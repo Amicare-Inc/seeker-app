@@ -1,15 +1,31 @@
 import { View, Text, SafeAreaView, ScrollView } from 'react-native'
 import { StatusBar } from "expo-status-bar";
 import React from 'react'
+import CustomButton from '@/components/CustomButton';
 
 const Role = () => {
     return (
         <SafeAreaView className="h-full bg-white" >
             <ScrollView contentContainerStyle={{ height: '100%' }}>
-                <View className="flex w-full h-full justify-center items-center p-4">
-                    <Text className="text-5xl text-black font-thin text-center mb-11">
-                        Role
+                <View className="flex w-full h-full justify-center items-center px-4">
+                    <Text className="text-3xl text-black font-semibold text-center mb-3">
+                        Get Started: Define {"\n"} Your Role
                     </Text>
+                    <Text className="text-xs text-gray-500 font-normal text-center mb-4">
+                        Are You a Personal Support Worker or in {"\n"} Need of Support?
+                    </Text>
+                    <CustomButton 
+                    title = "Join Our Team of PSWs"
+                    handlePress={() => {}}
+                    containerStyles="w-full bg-orange-500 mb-5"
+                    textStyles="text-sm"
+                    />
+                    <CustomButton 
+                    title = "Connected with Trusted Caregivers"
+                    handlePress={() => {}}
+                    containerStyles="w-full bg-blue-600"
+                    textStyles="text-sm"
+                    />
                 </View>
             </ScrollView>
             <StatusBar backgroundColor="#FFFFFF" style="dark" />
