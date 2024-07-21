@@ -12,21 +12,29 @@ const SignUp = () => {
   const [form, setForm] = useState({
     email: "",
     password: "",
+    confirm_password: ""
   });
 
   const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const handleSignUp = () => {
-    createUserWithEmailAndPassword(FIREBASE_AUTH, form.email, form.password)
-      .then(userCredential => {
-        const user = userCredential.user;
-        console.log('User signed up:', user);
-        router.push("/role");
-      })
-      .catch(error => {
-        setError(error.message);
-        console.error('Error signing up:', error);
-      });
+    if (form.password != form.confirm_password){
+      setPasswordError("Passwords do not match")
+    }
+    else{
+      setPasswordError('')
+      createUserWithEmailAndPassword(FIREBASE_AUTH, form.email, form.password)
+        .then(userCredential => {
+          const user = userCredential.user;
+          console.log('User signed up:', user);
+          router.push("/role");
+        })
+        .catch(error => {
+          setError(error.message);
+          console.error('Error signing up:', error);
+        });
+    }
   };
 
   return (
@@ -40,6 +48,11 @@ const SignUp = () => {
             <Text className="text-xs text-gray-500 font-normal text-left mb-4">
               Let's get started by filling out the from below
             </Text>
+            {passwordError ? (
+              <Text className="text-normal text-red-500 font-normal text-left mb-4">
+                {passwordError}
+              </Text>
+            ) : null}
             <ForumField
               title="Email"
               value={form.email}
@@ -51,6 +64,12 @@ const SignUp = () => {
               title="Password"
               value={form.password}
               handleChangeText={(e) => setForm({ ...form, password: e })}
+              otherStyles="mb-4"
+            />
+            <ForumField
+              title="Confirm Password"
+              value={form.confirm_password}
+              handleChangeText={(e) => setForm({ ...form, confirm_password: e })}
               otherStyles="mb-4"
             />
             <CustomButton

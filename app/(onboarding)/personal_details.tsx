@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
+import { router } from 'expo-router';
 
 const PersonalDetails: React.FC = () => {
     const [form, setForm] = useState({
@@ -41,6 +42,7 @@ const PersonalDetails: React.FC = () => {
             } catch (e) {
                 console.error("Error adding document: ", e);
             }
+            router.push("/discover")
         }
     };
 

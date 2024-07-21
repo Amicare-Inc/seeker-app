@@ -31,7 +31,7 @@ const ForumField: React.FC<ForumFieldProps> = ({
           placeholder={title}
           placeholderTextColor="#4B5563"
           onChangeText={handleChangeText}
-          secureTextEntry={title === "Password" && !showPassword}
+          secureTextEntry={(title === "Password" || title === "Confirm Password") && !showPassword}
           {...props}
         />
 
