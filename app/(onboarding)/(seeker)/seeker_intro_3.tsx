@@ -4,25 +4,22 @@ import React from 'react'
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
 
-const SeekerIntro1 = () => {
+const SeekerIntro3 = () => {
     return (
         <SafeAreaView className="h-full bg-white" >
             <ScrollView contentContainerStyle={{ height: '100%' }}>
                 <View className="flex w-full h-full justify-center items-center p-4">
                     <Text className="text-2xl text-black font-bold text-left mb-11">
-                        Your Path to Reliable Elderly Support
+                        Pay As You Go
                     </Text>
                     <Text className="text-xs text-gray-500 font-normal text-left mb-4">
-                        Our user-friendly app makes it easy to find and connect with experienced caregivers 
-                        who can offer assistance with daily tasks, companionship, and specialized care services. 
-                        Whether you require occasional support or ongoing assistance, our marketplace ensures 
-                        reliability, flexibility, and peace of mind for you and your loved ones. Join us today 
-                        to experience the convenience and reassurance of finding the perfect caregiver for your 
-                        elderly support needs.
+                        We make it effortless to pay for shorter or fractional shifts directly from your 
+                        bank account. With transparent pricing and lower costs,  our marketplace ensures 
+                        that you receive top-quality support without breaking the bank. 
                     </Text>
                     <CustomButton 
-                        title="Continue"
-                        handlePress={() => router.push("/seeker_intro_2")}
+                        title="Complete Your Profile"
+                        handlePress={() => router.push("/personal_details")}
                         containerStyles="w-full mt-11"
                     />
                 </View>
@@ -32,4 +29,4 @@ const SeekerIntro1 = () => {
     )
 }
 
-export default SeekerIntro1
+export default SeekerIntro3

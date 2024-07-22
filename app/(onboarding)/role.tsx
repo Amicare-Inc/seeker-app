@@ -39,7 +39,7 @@ const Role = () => {
                     textStyles="text-sm"
                     />
                     <CustomButton 
-                    title = "Connected with Trusted Caregivers"
+                    title = "Connect with Trusted Caregivers"
                     handlePress={() => {handleButtons(false)}}
                     containerStyles="w-full bg-blue-600"
                     textStyles="text-sm"
