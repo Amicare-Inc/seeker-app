@@ -42,7 +42,7 @@ const PersonalDetails: React.FC = () => {
             } catch (e) {
                 console.error("Error adding document: ", e);
             }
-            router.push("/discover")
+            router.push("/seeker_details")
         }
     };
 

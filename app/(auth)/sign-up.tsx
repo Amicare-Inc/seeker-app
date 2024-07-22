@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import ForumField from '@/components/ForumField';
 import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/firebase.config';
 
 const SignUp = () => {
@@ -27,8 +27,9 @@ const SignUp = () => {
       createUserWithEmailAndPassword(FIREBASE_AUTH, form.email, form.password)
         .then(userCredential => {
           const user = userCredential.user;
+          sendEmailVerification(user)
           console.log('User signed up:', user);
-          router.push("/role");
+          router.push("/verify-email");
         })
         .catch(error => {
           setError(error.message);
