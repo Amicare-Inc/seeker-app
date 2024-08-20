@@ -2,7 +2,7 @@ import { View, Text, SafeAreaView, ScrollView } from 'react-native'
 import { StatusBar } from "expo-status-bar";
 import React from 'react'
 
-const Sample = () => {
+const Discover = () => {
     return (
         <SafeAreaView className="h-full bg-white" >
             <ScrollView contentContainerStyle={{ height: '100%' }}>
@@ -17,4 +17,4 @@ const Sample = () => {
     )
 }
 
-export default Sample
+export default Discover
