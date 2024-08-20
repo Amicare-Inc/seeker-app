@@ -1,11 +1,35 @@
 import React from 'react'
-import { Stack } from "expo-router"
+import { Stack, Tabs } from "expo-router"
 
 const DashboardLayout = () => {
   return (
-    <Stack>
-      <Stack.Screen name="discover" options={{headerShown:false}}/>
-    </Stack>
+    <>
+      <Tabs
+      screenOptions={{tabBarShowLabel: true}}
+      >
+        <Tabs.Screen
+          name="home"
+          options={{
+            title: "Home",
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="sessions"
+          options={{
+            title: "Sessions",
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "My Profile",
+            headerShown: false,
+          }}
+        />
+      </Tabs>
+    </>
   )
 }
 
