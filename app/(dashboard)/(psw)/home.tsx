@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, SafeAreaView, ScrollView, ActivityIndicator, FlatList } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -14,7 +14,7 @@ const Home = () => {
       try {
         const q = query(
           collection(FIREBASE_DB, "personal"),
-          where("isPSW", "==", true)
+          where("isPSW", "==", false)
         );
         const querySnapshot = await getDocs(q);
         const users: User[] = [];
@@ -36,26 +36,28 @@ const Home = () => {
     fetchPswUsers();
   }, []);
 
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 bg-white justify-center items-center">
-        <ActivityIndicator size="large" color="#0000ff" />
-      </SafeAreaView>
-    );
-  }
+  const renderItem = ({ item }: { item: User }) => (
+    <View className="bg-gray-100 py-4 rounded-lg mb-4">
+      <Text className="text-xl font-semibold px-20 text-left">{item.firstName} {item.lastName}</Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView contentContainerStyle={{ paddingVertical: 20 }}>
-        {pswUsers.map((user) => (
-          <View key={user.id} className="bg-gray-100 p-4 rounded-lg mb-4 shadow w-full">
-            <Text className="text-lg font-bold text-gray-800">
-              {user.firstName} {user.lastName}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+    <SafeAreaView className="h-full bg-white">
+    <View className="flex-1 px-6">
+      <Text className="text-3xl font-bold text-center mb-6">Explore</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          data={pswUsers}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 16 }}
+        />
+      )}
+    </View>
+  </SafeAreaView>
   );
 };
 

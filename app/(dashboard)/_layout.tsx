@@ -1,36 +1,13 @@
 import React from 'react'
-import { Stack, Tabs } from "expo-router"
+import { Stack } from "expo-router"
 
-const DashboardLayout = () => {
+const OnboardingLayout = () => {
   return (
-    <>
-      <Tabs
-      screenOptions={{tabBarShowLabel: true}}
-      >
-        <Tabs.Screen
-          name="home"
-          options={{
-            title: "Home",
-            headerShown: false,
-          }}
-        />
-        <Tabs.Screen
-          name="sessions"
-          options={{
-            title: "Sessions",
-            headerShown: false,
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: "My Profile",
-            headerShown: false,
-          }}
-        />
-      </Tabs>
-    </>
+    <Stack>
+      <Stack.Screen name="(seeker)" options={{headerShown:false}}/>
+      <Stack.Screen name="(psw)" options={{headerShown:false}}/>
+    </Stack>
   )
 }
 
-export default DashboardLayout
+export default OnboardingLayout
