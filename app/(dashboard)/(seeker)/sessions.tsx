@@ -5,6 +5,7 @@ import { collection, query, where, getDocs, getDoc, doc, updateDoc } from 'fireb
 import { User } from "@/types/User";
 import { Session } from "@/types/Sessions";
 import CustomButton from '@/components/CustomButton';
+import { router } from 'expo-router';
 
 const SessionsTab = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -81,6 +82,10 @@ const SessionsTab = () => {
     }
   };
 
+  const handleChat = () => {
+    router.push('/convo')
+  }
+
 
   const renderItem = ({ item }: { item: Session }) => {
     const requester = requesters.find(user => user.id === item.requesterId);
@@ -102,7 +107,7 @@ const SessionsTab = () => {
             <Text className="text-lg font-semibold">
                 Session with {requester?.firstName} {requester?.lastName}
             </Text>
-            <CustomButton title="Chat" handlePress={() => { /* Handle chat navigation */ }} />
+            <CustomButton title="Chat" handlePress={handleChat} />
           </View>
         )}
       </View>
