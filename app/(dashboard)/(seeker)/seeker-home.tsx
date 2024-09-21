@@ -6,7 +6,7 @@ import { FIREBASE_AUTH, FIREBASE_DB } from "@/firebase.config";
 import { User } from "@/types/User";
 import CustomButton from "@/components/CustomButton";
 
-const Home = () => {
+const SeekerHomeTab = () => {
   const [pswUsers, setPswUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -92,4 +92,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default SeekerHomeTab;

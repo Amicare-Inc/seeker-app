@@ -30,9 +30,9 @@ const SignIn = () => {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         if (userData.isPSW) {
-          router.push("/(psw)/home");
+          router.push("/(psw)/psw-home");
         } else {
-          router.push("/(seeker)/home");
+          router.push("/(seeker)/seeker-home");
         }
       } else {
         console.log('No such document!');

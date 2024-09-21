@@ -8,21 +8,21 @@ const DashboardLayout = () => {
       screenOptions={{tabBarShowLabel: true}}
       >
         <Tabs.Screen
-          name="home"
+          name="seeker-home"
           options={{
             title: "Home",
             headerShown: false,
           }}
         />
         <Tabs.Screen
-          name="sessions"
+          name="seeker-sessions"
           options={{
             title: "Sessions",
             headerShown: false,
           }}
         />
         <Tabs.Screen
-          name="profile"
+          name="seeker-profile"
           options={{
             title: "My Profile",
             headerShown: false,

@@ -1,28 +1,28 @@
 import React from 'react'
 import { Stack, Tabs } from "expo-router"
 
-const DashboardLayout = () => {
+const PswDashboardLayout = () => {
   return (
     <>
       <Tabs
       screenOptions={{tabBarShowLabel: true}}
       >
         <Tabs.Screen
-          name="home"
+          name="psw-home"
           options={{
             title: "Home",
             headerShown: false,
           }}
         />
         <Tabs.Screen
-          name="sessions"
+          name="psw-sessions"
           options={{
             title: "Sessions",
             headerShown: false,
           }}
         />
         <Tabs.Screen
-          name="profile"
+          name="psw-profile"
           options={{
             title: "My Profile",
             headerShown: false,
@@ -33,4 +33,4 @@ const DashboardLayout = () => {
   )
 }
 
-export default DashboardLayout
+export default PswDashboardLayout

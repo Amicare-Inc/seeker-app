@@ -11,6 +11,7 @@ npm-debug.*
 web-build/
 firebase.config.ts
 utils/firebase-key.json
+*.zip
 
 # macOS
 .DS_Store

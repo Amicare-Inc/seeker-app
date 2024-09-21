@@ -7,7 +7,7 @@ import { Session } from "@/types/Sessions";
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
 
-const SessionsTab = () => {
+const PswSessionsTab = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [requesters, setRequesters] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +90,7 @@ const SessionsTab = () => {
   const renderItem = ({ item }: { item: Session }) => {
     const requester = requesters.find(user => user.id === item.requesterId);
     return (
-        <View className="bg-gray-300 p-4 rounded-lg mb-4 w-full">
+      <View className="bg-gray-300 p-4 rounded-lg mb-4 w-full">
         {item.status === 'pending' ? (
           <View>
             <Text className="text-lg font-semibold">
@@ -136,4 +136,4 @@ const SessionsTab = () => {
   );
 };
 
-export default SessionsTab;
+export default PswSessionsTab;
