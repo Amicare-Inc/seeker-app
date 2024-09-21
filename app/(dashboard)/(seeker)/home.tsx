@@ -1,21 +1,7 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  ActivityIndicator,
-  FlatList,
-} from "react-native";
+import { View, Text, SafeAreaView, ScrollView, ActivityIndicator, FlatList,} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import {collection, doc, getDocs, query, setDoc, where,} from "firebase/firestore";
 import { FIREBASE_AUTH, FIREBASE_DB } from "@/firebase.config";
 import { User } from "@/types/User";
 import CustomButton from "@/components/CustomButton";
@@ -92,12 +78,14 @@ const Home = () => {
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
-          <FlatList
-            data={pswUsers}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 16 }}
-          />
+          <View className="mt-28">
+            <FlatList
+              data={pswUsers}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 16 }}
+            />
+          </View>
         )}
       </View>
     </SafeAreaView>
