@@ -15,5 +15,7 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "env.d.ts",
-    "utils/reset-project.js"  , "tailwind.config.js"]
+    "utils/reset-project.js"  , 
+    "tailwind.config.js"
+  ]
 }
