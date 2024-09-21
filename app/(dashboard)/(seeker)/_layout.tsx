@@ -1,7 +1,7 @@
 import React from 'react'
 import { Stack, Tabs } from "expo-router"
 
-const DashboardLayout = () => {
+const SeekerDashboardLayout = () => {
   return (
     <>
       <Tabs
@@ -33,4 +33,4 @@ const DashboardLayout = () => {
   )
 }
 
-export default DashboardLayout
+export default SeekerDashboardLayout
