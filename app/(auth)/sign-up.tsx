@@ -6,6 +6,7 @@ import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/firebase.config';
+import { signUpWithEmail, verifyEmail } from '@/services/firebase/auth';
 
 const SignUp = () => {
 
@@ -18,23 +19,22 @@ const SignUp = () => {
   const [error, setError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (form.password != form.confirm_password){
       setPasswordError("Passwords do not match")
     }
     else{
-      setPasswordError('')
-      createUserWithEmailAndPassword(FIREBASE_AUTH, form.email, form.password)
-        .then(userCredential => {
-          const user = userCredential.user;
-          sendEmailVerification(user)
-          console.log('User signed up:', user);
-          router.push("/verify-email");
-        })
-        .catch(error => {
-          setError(error.message);
-          console.error('Error signing up:', error);
-        });
+      try {
+        const userCredential = await signUpWithEmail(form.email, form.password)
+        const user = userCredential.user
+        console.log('User signed up:',user)
+        verifyEmail(user)
+        router.push("/(onboarding)/personal_details");
+        }
+      catch (error) {
+        setPasswordError((error as any).message)
+        console.log((error as any).message)
+      }
     }
   };
 

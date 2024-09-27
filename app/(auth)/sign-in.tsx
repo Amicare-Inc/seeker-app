@@ -4,9 +4,8 @@ import React, { useState } from 'react'
 import ForumField from '@/components/ForumField';
 import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { getDoc, doc } from 'firebase/firestore';
-import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
+import { signInWithEmail } from '@/services/firebase/auth';
+import { getUserDoc } from '@/services/firebase/firestore';
 
 const SignIn = () => {
 
@@ -19,26 +18,25 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     try {
-      const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, form.email, form.password);
+      const userCredential = await signInWithEmail(form.email, form.password);
       const user = userCredential.user;
       console.log('User signed in:', user);
-  
-      // Fetch user data from Firestore
-      const userDocRef = doc(FIREBASE_DB, 'personal', user.uid);
-      const userDoc = await getDoc(userDocRef);
-  
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        if (userData.isPSW) {
-          router.push("/(psw)/psw-home");
-        } else {
-          router.push("/(seeker)/seeker-home");
-        }
+
+      const userData = await getUserDoc(user.uid);
+
+      if (userData) {
+          console.log('User Data:', userData);
+          if (userData.isPSW) {
+              router.push('/(psw)/psw-home');
+          } else {
+              router.push('/(seeker)/seeker-home');
+          }
       } else {
-        console.log('No such document!');
+          console.log('No such document!');
       }
-    } catch (error) {
-      setError(error.message);
+    } 
+    catch (error) {
+      setError((error as any).message);
       console.error('Error signing in:', error);
     }
   };
