@@ -40,28 +40,89 @@ export const setUserDoc = async (uid: string, userData: any) => {
 };
 
 /**
+ * DEPRECIATED
  * Fetches all PSW users from Firestore.
  * @returns A promise resolving to an array of PSW users.
  */
+// export const getListOfUsers = async (isPSW: boolean) => {
+//     try {
+//         const q = query(
+//             collection(FIREBASE_DB, 'personal'),
+//             where('isPSW', '==', isPSW),
+//         );
+//         const querySnapshot = await getDocs(q);
+//         const users: User[] = querySnapshot.docs.map(doc => {
+//             const data = doc.data() as User
+//             return {
+//             ...data,
+//             id: doc.id
+//             };
+//         });
+//         return users;
+//     } catch (error) {
+//         throw new Error(`Error fetching users: ${(error as any).message}`);
+//     }
+// };
+
+
+/**
+ * Retrieves a list of available PSWs, excluding those who are involved in a pending or accepted session with the current user.
+ * @returns A promise that resolves to an array of available PSWs.
+ */
 export const getListOfUsers = async (isPSW: boolean) => {
-    try {
-        const q = query(
-            collection(FIREBASE_DB, 'personal'),
-            where('isPSW', '==', isPSW)
-        );
-        const querySnapshot = await getDocs(q);
-        const users: User[] = querySnapshot.docs.map(doc => {
-            const data = doc.data() as User
-            return {
-            ...data,
-            id: doc.id
-            };
-        });
-        return users;
-    } catch (error) {
-        throw new Error(`Error fetching users: ${(error as any).message}`);
-    }
-};
+    const currentUserId = FIREBASE_AUTH.currentUser?.uid;
+    // if (!currentUser) throw new Error("User not authenticated");             CHECK AFTER
+
+    // Query 1: Get sessions where currentUserId is the requester
+    const requesterQuery = query(
+        collection(FIREBASE_DB, "sessions"),
+        where("requesterId", "==", currentUserId),
+        where("status", "in", ["pending", "accepted"])
+    );
+
+    // Query 2: Get sessions where currentUserId is the target
+    const targetQuery = query(
+        collection(FIREBASE_DB, "sessions"),
+        where("targetUserId", "==", currentUserId),
+        where("status", "in", ["pending", "accepted"])
+    );
+
+    // Execute both queries
+    const [requesterSnapshot, targetSnapshot] = await Promise.all([
+        getDocs(requesterQuery),
+        getDocs(targetQuery),
+    ]);
+
+    const excludedUserIds = new Set<string>();
+
+    // Process the results of both queries
+    requesterSnapshot.forEach(doc => {
+        const data = doc.data();
+        excludedUserIds.add(data.targetUserId);  // Exclude users that the current user has requested
+    });
+
+    targetSnapshot.forEach(doc => {
+        const data = doc.data();
+        excludedUserIds.add(data.requesterId);  // Exclude users that have requested the current user
+    });
+
+    // Query to find all available PSWs
+    const listQuery = query(
+        collection(FIREBASE_DB, "personal"),
+        where("isPSW", "==", isPSW)
+    );
+
+    const pswSnapshot = await getDocs(listQuery);
+    const availableUser: User[] = [];
+
+    pswSnapshot.forEach(doc => {
+        if (!excludedUserIds.has(doc.id)) {
+            availableUser.push({ id: doc.id, ...doc.data() } as User);
+        }
+    });
+
+    return availableUser;
+  };
 
 /**
  * Creates a booking session in the Firestore database.
@@ -70,12 +131,13 @@ export const getListOfUsers = async (isPSW: boolean) => {
  */
 export const createBookingSession = async (userId: string) => {
     try {
-      const sessionId = `${FIREBASE_AUTH.currentUser?.uid}_${userId}`; // Create a unique session ID
+      const status = 'pending'
+      const sessionId = `${FIREBASE_AUTH.currentUser?.uid}_${userId}_${status}`; // Create a unique session ID
   
       await setDoc(doc(collection(FIREBASE_DB, "sessions"), sessionId), {
         requesterId: FIREBASE_AUTH.currentUser?.uid, // The ID of the user making the booking request
         targetUserId: userId, // The ID of the user being booked
-        status: "pending", // Initial status
+        status: status, // Initial status
         createdAt: new Date(), // Timestamp of the request
       });
   
