@@ -4,9 +4,7 @@ import { Stack, Tabs } from "expo-router"
 const SeekerDashboardLayout = () => {
   return (
     <>
-      <Tabs
-      screenOptions={{tabBarShowLabel: true}}
-      >
+      <Tabs screenOptions={{tabBarShowLabel: true}}>
         <Tabs.Screen
           name="seeker-home"
           options={{
