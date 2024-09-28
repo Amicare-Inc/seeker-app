@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, ScrollView, ActivityIndicator, FlatList, Modal, TouchableOpacity,} from "react-native";
+import { View, Text, SafeAreaView, ActivityIndicator, FlatList, Modal, TouchableOpacity,} from "react-native";
 import React, { useEffect, useState } from "react";
 import { User } from "@/types/User";
 import { createBookingSession, getListOfUsers } from "@/services/firebase/firestore";
