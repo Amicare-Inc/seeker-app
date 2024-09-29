@@ -78,14 +78,14 @@ export const getListOfUsers = async (isPSW: boolean) => {
     const requesterQuery = query(
         collection(FIREBASE_DB, "sessions"),
         where("requesterId", "==", currentUserId),
-        where("status", "in", ["pending", "accepted"])
+        where("status", "in", ["pending", "accepted", "booked"])
     );
 
     // Query 2: Get sessions where currentUserId is the target
     const targetQuery = query(
         collection(FIREBASE_DB, "sessions"),
         where("targetUserId", "==", currentUserId),
-        where("status", "in", ["pending", "accepted"])
+        where("status", "in", ["pending", "accepted", "booked"])
     );
 
     // Execute both queries

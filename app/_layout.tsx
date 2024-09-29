@@ -8,7 +8,7 @@ const RootLayout = () => {
       <Stack.Screen name="(auth)" options={{headerShown:false}}/>
       <Stack.Screen name="(dashboard)" options={{headerShown:false}}/>
       <Stack.Screen name="(onboarding)" options={{headerShown:false, gestureEnabled: false}}/>
-      <Stack.Screen name="(chat)" options={{headerShown:false, gestureEnabled: false}}/>
+      <Stack.Screen name="(chat)" options={{headerShown:false}}/>
     </Stack>
   )
 }

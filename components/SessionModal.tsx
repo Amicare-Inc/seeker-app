@@ -7,13 +7,14 @@ import { User } from "@/types/User";
 interface SessionModalProps {
   isVisible: boolean;
   onClose: () => void; // Use onClose for closing the modal
-  onAction: (action: 'accept' | 'rejected' | 'chat' | 'rejected2') => void; // Only for actions
+  onAction: (action: 'accept' | 'rejected' | 'book' | 'rejected2' | 'cancelled') => void; // Only for actions
   user: User | null;
   isConfirmed?: boolean;
   isPending?: boolean;
+  isBooked?: boolean;
 }
 
-const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onAction, user, isConfirmed, isPending }) => {
+const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onAction, user, isConfirmed, isPending, isBooked }) => {
   if (!user) return null;
 
   return (
@@ -36,7 +37,7 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onActio
           {/* Conditional Buttons for Not Confirmed (Pending) Section */}
           {isPending && (
             <View className="mt-4 w-full px-6">
-              <TouchableOpacity onPress={() => onAction('accept')} className="bg-green-500 py-3 rounded-lg">
+              <TouchableOpacity onPress={() => onAction('accept')} className="bg-blue-500 py-3 rounded-lg">
                 <Text className="text-white text-center text-lg">Accept</Text>
               </TouchableOpacity>
 
@@ -49,11 +50,20 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onActio
           {/* Conditional Buttons for Confirmed Section */}
           {isConfirmed && (
             <View className="mt-4 w-full px-6">
-              <TouchableOpacity onPress={() => onAction('chat')} className="bg-green-500 py-3 rounded-lg">
-                <Text className="text-white text-center text-lg">Chat</Text>
+              <TouchableOpacity onPress={() => onAction('book')} className="bg-blue-500 py-3 rounded-lg">
+                <Text className="text-white text-center text-lg">Book</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => onAction('rejected2')} className="bg-red-500 py-3 rounded-lg mt-2">
+                <Text className="text-white text-center text-lg">Reject</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Conditional Buttons for Confirmed Section */}
+          {isBooked && (
+            <View className="mt-4 w-full px-6">
+              <TouchableOpacity onPress={() => onAction('cancelled')} className="bg-red-500 py-3 rounded-lg mt-2">
                 <Text className="text-white text-center text-lg">Reject</Text>
               </TouchableOpacity>
             </View>

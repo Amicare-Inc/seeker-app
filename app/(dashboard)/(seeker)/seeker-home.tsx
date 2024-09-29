@@ -4,6 +4,7 @@ import { User } from "@/types/User";
 import { createBookingSession, getListOfUsers } from "@/services/firebase/firestore";
 import UserCard from "@/components/UserCard";
 import UserCardExpanded from "@/components/UserCardExpanded";
+import { useFocusEffect } from "expo-router";
 
 const PswHomeTab = () => {
   const [seekerUsers, setSeekerUsers] = useState<User[]>([]);
@@ -11,22 +12,27 @@ const PswHomeTab = () => {
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
 
+  const fetchPswUsers = async () => {
+    try {
+        const users = await getListOfUsers(true)
+        setSeekerUsers(users)
+    }
+    catch (error) {
+      console.error((error as any).message);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchPswUsers = async () => {
-      try {
-          const users = await getListOfUsers(true)
-          setSeekerUsers(users)
-      }
-      catch (error) {
-        console.error((error as any).message);
-      }
-      finally {
-        setLoading(false);
-      }
-    };
-
     fetchPswUsers();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPswUsers();
+    }, [])
+  );
 
   const handleBookRequest = async (userId: string) => {
     try {

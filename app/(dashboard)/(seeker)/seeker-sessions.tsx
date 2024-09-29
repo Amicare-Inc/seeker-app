@@ -6,56 +6,82 @@ import { fetchUserSessions, getUserDoc, updateSessionStatus } from '@/services/f
 import SessionList from '@/components/SessionList';
 import SessionModal from '@/components/SessionModal';
 import { FIREBASE_AUTH } from '@/firebase.config';
+import SessionBookedList from '@/components/SessionBookedList';
+import { useFocusEffect } from 'expo-router';
 
-const PswSessionsTab = () => {
+const SeekerSessionsTab = () => {
   const [notConfirmedSessions, setNotConfirmedSessions] = useState<Session[]>([]);
   const [confirmedSessions, setConfirmedSessions] = useState<Session[]>([]);
+  const [bookedSessions, setBookedSessions] = useState<Session[]>([]);
   const [expandedSession, setExpandedSession] = useState<Session | null>(null);
   const [pendingMap, setPendingMap] = useState<{ [key: string]: User }>({});
+  const [bookedMap, setBookedMap] = useState<{ [key: string]: User }>({});
   const [acceptedMap, setAcceptedMap] = useState<{ [key: string]: User }>({});
   const [loading, setLoading] = useState(true);
   const currentUserId = FIREBASE_AUTH.currentUser?.uid;
 
+  const fetchSessions = async () => {
+    try {
+      const pendingSessions = await fetchUserSessions("pending", "targetUserId");
+      setNotConfirmedSessions(pendingSessions);
+      const acceptedSessionsRequester = await fetchUserSessions("accepted", "requesterId");
+      const acceptedSessionsTarget = await fetchUserSessions("accepted", "targetUserId");
+      const acceptedSessions = [...acceptedSessionsRequester, ...acceptedSessionsTarget];
+      setConfirmedSessions(acceptedSessions);
+      const bookedSessionsRequester = await fetchUserSessions("booked", "requesterId");
+      const bookedSessionsTarget = await fetchUserSessions("booked", "targetUserId");
+      const bookedSessions = [...bookedSessionsRequester, ...bookedSessionsTarget];
+      setBookedSessions(bookedSessions);
+
+      const pendingData: { [key: string]: User } = {};
+      await Promise.all(pendingSessions.map(async (session) => {
+        const userData = await getUserDoc(session.requesterId);
+        if (userData) {
+          pendingData[session.requesterId] = userData as User;
+        }
+      }));
+      setPendingMap(pendingData);
+
+      const acceptedData: { [key: string]: User } = {};
+      await Promise.all(acceptedSessions.map(async (session) => {
+        const userIdToFetch = session.requesterId === currentUserId
+        ? session.targetUserId
+        : session.requesterId;
+        const userData = await getUserDoc(userIdToFetch);
+        if (userData) {
+          acceptedData[userIdToFetch] = userData as User;
+        }
+      }));
+      setAcceptedMap(acceptedData);
+
+      const bookedData: { [key: string]: User } = {};
+      await Promise.all(bookedSessions.map(async (session) => {
+        const userIdToFetch = session.requesterId === currentUserId
+        ? session.targetUserId
+        : session.requesterId;          
+        const userData = await getUserDoc(userIdToFetch);
+        if (userData) {
+          bookedData[userIdToFetch] = userData as User;
+        }
+      }));
+      setBookedMap(bookedData);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const pendingSessions = await fetchUserSessions("pending", "targetUserId");
-        setNotConfirmedSessions(pendingSessions);
-        const acceptedSessionsRequester = await fetchUserSessions("accepted", "requesterId");
-        const acceptedSessionsTarget = await fetchUserSessions("accepted", "targetUserId");
-        const acceptedSessions = [...acceptedSessionsRequester, ...acceptedSessionsTarget];
-        setConfirmedSessions(acceptedSessions);
-
-        const pendingData: { [key: string]: User } = {};
-        await Promise.all(pendingSessions.map(async (session) => {
-          const userData = await getUserDoc(session.requesterId);
-          if (userData) {
-            pendingData[session.requesterId] = userData as User;
-          }
-        }));
-        setPendingMap(pendingData);
-
-        const acceptedData: { [key: string]: User } = {};
-        await Promise.all(acceptedSessions.map(async (session) => {
-          const userIdToFetch = session.requesterId === currentUserId
-          ? session.targetUserId
-          : session.requesterId;
-          const userData = await getUserDoc(userIdToFetch);
-          if (userData) {
-            acceptedData[userIdToFetch] = userData as User;
-          }
-        }));
-        setAcceptedMap(acceptedData);
-  
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching sessions:", error);
-        setLoading(false);
-      }
-    };
-
     fetchSessions();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchSessions();
+    }, [])
+  );
 
   const handleExpandSession = (session: Session) => {
     setExpandedSession(session);
@@ -145,8 +171,59 @@ const PswSessionsTab = () => {
     }
   };
 
-  const handleChat = () => {
-    console.log("Chat initiated with:", expandedSession);
+  const handleReject3 = async () => {
+    if (expandedSession) {
+      try {
+        await updateSessionStatus(expandedSession.id, 'cancelled');
+        
+        setBookedSessions(prevSessions =>
+          prevSessions.filter(session => session.id !== expandedSession.id)
+        );
+        
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error rejecting3 session:", error);
+      }
+    }
+  };
+
+  const handleBook = async () => {
+    if (expandedSession) {
+      try {
+        await updateSessionStatus(expandedSession.id, 'booked');
+
+        // First, update the pending sessions by removing the accepted session
+        setConfirmedSessions(prevSessions =>
+          prevSessions.filter(session => session.id !== expandedSession.id)
+        );
+
+        // Now, add the session to confirmedSessions and update acceptedMap
+        const userData = await getUserDoc(
+          expandedSession.requesterId === currentUserId
+            ? expandedSession.targetUserId
+            : expandedSession.requesterId
+        );
+        
+        if (userData) {
+          setBookedMap(prevMap => ({
+            ...prevMap,
+            [expandedSession.requesterId === currentUserId
+              ? expandedSession.targetUserId
+              : expandedSession.requesterId]: userData as User
+          }));
+
+          // Move the session to confirmedSessions
+          setBookedSessions(prevSessions => [
+            ...prevSessions,
+            { ...expandedSession, status: 'booked' }
+          ]);
+        }
+
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error accepting session:", error);
+      }
+    }
   };
 
 
@@ -158,6 +235,8 @@ const PswSessionsTab = () => {
       return pendingMap[expandedSession.requesterId];
     } else if (expandedSession.status === "accepted") {
       return acceptedMap[expandedSession.targetUserId] || acceptedMap[expandedSession.requesterId];
+    } else if (expandedSession.status === "booked") {
+      return bookedMap[expandedSession.targetUserId] || bookedMap[expandedSession.requesterId];
     }
     return null;
   };
@@ -180,7 +259,6 @@ const PswSessionsTab = () => {
           sessions={notConfirmedSessions}
           onSessionPress={handleExpandSession}
           requesterMap={pendingMap}
-          isAccepted = {false}
           title="Not Confirmed Yet"
         />
 
@@ -190,10 +268,16 @@ const PswSessionsTab = () => {
             sessions={confirmedSessions}
             onSessionPress={handleExpandSession}
             requesterMap={acceptedMap}
-            isAccepted = {true}
             title="Confirmed / Upcoming"
           />
         </View>
+         {/* Booked Section */}
+         <SessionBookedList
+          sessions={bookedSessions}
+          onSessionPress={handleExpandSession}
+          requesterMap={bookedMap}
+          title="Booked"
+        />
       </View>
 
       {/* Modal for Expanded Session */}
@@ -205,18 +289,21 @@ const PswSessionsTab = () => {
             handleAccept();
           } else if (action === 'rejected') {
             handleReject();
-          } else if (action === 'chat') {
-            handleChat();
+          } else if (action === 'book') {
+            handleBook();
           } else if (action === 'rejected2') {
             handleReject2()
+          } else if (action === 'cancelled') {
+            handleReject3()
           }
         }} // Single action handler
         user={getUserForExpandedSession()}
         isConfirmed={expandedSession?.status === "accepted"}
         isPending={expandedSession?.status === "pending"}
+        isBooked={expandedSession?.status === "booked"}
       />
     </SafeAreaView>
   );
 };
 
-export default PswSessionsTab;
+export default SeekerSessionsTab;

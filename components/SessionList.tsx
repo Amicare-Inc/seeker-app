@@ -7,16 +7,16 @@ interface SessionListProps {
   sessions: Session[];
   onSessionPress: (session: Session) => void;
   requesterMap: { [key: string]: User };
-  isAccepted: boolean;
   title: string;
 }
 
-const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, requesterMap, isAccepted, title }) => {
+const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, requesterMap, title }) => {
+    console.log("IN Session LIST BEGINNIG", requesterMap)
     const renderItem = ({ item }: { item: Session }) => {
         const requester: User = requesterMap[item.targetUserId] 
             ? requesterMap[item.targetUserId] 
             : requesterMap[item.requesterId];
-
+        console.log("IN Session LIST AFTER",requester)
         return (
         <TouchableOpacity onPress={() => onSessionPress(item)} className="flex-col items-center mr-4">
             <Image
