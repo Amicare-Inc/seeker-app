@@ -1,7 +1,7 @@
 export interface Session {
     id: string;
     requesterId: string;
-    targetId: string;
+    targetUserId: string;
     status: string;
     createdAt?: string;
     updatedAt?: string;

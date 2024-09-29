@@ -1,6 +1,7 @@
-import { getDoc, doc, setDoc, query, collection, where, getDocs } from 'firebase/firestore';
+import { getDoc, doc, setDoc, query, collection, where, getDocs, updateDoc } from 'firebase/firestore';
 import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { User } from '@/types/User';
+import { Session } from '@/types/Sessions';
 
 /**
  * Fetches the user document from Firestore based on the user's UID.
@@ -144,5 +145,46 @@ export const createBookingSession = async (userId: string) => {
       return sessionId; // Return session ID if needed for further processing
     } catch (error) {
       throw new Error(`Failed to create booking session: ${(error as any).message}`);
+    }
+  };
+
+/**
+ * Fetches sessions where the current user is the target and the status is either pending or accepted.
+ * @param status - An array of statuses to filter by. Default is ['pending', 'accepted'].
+ * @returns A promise that resolves to an array of sessions.
+ */
+export const fetchUserSessions = async (status: string, typeUser: string): Promise<Session[]> => {
+    const currentUserId = FIREBASE_AUTH.currentUser?.uid;
+    // if (!currentUser) throw new Error("User not authenticated");
+  
+    // const currentUserId = currentUser.uid;
+  
+    // Construct the Firestore query
+    const q = query(
+      collection(FIREBASE_DB, 'sessions'),
+      where(typeUser, '==', currentUserId),
+      where('status', '==', status)
+    );
+  
+    // Execute the query and process the results
+    const querySnapshot = await getDocs(q);
+    const sessions = querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+      id: doc.id
+    })) as Session[];
+  
+    return sessions;
+  };
+
+  /**
+   * Updates the status of a session.
+   * @param sessionId - The ID of the session to update.
+   * @param status - The new status to set.
+   */
+  export const updateSessionStatus = async (sessionId: string, status: string): Promise<void> => {
+    try {
+      await updateDoc(doc(FIREBASE_DB, 'sessions', sessionId), { status });
+    } catch (error) {
+      throw new Error(`Failed to update session status: ${(error as any).message}`);
     }
   };
