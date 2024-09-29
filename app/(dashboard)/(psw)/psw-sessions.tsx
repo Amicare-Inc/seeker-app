@@ -70,47 +70,85 @@ const PswSessionsTab = () => {
   // Handle Accept and Reject Actions
   const handleAccept = async () => {
     if (expandedSession) {
-      await updateSessionStatus(expandedSession.id, 'accepted');
+      try {
+        await updateSessionStatus(expandedSession.id, 'accepted');
 
-      // First, update the pending sessions by removing the accepted session
-      setNotConfirmedSessions(prevSessions =>
-        prevSessions.filter(session => session.id !== expandedSession.id)
-      );
+        // First, update the pending sessions by removing the accepted session
+        setNotConfirmedSessions(prevSessions =>
+          prevSessions.filter(session => session.id !== expandedSession.id)
+        );
 
-      // Now, add the session to confirmedSessions and update acceptedMap
-      const userData = await getUserDoc(
-        expandedSession.requesterId === currentUserId
-          ? expandedSession.targetUserId
-          : expandedSession.requesterId
-      );
-      
-      if (userData) {
-        setAcceptedMap(prevMap => ({
-          ...prevMap,
-          [expandedSession.requesterId === currentUserId
+        // Now, add the session to confirmedSessions and update acceptedMap
+        const userData = await getUserDoc(
+          expandedSession.requesterId === currentUserId
             ? expandedSession.targetUserId
-            : expandedSession.requesterId]: userData as User
-        }));
+            : expandedSession.requesterId
+        );
+        
+        if (userData) {
+          setAcceptedMap(prevMap => ({
+            ...prevMap,
+            [expandedSession.requesterId === currentUserId
+              ? expandedSession.targetUserId
+              : expandedSession.requesterId]: userData as User
+          }));
 
-        // Move the session to confirmedSessions
-        setConfirmedSessions(prevSessions => [
-          ...prevSessions,
-          { ...expandedSession, status: 'accepted' }
-        ]);
+          // Move the session to confirmedSessions
+          setConfirmedSessions(prevSessions => [
+            ...prevSessions,
+            { ...expandedSession, status: 'accepted' }
+          ]);
+        }
+
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error accepting session:", error);
       }
-      
-      handleCloseModal();
     }
   };
 
   const handleReject = async () => {
     if (expandedSession) {
-      await updateSessionStatus(expandedSession.id, 'rejected');
-      setNotConfirmedSessions(prevSessions =>
-        prevSessions.filter(session => session.id !== expandedSession.id)
-      );
-      handleCloseModal();
+      try {
+        await updateSessionStatus(expandedSession.id, 'rejected');
+        
+        // Remove session from both lists, since it's rejected
+        setNotConfirmedSessions(prevSessions =>
+          prevSessions.filter(session => session.id !== expandedSession.id)
+        );
+        setConfirmedSessions(prevSessions =>
+          prevSessions.filter(session => session.id !== expandedSession.id)
+        );
+        
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error rejecting session:", error);
+      }
     }
+  };
+
+  const handleReject2 = async () => {
+    if (expandedSession) {
+      try {
+        await updateSessionStatus(expandedSession.id, 'rejected2');
+        
+        // Remove session from both lists, since it's rejected
+        setNotConfirmedSessions(prevSessions =>
+          prevSessions.filter(session => session.id !== expandedSession.id)
+        );
+        setConfirmedSessions(prevSessions =>
+          prevSessions.filter(session => session.id !== expandedSession.id)
+        );
+        
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error rejecting2 session:", error);
+      }
+    }
+  };
+
+  const handleChat = () => {
+    console.log("Chat initiated with:", expandedSession);
   };
 
   // Determine which map to use based on the session type
@@ -161,13 +199,22 @@ const PswSessionsTab = () => {
 
       {/* Modal for Expanded Session */}
       <SessionModal
-        isVisible={!!expandedSession}
         onClose={handleCloseModal}
+        isVisible={!!expandedSession}
+        onAction={(action) => {
+          if (action === 'accept') {
+            handleAccept();
+          } else if (action === 'rejected') {
+            handleReject();
+          } else if (action === 'chat') {
+            handleChat();
+          } else if (action === 'rejected2') {
+            handleReject2()
+          }
+        }} // Single action handler
         user={getUserForExpandedSession()}
-        actions={[
-          { label: "Accept", onPress: handleAccept, style: "bg-green-500" },
-          { label: "Reject", onPress: handleReject, style: "bg-red-500" }
-        ]}
+        isConfirmed={expandedSession?.status === "accepted"}
+        isPending={expandedSession?.status === "pending"}
       />
     </SafeAreaView>
   );

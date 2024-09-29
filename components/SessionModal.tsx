@@ -6,12 +6,14 @@ import { User } from "@/types/User";
 
 interface SessionModalProps {
   isVisible: boolean;
-  onClose: () => void;
+  onClose: () => void; // Use onClose for closing the modal
+  onAction: (action: 'accept' | 'rejected' | 'chat' | 'rejected2') => void; // Only for actions
   user: User | null;
-  actions: { label: string; onPress: () => void; style: string }[]; 
+  isConfirmed?: boolean;
+  isPending?: boolean;
 }
 
-const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, user, actions }) => {
+const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onAction, user, isConfirmed, isPending }) => {
   if (!user) return null;
 
   return (
@@ -19,7 +21,7 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, user, a
       transparent={true}
       visible={isVisible}
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={onClose} // Use onClose directly here
     >
       <BlurView
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
@@ -30,17 +32,32 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, user, a
           <TouchableOpacity onPress={onClose} className="bg-transparent w-11/12 rounded-lg p-0">
             <UserCardExpanded user={user} onPress={onClose} />
           </TouchableOpacity>
-          <View className="mt-4 w-full px-6">
-          {actions.map(action => (
-            <TouchableOpacity
-            key={action.label}
-            onPress={action.onPress}
-            className={`${action.style} py-3 rounded-lg mb-2`}
-            >
-            <Text className="text-white text-center text-lg">{action.label}</Text>
-            </TouchableOpacity>
-          ))}
-          </View>
+
+          {/* Conditional Buttons for Not Confirmed (Pending) Section */}
+          {isPending && (
+            <View className="mt-4 w-full px-6">
+              <TouchableOpacity onPress={() => onAction('accept')} className="bg-green-500 py-3 rounded-lg">
+                <Text className="text-white text-center text-lg">Accept</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => onAction('rejected')} className="bg-red-500 py-3 rounded-lg mt-2">
+                <Text className="text-white text-center text-lg">Reject</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Conditional Buttons for Confirmed Section */}
+          {isConfirmed && (
+            <View className="mt-4 w-full px-6">
+              <TouchableOpacity onPress={() => onAction('chat')} className="bg-green-500 py-3 rounded-lg">
+                <Text className="text-white text-center text-lg">Chat</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => onAction('rejected2')} className="bg-red-500 py-3 rounded-lg mt-2">
+                <Text className="text-white text-center text-lg">Reject</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </BlurView>
     </Modal>
