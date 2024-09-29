@@ -5,8 +5,8 @@ import { createBookingSession, getListOfUsers } from "@/services/firebase/firest
 import UserCard from "@/components/UserCard";
 import UserCardExpanded from "@/components/UserCardExpanded";
 
-const SeekerHomeTab = () => {
-  const [pswUsers, setPswUsers] = useState<User[]>([]);
+const PswHomeTab = () => {
+  const [seekerUsers, setSeekerUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
@@ -15,7 +15,7 @@ const SeekerHomeTab = () => {
     const fetchPswUsers = async () => {
       try {
           const users = await getListOfUsers(true)
-          setPswUsers(users)
+          setSeekerUsers(users)
       }
       catch (error) {
         console.error((error as any).message);
@@ -31,8 +31,8 @@ const SeekerHomeTab = () => {
   const handleBookRequest = async (userId: string) => {
     try {
       await createBookingSession(userId);
-      const updatedUsers = pswUsers.filter(user => user.id !== userId);
-      setPswUsers(updatedUsers);
+      const updatedUsers = seekerUsers.filter(user => user.id !== userId);
+      setSeekerUsers(updatedUsers);
       console.log("Booking request sent successfully!");
       setExpandedUserId(null);
     } catch (error) {
@@ -65,7 +65,7 @@ const SeekerHomeTab = () => {
         ) : (
           <View className="mt-2">
             <FlatList
-              data={pswUsers}
+              data={seekerUsers}
               keyExtractor={(item) => item.id}
               renderItem={renderItem}
               contentContainerStyle={{ paddingBottom: 200 }}
@@ -88,4 +88,4 @@ const SeekerHomeTab = () => {
   );
 };
 
-export default SeekerHomeTab;
+export default PswHomeTab;

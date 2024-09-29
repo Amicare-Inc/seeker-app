@@ -1,139 +1,124 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, SafeAreaView, ActivityIndicator } from 'react-native';
-import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
-import { collection, query, where, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
-import { User } from "@/types/User";
+import { SafeAreaView, View, Text } from 'react-native';
 import { Session } from "@/types/Sessions";
-import CustomButton from '@/components/CustomButton';
-import { router } from 'expo-router';
+import { User } from "@/types/User";
+import { fetchUserSessions, getUserDoc } from '@/services/firebase/firestore';
+import SessionList from '@/components/SessionList';
+import SessionModal from '@/components/SessionModal';
+import { FIREBASE_AUTH } from '@/firebase.config';
 
-const SeekerSessionsTab = () => {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [requesters, setRequesters] = useState<User[]>([]);
+const PswSessionsTab = () => {
+  const [notConfirmedSessions, setNotConfirmedSessions] = useState<Session[]>([]);
+  const [confirmedSessions, setConfirmedSessions] = useState<Session[]>([]);
+  const [expandedSession, setExpandedSession] = useState<Session | null>(null);
+  const [pendingMap, setPendingMap] = useState<{ [key: string]: User }>({});
+  const [acceptedMap, setAcceptedMap] = useState<{ [key: string]: User }>({});
   const [loading, setLoading] = useState(true);
   const currentUserId = FIREBASE_AUTH.currentUser?.uid;
 
   useEffect(() => {
-    const fetchSessionsAndRequesters = async () => {
-      if (!currentUserId) {
-        console.error("User not authenticated");
-        setLoading(false);
-        return;
-      }
-
+    const fetchSessions = async () => {
       try {
-        const q = query(
-          collection(FIREBASE_DB, 'sessions'),
-          where('targetUserId', '==', currentUserId),
-          where('status', '!=', 'rejected')
-        );
-        const querySnapshot = await getDocs(q);
+        const pendingSessions = await fetchUserSessions("pending", "targetUserId");
+        setNotConfirmedSessions(pendingSessions);
+        const acceptedSessionsRequester = await fetchUserSessions("accepted", "requesterId");
+        const acceptedSessionsTarget = await fetchUserSessions("accepted", "targetUserId");
+        const acceptedSessions = [...acceptedSessionsRequester, ...acceptedSessionsTarget];
+        setConfirmedSessions(acceptedSessions);
 
-        const sessionList: Session[] = querySnapshot.docs.map(doc => ({
-          ...doc.data() as Session,
-          id: doc.id
-        }));
-        setSessions(sessionList);
-
-        const requesterPromises = sessionList.map(async session => {
-          const userDoc = await getDoc(doc(FIREBASE_DB, 'personal', session.requesterId));
-          if (userDoc.exists()) {
-            return { ...userDoc.data(), id: userDoc.id } as User;
-          } else {
-            console.warn(`No user found for requester ID: ${session.requesterId}`);
-            return null;
+        const pendingData: { [key: string]: User } = {};
+        await Promise.all(pendingSessions.map(async (session) => {
+          const userData = await getUserDoc(session.requesterId);
+          if (userData) {
+            pendingData[session.requesterId] = userData as User;
           }
-        });
+        }));
+        setPendingMap(pendingData);
 
-        const requesterList = (await Promise.all(requesterPromises)).filter(user => user !== null) as User[];
-        setRequesters(requesterList);
+        const acceptedData: { [key: string]: User } = {};
+        await Promise.all(acceptedSessions.map(async (session) => {
+          const userIdToFetch = session.requesterId === currentUserId
+          ? session.targetUserId
+          : session.requesterId;
+          const userData = await getUserDoc(userIdToFetch);
+          if (userData) {
+            acceptedData[userIdToFetch] = userData as User;
+          }
+        }));
+        setAcceptedMap(acceptedData);
+  
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching sessions or requesters: ", error);
-      } finally {
+        console.error("Error fetching sessions:", error);
         setLoading(false);
       }
     };
 
-    fetchSessionsAndRequesters();
-  }, [currentUserId]);
+    fetchSessions();
+  }, []);
 
-  const handleAccept = async (sessionId: string) => {
-    try {
-      await updateDoc(doc(FIREBASE_DB, 'sessions', sessionId), { status: 'accepted' });
-      setSessions(prevSessions =>
-        prevSessions.map(session =>
-          session.id === sessionId ? { ...session, status: 'accepted' } : session
-        )
-      );
-    } catch (error) {
-      console.error("Error accepting session: ", error);
-    }
+  const handleExpandSession = (session: Session) => {
+    setExpandedSession(session);
   };
 
-  const handleReject = async (sessionId: string) => {
-    try {
-      // Update the status to "rejected"
-      await updateDoc(doc(FIREBASE_DB, 'sessions', sessionId), { status: 'rejected' });
-
-      // Remove the rejected session from the list
-      setSessions(prevSessions => prevSessions.filter(session => session.id !== sessionId));
-    } catch (error) {
-      console.error("Error rejecting session: ", error);
-    }
+  const handleCloseModal = () => {
+    setExpandedSession(null);
   };
 
-  const handleChat = () => {
-    router.push('/convo')
+    // Determine which map to use based on the session type
+    const getUserForExpandedSession = () => {
+      if (!expandedSession) return null;
+  
+      if (expandedSession.status === "pending") {
+        return pendingMap[expandedSession.requesterId];
+      } else if (expandedSession.status === "accepted") {
+        return acceptedMap[expandedSession.targetUserId] || acceptedMap[expandedSession.requesterId];
+      }
+      return null;
+    };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center bg-white">
+        <Text>Loading...</Text>
+      </SafeAreaView>
+    );
   }
 
-
-  const renderItem = ({ item }: { item: Session }) => {
-    const requester = requesters.find(user => user.id === item.requesterId);
-    return (
-        <View className="bg-gray-300 p-4 rounded-lg mb-4 w-full">
-        {item.status === 'pending' ? (
-          <View>
-            <Text className="text-lg font-semibold">
-                Request from {requester?.firstName} {requester?.lastName}
-            </Text>
-            <View className="flex-row mt-4">
-                <CustomButton title="Accept" handlePress={() => handleAccept(item.id)} />
-                <View style={{ width: 10 }} />
-                <CustomButton title="Reject" handlePress={() => handleReject(item.id)} />
-            </View>
-          </View>
-        ) : (
-          <View>
-            <Text className="text-lg font-semibold">
-                Session with {requester?.firstName} {requester?.lastName}
-            </Text>
-            <CustomButton title="Chat" handlePress={handleChat} />
-          </View>
-        )}
-      </View>
-    );
-  };
-
   return (
-    <SafeAreaView className="h-full bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
         <Text className="text-2xl font-bold text-black mb-4">Sessions</Text>
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
-          requesters.length > 0 ? (
-            <FlatList
-              data={sessions}
-              keyExtractor={(item) => item.id}
-              renderItem={renderItem}
-            />
-          ) : (
-            <Text>No requests found</Text>
-          )
-        )}
+
+        {/* Not Confirmed Yet Section */}
+        <SessionList
+          sessions={notConfirmedSessions}
+          onSessionPress={handleExpandSession}
+          requesterMap={pendingMap}
+          isAccepted = {false}
+          title="Not Confirmed Yet"
+        />
+
+        {/* Confirmed/Upcoming Section */}
+        <View className="mt-8">
+          <SessionList
+            sessions={confirmedSessions}
+            onSessionPress={handleExpandSession}
+            requesterMap={acceptedMap}
+            isAccepted = {true}
+            title="Confirmed / Upcoming"
+          />
+        </View>
       </View>
+
+      {/* Modal for Expanded Session */}
+      <SessionModal
+        isVisible={!!expandedSession}
+        onClose={handleCloseModal}
+        user={getUserForExpandedSession()}
+      />
     </SafeAreaView>
   );
 };
 
-export default SeekerSessionsTab;
+export default PswSessionsTab;

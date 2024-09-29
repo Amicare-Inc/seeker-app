@@ -162,7 +162,8 @@ export const fetchUserSessions = async (status: string, typeUser: string): Promi
     // Construct the Firestore query
     const q = query(
       collection(FIREBASE_DB, 'sessions'),
-      where(typeUser, '==', currentUserId),
+    //   where(typeUser, '==', currentUserId),
+      where(typeUser === "requesterId" ? "requesterId" : "targetUserId", "==", currentUserId),
       where('status', '==', status)
     );
   

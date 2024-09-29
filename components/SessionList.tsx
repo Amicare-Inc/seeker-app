@@ -13,13 +13,9 @@ interface SessionListProps {
 
 const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, requesterMap, isAccepted, title }) => {
     const renderItem = ({ item }: { item: Session }) => {
-        let requester: User;
-        if (isAccepted){
-            requester = requesterMap[item.targetUserId];
-        }
-        else {
-            requester = requesterMap[item.requesterId];
-        }
+        const requester: User = requesterMap[item.targetUserId] 
+            ? requesterMap[item.targetUserId] 
+            : requesterMap[item.requesterId];
 
         return (
         <TouchableOpacity onPress={() => onSessionPress(item)} className="flex-col items-center mr-4">

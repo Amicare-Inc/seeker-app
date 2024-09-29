@@ -5,6 +5,7 @@ import { User } from "@/types/User";
 import { fetchUserSessions, getUserDoc } from '@/services/firebase/firestore';
 import SessionList from '@/components/SessionList';
 import SessionModal from '@/components/SessionModal';
+import { FIREBASE_AUTH } from '@/firebase.config';
 
 const PswSessionsTab = () => {
   const [notConfirmedSessions, setNotConfirmedSessions] = useState<Session[]>([]);
@@ -13,14 +14,19 @@ const PswSessionsTab = () => {
   const [pendingMap, setPendingMap] = useState<{ [key: string]: User }>({});
   const [acceptedMap, setAcceptedMap] = useState<{ [key: string]: User }>({});
   const [loading, setLoading] = useState(true);
+  const currentUserId = FIREBASE_AUTH.currentUser?.uid;
 
   useEffect(() => {
     const fetchSessions = async () => {
       try {
         const pendingSessions = await fetchUserSessions("pending", "targetUserId");
         setNotConfirmedSessions(pendingSessions);
-        const acceptedSessions = await fetchUserSessions("accepted", "requesterId");
+        const acceptedSessionsRequester = await fetchUserSessions("accepted", "requesterId");
+        const acceptedSessionsTarget = await fetchUserSessions("accepted", "targetUserId");
+        const acceptedSessions = [...acceptedSessionsRequester, ...acceptedSessionsTarget];
         setConfirmedSessions(acceptedSessions);
+        // const acceptedSessions = await fetchUserSessions("accepted", "requesterId");
+        // setConfirmedSessions(acceptedSessions);
 
         const pendingData: { [key: string]: User } = {};
         await Promise.all(pendingSessions.map(async (session) => {
@@ -33,9 +39,12 @@ const PswSessionsTab = () => {
 
         const acceptedData: { [key: string]: User } = {};
         await Promise.all(acceptedSessions.map(async (session) => {
-          const userData2 = await getUserDoc(session.targetUserId);
-          if (userData2) {
-            acceptedData[session.targetUserId] = userData2 as User;
+          const userIdToFetch = session.requesterId === currentUserId
+          ? session.targetUserId
+          : session.requesterId;
+          const userData = await getUserDoc(userIdToFetch);
+          if (userData) {
+            acceptedData[userIdToFetch] = userData as User;
           }
         }));
         setAcceptedMap(acceptedData);
@@ -65,7 +74,7 @@ const PswSessionsTab = () => {
       if (expandedSession.status === "pending") {
         return pendingMap[expandedSession.requesterId];
       } else if (expandedSession.status === "accepted") {
-        return acceptedMap[expandedSession.targetUserId];
+        return acceptedMap[expandedSession.targetUserId] || acceptedMap[expandedSession.requesterId];
       }
       return null;
     };

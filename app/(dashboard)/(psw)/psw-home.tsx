@@ -5,7 +5,7 @@ import { createBookingSession, getListOfUsers } from "@/services/firebase/firest
 import UserCard from "@/components/UserCard";
 import UserCardExpanded from "@/components/UserCardExpanded";
 
-const SeekerHomeTab = () => {
+const PswHomeTab = () => {
   const [seekerUsers, setSeekerUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
@@ -88,4 +88,4 @@ const SeekerHomeTab = () => {
   );
 };
 
-export default SeekerHomeTab;
+export default PswHomeTab;
