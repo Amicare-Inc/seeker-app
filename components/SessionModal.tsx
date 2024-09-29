@@ -8,9 +8,10 @@ interface SessionModalProps {
   isVisible: boolean;
   onClose: () => void;
   user: User | null;
+  actions: { label: string; onPress: () => void; style: string }[]; 
 }
 
-const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, user }) => {
+const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, user, actions }) => {
   if (!user) return null;
 
   return (
@@ -30,9 +31,15 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, user })
             <UserCardExpanded user={user} onPress={onClose} />
           </TouchableOpacity>
           <View className="mt-4 w-full px-6">
-            <TouchableOpacity onPress={onClose} className="bg-blue-500 py-3 rounded-lg">
-              <Text className="text-white text-center text-lg">Close</Text>
+          {actions.map(action => (
+            <TouchableOpacity
+            key={action.label}
+            onPress={action.onPress}
+            className={`${action.style} py-3 rounded-lg mb-2`}
+            >
+            <Text className="text-white text-center text-lg">{action.label}</Text>
             </TouchableOpacity>
+          ))}
           </View>
         </View>
       </BlurView>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
 import { Session } from "@/types/Sessions";
 import { User } from "@/types/User";
-import { fetchUserSessions, getUserDoc } from '@/services/firebase/firestore';
+import { fetchUserSessions, getUserDoc, updateSessionStatus } from '@/services/firebase/firestore';
 import SessionList from '@/components/SessionList';
 import SessionModal from '@/components/SessionModal';
 import { FIREBASE_AUTH } from '@/firebase.config';
@@ -66,18 +66,64 @@ const PswSessionsTab = () => {
   const handleCloseModal = () => {
     setExpandedSession(null);
   };
-
-    // Determine which map to use based on the session type
-    const getUserForExpandedSession = () => {
-      if (!expandedSession) return null;
   
-      if (expandedSession.status === "pending") {
-        return pendingMap[expandedSession.requesterId];
-      } else if (expandedSession.status === "accepted") {
-        return acceptedMap[expandedSession.targetUserId] || acceptedMap[expandedSession.requesterId];
+  // Handle Accept and Reject Actions
+  const handleAccept = async () => {
+    if (expandedSession) {
+      await updateSessionStatus(expandedSession.id, 'accepted');
+
+      // First, update the pending sessions by removing the accepted session
+      setNotConfirmedSessions(prevSessions =>
+        prevSessions.filter(session => session.id !== expandedSession.id)
+      );
+
+      // Now, add the session to confirmedSessions and update acceptedMap
+      const userData = await getUserDoc(
+        expandedSession.requesterId === currentUserId
+          ? expandedSession.targetUserId
+          : expandedSession.requesterId
+      );
+      
+      if (userData) {
+        setAcceptedMap(prevMap => ({
+          ...prevMap,
+          [expandedSession.requesterId === currentUserId
+            ? expandedSession.targetUserId
+            : expandedSession.requesterId]: userData as User
+        }));
+
+        // Move the session to confirmedSessions
+        setConfirmedSessions(prevSessions => [
+          ...prevSessions,
+          { ...expandedSession, status: 'accepted' }
+        ]);
       }
-      return null;
-    };
+      
+      handleCloseModal();
+    }
+  };
+
+  const handleReject = async () => {
+    if (expandedSession) {
+      await updateSessionStatus(expandedSession.id, 'rejected');
+      setNotConfirmedSessions(prevSessions =>
+        prevSessions.filter(session => session.id !== expandedSession.id)
+      );
+      handleCloseModal();
+    }
+  };
+
+  // Determine which map to use based on the session type
+  const getUserForExpandedSession = () => {
+    if (!expandedSession) return null;
+
+    if (expandedSession.status === "pending") {
+      return pendingMap[expandedSession.requesterId];
+    } else if (expandedSession.status === "accepted") {
+      return acceptedMap[expandedSession.targetUserId] || acceptedMap[expandedSession.requesterId];
+    }
+    return null;
+  };
 
   if (loading) {
     return (
@@ -118,6 +164,10 @@ const PswSessionsTab = () => {
         isVisible={!!expandedSession}
         onClose={handleCloseModal}
         user={getUserForExpandedSession()}
+        actions={[
+          { label: "Accept", onPress: handleAccept, style: "bg-green-500" },
+          { label: "Reject", onPress: handleReject, style: "bg-red-500" }
+        ]}
       />
     </SafeAreaView>
   );
