@@ -3,6 +3,6 @@ export interface Session {
     requesterId: string;
     targetUserId: string;
     status: string;
-    createdAt?: string;
-    updatedAt?: string;
+    // createdAt?: string;
+    // updatedAt?: string;
 }

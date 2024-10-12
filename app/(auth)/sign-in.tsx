@@ -10,7 +10,7 @@ import { getUserDoc } from '@/services/firebase/firestore';
 const SignIn = () => {
 
   const [form, setForm] = useState({
-    email: "william.miller@example.com",
+    email: "david.moore@example.com",
     password: "asdfgh",
   });
 

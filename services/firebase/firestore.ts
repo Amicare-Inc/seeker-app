@@ -139,14 +139,21 @@ export const createBookingSession = async (userId: string) => {
         requesterId: FIREBASE_AUTH.currentUser?.uid, // The ID of the user making the booking request
         targetUserId: userId, // The ID of the user being booked
         status: status, // Initial status
-        createdAt: new Date(), // Timestamp of the request
+        // createdAt: new Date(), // Timestamp of the request
       });
   
       return sessionId; // Return session ID if needed for further processing
     } catch (error) {
       throw new Error(`Failed to create booking session: ${(error as any).message}`);
     }
-  };
+};
+
+const convertFirestoreTimestampToDate = (session: any) => {
+    return {
+      ...session,
+      createdAt: session.createdAt?.toString(), // Converts Firestore Timestamp to JS Date
+    };
+};
 
 /**
  * Fetches sessions where the current user is the target and the status is either pending or accepted.
@@ -173,7 +180,13 @@ export const fetchUserSessions = async (status: string, typeUser: string): Promi
       ...doc.data(),
       id: doc.id
     })) as Session[];
-  
+
+    // const sessions_redux = sessions.map(convertFirestoreTimestampToDate)
+    // console.log("sessions redux",sessions_redux)
+    // console.log("sessions redux created",sessions_redux[0]["createdAt"])
+    // console.log("sessions redux created type",typeof sessions_redux[0]["createdAt"])
+    // console.log("sessions redux created after", sessions_redux[0]["createdAt"])
+    // return sessions_redux;
     return sessions;
   };
 

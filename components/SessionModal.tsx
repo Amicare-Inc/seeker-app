@@ -7,7 +7,7 @@ import { User } from "@/types/User";
 interface SessionModalProps {
   isVisible: boolean;
   onClose: () => void; // Use onClose for closing the modal
-  onAction: (action: 'accept' | 'rejected' | 'book' | 'rejected2' | 'cancelled') => void; // Only for actions
+  onAction: (action: 'accept' | 'reject' | 'book' | 'reject_book' | 'cancelled') => void; // Only for actions
   user: User | null;
   isConfirmed?: boolean;
   isPending?: boolean;
@@ -41,7 +41,7 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onActio
                 <Text className="text-white text-center text-lg">Accept</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => onAction('rejected')} className="bg-red-500 py-3 rounded-lg mt-2">
+              <TouchableOpacity onPress={() => onAction('reject')} className="bg-red-500 py-3 rounded-lg mt-2">
                 <Text className="text-white text-center text-lg">Reject</Text>
               </TouchableOpacity>
             </View>
@@ -54,7 +54,7 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onActio
                 <Text className="text-white text-center text-lg">Book</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => onAction('rejected2')} className="bg-red-500 py-3 rounded-lg mt-2">
+              <TouchableOpacity onPress={() => onAction('reject_book')} className="bg-red-500 py-3 rounded-lg mt-2">
                 <Text className="text-white text-center text-lg">Reject</Text>
               </TouchableOpacity>
             </View>

@@ -1,20 +1,35 @@
-import { View, Text, SafeAreaView, ScrollView } from 'react-native'
-import { StatusBar } from "expo-status-bar";
-import React from 'react'
+import { SafeAreaView, View, Text, Button } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { updateSessionStatus } from '@/services/firebase/firestore';
 
 const Convo = () => {
-    return (
-        <SafeAreaView className="h-full bg-white" >
-            <ScrollView contentContainerStyle={{ height: '100%' }}>
-                <View className="flex w-full h-full justify-center items-center p-4">
-                    <Text className="text-5xl text-black font-thin text-center mb-11">
-                        Convo
-                    </Text>
-                </View>
-            </ScrollView>
-            <StatusBar backgroundColor="#FFFFFF" style="dark" />
-        </SafeAreaView>
-    )
-}
+    const { sessionId, confirmedSessions, setConfirmedSessions, bookedSessions, setBookedSessions, bookedMap, setBookedMap } = useLocalSearchParams();
+    const router = useRouter();
 
-export default Convo
+  // If sessionId is an array, take the first element
+  const actualSessionId = Array.isArray(sessionId) ? sessionId[0] : sessionId;
+
+  const handleBooked = async () => {
+    if (actualSessionId) {
+      try {
+        await updateSessionStatus(actualSessionId, 'booked'); // Use actualSessionId
+        alert('Session successfully updated to booked!');
+        
+        // router.back(); // Navigate back after booking
+      } catch (error) {
+        console.error('Error updating session to booked:', error);
+      }
+    }
+  };
+
+  return (
+    <SafeAreaView className="flex-1 justify-center items-center bg-white">
+      <View className="p-4">
+        <Text className="text-2xl font-bold mb-4">Chat</Text>
+        <Button title="Booked" onPress={handleBooked} />
+      </View>
+    </SafeAreaView>
+  );
+};
+
+export default Convo;
