@@ -33,11 +33,11 @@ const sessionSlice = createSlice({
       state.pendingMap = action.payload.pendingMap;
     },
     setAcceptedSessions(state, action: PayloadAction<{ sessions: Session[], acceptedMap: { [key: string]: User } }>) {
-      state.confirmedSessions = action.payload.sessions;
+      state.confirmedSessions = action.payload.sessions.filter(session => session.status === 'accepted');
       state.acceptedMap = action.payload.acceptedMap;
     },
     setBookedSessions(state, action: PayloadAction<{ sessions: Session[], bookedMap: { [key: string]: User } }>) {
-      state.bookedSessions = action.payload.sessions;
+      state.bookedSessions = action.payload.sessions.filter(session => session.status === 'booked');
       state.bookedMap = action.payload.bookedMap;
     },
     removePendingSession(state, action: PayloadAction<string>) {

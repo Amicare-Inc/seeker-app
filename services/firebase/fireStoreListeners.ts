@@ -91,13 +91,13 @@ export const listenToUserSessions = (dispatch: AppDispatch) => {
     const targetSessions = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-    } as Session));
+    } as Session)).filter(session => session.status === 'accepted');
 
     onSnapshot(acceptedRequesterQuery, async (reqSnapshot) => {
       const requesterSessions = reqSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-    } as Session));
+    } as Session)).filter(session => session.status === 'accepted');
 
     const combinedAcceptedSessions = [...targetSessions, ...requesterSessions];
     console.log("ACCEPTED LISTENER", combinedAcceptedSessions, FIREBASE_AUTH.currentUser?.email)
@@ -121,13 +121,13 @@ export const listenToUserSessions = (dispatch: AppDispatch) => {
     const targetSessions = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-    } as Session));
+    } as Session)).filter(session => session.status === 'booked');
 
     onSnapshot(bookedRequesterQuery, async (reqSnapshot) => {
       const requesterSessions = reqSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-      } as Session));
+      } as Session)).filter(session => session.status === 'booked');
 
       const combinedBookedSessions = [...targetSessions, ...requesterSessions];
 
