@@ -10,6 +10,8 @@ import { AppDispatch, RootState } from '@/redux/store';
 
 import SessionBookedList from '@/components/SessionBookedList';
 import { listenToUserSessions } from '@/services/firebase/FireStoreListeners';
+import { router } from 'expo-router';
+
 
 const PswSessionsTab = () => {
    // Keeping expandedSession as a local state to handle modal expansion
@@ -37,7 +39,14 @@ const PswSessionsTab = () => {
    }, [dispatch]);
 
    const handleExpandSession = (session: Session) => {
-     setExpandedSession(session);  // Set the session to be expanded
+    if (session.status === 'accepted') {
+      router.push({
+        pathname: '/(chat)/[sessionId]',
+        params: { sessionId: session.id }, // Pass session ID for chat
+      });
+    } else {
+      setExpandedSession(session);  // Open modal for other cases (pending/booked)
+    }
    };
  
    const handleCloseModal = () => {
