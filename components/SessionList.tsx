@@ -11,7 +11,7 @@ interface SessionListProps {
 }
 
 const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, requesterMap, title }) => {
-    console.log("IN Session LIST BEGINNING", requesterMap)
+    // console.log("IN Session LIST BEGINNING", requesterMap)
     const renderItem = ({ item }: { item: Session }) => {
         const requester: User | undefined = requesterMap[item.targetUserId] 
             ? requesterMap[item.targetUserId] 
@@ -19,7 +19,7 @@ const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, req
         if (!requester) {
             return null; // Or you could return some default UI or handle it as needed
         }
-        console.log("IN Session LIST AFTER",requester)
+        // console.log("IN Session LIST AFTER",requester)
         return (
         <TouchableOpacity onPress={() => onSessionPress(item)} className="flex-col items-center mr-4">
             <Image

@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, FlatList } from 'react-native';
+import { SafeAreaView, View, Text } from 'react-native';
 import { Session } from "@/types/Sessions";
-import { User } from "@/types/User";
-import { fetchUserSessions, getUserDoc, updateSessionStatus } from '@/services/firebase/firestore';
 import SessionList from '@/components/SessionList';
 import SessionModal from '@/components/SessionModal';
+import { updateSessionStatus } from '@/services/firebase/firestore';
 import { FIREBASE_AUTH } from '@/firebase.config';
-import { router, useFocusEffect } from 'expo-router';
-import SessionBooked from '@/components/SessionBooked';
-import SessionBookedList from '@/components/SessionBookedList';
-import { useDispatch, useSelector } from 'react-redux';  // Import Redux hooks
-import { fetchSessions, acceptSession, rejectSession, bookSession, rejectBookedSession } from '@/redux/sessionSlice'; // Import Redux actions
-import { AppDispatch, RootState } from '@/redux/store'; 
+import { useDispatch, useSelector } from 'react-redux';  
+import { AppDispatch, RootState } from '@/redux/store';
 
+import SessionBookedList from '@/components/SessionBookedList';
+import { listenToUserSessions } from '@/services/firebase/FireStoreListeners';
 
 const PswSessionsTab = () => {
    // Keeping expandedSession as a local state to handle modal expansion
@@ -21,28 +18,24 @@ const PswSessionsTab = () => {
    const dispatch: AppDispatch = useDispatch();
  
    // Getting session-related states from Redux
-   const notConfirmedSessions = useSelector((state: any) => state.sessions.notConfirmedSessions);
-   const confirmedSessions = useSelector((state: any) => state.sessions.confirmedSessions);
-   const bookedSessions = useSelector((state: any) => state.sessions.bookedSessions);
+   const notConfirmedSessions = useSelector((state: RootState) => state.sessions.notConfirmedSessions);
+   const confirmedSessions = useSelector((state: RootState) => state.sessions.confirmedSessions);
+   const bookedSessions = useSelector((state: RootState) => state.sessions.bookedSessions);
+   const pendingMap = useSelector((state: RootState) => state.sessions.pendingMap);
+   const acceptedMap = useSelector((state: RootState) => state.sessions.acceptedMap);
+   const bookedMap = useSelector((state: RootState) => state.sessions.bookedMap);
    const loading = useSelector((state: any) => state.sessions.loading);
    const error = useSelector((state: any) => state.sessions.error);
-   console.log("not  confimed pswtab: ",notConfirmedSessions)
- 
-   // Retrieve user maps from Redux store
-   const pendingMap = useSelector((state: any) => state.sessions.pendingMap);
-   const acceptedMap = useSelector((state: any) => state.sessions.acceptedMap);
-   const bookedMap = useSelector((state: any) => state.sessions.bookedMap);
-   console.log("use selector pending : " ,(pendingMap as any))
-   console.log("use selector confirmed : " ,(acceptedMap as any))
-   console.log("use selector booked : " ,(bookedMap as any))
 
-
-   // Fetch sessions using Redux Thunk on component mount
+   // Listen for changes in the Firestore collection when component mounts
    useEffect(() => {
-     console.log("fetching effect")
-     dispatch(fetchSessions());
+     console.log("Subscribing to Firestore listener for sessions...");
+     listenToUserSessions(dispatch); // Start listening to sessions in Firestore
+
+     // Optionally, return an unsubscribe function here if you need to stop listening when the component unmounts.
+     // However, onSnapshot already handles live updates efficiently.
    }, [dispatch]);
- 
+
    const handleExpandSession = (session: Session) => {
      setExpandedSession(session);  // Set the session to be expanded
    };
@@ -50,22 +43,18 @@ const PswSessionsTab = () => {
    const handleCloseModal = () => {
      setExpandedSession(null);  // Close the session modal
    };
- 
+
    // Handle user actions inside the modal (accept, reject, book)
    const handleAction = async (action: string) => {
      if (expandedSession) {
-       if (action === 'accept') {
+       if (action === 'accept_pending') {
          await updateSessionStatus(expandedSession.id, 'accepted');
-         dispatch(acceptSession(expandedSession.id));  // Dispatch accept action
-       } else if (action === 'reject') {
-         await updateSessionStatus(expandedSession.id, 'rejected');
-         dispatch(rejectSession(expandedSession.id));  // Dispatch reject action
-       } else if (action === 'book') {
+       } else if (action === 'reject_pending') {
+         await updateSessionStatus(expandedSession.id, 'rejected_pending');
+       } else if (action === 'accept_confirmed') {
          await updateSessionStatus(expandedSession.id, 'booked');
-         dispatch(bookSession(expandedSession.id));  // Dispatch book action
-       } else if (action === 'reject_book') {
-        await updateSessionStatus(expandedSession.id, 'rejected_booked');
-        dispatch(rejectBookedSession(expandedSession.id));  // Dispatch book action
+       } else if (action === 'reject_confirmed') {
+         await updateSessionStatus(expandedSession.id, 'rejected_confirmed');
        }
        handleCloseModal();  // Close the modal after action is taken
      }
@@ -102,7 +91,6 @@ const PswSessionsTab = () => {
        </SafeAreaView>
      );
    }
- 
 
   return (
     <SafeAreaView className="flex-1 bg-white">

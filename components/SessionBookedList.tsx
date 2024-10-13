@@ -11,16 +11,16 @@ interface SessionBookedListProps {
 }
 
 const SessionBookedList: React.FC<SessionBookedListProps> = ({ sessions, onSessionPress, requesterMap, title }) => {
-    console.log("IN BOOKED LIST BEGINNIG", requesterMap)
+    // console.log("IN BOOKED LIST BEGINNIG", requesterMap)
     const renderItem = ({ item }: { item: Session }) => {
         const requester: User | undefined = requesterMap[item.targetUserId] 
             ? requesterMap[item.targetUserId] 
             : requesterMap[item.requesterId];
-        console.log("booked REQUESTER",requester)
+        // console.log("booked REQUESTER",requester)
         if (!requester) {
             return null; // Or you could return some default UI or handle it as needed
         }
-        console.log("IN BOOKED LIST After", requesterMap)
+        // console.log("IN BOOKED LIST After", requesterMap)
         return (
         <TouchableOpacity onPress={() => onSessionPress(item)} className="flex-row items-center justify-between mb-4 p-4 bg-blue-500 rounded-lg">
             <View className="flex-row items-center">
