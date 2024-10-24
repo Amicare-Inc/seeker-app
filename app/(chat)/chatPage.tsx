@@ -7,7 +7,9 @@ import { useLocalSearchParams } from 'expo-router';
 
 const ChatPage = () => {
   // Get sessionId from the route params (passed from PswSessionsTab)
-  const { sessionId } = useLocalSearchParams(); 
+  const { sessionId, userName } = useLocalSearchParams();
+  const localparams = useLocalSearchParams()
+  console.log("CHATPAGE ALL PARAMS: ",localparams)
 
   // State to hold all messages
   const [messages, setMessages] = useState<Message[]>([]);
@@ -17,6 +19,7 @@ const ChatPage = () => {
 
   // Get the current user's ID from Firebase Auth
   const currentUserId = FIREBASE_AUTH.currentUser?.uid;
+  console.log("IN CHATPAGE of ", FIREBASE_AUTH.currentUser?.email, "OPPOSITE is ", userName)
 
   // Fetch and listen to messages for this session in real-time
   useEffect(() => {
@@ -74,7 +77,7 @@ const ChatPage = () => {
   // Render a message item in the FlatList
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={{ padding: 10, backgroundColor: item.userId === currentUserId ? '#DCF8C6' : '#FFF', marginVertical: 5, borderRadius: 10 }}>
-      <Text style={{ fontWeight: 'bold' }}>{item.userId === currentUserId ? 'You' : 'Other User'}</Text>
+      <Text style={{ fontWeight: 'bold' }}>{item.userId === currentUserId ? 'You' : userName}</Text>
       <Text>{item.message}</Text>
     </View>
   );
@@ -86,13 +89,14 @@ const ChatPage = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}  // Adjust if needed
       >
+        <Text className="text-lg font-bold mt-14">Chat with {userName}</Text>
         {/* Message List */}
         <FlatList
           data={messages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
           contentContainerStyle={{ padding: 10 }}
-          inverted  // Makes sure the latest message appears at the bottom
+          // inverted  // Makes sure the latest message appears at the bottom
         />
 
         {/* Input for new message */}

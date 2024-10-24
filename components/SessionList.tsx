@@ -5,7 +5,7 @@ import { User } from "@/types/User";
 
 interface SessionListProps {
   sessions: Session[];
-  onSessionPress: (session: Session) => void;
+  onSessionPress: (session: Session, requester: User) => void;
   requesterMap: { [key: string]: User };
   title: string;
 }
@@ -21,7 +21,7 @@ const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, req
         }
         // console.log("IN Session LIST AFTER",requester)
         return (
-        <TouchableOpacity onPress={() => onSessionPress(item)} className="flex-col items-center mr-4">
+        <TouchableOpacity onPress={() => onSessionPress(item, requester)} className="flex-col items-center mr-4">
             <Image
             source={{ uri: "https://via.placeholder.com/50" }}  // Using hardcoded mock image
             className="w-16 h-16 rounded-full"

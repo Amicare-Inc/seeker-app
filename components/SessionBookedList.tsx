@@ -5,7 +5,7 @@ import { User } from "@/types/User";
 
 interface SessionBookedListProps {
   sessions: Session[];
-  onSessionPress: (session: Session) => void;
+  onSessionPress: (session: Session, requester: User) => void;
   requesterMap: { [key: string]: User };
   title: string;
 }
@@ -22,7 +22,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({ sessions, onSessi
         }
         // console.log("IN BOOKED LIST After", requesterMap)
         return (
-        <TouchableOpacity onPress={() => onSessionPress(item)} className="flex-row items-center justify-between mb-4 p-4 bg-blue-500 rounded-lg">
+        <TouchableOpacity onPress={() => onSessionPress(item, requester)} className="flex-row items-center justify-between mb-4 p-4 bg-blue-500 rounded-lg">
             <View className="flex-row items-center">
               <Image
                     source={{ uri: "https://via.placeholder.com/50" }} // Placeholder image URL
