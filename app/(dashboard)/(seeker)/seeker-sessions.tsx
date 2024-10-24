@@ -43,7 +43,7 @@ const SeekerSessionsTab = () => {
     if (session.status === 'accepted') {
       router.push({
         pathname: '/(chat)/[sessionId]',
-        params: { sessionId: session.id, userName: `${requester.firstName} ${requester.lastName}`}, // Pass session ID for chat
+        params: { sessionId: session.id, user: JSON.stringify(requester)}, // Pass session ID for chat
       });
     } else {
       setExpandedSession(session);  // Open modal for other cases (pending/booked)

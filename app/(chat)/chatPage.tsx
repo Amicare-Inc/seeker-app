@@ -4,10 +4,12 @@ import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';  // Firebase imports
 import { Message } from '@/types/Message';  // Your Message interface
 import { useLocalSearchParams } from 'expo-router';
+import { User } from '@/types/User';
 
 const ChatPage = () => {
   // Get sessionId from the route params (passed from PswSessionsTab)
-  const { sessionId, userName } = useLocalSearchParams();
+  const { sessionId, user } = useLocalSearchParams();
+  const otherUser: User = JSON.parse(user as string)
   const localparams = useLocalSearchParams()
   console.log("CHATPAGE ALL PARAMS: ",localparams)
 
@@ -19,7 +21,7 @@ const ChatPage = () => {
 
   // Get the current user's ID from Firebase Auth
   const currentUserId = FIREBASE_AUTH.currentUser?.uid;
-  console.log("IN CHATPAGE of ", FIREBASE_AUTH.currentUser?.email, "OPPOSITE is ", userName)
+  console.log("IN CHATPAGE of ", FIREBASE_AUTH.currentUser?.email, "OPPOSITE is ", otherUser.firstName)
 
   // Fetch and listen to messages for this session in real-time
   useEffect(() => {
@@ -77,7 +79,7 @@ const ChatPage = () => {
   // Render a message item in the FlatList
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={{ padding: 10, backgroundColor: item.userId === currentUserId ? '#DCF8C6' : '#FFF', marginVertical: 5, borderRadius: 10 }}>
-      <Text style={{ fontWeight: 'bold' }}>{item.userId === currentUserId ? 'You' : userName}</Text>
+      <Text style={{ fontWeight: 'bold' }}>{item.userId === currentUserId ? 'You' : otherUser.firstName}</Text>
       <Text>{item.message}</Text>
     </View>
   );
@@ -89,7 +91,7 @@ const ChatPage = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}  // Adjust if needed
       >
-        <Text className="text-lg font-bold mt-14">Chat with {userName}</Text>
+        <Text className="text-lg font-bold mt-14">Chat with {otherUser.firstName} {otherUser.lastName} </Text>
         {/* Message List */}
         <FlatList
           data={messages}
