@@ -197,7 +197,9 @@ export const fetchUserSessions = async (status: string, typeUser: string): Promi
    */
   export const updateSessionStatus = async (sessionId: string, status: string): Promise<void> => {
     try {
+      console.log(`Attempting to update session ${sessionId} to status ${status}`);
       await updateDoc(doc(FIREBASE_DB, 'sessions', sessionId), { status });
+      console.log(`Session ${sessionId} updated to status ${status}`);
     } catch (error) {
       throw new Error(`Failed to update session status: ${(error as any).message}`);
     }

@@ -40,7 +40,7 @@ const PswSessionsTab = () => {
    }, [dispatch]);
 
    const handleExpandSession = (session: Session, requester:User) => {
-    console.log("MESSAGE EXPAND IN PSW: ",requester)
+    // console.log("MESSAGE EXPAND IN PSW: ",requester)
     if (session.status === 'accepted') {
       router.push({
         pathname: '/(chat)/[sessionId]',

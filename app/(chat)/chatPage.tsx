@@ -5,13 +5,22 @@ import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firesto
 import { Message } from '@/types/Message';  // Your Message interface
 import { useLocalSearchParams } from 'expo-router';
 import { User } from '@/types/User';
+import UserCard from '@/components/UserCard';
+import SessionModal from '@/components/SessionModal';
+import { updateSessionStatus } from '@/services/firebase/firestore';
+import { Session } from '@/types/Sessions';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { useDispatch } from 'react-redux';
 
 const ChatPage = () => {
   // Get sessionId from the route params (passed from PswSessionsTab)
   const { sessionId, user } = useLocalSearchParams();
   const otherUser: User = JSON.parse(user as string)
   const localparams = useLocalSearchParams()
-  console.log("CHATPAGE ALL PARAMS: ",localparams)
+  // console.log("CHATPAGE ALL PARAMS: ",localparams)
+
+  const dispatch = useDispatch(); // Initialize dispatch
 
   // State to hold all messages
   const [messages, setMessages] = useState<Message[]>([]);
@@ -21,7 +30,12 @@ const ChatPage = () => {
 
   // Get the current user's ID from Firebase Auth
   const currentUserId = FIREBASE_AUTH.currentUser?.uid;
-  console.log("IN CHATPAGE of ", FIREBASE_AUTH.currentUser?.email, "OPPOSITE is ", otherUser.firstName)
+  // console.log("IN CHATPAGE of ", FIREBASE_AUTH.currentUser?.email, "OPPOSITE is ", otherUser.firstName)
+
+  // States
+  const [isExpandedUser, setExpandedUser] = useState(false);
+  // const [isExpanded, setExpanded] = useState<Session | null>(null);
+  const acceptedMap = useSelector((state: RootState) => state.sessions.acceptedMap);
 
   // Fetch and listen to messages for this session in real-time
   useEffect(() => {
@@ -76,6 +90,46 @@ const ChatPage = () => {
     });
   };
 
+  // const getUserForExpandedSession = () => {
+  //   if (!isExpanded) return null;
+  
+  //   // Determine the correct user based on the session
+  //   return acceptedMap[isExpanded.targetUserId] || acceptedMap[isExpanded.requesterId];
+    
+  //   return null;
+  // };
+
+  const handleCloseModal = () => {
+    setExpandedUser(false);  // Close the session modal
+  };
+    // Handle user actions inside the modal (accept, reject, book)
+  // const handleAction = async (action: string) => {
+  //   console.log("ACTION")
+  //   if (isExpanded) {
+  //     console.log("IS EXPANDED ACTION: ",isExpanded.id)
+  //     if (action === 'accept_confirmed') {
+  //       await updateSessionStatus(isExpanded.id, 'booked');
+  //       dispatch({ type: 'sessions/updateSessionStatus', payload: { session: sessionId , status: 'booked' } });
+  //       console.log("Dispatched updateSessionStatus action with sessionId:", sessionId);
+
+  //     } else if (action === 'reject_confirmed') {
+  //       await updateSessionStatus(isExpanded.id, 'rejected_confirmed');
+  //     }
+  //     handleCloseModal();  // Close the modal after action is taken
+  //   }
+  // };
+  const handleAction = async (action: string) => {
+    if (sessionId) {
+      const newStatus = action === 'accept_confirmed' ? 'booked' : 'rejected_confirmed';
+      await updateSessionStatus(sessionId as string, newStatus);
+
+      // Optional: Dispatch an action to update local Redux state if needed
+      dispatch({ type: 'sessions/updateSessionStatus', payload: { sessionId, status: newStatus } });
+      
+      setExpandedUser(false); // Close the modal after action
+    }
+  };
+
   // Render a message item in the FlatList
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={{ padding: 10, backgroundColor: item.userId === currentUserId ? '#DCF8C6' : '#FFF', marginVertical: 5, borderRadius: 10 }}>
@@ -88,10 +142,12 @@ const ChatPage = () => {
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}  // Adjust if needed
+        // behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}  // Adjust if needed
       >
-        <Text className="text-lg font-bold mt-14">Chat with {otherUser.firstName} {otherUser.lastName} </Text>
+        {/* <UserCard user={otherUser} onPress={() => setExpanded({ id: sessionId as string, status: 'accepted' })} /> */}
+        <UserCard user={otherUser} onPress={() => setExpandedUser(true)} />
+        {/* <Text className="text-lg font-bold mt-14">Chat with {otherUser.firstName} {otherUser.lastName} </Text> */}
         {/* Message List */}
         <FlatList
           data={messages}
@@ -111,6 +167,16 @@ const ChatPage = () => {
           />
           <Button title="Send" onPress={handleSendMessage} />
         </View>
+        {/* Expanded User Modal */}
+        <SessionModal
+          isVisible={!!isExpandedUser}
+          onAction={handleAction}
+          onClose={() => setExpandedUser(false)}
+          user={otherUser}  // Pass the entire user object
+          isConfirmed={true}  // Example value; adjust as needed
+          isPending={false}
+          isBooked={false}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

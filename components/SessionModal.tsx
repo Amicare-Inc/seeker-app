@@ -16,7 +16,7 @@ interface SessionModalProps {
 
 const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onAction, user, isConfirmed, isPending, isBooked }) => {
   if (!user) return null;
-
+//   console.log("SessionModal is visible:", user)
   return (
     <Modal
       transparent={true}
@@ -50,7 +50,10 @@ const SessionModal: React.FC<SessionModalProps> = ({ isVisible, onClose, onActio
           {/* Conditional Buttons for Confirmed Section */}
           {isConfirmed && (
             <View className="mt-4 w-full px-6">
-              <TouchableOpacity onPress={() => onAction('accept_confirmed')} className="bg-blue-500 py-3 rounded-lg">
+              <TouchableOpacity onPress={() => {
+                onAction('accept_confirmed');
+                // console.log("BOOK PRESSED")
+                }} className="bg-blue-500 py-3 rounded-lg">
                 <Text className="text-white text-center text-lg">Book</Text>
               </TouchableOpacity>
 

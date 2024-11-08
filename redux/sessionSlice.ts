@@ -55,6 +55,34 @@ const sessionSlice = createSlice({
     setError(state, action: PayloadAction<string>) {
       state.error = action.payload;
     },
+    updateSessionStatus(state, action: PayloadAction<{ sessionId: string, status: string }>) {
+        const { sessionId, status } = action.payload;
+      
+        // Loop through each session list to find and update the session
+        for (const list of ['notConfirmedSessions', 'confirmedSessions', 'bookedSessions'] as const) {
+          // Cast the list to an array of Session to access findIndex
+          const sessionList = state[list as keyof SessionState] as Session[];
+          const sessionIndex = sessionList?.findIndex(session => session.id === sessionId) ?? -1;
+      
+          if (sessionIndex !== -1) {
+            const session = sessionList[sessionIndex];
+            session.status = status; // Update the status of the session
+      
+            // Move the session to the appropriate list based on the new status
+            if (status === 'booked') {
+              state.bookedSessions.push(session);
+            } else if (status === 'accepted') {
+              state.confirmedSessions.push(session);
+            } else if (status === 'pending') {
+              state.notConfirmedSessions.push(session);
+            }
+      
+            // Remove the session from the original list
+            sessionList.splice(sessionIndex, 1);
+            break;
+          }
+        }
+      },
   },
 });
 
@@ -66,6 +94,7 @@ export const {
   removeAcceptedSession,
   removeBookedSession,
   setError,
+  updateSessionStatus
 } = sessionSlice.actions;
 
 export default sessionSlice.reducer;
