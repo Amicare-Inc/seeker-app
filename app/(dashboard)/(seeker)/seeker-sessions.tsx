@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 
 import SessionBookedList from '@/components/SessionBookedList';
-import { listenToUserSessions } from '@/services/firebase/FireStoreListeners';
+import { listenToUserSessions } from '@/services/firebase/fireStoreListeners';
 import { router } from 'expo-router';
 import { User } from '@/types/User';
 

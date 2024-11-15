@@ -7,4 +7,14 @@ export interface User {
     phone: string;
     email: string;
     isPsw: boolean;
+    profilePhotoUrl?: string;
+    carePreferences?: {
+        lookingForSelf: boolean;
+        careType: string[];
+        tasks: string[];
+        availability: {
+            days: string[];
+            times: string[];
+        };
+    };
 }

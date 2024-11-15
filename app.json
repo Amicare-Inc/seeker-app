@@ -9,14 +9,14 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-    },
+    "android": {},
     "web": {
       "bundler": "metro",
       "output": "static"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

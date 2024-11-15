@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, TouchableOpacity, Image } from 'react-native';
 import ForumField from '@/components/ForumField';
 import CustomButton from '@/components/CustomButton';
 import { StatusBar } from "expo-status-bar";
@@ -7,6 +7,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadProfilePhoto } from '@/services/firebase/storage';
 
 const PersonalDetails: React.FC = () => {
     const [form, setForm] = useState({
@@ -16,6 +18,7 @@ const PersonalDetails: React.FC = () => {
         address: '',
         phone: '',
         email: '',
+        profilePhotoUrl: '',
     });
 
     const handleInputChange = (field: string, value: string) => {
@@ -33,6 +36,15 @@ const PersonalDetails: React.FC = () => {
             }));
         }
     }, [user]);
+
+    const handlePhotoUpload = async () => {
+        if (user) {
+            const downloadURL = await uploadProfilePhoto(user.uid);
+            if (downloadURL) {
+                setForm((prevForm) => ({ ...prevForm, profilePhotoUrl: downloadURL }));
+            }
+        }
+    };
 
     const handleContinue = async () => {
         if (user) {
@@ -57,6 +69,15 @@ const PersonalDetails: React.FC = () => {
                         <Text className="text-xs text-gray-500 font-normal text-left mb-4">
                             Please fill out the form below with your personal details
                         </Text>
+                        <TouchableOpacity onPress={handlePhotoUpload} className="self-center mb-4">
+                            {form.profilePhotoUrl ? (
+                                <Image source={{ uri: form.profilePhotoUrl || "https://via.placeholder.com/50" }} style={{ width: 100, height: 100, borderRadius: 50 }} />
+                            ) : (
+                                <View className='w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center'>
+                                    {/* <Text>Tap to add photo</Text> */}
+                                </View>
+                            )}
+                        </TouchableOpacity>
                         <ForumField
                             title="First Name"
                             value={form.firstName}

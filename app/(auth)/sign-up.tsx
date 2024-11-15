@@ -11,9 +11,9 @@ import { signUpWithEmail, verifyEmail } from '@/services/firebase/auth';
 const SignUp = () => {
 
   const [form, setForm] = useState({
-    email: "",
-    password: "",
-    confirm_password: ""
+    email: "azaanazam1606@gmail.com",
+    password: "asdfgh",
+    confirm_password: "asdfgh"
   });
 
   const [error, setError] = useState('');
