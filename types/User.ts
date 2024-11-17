@@ -13,7 +13,7 @@ export interface User {
         careType?: string[];
         tasks?: string[];
         availability?: {
-            [days: string]: string[];
+            [days: string]: { start: string; end: string}[];
         };
     };
 }
