@@ -14,12 +14,13 @@ const Role = () => {
         if (user) {
             await setDoc(doc(FIREBASE_DB, "personal", user.uid), { isPsw }, { merge: true });
         }
-        if (isPsw) {
-            router.push("/psw_intro_1");
-        }
-        else {
-            router.push("/seeker_intro_1");
-        }
+        // if (isPsw) {
+        //     router.push("/psw_intro_1");
+        // }
+        // else {
+        //     router.push("/seeker_intro_1");
+        // }
+        router.push("/onboard1");
     }
 
     return (

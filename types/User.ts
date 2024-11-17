@@ -9,10 +9,10 @@ export interface User {
     isPsw: boolean;
     profilePhotoUrl?: string;
     carePreferences?: {
-        lookingForSelf: boolean;
-        careType: string[];
-        tasks: string[];
-        availability: {
+        lookingForSelf?: boolean;
+        careType?: string[];
+        tasks?: string[];
+        availability?: {
             days: string[];
             times: string[];
         };

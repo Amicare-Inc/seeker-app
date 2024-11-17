@@ -29,7 +29,7 @@ const SignUp = () => {
         const user = userCredential.user
         console.log('User signed up:',user)
         verifyEmail(user)
-        router.push("/(onboarding)/personal_details");
+        router.push("/(onboarding)/role");
         }
       catch (error) {
         setPasswordError((error as any).message)
