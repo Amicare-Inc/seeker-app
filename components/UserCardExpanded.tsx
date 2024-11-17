@@ -8,13 +8,18 @@ interface UserCardExpandedProps {
 }
 
 const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onPress }) => {
+
+  const joinWithPeriod = (array?: string[]) => {
+    return array && array.length > 0 ? array.join(". ") : "Not provided";
+  };
+
     return (
         <TouchableOpacity onPress={onPress} className="bg-white rounded-lg p-5 mb-1 shadow-lg">
         {/* Header with User Image, Name, and Rate */}
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
             <Image
-              source={{ uri: "https://via.placeholder.com/50" }} // Placeholder image URL
+              source={{ uri: user.profilePhotoUrl || "https://via.placeholder.com/50" }} // Placeholder image URL
               className="w-16 h-16 rounded-full mr-4"
             />
             <View>
@@ -28,19 +33,19 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onPress }) =>
         {/* Bio Section */}
         <Text className="font-bold text-gray-800 mb-2">Bio</Text>
         <Text className="text-gray-600 mb-4">
-          [Summary]Hello, my name is {user.firstName}. I've provided personalized care to elders with dementia, cancer and diabetes. I focus on providing a foundation of personal support fostering confidence in the elderly.
+          {user.carePreferences?.bio || `[Summary]Hello, my name is ${user.firstName}. I've provided personalized care to elders with dementia, cancer and diabetes. I focus on providing a foundation of personal support fostering confidence in the elderly.`}
         </Text>
   
         {/* Skill Sets */}
         <Text className="font-bold text-gray-800 mb-2">My skill sets</Text>
         <Text className="text-gray-600 mb-4">
-          [Skills]Housekeeping. Accompaniment to Medical appointments. Wound care. Meal preparation.
+          {joinWithPeriod(user.carePreferences?.tasks) || `[Skills]Housekeeping. Accompaniment to Medical appointments. Wound care. Meal preparation.`}
         </Text>
   
         {/* Diagnosed Conditions Section */}
         <Text className="font-bold text-gray-800 mb-2">Diagnosed conditions I have cared for</Text>
         <Text className="text-gray-600 mb-4">
-          [Conditions]Dementia. Cancer. Diabetes
+          {joinWithPeriod(user.carePreferences?.careType) || `[Conditions]Dementia. Cancer. Diabetes`}
         </Text>
   
         {/* Languages and Location */}
@@ -51,7 +56,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onPress }) =>
           </View>
           <View className="flex-1 ml-2">
             <Text className="font-bold text-gray-800 mb-1">Location</Text>
-            <Text className="text-gray-600">[Distance]</Text>
+            <Text className="text-gray-600">{user.address || `[Distance]`}</Text>
           </View>
         </View>
       </TouchableOpacity>

@@ -12,6 +12,7 @@ export interface User {
         lookingForSelf?: boolean;
         careType?: string[];
         tasks?: string[];
+        bio?: string;
         availability?: {
             [days: string]: { start: string; end: string}[];
         };

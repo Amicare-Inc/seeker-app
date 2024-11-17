@@ -9,10 +9,10 @@ import { doc, setDoc } from 'firebase/firestore';
 
 const Role = () => {
 
-    const handleButtons = async (isPsw: boolean) => {
+    const handleButtons = async (isPSW: boolean) => {
         const user = FIREBASE_AUTH.currentUser;
         if (user) {
-            await setDoc(doc(FIREBASE_DB, "personal", user.uid), { isPsw }, { merge: true });
+            await setDoc(doc(FIREBASE_DB, "personal", user.uid), { isPSW }, { merge: true });
         }
         // if (isPsw) {
         //     router.push("/psw_intro_1");

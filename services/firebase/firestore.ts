@@ -106,7 +106,6 @@ export const getListOfUsers = async (isPSW: boolean) => {
         const data = doc.data();
         excludedUserIds.add(data.requesterId);  // Exclude users that have requested the current user
     });
-
     // Query to find all available PSWs
     const listQuery = query(
         collection(FIREBASE_DB, "personal"),

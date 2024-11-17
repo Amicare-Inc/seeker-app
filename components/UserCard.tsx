@@ -14,7 +14,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
       className="bg-gray-100 rounded-lg p-4 mb-4 flex-row items-center"
     >
       <Image
-        source={{ uri: "https://via.placeholder.com/50" }} // Placeholder image URL
+        source={{ uri: user.profilePhotoUrl || "https://via.placeholder.com/50" }} // Placeholder image URL
         className="w-12 h-12 rounded-full mr-4"
       />
       <View className="flex-1">
