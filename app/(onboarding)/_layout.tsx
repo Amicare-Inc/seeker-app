@@ -7,6 +7,8 @@ const OnboardingLayout = () => {
       <Stack.Screen name="role" options={{headerShown:false}}/>
       <Stack.Screen name="personal_details" options={{headerShown:false}}/>
       <Stack.Screen name="onboard1" options={{headerShown:false}}/>
+      <Stack.Screen name="tasks" options={{headerShown:false}}/>
+      <Stack.Screen name="availability" options={{headerShown:false}}/>
       <Stack.Screen name="(seeker)" options={{headerShown:false}}/>
       <Stack.Screen name="(psw)" options={{headerShown:false}}/>
     </Stack>

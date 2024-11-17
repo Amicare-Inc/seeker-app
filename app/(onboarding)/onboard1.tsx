@@ -45,7 +45,7 @@ const CarePreferences: React.FC = () => {
 
                 console.log('Care preferences saved successfully.');
                 // Navigate to the personal details page
-                router.push('/personal_details');
+                router.push('/tasks');
             } catch (error) {
                 console.error('Failed to save care preferences:', error);
             }
