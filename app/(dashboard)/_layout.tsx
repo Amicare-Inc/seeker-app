@@ -6,6 +6,7 @@ const OnboardingLayout = () => {
     <Stack>
       <Stack.Screen name="(seeker)" options={{headerShown:false}}/>
       <Stack.Screen name="(psw)" options={{headerShown:false}}/>
+      <Stack.Screen name="request-sessions" options={{headerShown:false}}/>
     </Stack>
   )
 }

@@ -16,8 +16,14 @@ import { useDispatch } from 'react-redux';
 const ChatPage = () => {
   // Get sessionId from the route params (passed from PswSessionsTab)
   const { sessionId, user } = useLocalSearchParams();
-  const otherUser: User = JSON.parse(user as string)
-  const localparams = useLocalSearchParams()
+  console.log("CHATPAGE SESSION ID: ",sessionId)
+  console.log("CHATPAGE USER: ",user)
+  if (!sessionId || !user) {
+    console.log("ChatPage rendered with missing params:", { sessionId, user });
+    return null; // Prevent further execution
+  }
+  const otherUser: User = JSON.parse(user  as string)
+  // const localparams = useLocalSearchParams()
   // console.log("CHATPAGE ALL PARAMS: ",localparams)
 
   const dispatch = useDispatch(); // Initialize dispatch

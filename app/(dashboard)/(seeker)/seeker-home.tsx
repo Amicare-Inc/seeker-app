@@ -4,9 +4,10 @@ import { User } from "@/types/User";
 import { createBookingSession, getListOfUsers } from "@/services/firebase/firestore";
 import UserCard from "@/components/UserCard";
 import UserCardExpanded from "@/components/UserCardExpanded";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { FIREBASE_AUTH } from "@/firebase.config";
 
-const PswHomeTab = () => {
+const SeekerHomeTab = () => {
   const [seekerUsers, setSeekerUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
@@ -35,15 +36,19 @@ const PswHomeTab = () => {
   );
 
   const handleBookRequest = async (userId: string) => {
-    try {
-      await createBookingSession(userId);
-      const updatedUsers = seekerUsers.filter(user => user.id !== userId);
-      setSeekerUsers(updatedUsers);
-      console.log("Booking request sent successfully!");
-      setExpandedUserId(null);
-    } catch (error) {
-      console.error((error as any).message);
-    }
+    router.push({
+      pathname: "/request-sessions",
+      params: { targetUserId: userId, requesterId: FIREBASE_AUTH.currentUser?.uid },
+    });
+    // try {
+    //   await createBookingSession(userId);
+    //   const updatedUsers = seekerUsers.filter(user => user.id !== userId);
+    //   setSeekerUsers(updatedUsers);
+    //   console.log("Booking request sent successfully!");
+    //   setExpandedUserId(null);
+    // } catch (error) {
+    //   console.error((error as any).message);
+    // }
   };
 
   const handleCardPress = (userId: string) => {
@@ -94,4 +99,4 @@ const PswHomeTab = () => {
   );
 };
 
-export default PswHomeTab;
+export default SeekerHomeTab;

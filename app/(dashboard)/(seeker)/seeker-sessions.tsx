@@ -41,6 +41,8 @@ const SeekerSessionsTab = () => {
    const handleExpandSession = (session: Session, requester:User) => {
     // console.log("MESSAGE EXPAND IN SEEKER: ",requester)
     if (session.status === 'accepted') {
+      console.log("SEEKER SESSION ID: ",session.id)
+      console.log("SEEKER HANDLEEXPNAD REQUESTER: ",requester)
       router.push({
         pathname: '/(chat)/[sessionId]',
         params: { sessionId: session.id, user: JSON.stringify(requester)}, // Pass session ID for chat
