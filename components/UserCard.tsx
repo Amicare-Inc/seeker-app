@@ -21,7 +21,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
         <Text className="font-bold text-lg">{`${user.firstName} ${user.lastName}`}</Text>
         <Text className="text-gray-500">[Rating]</Text>
       </View>
-      <Text className="font-bold text-lg">[Rate]</Text>
+      <Text className="font-bold text-lg">${`${user.isPSW? (user.rate? user.rate: 20) : ""}`}</Text>
     </TouchableOpacity>
   );
 };

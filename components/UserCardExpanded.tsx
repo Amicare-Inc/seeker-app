@@ -9,6 +9,9 @@ interface UserCardExpandedProps {
 
 const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onPress }) => {
 
+  // console.log("UserCardExpanded: ", user.isPSW);
+  /// NEED TO FIX isPSW vs isPsw in User type and UserCardExpanded.tsx ^^^^^
+
   const joinWithPeriod = (array?: string[]) => {
     return array && array.length > 0 ? array.join(". ") : "Not provided";
   };
@@ -27,7 +30,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onPress }) =>
               <Text className="text-gray-500 text-sm">[Rating]</Text>
             </View>
           </View>
-          <Text className="font-bold text-xl text-blue-600">[Rate]</Text>
+          <Text className="font-bold text-xl text-blue-600">${`${user.isPSW? (user.rate? user.rate: 20) : ""}`}</Text>
         </View>
   
         {/* Bio Section */}
