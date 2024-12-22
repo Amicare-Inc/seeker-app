@@ -82,7 +82,7 @@ const RequestSession = () => {
         note: helpText,
         startTime: startDate.toISOString(),
         endTime: endDate.toISOString(),
-        billing: {
+        billingDetails: {
           basePrice,
           taxes,
           serviceFee,
