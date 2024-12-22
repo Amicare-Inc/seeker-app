@@ -7,31 +7,33 @@ import {
   SafeAreaView,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { FIREBASE_AUTH, FIREBASE_DB } from "@/firebase.config";
 import { router, useLocalSearchParams } from "expo-router";
 import { User } from "@/types/User";
 
 const RequestSession = () => {
-  const { targetUser, requesterId } = useLocalSearchParams();
+  const { targetUser, sessionObj } = useLocalSearchParams();
   const targetUserObj: User = JSON.parse(targetUser as string);
-  console.log("TARGET USER: ", targetUserObj);
-  const [helpText, setHelpText] = useState<string>("");
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const existingSession = sessionObj ? JSON.parse(sessionObj as string) : null;
+
+  const [helpText, setHelpText] = useState<string>(
+    existingSession?.note || ""
+  );
+  const [startDate, setStartDate] = useState<Date | null>(
+    existingSession ? new Date(existingSession.startTime) : null
+  );
+  const [endDate, setEndDate] = useState<Date | null>(
+    existingSession ? new Date(existingSession.endTime) : null
+  );
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
   const [pickerTarget, setPickerTarget] = useState<"start" | "end">("start");
 
   const currentUser = FIREBASE_AUTH.currentUser;
-
-  if (targetUserObj.isPsw) {
-    const basePrice = targetUserObj.rate? targetUserObj.rate : 20;
-  }
-  else {
-    const basePrice = 156;
-  }
-  const basePrice = 156;
+  const basePrice = targetUserObj.isPSW
+    ? targetUserObj.rate || 20
+    : 156;
   const taxes = 24.2;
   const serviceFee = 40;
   const total = basePrice + taxes + serviceFee;
@@ -56,7 +58,6 @@ const RequestSession = () => {
   };
 
   const handleSubmit = async () => {
-    
     if (!currentUser) {
       alert("You must be signed in to send a request.");
       return;
@@ -73,12 +74,7 @@ const RequestSession = () => {
     }
 
     try {
-      const sessionId = `${currentUser.uid}_${Date.now()}`;
       const sessionData = {
-        id: sessionId,
-        requesterId: currentUser.uid,
-        targetUserId: targetUserObj.id,
-        status: "pending",
         note: helpText,
         startTime: startDate.toISOString(),
         endTime: endDate.toISOString(),
@@ -88,12 +84,28 @@ const RequestSession = () => {
           serviceFee,
           total,
         },
-        confirmedBy: []
       };
 
-      await setDoc(doc(FIREBASE_DB, "sessions", sessionId), sessionData);
+      if (existingSession) {
+        // Update existing session
+        const sessionRef = doc(FIREBASE_DB, "sessions", existingSession.id);
+        await updateDoc(sessionRef, sessionData);
+        alert("Session updated successfully!");
+      } else {
+        // Create new session
+        const sessionId = `${currentUser.uid}_${Date.now()}`;
+        const newSessionData = {
+          ...sessionData,
+          id: sessionId,
+          requesterId: currentUser.uid,
+          targetUserId: targetUserObj.id,
+          status: "pending",
+          confirmedBy: [],
+        };
+        await setDoc(doc(FIREBASE_DB, "sessions", sessionId), newSessionData);
+        alert("Session request sent successfully!");
+      }
 
-      alert("Session request sent successfully!");
       router.back();
     } catch (error) {
       console.error("Error submitting session request:", error);
@@ -125,7 +137,7 @@ const RequestSession = () => {
             fontWeight: "bold",
           }}
         >
-          Request Session
+          {existingSession ? "Edit Session" : "Request Session"}
         </Text>
       </View>
 
@@ -152,13 +164,7 @@ const RequestSession = () => {
         <Text style={{ fontSize: 14, fontWeight: "bold", marginBottom: 8 }}>
           Starts:
         </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}
-        >
+        <View style={{ flexDirection: "row", marginBottom: 20 }}>
           <TouchableOpacity
             onPress={() => showDatePicker("start", "date")}
             style={{
@@ -201,13 +207,7 @@ const RequestSession = () => {
         <Text style={{ fontSize: 14, fontWeight: "bold", marginBottom: 8 }}>
           Ends:
         </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}
-        >
+        <View style={{ flexDirection: "row", marginBottom: 20 }}>
           <TouchableOpacity
             onPress={() => showDatePicker("end", "date")}
             style={{
@@ -265,13 +265,7 @@ const RequestSession = () => {
           <Text style={{ fontSize: 14 }}>Base Price: ${basePrice}</Text>
           <Text style={{ fontSize: 14 }}>Taxes: ${taxes}</Text>
           <Text style={{ fontSize: 14 }}>Service Fee: ${serviceFee}</Text>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "bold",
-              marginTop: 8,
-            }}
-          >
+          <Text style={{ fontSize: 16, fontWeight: "bold", marginTop: 8 }}>
             Total: ${total}
           </Text>
         </View>
@@ -287,8 +281,8 @@ const RequestSession = () => {
           }}
         >
           <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
-            Send Request
-          </Text>
+            {existingSession ? "Update Session" : "Send Request"}
+            </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -7,9 +7,9 @@ import {
 } from 'react-native';
 import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { doc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
+import { router } from 'expo-router';
 import { User } from '@/types/User';
 import { Session } from '@/types/Sessions';
-import { router } from 'expo-router';
 
 const ChatHeader: React.FC<{
   session: Session;
@@ -53,10 +53,20 @@ const ChatHeader: React.FC<{
     try {
       const newStatus = sessionData.status === 'booked' ? 'cancelled' : 'rejected';
       await updateDoc(sessionRef, { status: newStatus });
+      router.back(); // Navigate back after cancelling
     } catch (error) {
       console.error('Error cancelling session:', error);
     }
-    router.back();
+  };
+
+  const handleNavigateToRequestSession = () => {
+    router.push({
+      pathname: '/request-sessions', // Corrected the pathname
+      params: {
+        targetUser: JSON.stringify(user),
+        sessionObj: JSON.stringify(sessionData),
+      },
+    });
   };
 
   const isCurrentUserConfirmed = currentUserId ? sessionData.confirmedBy?.includes(currentUserId) || false : false;
@@ -104,7 +114,6 @@ const ChatHeader: React.FC<{
               padding: 12,
             }}
           >
-            {/* Date Section */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
                 style={{
@@ -126,8 +135,6 @@ const ChatHeader: React.FC<{
                 })}
               </Text>
             </View>
-
-            {/* Time Section */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
                 style={{
@@ -151,6 +158,7 @@ const ChatHeader: React.FC<{
           {/* Buttons */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
             <TouchableOpacity
+              onPress={handleNavigateToRequestSession}
               style={{
                 backgroundColor: '#000',
                 flex: 1,
@@ -165,7 +173,7 @@ const ChatHeader: React.FC<{
             <TouchableOpacity
               onPress={handleCancelSession}
               style={{
-                backgroundColor: '#FF3B30', // Red for cancel
+                backgroundColor: '#FF3B30',
                 flex: 1,
                 padding: 12,
                 borderRadius: 8,
@@ -181,10 +189,10 @@ const ChatHeader: React.FC<{
             onPress={handleBookSession}
             style={{
               backgroundColor: isBooked
-                ? '#4CAF50' // Green if booked
+                ? '#4CAF50'
                 : isCurrentUserConfirmed
-                ? '#E5E5EA' // Grey if waiting for the other user
-                : '#007AFF', // Blue if the current user can press
+                ? '#E5E5EA'
+                : '#007AFF',
               padding: 12,
               borderRadius: 8,
               alignItems: 'center',
@@ -202,10 +210,10 @@ const ChatHeader: React.FC<{
             </Text>
           </TouchableOpacity>
 
-          {/* Status and Total Cost */}
+          {/* Total Cost */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ color: '#888', fontSize: 14 }}>
-              {isBooked ? 'Session is booked' : sessionData.status === 'rejected' ? 'Session is rejected' : 'Awaiting confirmation'}
+              {isBooked ? 'Session is booked' : 'Awaiting confirmation'}
             </Text>
             <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#000' }}>
               Total Cost: ${sessionData.billingDetails?.total.toFixed(2)}
