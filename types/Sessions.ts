@@ -14,4 +14,5 @@ export interface Session {
       serviceFee: number;
       total: number;
     };
+    confirmedBy?: string[]; // Set of user IDs who have confirmed the session
 }

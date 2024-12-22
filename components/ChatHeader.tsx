@@ -1,16 +1,62 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { Session } from '@/types/Sessions';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
+import { doc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
 import { User } from '@/types/User';
+import { Session } from '@/types/Sessions';
 
-interface ChatHeaderProps {
+const ChatHeader: React.FC<{
   session: Session;
   user: User;
   isExpanded: boolean;
   toggleExpanded: () => void;
-}
+}> = ({ session, user, isExpanded, toggleExpanded }) => {
+  const currentUserId = FIREBASE_AUTH.currentUser?.uid;
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ session, user, isExpanded, toggleExpanded }) => {
+  const [sessionData, setSessionData] = useState<Session>(session);
+
+  useEffect(() => {
+    const sessionRef = doc(FIREBASE_DB, 'sessions', session.id);
+
+    const unsubscribe = onSnapshot(sessionRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        setSessionData(docSnapshot.data() as Session);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [session.id]);
+
+  const handleBookSession = async () => {
+    const sessionRef = doc(FIREBASE_DB, 'sessions', session.id);
+    try {
+      await updateDoc(sessionRef, {
+        confirmedBy: arrayUnion(currentUserId),
+      });
+
+      // If both users confirm, update status to booked
+      if (sessionData.confirmedBy?.length === 1) {
+        await updateDoc(sessionRef, { status: 'booked' });
+      }
+    } catch (error) {
+      console.error('Error updating session:', error);
+    }
+  };
+
+  const isCurrentUserConfirmed = currentUserId ? sessionData.confirmedBy?.includes(currentUserId) || false : false;
+  const isOtherUserConfirmed =
+    currentUserId &&
+    sessionData.confirmedBy?.includes(
+      currentUserId === sessionData.requesterId ? sessionData.targetUserId : sessionData.requesterId
+    );
+
+  const isBooked = sessionData.status === 'booked';
+
   return (
     <TouchableOpacity
       onPress={toggleExpanded}
@@ -38,7 +84,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ session, user, isExpanded, togg
         <View style={{ marginTop: 16 }}>
           {/* Notes */}
           <Text style={{ fontSize: 14, color: '#666', marginBottom: 10 }}>
-            {session.note || 'No additional details provided.'}
+            {sessionData.note || 'No additional details provided.'}
           </Text>
 
           {/* Date and Time Section */}
@@ -67,35 +113,35 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ session, user, isExpanded, togg
               >
                 {/* Placeholder for the Calendar Icon */}
                 <Text style={{ fontSize: 16, color: '#000' }}>📅</Text>
-              </View>
-              <Text style={{ fontSize: 14, color: '#000' }}>
-                {new Date(session.startTime || '').toLocaleDateString('en-US', {
-                  weekday: 'short',
-                  day: '2-digit',
-                  month: 'short',
-                })}
-              </Text>
             </View>
+            <Text style={{ fontSize: 14, color: '#000' }}>
+              {new Date(sessionData.startTime || '').toLocaleDateString('en-US', {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short',
+            })}
+            </Text>
+          </View>
 
-            {/* Time Section */}
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View
-                style={{
-                  backgroundColor: '#e5e5e5',
-                  borderRadius: 20,
-                  padding: 8,
-                  marginRight: 8,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {/* Placeholder for the Clock Icon */}
-                <Text style={{ fontSize: 16, color: '#000' }}>⏰</Text>
-              </View>
-              <Text style={{ fontSize: 14, color: '#000' }}>
-                {new Date(session.startTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
-                {new Date(session.endTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
+          {/* Time Section */}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View
+              style={{
+                backgroundColor: '#e5e5e5',
+                borderRadius: 20,
+                padding: 8,
+                marginRight: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {/* Placeholder for the Clock Icon */}
+              <Text style={{ fontSize: 16, color: '#000' }}>⏰</Text>
+            </View>
+            <Text style={{ fontSize: 14, color: '#000' }}>
+              {new Date(sessionData.startTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
+              {new Date(sessionData.endTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
             </View>
           </View>
 
@@ -127,11 +173,39 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ session, user, isExpanded, togg
             </TouchableOpacity>
           </View>
 
+          {/* Book Button */}
+          <TouchableOpacity
+            onPress={handleBookSession}
+            style={{
+              backgroundColor: isBooked
+                ? '#4CAF50' // Green if booked
+                : isCurrentUserConfirmed
+                ? '#E5E5EA' // Grey if waiting for the other user
+                : '#007AFF', // Blue if the current user can press
+              padding: 12,
+              borderRadius: 8,
+              alignItems: 'center',
+              marginBottom: 16,
+            }}
+            disabled={isBooked || isCurrentUserConfirmed}
+          >
+            <Text
+              style={{
+                color: isBooked || isCurrentUserConfirmed ? '#000' : '#fff',
+                fontWeight: 'bold',
+              }}
+            >
+              {isBooked ? 'Booked' : isCurrentUserConfirmed ? 'Waiting...' : 'Book'}
+            </Text>
+          </TouchableOpacity>
+
           {/* Status and Total Cost */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ color: '#888', fontSize: 14 }}>Awaiting confirmation</Text>
+            <Text style={{ color: '#888', fontSize: 14 }}>
+              {isBooked ? 'Session is booked' : 'Awaiting confirmation'}
+            </Text>
             <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#000' }}>
-              Total Cost: ${session.billingDetails?.total.toFixed(2)}
+              Total Cost: ${sessionData.billingDetails?.total.toFixed(2)}
             </Text>
           </View>
         </View>

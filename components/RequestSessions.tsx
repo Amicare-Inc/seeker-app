@@ -88,6 +88,7 @@ const RequestSession = () => {
           serviceFee,
           total,
         },
+        confirmedBy: []
       };
 
       await setDoc(doc(FIREBASE_DB, "sessions", sessionId), sessionData);
