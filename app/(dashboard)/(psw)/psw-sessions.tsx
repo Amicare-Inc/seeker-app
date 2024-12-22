@@ -41,7 +41,7 @@ const PswSessionsTab = () => {
 
    const handleExpandSession = (session: Session, requester:User) => {
     // console.log("MESSAGE EXPAND IN PSW: ",requester)
-    if (session.status === 'accepted') {
+    if (session.status === 'accepted' || session.status === 'booked') {
       console.log("SESSION ID: ",session.id)
       console.log("HANDLEEXPNAD REQUESTER: ",requester)
       router.push({
