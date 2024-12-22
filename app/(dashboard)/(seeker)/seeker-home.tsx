@@ -36,9 +36,10 @@ const SeekerHomeTab = () => {
   );
 
   const handleBookRequest = async (userId: string) => {
+    const targetUserObj = seekerUsers.find(user => user.id === userId);
     router.push({
       pathname: "/request-sessions",
-      params: { targetUserId: userId, requesterId: FIREBASE_AUTH.currentUser?.uid },
+      params: { targetUser: JSON.stringify(targetUserObj), requesterId: FIREBASE_AUTH.currentUser?.uid },
     });
     // try {
     //   await createBookingSession(userId);

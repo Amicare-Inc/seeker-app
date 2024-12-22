@@ -6,29 +6,57 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { doc, setDoc } from "firebase/firestore";
 import { FIREBASE_AUTH, FIREBASE_DB } from "@/firebase.config";
 import { router, useLocalSearchParams } from "expo-router";
+import { User } from "@/types/User";
 
 const RequestSession = () => {
-  const { targetUserId, requesterId } = useLocalSearchParams();
+  const { targetUser, requesterId } = useLocalSearchParams();
+  const targetUserObj: User = JSON.parse(targetUser as string);
+  console.log("TARGET USER: ", targetUserObj);
   const [helpText, setHelpText] = useState<string>("");
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(new Date());
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
+  const [pickerTarget, setPickerTarget] = useState<"start" | "end">("start");
 
+  const currentUser = FIREBASE_AUTH.currentUser;
+
+  if (targetUserObj.isPsw) {
+    const basePrice = targetUserObj.rate? targetUserObj.rate : 20;
+  }
+  else {
+    const basePrice = 156;
+  }
   const basePrice = 156;
   const taxes = 24.2;
   const serviceFee = 40;
   const total = basePrice + taxes + serviceFee;
 
-  const handleSubmit = async () => {
-    const currentUser = FIREBASE_AUTH.currentUser;
+  const showDatePicker = (target: "start" | "end", mode: "date" | "time") => {
+    setPickerTarget(target);
+    setPickerMode(mode);
+    setDatePickerVisible(true);
+  };
 
+  const hideDatePicker = () => {
+    setDatePickerVisible(false);
+  };
+
+  const handleConfirm = (selectedDate: Date) => {
+    if (pickerTarget === "start") {
+      setStartDate(selectedDate);
+    } else {
+      setEndDate(selectedDate);
+    }
+    hideDatePicker();
+  };
+
+  const handleSubmit = async () => {
+    
     if (!currentUser) {
       alert("You must be signed in to send a request.");
       return;
@@ -39,12 +67,17 @@ const RequestSession = () => {
       return;
     }
 
+    if (!startDate || !endDate) {
+      alert("Please select both start and end times.");
+      return;
+    }
+
     try {
       const sessionId = `${currentUser.uid}_${Date.now()}`;
       const sessionData = {
         id: sessionId,
         requesterId: currentUser.uid,
-        targetUserId: targetUserId, // Replace with the target user's ID
+        targetUserId: targetUserObj.id,
         status: "pending",
         note: helpText,
         startTime: startDate.toISOString(),
@@ -68,112 +101,191 @@ const RequestSession = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="p-6">
-        {/* Header */}
-        <Text className="text-2xl font-bold mb-6">Request Sessions</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      {/* Header */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 16,
+          paddingVertical: 10,
+          borderBottomWidth: 1,
+          borderBottomColor: "#ddd",
+        }}
+      >
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={{ fontSize: 18, color: "blue" }}>{"< Back"}</Text>
+        </TouchableOpacity>
+        <Text
+          style={{
+            flex: 1,
+            textAlign: "center",
+            fontSize: 18,
+            fontWeight: "bold",
+          }}
+        >
+          Request Session
+        </Text>
+      </View>
 
+      <View style={{ padding: 16 }}>
         {/* Help Text Input */}
-        <Text className="text-lg font-bold mb-2">I need help with:</Text>
+        <Text style={{ fontSize: 14, fontWeight: "bold", marginBottom: 8 }}>
+          I need help with:
+        </Text>
         <TextInput
           value={helpText}
           onChangeText={setHelpText}
           placeholder="E.g., Elderly care, wound care"
-          className="border border-gray-300 rounded-md p-4 mb-6 bg-white"
+          style={{
+            fontSize: 14,
+            padding: 12,
+            borderWidth: 1,
+            borderColor: "#ddd",
+            borderRadius: 8,
+            marginBottom: 20,
+          }}
         />
 
         {/* Start Date and Time */}
-        <Text className="text-lg font-bold mb-2">Starts:</Text>
-        <View className="flex-row items-center justify-between border border-gray-300 rounded-md p-4 mb-6 bg-white">
+        <Text style={{ fontSize: 14, fontWeight: "bold", marginBottom: 8 }}>
+          Starts:
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
           <TouchableOpacity
-            onPress={() => setShowStartDatePicker(true)}
-            className="flex-1 mr-2"
+            onPress={() => showDatePicker("start", "date")}
+            style={{
+              flex: 1,
+              marginRight: 8,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 8,
+              alignItems: "center",
+            }}
           >
-            <Text className="text-black">{startDate.toLocaleDateString()}</Text>
+            <Text>
+              {startDate ? startDate.toLocaleDateString() : "Select Date"}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setShowStartTimePicker(true)}
-            className="flex-1"
+            onPress={() => showDatePicker("start", "time")}
+            style={{
+              flex: 1,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 8,
+              alignItems: "center",
+            }}
           >
-            <Text className="text-black">{startDate.toLocaleTimeString()}</Text>
+            <Text>
+              {startDate
+                ? startDate.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Select Time"}
+            </Text>
           </TouchableOpacity>
         </View>
-        {showStartDatePicker && (
-          <DateTimePicker
-            value={startDate}
-            mode="date"
-            display="default"
-            onChange={(event, date) => {
-              setShowStartDatePicker(false);
-              if (date) setStartDate(new Date(date.setHours(startDate.getHours(), startDate.getMinutes())));
-            }}
-          />
-        )}
-        {showStartTimePicker && (
-          <DateTimePicker
-            value={startDate}
-            mode="time"
-            display="default"
-            onChange={(event, time) => {
-              setShowStartTimePicker(false);
-              if (time) setStartDate(new Date(startDate.setHours(time.getHours(), time.getMinutes())));
-            }}
-          />
-        )}
 
         {/* End Date and Time */}
-        <Text className="text-lg font-bold mb-2">Ends:</Text>
-        <View className="flex-row items-center justify-between border border-gray-300 rounded-md p-4 mb-6 bg-white">
+        <Text style={{ fontSize: 14, fontWeight: "bold", marginBottom: 8 }}>
+          Ends:
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
           <TouchableOpacity
-            onPress={() => setShowEndDatePicker(true)}
-            className="flex-1 mr-2"
+            onPress={() => showDatePicker("end", "date")}
+            style={{
+              flex: 1,
+              marginRight: 8,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 8,
+              alignItems: "center",
+            }}
           >
-            <Text className="text-black">{endDate.toLocaleDateString()}</Text>
+            <Text>
+              {endDate ? endDate.toLocaleDateString() : "Select Date"}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setShowEndTimePicker(true)}
-            className="flex-1"
+            onPress={() => showDatePicker("end", "time")}
+            style={{
+              flex: 1,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: "#ddd",
+              borderRadius: 8,
+              alignItems: "center",
+            }}
           >
-            <Text className="text-black">{endDate.toLocaleTimeString()}</Text>
+            <Text>
+              {endDate
+                ? endDate.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Select Time"}
+            </Text>
           </TouchableOpacity>
         </View>
-        {showEndDatePicker && (
-          <DateTimePicker
-            value={endDate}
-            mode="date"
-            display="default"
-            onChange={(event, date) => {
-              setShowEndDatePicker(false);
-              if (date) setEndDate(new Date(date.setHours(endDate.getHours(), endDate.getMinutes())));
-            }}
-          />
-        )}
-        {showEndTimePicker && (
-          <DateTimePicker
-            value={endDate}
-            mode="time"
-            display="default"
-            onChange={(event, time) => {
-              setShowEndTimePicker(false);
-              if (time) setEndDate(new Date(endDate.setHours(time.getHours(), time.getMinutes())));
-            }}
-          />
-        )}
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode={pickerMode}
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+        />
 
         {/* Billing Info */}
-        <View className="bg-gray-100 p-4 rounded-md mb-6">
-          <Text className="text-base">Base Price: ${basePrice}</Text>
-          <Text className="text-base">Taxes: ${taxes}</Text>
-          <Text className="text-base">Service Fee: ${serviceFee}</Text>
-          <Text className="text-lg font-bold mt-2">Total: ${total}</Text>
+        <View
+          style={{
+            backgroundColor: "#f9f9f9",
+            padding: 16,
+            borderRadius: 8,
+            marginBottom: 20,
+          }}
+        >
+          <Text style={{ fontSize: 14 }}>Base Price: ${basePrice}</Text>
+          <Text style={{ fontSize: 14 }}>Taxes: ${taxes}</Text>
+          <Text style={{ fontSize: 14 }}>Service Fee: ${serviceFee}</Text>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "bold",
+              marginTop: 8,
+            }}
+          >
+            Total: ${total}
+          </Text>
         </View>
 
         {/* Submit Button */}
         <TouchableOpacity
           onPress={handleSubmit}
-          className="bg-blue-500 py-4 rounded-md"
+          style={{
+            backgroundColor: "#007bff",
+            borderRadius: 8,
+            padding: 16,
+            alignItems: "center",
+          }}
         >
-          <Text className="text-white font-bold text-center text-lg">
+          <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
             Send Request
           </Text>
         </TouchableOpacity>

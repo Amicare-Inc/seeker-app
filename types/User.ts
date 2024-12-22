@@ -8,6 +8,7 @@ export interface User {
     email: string;
     isPsw: boolean;
     profilePhotoUrl?: string;
+    rate?: number;
     carePreferences?: {
         lookingForSelf?: boolean;
         careType?: string[];
