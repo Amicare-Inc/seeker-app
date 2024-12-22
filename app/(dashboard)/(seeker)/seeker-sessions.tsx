@@ -45,7 +45,7 @@ const SeekerSessionsTab = () => {
       console.log("SEEKER HANDLEEXPNAD REQUESTER: ",requester)
       router.push({
         pathname: '/(chat)/[sessionId]',
-        params: { sessionId: session.id, user: JSON.stringify(requester)}, // Pass session ID for chat
+        params: { sessionObj: JSON.stringify(session), user: JSON.stringify(requester)}, // Pass session ID for chat
       });
     } else {
       setExpandedSession(session);  // Open modal for other cases (pending/booked)
