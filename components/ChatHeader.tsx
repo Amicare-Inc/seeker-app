@@ -9,6 +9,7 @@ import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { doc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
 import { User } from '@/types/User';
 import { Session } from '@/types/Sessions';
+import { router } from 'expo-router';
 
 const ChatHeader: React.FC<{
   session: Session;
@@ -39,7 +40,6 @@ const ChatHeader: React.FC<{
         confirmedBy: arrayUnion(currentUserId),
       });
 
-      // If both users confirm, update status to booked
       if (sessionData.confirmedBy?.length === 1) {
         await updateDoc(sessionRef, { status: 'booked' });
       }
@@ -48,13 +48,18 @@ const ChatHeader: React.FC<{
     }
   };
 
-  const isCurrentUserConfirmed = currentUserId ? sessionData.confirmedBy?.includes(currentUserId) || false : false;
-  const isOtherUserConfirmed =
-    currentUserId &&
-    sessionData.confirmedBy?.includes(
-      currentUserId === sessionData.requesterId ? sessionData.targetUserId : sessionData.requesterId
-    );
+  const handleCancelSession = async () => {
+    const sessionRef = doc(FIREBASE_DB, 'sessions', session.id);
+    try {
+      const newStatus = sessionData.status === 'booked' ? 'cancelled' : 'rejected';
+      await updateDoc(sessionRef, { status: newStatus });
+    } catch (error) {
+      console.error('Error cancelling session:', error);
+    }
+    router.back();
+  };
 
+  const isCurrentUserConfirmed = currentUserId ? sessionData.confirmedBy?.includes(currentUserId) || false : false;
   const isBooked = sessionData.status === 'booked';
 
   return (
@@ -111,37 +116,35 @@ const ChatHeader: React.FC<{
                   justifyContent: 'center',
                 }}
               >
-                {/* Placeholder for the Calendar Icon */}
                 <Text style={{ fontSize: 16, color: '#000' }}>📅</Text>
+              </View>
+              <Text style={{ fontSize: 14, color: '#000' }}>
+                {new Date(sessionData.startTime || '').toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  day: '2-digit',
+                  month: 'short',
+                })}
+              </Text>
             </View>
-            <Text style={{ fontSize: 14, color: '#000' }}>
-              {new Date(sessionData.startTime || '').toLocaleDateString('en-US', {
-                weekday: 'short',
-                day: '2-digit',
-                month: 'short',
-            })}
-            </Text>
-          </View>
 
-          {/* Time Section */}
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View
-              style={{
-                backgroundColor: '#e5e5e5',
-                borderRadius: 20,
-                padding: 8,
-                marginRight: 8,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {/* Placeholder for the Clock Icon */}
-              <Text style={{ fontSize: 16, color: '#000' }}>⏰</Text>
-            </View>
-            <Text style={{ fontSize: 14, color: '#000' }}>
-              {new Date(sessionData.startTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
-              {new Date(sessionData.endTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </Text>
+            {/* Time Section */}
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{
+                  backgroundColor: '#e5e5e5',
+                  borderRadius: 20,
+                  padding: 8,
+                  marginRight: 8,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text style={{ fontSize: 16, color: '#000' }}>⏰</Text>
+              </View>
+              <Text style={{ fontSize: 14, color: '#000' }}>
+                {new Date(sessionData.startTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
+                {new Date(sessionData.endTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
             </View>
           </View>
 
@@ -160,16 +163,16 @@ const ChatHeader: React.FC<{
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Change Time</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              onPress={handleCancelSession}
               style={{
-                borderColor: '#000',
-                borderWidth: 1,
+                backgroundColor: '#FF3B30', // Red for cancel
                 flex: 1,
                 padding: 12,
                 borderRadius: 8,
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#000', fontWeight: 'bold' }}>Cancel</Text>
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancel</Text>
             </TouchableOpacity>
           </View>
 
@@ -202,7 +205,7 @@ const ChatHeader: React.FC<{
           {/* Status and Total Cost */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ color: '#888', fontSize: 14 }}>
-              {isBooked ? 'Session is booked' : 'Awaiting confirmation'}
+              {isBooked ? 'Session is booked' : sessionData.status === 'rejected' ? 'Session is rejected' : 'Awaiting confirmation'}
             </Text>
             <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#000' }}>
               Total Cost: ${sessionData.billingDetails?.total.toFixed(2)}
