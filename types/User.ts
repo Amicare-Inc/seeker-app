@@ -18,4 +18,5 @@ export interface User {
             [days: string]: { start: string; end: string}[];
         };
     };
+    onboardingComplete: boolean;
 }

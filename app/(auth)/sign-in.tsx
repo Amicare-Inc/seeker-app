@@ -32,13 +32,17 @@ const SignIn = () => {
     }
   };
 
+  // PATCH: FIX isPSW vs isPsw
+  // PATCH: REMOVE OLD TEST OF userData.first_name
   useEffect(() => {
     if (userData) {
       console.log('User Data:', userData);
-      if (userData.isPsw) {
+      if (userData.onboardingComplete == true || userData.firstName){
+        if (userData.isPSW == true) {
           router.push('/(psw)/psw-home');
-      } else {
-          router.push('/(seeker)/seeker-home');
+        } else if (userData.isPSW == false) {
+            router.push('/(seeker)/seeker-home');
+        }
       }
   }}, [userData])
 
