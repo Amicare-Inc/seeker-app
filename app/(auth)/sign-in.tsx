@@ -1,19 +1,22 @@
 import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native'
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ForumField from '@/components/ForumField';
 import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
 import { signInWithEmail } from '@/services/firebase/auth';
 import { getUserDoc } from '@/services/firebase/firestore';
+import { fetchUserById } from '@/redux/userSlice';
+import { AppDispatch, RootState } from '@/redux/store';
+import { useDispatch, useSelector } from 'react-redux';
 
 const SignIn = () => {
-
+  const dispatch = useDispatch<AppDispatch>();
   const [form, setForm] = useState({
     email: "david.moore@example.com",
     password: "asdfgh",
   });
-
+  const userData = useSelector((state: RootState) => state.user.userData);
   const [error, setError] = useState('');
 
   const handleSignIn = async () => {
@@ -21,25 +24,23 @@ const SignIn = () => {
       const userCredential = await signInWithEmail(form.email, form.password);
       const user = userCredential.user;
       console.log('User signed in:', user);
-
-      const userData = await getUserDoc(user.uid);
-
-      if (userData) {
-          console.log('User Data:', userData);
-          if (userData.isPSW) {
-              router.push('/(psw)/psw-home');
-          } else {
-              router.push('/(seeker)/seeker-home');
-          }
-      } else {
-          console.log('No such document!');
-      }
+      dispatch(fetchUserById(user.uid));
     } 
     catch (error) {
       setError((error as any).message);
       console.error('Error signing in:', error);
     }
   };
+
+  useEffect(() => {
+    if (userData) {
+      console.log('User Data:', userData);
+      if (userData.isPsw) {
+          router.push('/(psw)/psw-home');
+      } else {
+          router.push('/(seeker)/seeker-home');
+      }
+  }}, [userData])
 
   return (
     <SafeAreaView className="h-full bg-white" >

@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 import sessionReducer from './sessionSlice';
+import userReducer from './userSlice';
 
 export const store = configureStore({
   reducer: {
+    user: userReducer,
     sessions: sessionReducer, // You can add more slices here later
   },
 });
