@@ -1,76 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
-import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
-import { doc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { router } from 'expo-router';
-import { User } from '@/types/User';
+import { FIREBASE_AUTH } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
+import { User } from '@/types/User';
 
-const ChatHeader: React.FC<{
+// Import from your service file
+import {
+  subscribeToSession,
+  confirmSessionBooking,
+  cancelSession,
+} from '@/services/firebase/sessionService';
+
+interface ChatHeaderProps {
   session: Session;
   user: User;
   isExpanded: boolean;
   toggleExpanded: () => void;
-}> = ({ session, user, isExpanded, toggleExpanded }) => {
-  const currentUserId = FIREBASE_AUTH.currentUser?.uid;
+}
 
+const ChatHeader: React.FC<ChatHeaderProps> = ({
+  session,
+  user,
+  isExpanded,
+  toggleExpanded,
+}) => {
+  const currentUserId = FIREBASE_AUTH.currentUser?.uid;
   const [sessionData, setSessionData] = useState<Session>(session);
 
+  // Real-time subscription to the session
   useEffect(() => {
-    const sessionRef = doc(FIREBASE_DB, 'sessions', session.id);
-
-    const unsubscribe = onSnapshot(sessionRef, (docSnapshot) => {
-      if (docSnapshot.exists()) {
-        setSessionData(docSnapshot.data() as Session);
-      }
+    const unsubscribe = subscribeToSession(session.id, (updatedSession) => {
+      setSessionData(updatedSession);
     });
-
     return () => unsubscribe();
   }, [session.id]);
 
-  const handleBookSession = async () => {
-    const sessionRef = doc(FIREBASE_DB, 'sessions', session.id);
-    try {
-      await updateDoc(sessionRef, {
-        confirmedBy: arrayUnion(currentUserId),
-      });
+  // Boolean helpers for UI
+  const isBooked = sessionData.status === 'booked';
+  const isCurrentUserConfirmed =
+    !!currentUserId && sessionData.confirmedBy?.includes(currentUserId);
 
-      if (sessionData.confirmedBy?.length === 1) {
-        await updateDoc(sessionRef, { status: 'booked' });
-      }
+  // Handle "Book" action
+  const handleBookSession = async () => {
+    if (!currentUserId) return;
+    try {
+      await confirmSessionBooking(sessionData.id, currentUserId, sessionData.confirmedBy);
     } catch (error) {
-      console.error('Error updating session:', error);
+      console.error('Error booking session:', error);
     }
   };
 
+  // Handle "Cancel" action
   const handleCancelSession = async () => {
-    const sessionRef = doc(FIREBASE_DB, 'sessions', session.id);
     try {
-      const newStatus = sessionData.status === 'booked' ? 'cancelled' : 'rejected';
-      await updateDoc(sessionRef, { status: newStatus });
-      router.back(); // Navigate back after cancelling
+      await cancelSession(sessionData.id, sessionData.status);
+      // Optionally, navigate back after cancel:
+      router.back();
     } catch (error) {
       console.error('Error cancelling session:', error);
     }
   };
 
+  // Handle "Change Time" action
   const handleNavigateToRequestSession = () => {
     router.push({
-      pathname: '/request-sessions', // Corrected the pathname
+      pathname: '/request-sessions',
       params: {
         targetUser: JSON.stringify(user),
         sessionObj: JSON.stringify(sessionData),
       },
     });
   };
-
-  const isCurrentUserConfirmed = currentUserId ? sessionData.confirmedBy?.includes(currentUserId) || false : false;
-  const isBooked = sessionData.status === 'booked';
 
   return (
     <TouchableOpacity
@@ -82,27 +83,31 @@ const ChatHeader: React.FC<{
         borderBottomColor: '#ccc',
       }}
     >
-      {/* Initial Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: isExpanded ? 16 : 0 }}>
+      {/* Collapsed Header */}
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Image
           source={{ uri: user.profilePhotoUrl || 'https://via.placeholder.com/50' }}
           style={{ width: 50, height: 50, borderRadius: 25, marginRight: 16 }}
         />
         <View style={{ flex: 1 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 18, color: '#000' }}>{`${user.firstName} ${user.lastName}`}</Text>
-          <Text style={{ color: '#666', fontSize: 14 }}>{user.isPSW ? 'Current Address' : user.address}</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
+            {user.firstName} {user.lastName}
+          </Text>
+          <Text style={{ color: '#666', fontSize: 14 }}>
+            {user.isPSW ? 'Current Address' : user.address}
+          </Text>
         </View>
       </View>
 
-      {/* Expanded Header */}
+      {/* Expanded Section */}
       {isExpanded && (
         <View style={{ marginTop: 16 }}>
-          {/* Notes */}
+          {/* Optional note/details */}
           <Text style={{ fontSize: 14, color: '#666', marginBottom: 10 }}>
             {sessionData.note || 'No additional details provided.'}
           </Text>
 
-          {/* Date and Time Section */}
+          {/* Date and Time Row */}
           <View
             style={{
               flexDirection: 'row',
@@ -114,6 +119,7 @@ const ChatHeader: React.FC<{
               padding: 12,
             }}
           >
+            {/* Date */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
                 style={{
@@ -135,6 +141,8 @@ const ChatHeader: React.FC<{
                 })}
               </Text>
             </View>
+
+            {/* Time Range */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
                 style={{
@@ -149,14 +157,28 @@ const ChatHeader: React.FC<{
                 <Text style={{ fontSize: 16, color: '#000' }}>⏰</Text>
               </View>
               <Text style={{ fontSize: 14, color: '#000' }}>
-                {new Date(sessionData.startTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
-                {new Date(sessionData.endTime || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(sessionData.startTime || '').toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                -{' '}
+                {new Date(sessionData.endTime || '').toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </Text>
             </View>
           </View>
 
-          {/* Buttons */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
+          {/* "Change Time" + "Cancel" in same row (optional) */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 16,
+            }}
+          >
+            {/* Change Time Button */}
             <TouchableOpacity
               onPress={handleNavigateToRequestSession}
               style={{
@@ -170,6 +192,8 @@ const ChatHeader: React.FC<{
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Change Time</Text>
             </TouchableOpacity>
+
+            {/* Cancel Button */}
             <TouchableOpacity
               onPress={handleCancelSession}
               style={{
@@ -209,16 +233,6 @@ const ChatHeader: React.FC<{
               {isBooked ? 'Booked' : isCurrentUserConfirmed ? 'Waiting...' : 'Book'}
             </Text>
           </TouchableOpacity>
-
-          {/* Total Cost */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ color: '#888', fontSize: 14 }}>
-              {isBooked ? 'Session is booked' : 'Awaiting confirmation'}
-            </Text>
-            <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#000' }}>
-              Total Cost: ${sessionData.billingDetails?.total.toFixed(2)}
-            </Text>
-          </View>
         </View>
       )}
     </TouchableOpacity>
