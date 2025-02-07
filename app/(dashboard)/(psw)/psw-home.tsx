@@ -69,7 +69,7 @@ const PswHomeTab = () => {
     <SafeAreaView className="flex-1 h-full bg-white">
       <View className="flex-1 px-6 mt-6">
         <Text className="text-3xl font-bold text-center mb-3">
-          Explore PSWs
+          Explore Seekers
         </Text>
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
