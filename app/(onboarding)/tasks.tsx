@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import CustomButton from '@/components/CustomButton';
-import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '@/redux/store';
+import { updateUserFields } from '@/redux/userSlice';
 import { router } from 'expo-router';
 
 const TaskSelection: React.FC = () => {
-    const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
-    const [user] = useAuthState(FIREBASE_AUTH);
+    const dispatch = useDispatch<AppDispatch>();
+    const userData = useSelector((state: RootState) => state.user.userData);
+    const isPSW = userData?.isPsw;
+
+    const [selectedTasks, setSelectedTasks] = useState<string[]>(userData?.carePreferences?.tasks || []);
 
     const taskOptions = [
         'Option 1',
@@ -27,37 +30,33 @@ const TaskSelection: React.FC = () => {
         );
     };
 
-    const handleDone = async () => {
-        if (user) {
-            try {
-                const userDocRef = doc(FIREBASE_DB, 'personal', user.uid);
-
-                // Update `carePreferences.tasks` in Firestore
-                await updateDoc(userDocRef, {
-                    'carePreferences.tasks': selectedTasks,
-                });
-
-                router.push('/availability');
-            } catch (error) {
-                console.error('Failed to save tasks:', error);
-            }
-        } else {
-            alert('User not authenticated.');
+    const handleNext = () => {
+        if (selectedTasks.length > 0) {
+            dispatch(updateUserFields({
+                carePreferences: {
+                    ...userData?.carePreferences,
+                    tasks: selectedTasks,
+                },
+            }));
+            console.log('Tasks updated in Redux:', selectedTasks);
         }
+        router.push('/availability'); // Move to the next page regardless
     };
 
     return (
         <SafeAreaView className="flex-1 bg-white">
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
                 <View className="px-6">
-                    {/* Header */}
+                    {/* Dynamic Header Based on Role */}
                     <Text className="text-lg font-bold text-black mb-4">
-                        What kind of tasks would you like help with?
+                        {isPSW
+                            ? 'What tasks are you able to assist with?'
+                            : 'What kind of tasks would you like help with?'}
                     </Text>
 
                     {/* Task Options */}
                     <View className="flex-wrap flex-row justify-between">
-                        {taskOptions.map((task, index) => (
+                        {taskOptions.map((task) => (
                             <CustomButton
                                 key={task}
                                 title={task}
@@ -73,16 +72,18 @@ const TaskSelection: React.FC = () => {
                             />
                         ))}
                     </View>
-
-                    {/* Done Button */}
-                    <CustomButton
-                        title="Done"
-                        handlePress={handleDone}
-                        containerStyles="mt-8 bg-black py-4 rounded-full"
-                        textStyles="text-white text-lg"
-                    />
                 </View>
             </ScrollView>
+
+            {/* Skip/Next Button */}
+            <View className="px-9 pb-0">
+                <CustomButton
+                    title={selectedTasks.length > 0 ? 'Next' : 'Skip'}
+                    handlePress={handleNext}
+                    containerStyles="bg-black py-4 rounded-full"
+                    textStyles="text-white text-lg"
+                />
+            </View>
         </SafeAreaView>
     );
 };

@@ -34,11 +34,25 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    // Overwrite userData entirely
+    setUserData(state, action: PayloadAction<User>) {
+        state.userData = action.payload;
+        state.loading = false;
+        state.error = null;
+    },
     // Optionally define standard reducers, e.g. to clear user data
     clearUser(state) {
       state.userData = null;
       state.loading = false;
       state.error = null;
+    },
+    // ❗ NEW: Partially update fields in userData
+    updateUserFields(state, action: PayloadAction<Partial<User>>) {
+        if (!state.userData) {
+          state.userData = { ...action.payload } as User;
+        } else {
+          state.userData = { ...state.userData, ...action.payload };
+        }
     },
   },
   extraReducers: (builder) => {
@@ -61,5 +75,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearUser } = userSlice.actions;
+export const { setUserData, clearUser, updateUserFields } = userSlice.actions;
 export default userSlice.reducer;

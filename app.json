@@ -7,9 +7,16 @@
     "scheme": "AmiCare",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app requires access to the camera for identity verification purposes."
+      }
     },
-    "android": {},
+    "android": {
+      "permissions": [
+        "CAMERA"
+      ]
+    },
     "web": {
       "bundler": "metro",
       "output": "static"

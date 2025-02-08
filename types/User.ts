@@ -2,6 +2,7 @@ export interface User {
     id: string;
     firstName: string;
     lastName: string;
+    dob: string; // Date of Birth ISO string
     age: string;
     address: string;
     phone: string;
@@ -9,6 +10,10 @@ export interface User {
     isPsw: boolean;
     profilePhotoUrl?: string;
     rate?: number;
+    idVerified?: boolean;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
+    hasProfilePhoto?: boolean;
     carePreferences?: {
         lookingForSelf?: boolean;
         careType?: string[];
@@ -19,4 +24,5 @@ export interface User {
         };
     };
     onboardingComplete: boolean;
+    bio?: string;
 }

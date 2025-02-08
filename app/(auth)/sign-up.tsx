@@ -7,9 +7,12 @@ import { Link, router } from 'expo-router';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/firebase.config';
 import { signUpWithEmail, verifyEmail } from '@/services/firebase/auth';
+import { useDispatch } from 'react-redux';
+import { updateUserFields } from '@/redux/userSlice';
+import { AppDispatch } from '@/redux/store';
 
 const SignUp = () => {
-
+  const dispatch = useDispatch<AppDispatch>();
   const [form, setForm] = useState({
     email: "azaanazam1606@gmail.com",
     password: "asdfgh",
@@ -29,6 +32,12 @@ const SignUp = () => {
         const user = userCredential.user
         console.log('User signed up:',user)
         verifyEmail(user)
+        dispatch(
+          updateUserFields({
+            id: user.uid,
+            email: user.email || '',
+          })
+        );
         router.push("/(onboarding)/role");
         }
       catch (error) {
