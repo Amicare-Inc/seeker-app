@@ -38,7 +38,7 @@ const AddProfilePhoto: React.FC = () => {
       try {
         const downloadURL = await uploadPhotoToFirebase(userData.id, localPhotoUri);
         dispatch(updateUserFields({ profilePhotoUrl: downloadURL || '' }));
-        await setDoc(doc(FIREBASE_DB, 'personal', userData.id), { profilePhotoUrl: downloadURL }, { merge: true });
+        await setDoc(doc(FIREBASE_DB, 'test1', userData.id), { profilePhotoUrl: downloadURL }, { merge: true });
       } catch (error) {
         console.error('Error uploading photo:', error);
         Alert.alert('Upload Failed', 'There was an issue uploading your photo. Please try again.');

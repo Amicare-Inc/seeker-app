@@ -23,7 +23,7 @@ const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, req
         return (
         <TouchableOpacity onPress={() => onSessionPress(item, requester)} className="flex-col items-center mr-4">
             <Image
-            source={{ uri: "https://via.placeholder.com/50" }}  // Using hardcoded mock image
+            source={{ uri: requester.profilePhotoUrl }}  // Using hardcoded mock image
             className="w-16 h-16 rounded-full"
             />
             <Text className="text-center mt-2">{requester.firstName}</Text>

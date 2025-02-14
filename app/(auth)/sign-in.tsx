@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 const SignIn = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [form, setForm] = useState({
-    email: "david.moore@example.com",
+    email: "aisha.khan@example.com",
     password: "asdfgh",
   });
   const userData = useSelector((state: RootState) => state.user.userData);
@@ -38,9 +38,9 @@ const SignIn = () => {
     if (userData) {
       console.log('User Data:', userData);
       if (userData.onboardingComplete == true || userData.firstName){
-        if (userData.isPSW == true) {
+        if (userData.isPsw == true) {
           router.push('/(psw)/psw-home');
-        } else if (userData.isPSW == false) {
+        } else if (userData.isPsw == false) {
             router.push('/(seeker)/seeker-home');
         }
       }

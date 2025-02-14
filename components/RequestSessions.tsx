@@ -31,7 +31,7 @@ const RequestSession = () => {
   const [pickerTarget, setPickerTarget] = useState<"start" | "end">("start");
 
   const currentUser = FIREBASE_AUTH.currentUser;
-  const basePrice = targetUserObj.isPSW
+  const basePrice = targetUserObj.isPsw
     ? targetUserObj.rate || 20
     : 156;
   const taxes = 24.2;

@@ -12,6 +12,8 @@ web-build/
 firebase.config.ts
 utils/firebase-key.json
 *.zip
+test/*.jpg
+test/*.webp
 
 # macOS
 .DS_Store

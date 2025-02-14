@@ -94,7 +94,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             {user.firstName} {user.lastName}
           </Text>
           <Text style={{ color: '#666', fontSize: 14 }}>
-            {user.isPSW ? 'Current Address' : user.address}
+            {user.isPsw ? 'Current Address' : user.address}
           </Text>
         </View>
       </View>

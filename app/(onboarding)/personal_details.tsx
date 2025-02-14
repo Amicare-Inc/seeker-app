@@ -75,7 +75,7 @@ const PersonalDetails: React.FC = () => {
       try {
         dispatch(updateUserFields(form));
         if (userData?.id) {
-          await setDoc(doc(FIREBASE_DB, 'personal', userData.id), form, { merge: true });
+          await setDoc(doc(FIREBASE_DB, 'test1', userData.id), form, { merge: true });
         }
         router.push('/onboard1');
       } catch (error) {

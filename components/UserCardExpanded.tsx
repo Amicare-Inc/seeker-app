@@ -30,13 +30,13 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onPress }) =>
               <Text className="text-gray-500 text-sm">[Rating]</Text>
             </View>
           </View>
-          <Text className="font-bold text-xl text-blue-600">${`${user.isPSW? (user.rate? user.rate: 20) : ""}`}</Text>
+          <Text className="font-bold text-xl text-blue-600">${`${user.isPsw? (user.rate? user.rate: 20) : ""}`}</Text>
         </View>
   
         {/* Bio Section */}
         <Text className="font-bold text-gray-800 mb-2">Bio</Text>
         <Text className="text-gray-600 mb-4">
-          {user.carePreferences?.bio || `[Summary]Hello, my name is ${user.firstName}. I've provided personalized care to elders with dementia, cancer and diabetes. I focus on providing a foundation of personal support fostering confidence in the elderly.`}
+          {user.bio || `[Summary]Hello, my name is ${user.firstName}. I've provided personalized care to elders with dementia, cancer and diabetes. I focus on providing a foundation of personal support fostering confidence in the elderly.`}
         </Text>
   
         {/* Skill Sets */}

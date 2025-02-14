@@ -2,8 +2,9 @@ export interface User {
     id: string;
     firstName: string;
     lastName: string;
-    dob: string; // Date of Birth ISO string
-    age: string;
+    dob?: string; // Date of Birth ISO string MM/DD/YYYY
+    age?: string;
+    gender?: string;
     address: string;
     phone: string;
     email: string;
@@ -18,9 +19,8 @@ export interface User {
         lookingForSelf?: boolean;
         careType?: string[];
         tasks?: string[];
-        bio?: string;
         availability?: {
-            [days: string]: { start: string; end: string}[];
+            [days: string]: { start: string; end: string}[]; // Example: { "Monday": [{ start: "09:00", end: "17:00" }, { start: "19:00", end: "21:00" }]
         };
     };
     onboardingComplete: boolean;

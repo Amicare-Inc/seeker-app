@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, TextInputProps, Platform } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+// import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface ForumFieldProps extends TextInputProps {
   title: string;
@@ -57,7 +57,7 @@ const ForumField: React.FC<ForumFieldProps> = ({
         )}
       </TouchableOpacity>
 
-      {showDatePicker && (
+      {/* {showDatePicker && (
         <DateTimePicker
           value={date}
           mode="date"
@@ -66,7 +66,7 @@ const ForumField: React.FC<ForumFieldProps> = ({
           maximumDate={new Date()}
           minimumDate={new Date(1900, 0, 1)}
         />
-      )}
+      )} */}
     </View>
   );
 };

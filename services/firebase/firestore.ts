@@ -10,7 +10,7 @@ import { Session } from '@/types/Sessions';
  */
 export const getUserDoc = async (uid: string) => {
     try {
-        const userDocRef = doc(FIREBASE_DB, 'personal', uid);
+        const userDocRef = doc(FIREBASE_DB, 'test1', uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
@@ -32,7 +32,7 @@ export const getUserDoc = async (uid: string) => {
  */
 export const setUserDoc = async (uid: string, userData: any) => {
     try {
-        const userDocRef = doc(FIREBASE_DB, 'personal', uid);
+        const userDocRef = doc(FIREBASE_DB, 'test1', uid);
         await setDoc(userDocRef, userData, { merge: true }); // merge: true will merge with existing data
         console.log('User document successfully written!');
     } catch (error) {
@@ -108,8 +108,8 @@ export const getListOfUsers = async (isPSW: boolean) => {
     });
     // Query to find all available PSWs
     const listQuery = query(
-        collection(FIREBASE_DB, "personal"),
-        where("isPSW", "==", isPSW)
+        collection(FIREBASE_DB, "test1"),
+        where("isPsw", "==", isPSW)
     );
 
     const pswSnapshot = await getDocs(listQuery);
