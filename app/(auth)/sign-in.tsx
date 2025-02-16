@@ -37,7 +37,7 @@ const SignIn = () => {
   useEffect(() => {
     if (userData) {
       console.log('User Data:', userData);
-      if (userData.onboardingComplete == true || userData.firstName){
+      if (userData.onboardingComplete == true){
         if (userData.isPsw == true) {
           router.push('/(psw)/psw-home');
         } else if (userData.isPsw == false) {
