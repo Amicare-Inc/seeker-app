@@ -2,11 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
-// import { listenToUserSessions } from '@/services/firebase/fireStoreListeners';
 import { AppDispatch, RootState } from '@/redux/store';
-import { Session } from '@/types/Sessions';
-import { updateSessionStatus, listenToUserSessions, setActiveEnrichedSession } from '@/redux/sessionSlice';
-// import setActiveEnrichedSession from '@/redux/sessionSlice';
+import { updateSessionStatus, setActiveEnrichedSession } from '@/redux/sessionSlice';
 import { EnrichedSession } from '@/types/EnrichedSession';
 
 export function useSessionsTab(role: 'psw' | 'seeker') {
@@ -21,12 +18,6 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
   );
   console.log('Sessions in useSessionsTab:', newRequests, pending, confirmed);
   const userId = useSelector((state: RootState) => state.user.userData?.id);
-  // Listen for session updates
-  useEffect(() => {
-    console.log(`Subscribing to Firestore listener for sessions... (role = ${role})`);
-    const unsubscribe = listenToUserSessions(dispatch, userId as string);
-    // optionally return unsubscribe if your code sets it up that way
-  }, [dispatch, role]);
 
   /**
    * If a session is 'confirmed' or 'pending', navigate to chat.
