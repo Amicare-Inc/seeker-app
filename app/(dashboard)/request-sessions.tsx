@@ -1,3 +1,3 @@
 
-import RequestSession from "@/components/RequestSessions";
+import RequestSession from "@/components/RequestSession/RequestSession";
 export default RequestSession;
