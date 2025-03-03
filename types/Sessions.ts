@@ -1,18 +1,19 @@
 export interface Session {
-    id: string;
-    requesterId: string;
-    targetUserId: string;
-    status: string;
-    // createdAt?: string;
-    // updatedAt?: string;
-    startDate?: string; // ISO date format
-    endDate?: string; // ISO date format
-    note?: string; // Details of the request (help type, etc.)
-    billingDetails?: {
-      basePrice: number;
-      taxes: number;
-      serviceFee: number;
-      total: number;
-    };
-    confirmedBy?: string[]; // Set of user IDs who have confirmed the session
+  id: string;
+  senderId: string;   // The user who created the session (previously "requesterId")
+  receiverId: string; // The user receiving the session (previously "targetUserId")
+  participants: string[]; // [senderId, receiverId] → Allows querying both in one request
+  status: "newRequest" | "pending" | "confirmed" | "rejected" | "declined" | "cancelled"; // Updated status flow
+  createdAt?: string;
+  updatedAt?: string;
+  startTime?: string; // ISO date format
+  endTime?: string; // ISO date format
+  note?: string;
+  billingDetails?: {
+    basePrice: number;
+    taxes: number;
+    serviceFee: number;
+    total: number;
+  };
+  confirmedBy?: string[]; // Users who have confirmed the session
 }

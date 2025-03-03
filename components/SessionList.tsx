@@ -1,35 +1,29 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
-import { Session } from "@/types/Sessions";
-import { User } from "@/types/User";
+import { EnrichedSession } from '@/types/EnrichedSession';
 
 interface SessionListProps {
-  sessions: Session[];
-  onSessionPress: (session: Session, requester: User) => void;
-  requesterMap: { [key: string]: User };
+  sessions: EnrichedSession[];
+  onSessionPress: (session: EnrichedSession) => void;
   title: string;
 }
 
-const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, requesterMap, title }) => {
-    // console.log("IN Session LIST BEGINNING", requesterMap)
-    const renderItem = ({ item }: { item: Session }) => {
-        const requester: User | undefined = requesterMap[item.targetUserId] 
-            ? requesterMap[item.targetUserId] 
-            : requesterMap[item.requesterId];
-        if (!requester) {
-            return null; // Or you could return some default UI or handle it as needed
-        }
-        // console.log("IN Session LIST AFTER",requester)
-        return (
-        <TouchableOpacity onPress={() => onSessionPress(item, requester)} className="flex-col items-center mr-4">
-            <Image
-            source={{ uri: requester.profilePhotoUrl }}  // Using hardcoded mock image
-            className="w-16 h-16 rounded-full"
-            />
-            <Text className="text-center mt-2">{requester.firstName}</Text>
-        </TouchableOpacity>
-        );
-    };
+const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, title }) => {
+  const renderItem = ({ item }: { item: EnrichedSession }) => {
+    if (!item.otherUser) return null; // Only render if the other user is loaded
+    return (
+      <TouchableOpacity
+        onPress={() => onSessionPress(item)}
+        className="flex-col items-center mr-4"
+      >
+        <Image
+          source={{ uri: item.otherUser?.profilePhotoUrl || 'https://via.placeholder.com/50' }}
+          className="w-16 h-16 rounded-full"
+        />
+        <Text className="text-center mt-2">{item.otherUser?.firstName}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View>

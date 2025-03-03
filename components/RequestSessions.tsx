@@ -88,7 +88,7 @@ const RequestSession = () => {
 
       if (existingSession) {
         // Update existing session
-        const sessionRef = doc(FIREBASE_DB, "sessions", existingSession.id);
+        const sessionRef = doc(FIREBASE_DB, "sessions_test1", existingSession.id);
         await updateDoc(sessionRef, sessionData);
         alert("Session updated successfully!");
       } else {
@@ -97,12 +97,14 @@ const RequestSession = () => {
         const newSessionData = {
           ...sessionData,
           id: sessionId,
-          requesterId: currentUser.uid,
-          targetUserId: targetUserObj.id,
-          status: "pending",
-          confirmedBy: [],
+          senderId: currentUser.uid,     // previously "requesterId"
+          receiverId: targetUserObj.id,  // previously "targetUserId"
+          participants: [currentUser.uid, targetUserObj.id],
+          status: "newRequest",          // or "pending", depending on your flow
+          createdAt: new Date().toISOString(),
+          confirmedBy: [], 
         };
-        await setDoc(doc(FIREBASE_DB, "sessions", sessionId), newSessionData);
+        await setDoc(doc(FIREBASE_DB, "sessions_test1", sessionId), newSessionData);
         alert("Session request sent successfully!");
       }
 

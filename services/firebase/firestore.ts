@@ -159,7 +159,7 @@ const convertFirestoreTimestampToDate = (session: any) => {
  * @param status - An array of statuses to filter by. Default is ['pending', 'accepted'].
  * @returns A promise that resolves to an array of sessions.
  */
-export const fetchUserSessions = async (status: string, typeUser: string): Promise<Session[]> => {
+export const oldFetchUserSessions = async (status: string, typeUser: string): Promise<Session[]> => {
     const currentUserId = FIREBASE_AUTH.currentUser?.uid;
     // if (!currentUser) throw new Error("User not authenticated");
   
@@ -194,7 +194,7 @@ export const fetchUserSessions = async (status: string, typeUser: string): Promi
    * @param sessionId - The ID of the session to update.
    * @param status - The new status to set.
    */
-  export const updateSessionStatus = async (sessionId: string, status: string): Promise<void> => {
+  export const directUpdateSessionStatus = async (sessionId: string, status: string): Promise<void> => {
     try {
       console.log(`Attempting to update session ${sessionId} to status ${status}`);
       await updateDoc(doc(FIREBASE_DB, 'sessions', sessionId), { status });

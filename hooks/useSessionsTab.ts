@@ -1,129 +1,84 @@
-// hooks/useSessionsTab.ts
+// src/hooks/useSessionsTab.ts
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
-import { listenToUserSessions } from '@/services/firebase/fireStoreListeners';
-import { updateSessionStatus } from '@/services/firebase/firestore';
+// import { listenToUserSessions } from '@/services/firebase/fireStoreListeners';
 import { AppDispatch, RootState } from '@/redux/store';
 import { Session } from '@/types/Sessions';
-import { User } from '@/types/User';
+import { updateSessionStatus, listenToUserSessions, setActiveEnrichedSession } from '@/redux/sessionSlice';
+// import setActiveEnrichedSession from '@/redux/sessionSlice';
+import { EnrichedSession } from '@/types/EnrichedSession';
 
-/**
- * A custom hook that centralizes session-listening, expansion, and status update logic.
- * @param role - 'psw' or 'seeker' (in case you need role-specific logic)
- */
 export function useSessionsTab(role: 'psw' | 'seeker') {
   const dispatch = useDispatch<AppDispatch>();
 
-  // Track which session is "expanded" for the modal
-  const [expandedSession, setExpandedSession] = useState<Session | null>(null);
+  // This tracks the session displayed in the modal
+  const [expandedSession, setExpandedSession] = useState<EnrichedSession | null>(null);
 
-  // Grab session data and loading/error states from Redux
-  const {
-    notConfirmedSessions,
-    confirmedSessions,
-    bookedSessions,
-    pendingMap,
-    acceptedMap,
-    bookedMap,
-    loading,
-    error,
-  } = useSelector((state: RootState) => state.sessions);
-
-  /**
-   * Listen for session updates from Firestore whenever this hook mounts.
-   * The 'role' param is available if you want to do role-based logic later.
-   */
+  // Redux state from your session slice
+  const { newRequests, pending, confirmed, loading, error } = useSelector(
+    (state: RootState) => state.sessions
+  );
+  console.log('Sessions in useSessionsTab:', newRequests, pending, confirmed);
+  const userId = useSelector((state: RootState) => state.user.userData?.id);
+  // Listen for session updates
   useEffect(() => {
     console.log(`Subscribing to Firestore listener for sessions... (role = ${role})`);
-    listenToUserSessions(dispatch);
-    // You do not necessarily need to unsubscribe here unless you want to stop listening on unmount.
+    const unsubscribe = listenToUserSessions(dispatch, userId as string);
+    // optionally return unsubscribe if your code sets it up that way
   }, [dispatch, role]);
 
   /**
-   * When a user taps on a session:
-   * - If it’s accepted or booked, open the chat screen.
-   * - Otherwise, open the modal for accept/reject/book actions.
+   * If a session is 'confirmed' or 'pending', navigate to chat.
+   * Otherwise, open the modal for accept/reject.
    */
-  const handleExpandSession = (session: Session, requester: User) => {
-    if (session.status === 'accepted' || session.status === 'booked') {
-      // navigate to chat
+  const handleExpandSession = (session: EnrichedSession) => {
+    if (session.status === 'confirmed' || session.status === 'pending') {
+      dispatch(setActiveEnrichedSession(session));
       router.push({
         pathname: '/(chat)/[sessionId]',
-        params: {
-          sessionId: session.id,
-          sessionObj: JSON.stringify(session),
-          user: JSON.stringify(requester),
-        },
+        params: {sessionId: session.id}
       });
     } else {
-      // open modal
       setExpandedSession(session);
     }
   };
 
-  /** Close the modal */
   const handleCloseModal = () => {
     setExpandedSession(null);
   };
 
-  /**
-   * Handle accept/reject/book actions triggered in the modal
-   */
-  const handleAction = async (action: string) => {
+  const handleAction = async (action: 'accept' | 'reject') => {
     if (!expandedSession) return;
-
-    if (action === 'accept_pending') {
-      await updateSessionStatus(expandedSession.id, 'accepted');
-    } else if (action === 'reject_pending') {
-      await updateSessionStatus(expandedSession.id, 'rejected_pending');
-    } else if (action === 'accept_confirmed') {
-      await updateSessionStatus(expandedSession.id, 'booked');
-    } else if (action === 'reject_confirmed') {
-      await updateSessionStatus(expandedSession.id, 'rejected_confirmed');
-    }
-    handleCloseModal(); // close modal afterwards
-  };
-
-  /** Find which user object (from the user maps) to show in the modal */
-  const getUserForExpandedSession = (): User | null => {
-    if (!expandedSession) return null;
-
-    switch (expandedSession.status) {
-      case 'pending':
-        return pendingMap[expandedSession.requesterId] || null;
-      case 'accepted':
-        return (
-          acceptedMap[expandedSession.targetUserId] ||
-          acceptedMap[expandedSession.requesterId] ||
-          null
-        );
-      case 'booked':
-        return (
-          bookedMap[expandedSession.targetUserId] ||
-          bookedMap[expandedSession.requesterId] ||
-          null
-        );
-      default:
-        return null;
+  
+    let newStatus = '';
+    if (expandedSession.status === 'newRequest') {
+      newStatus = action === 'accept' ? 'pending' : 'rejected';
+    } 
+    // else if (expandedSession.status === 'pending') {
+    //   newStatus = action === 'accept' ? 'confirmed' : 'declined';
+    // }
+    // For confirmed sessions, you may not open the modal at all.
+    
+    try {
+      await dispatch(updateSessionStatus({ sessionId: expandedSession.id, newStatus }));
+      setExpandedSession(null);
+    } catch (err) {
+      console.error('Error updating session status:', err);
     }
   };
 
-  // If you want to do role-specific filtering or behavior, you can add it here.
-  // For now, we return everything from Redux.
+  // If you want to fetch user details for the modal, you can do so here. For now, returning null.
+  const getUserForExpandedSession = () => {
+    return null;
+  };
 
   return {
-    // Redux data
-    notConfirmedSessions,
-    confirmedSessions,
-    bookedSessions,
-    pendingMap,
-    acceptedMap,
-    bookedMap,
+    newRequests,
+    pending,
+    confirmed,
     loading,
     error,
-
-    // Local state & handlers
     expandedSession,
     handleExpandSession,
     handleCloseModal,

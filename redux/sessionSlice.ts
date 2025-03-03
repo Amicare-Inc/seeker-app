@@ -1,25 +1,83 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { collection, query, where, getDocs, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
-import { User } from '@/types/User';
+import { RootState } from '@/redux/store';
+import { EnrichedSession } from '@/types/EnrichedSession';
+
+// Fetch all sessions where the user is a participant (excluding rejected/cancelled)
+export const fetchUserSessions = createAsyncThunk(
+  'sessions/fetchUserSessions',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const q = query(
+        collection(FIREBASE_DB, 'sessions_test1'),
+        where('participants', 'array-contains', userId),
+        where('status', 'not-in', ['rejected', 'declined', 'cancelled']) // Exclude rejected, declined, and cancelled sessions
+      );
+      const querySnapshot = await getDocs(q);
+      console.log('USER SESSIONS REDUX:', querySnapshot);
+      const sessions: Session[] = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Session[];
+
+      return sessions;
+    } catch (error) {
+      return rejectWithValue((error as any).message);
+    }
+  }
+);
+
+// Real-time listener for session updates
+export const listenToUserSessions = (dispatch: any, userId: string) => {
+  const sessionCollection = collection(FIREBASE_DB, 'sessions_test1');
+  const sessionQuery = query(sessionCollection, where('participants', 'array-contains', userId));
+
+  return onSnapshot(sessionQuery, (snapshot) => {
+    const sessions = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Session[];
+
+    // Remove any rejected, declined, or cancelled sessions
+    const filteredSessions = sessions.filter(
+      (s) => !["rejected", "declined", "cancelled"].includes(s.status)
+    );
+
+    dispatch(setSessions(filteredSessions));
+  });
+};
+
+// Update session status and remove rejected/declined sessions
+export const updateSessionStatus = createAsyncThunk(
+  'sessions/updateSessionStatus',
+  async ({ sessionId, newStatus }: { sessionId: string; newStatus: string }, { rejectWithValue }) => {
+    try {
+      await updateDoc(doc(FIREBASE_DB, 'sessions_test1', sessionId), { status: newStatus });
+      return { sessionId, newStatus };
+    } catch (error) {
+      return rejectWithValue((error as any).message);
+    }
+  }
+);
 
 interface SessionState {
-  notConfirmedSessions: Session[];
-  confirmedSessions: Session[];
-  bookedSessions: Session[];
-  pendingMap: { [key: string]: User };
-  acceptedMap: { [key: string]: User };
-  bookedMap: { [key: string]: User };
+  allSessions: Session[];
+  activeEnrichedSession: EnrichedSession | null; // we'll store the active (enriched) session here
+  newRequests: Session[];
+  pending: Session[];
+  confirmed: Session[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: SessionState = {
-  notConfirmedSessions: [],
-  confirmedSessions: [],
-  bookedSessions: [],
-  pendingMap: {},
-  acceptedMap: {},
-  bookedMap: {},
+  allSessions: [],
+  activeEnrichedSession: null,
+  newRequests: [],
+  pending: [],
+  confirmed: [],
   loading: false,
   error: null,
 };
@@ -28,73 +86,56 @@ const sessionSlice = createSlice({
   name: 'sessions',
   initialState,
   reducers: {
-    setPendingSessions(state, action: PayloadAction<{ sessions: Session[], pendingMap: { [key: string]: User } }>) {
-      state.notConfirmedSessions = action.payload.sessions;
-      state.pendingMap = action.payload.pendingMap;
+    setSessions(state, action: PayloadAction<Session[]>) {
+      state.allSessions = action.payload;
+      state.newRequests = action.payload.filter(
+        (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
+      );
+      state.pending = action.payload.filter((s) => s.status === 'pending');
+      state.confirmed = action.payload.filter((s) => s.status === 'confirmed');
     },
-    setAcceptedSessions(state, action: PayloadAction<{ sessions: Session[], acceptedMap: { [key: string]: User } }>) {
-      state.confirmedSessions = action.payload.sessions.filter(session => session.status === 'accepted');
-      state.acceptedMap = action.payload.acceptedMap;
+    clearSessions(state) {
+      state.allSessions = [];
+      state.newRequests = [];
+      state.pending = [];
+      state.confirmed = [];
     },
-    setBookedSessions(state, action: PayloadAction<{ sessions: Session[], bookedMap: { [key: string]: User } }>) {
-      state.bookedSessions = action.payload.sessions.filter(session => session.status === 'booked');
-      state.bookedMap = action.payload.bookedMap;
+    setActiveEnrichedSession(state, action: PayloadAction<EnrichedSession>) {
+      state.activeEnrichedSession = action.payload;
     },
-    removePendingSession(state, action: PayloadAction<string>) {
-      state.notConfirmedSessions = state.notConfirmedSessions.filter(session => session.id !== action.payload);
-      delete state.pendingMap[action.payload];
-    },
-    removeAcceptedSession(state, action: PayloadAction<string>) {
-      state.confirmedSessions = state.confirmedSessions.filter(session => session.id !== action.payload);
-      delete state.acceptedMap[action.payload];
-    },
-    removeBookedSession(state, action: PayloadAction<string>) {
-      state.bookedSessions = state.bookedSessions.filter(session => session.id !== action.payload);
-      delete state.bookedMap[action.payload];
-    },
-    setError(state, action: PayloadAction<string>) {
-      state.error = action.payload;
-    },
-    updateSessionStatus(state, action: PayloadAction<{ sessionId: string, status: string }>) {
-        const { sessionId, status } = action.payload;
-      
-        // Loop through each session list to find and update the session
-        for (const list of ['notConfirmedSessions', 'confirmedSessions', 'bookedSessions'] as const) {
-          // Cast the list to an array of Session to access findIndex
-          const sessionList = state[list as keyof SessionState] as Session[];
-          const sessionIndex = sessionList?.findIndex(session => session.id === sessionId) ?? -1;
-      
-          if (sessionIndex !== -1) {
-            const session = sessionList[sessionIndex];
-            session.status = status; // Update the status of the session
-      
-            // Move the session to the appropriate list based on the new status
-            if (status === 'booked') {
-              state.bookedSessions.push(session);
-            } else if (status === 'accepted') {
-              state.confirmedSessions.push(session);
-            } else if (status === 'pending') {
-              state.notConfirmedSessions.push(session);
-            }
-      
-            // Remove the session from the original list
-            sessionList.splice(sessionIndex, 1);
-            break;
-          }
-        }
-      },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUserSessions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserSessions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.allSessions = action.payload;
+        state.newRequests = action.payload.filter(
+          (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
+        );
+        state.pending = action.payload.filter((s) => s.status === 'pending');
+        state.confirmed = action.payload.filter((s) => s.status === 'confirmed');
+      })
+      .addCase(fetchUserSessions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateSessionStatus.fulfilled, (state, action) => {
+        const { sessionId, newStatus } = action.payload;
+        state.allSessions = state.allSessions.filter(
+          (session) => session.id !== sessionId || !["rejected", "declined", "cancelled"].includes(newStatus)
+        );
+        state.newRequests = state.allSessions.filter(
+          (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
+        );
+        state.pending = state.allSessions.filter((s) => s.status === 'pending');
+        state.confirmed = state.allSessions.filter((s) => s.status === 'confirmed');
+      });
   },
 });
 
-export const {
-  setPendingSessions,
-  setAcceptedSessions,
-  setBookedSessions,
-  removePendingSession,
-  removeAcceptedSession,
-  removeBookedSession,
-  setError,
-  updateSessionStatus
-} = sessionSlice.actions;
-
+export const { setSessions, clearSessions, setActiveEnrichedSession } = sessionSlice.actions;
 export default sessionSlice.reducer;

@@ -1,53 +1,60 @@
+// src/screens/ChatPage.tsx
 import React, { useState, useEffect } from 'react';
-import {
-  SafeAreaView,
-  FlatList,
-  TextInput,
-  View,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
-  Text,
-} from 'react-native';
-import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
+import {SafeAreaView, KeyboardAvoidingView, Keyboard, Platform} from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import ChatHeader from '@/components/ChatHeader';
+import { useSelector } from 'react-redux';
+import ChatHeader from '@/components/Chat/ChatHeader';
+import ChatMessageList from '@/components/Chat/ChatMessageList';
+import ChatInput from '@/components/Chat/ChatInput';
 import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { FIREBASE_DB } from '@/firebase.config';
 import { Message } from '@/types/Message';
-import { Session } from '@/types/Sessions';
-import { User } from '@/types/User';
+import { EnrichedSession } from '@/types/EnrichedSession';
+import { RootState } from '@/redux/store';
 
 const ChatPage = () => {
-  const { sessionObj, user } = useLocalSearchParams();
-  if (!sessionObj || !user) return null;
+  // Retrieve the session ID from route parameters.
+  const { sessionId } = useLocalSearchParams();
+  // Get current user from Redux.
+  const currentUser = useSelector((state: RootState) => state.user.userData);
+  // Retrieve the active enriched session from Redux (or look it up by ID).
+  const activeSession = useSelector((state: RootState) =>
+    state.sessions.activeEnrichedSession ||
+    state.sessions.allSessions.find((s) => s.id === sessionId)
+  ) as EnrichedSession | undefined;
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
 
-  const sessionData: Session = JSON.parse(sessionObj as string);
-  const otherUser: User = JSON.parse(user as string);
-  const sessionId = sessionData.id;
+  // Debug logs
+  console.log('ChatPage - sessionId:', sessionId);
+  console.log('ChatPage - currentUser:', currentUser);
+  console.log('ChatPage - activeSession:', activeSession);
 
+  // If essential data is missing, return null.
+  if (!sessionId || !activeSession || !currentUser) return null;
+
+  // Destructure otherUser from the enriched session.
+  const otherUser = activeSession.otherUser;
+
+  // Local state for messages.
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isExpanded, setIsExpanded] = useState(false);
-  const currentUserId = FIREBASE_AUTH.currentUser?.uid;
 
   useEffect(() => {
-    if (sessionId) {
-      const unsubscribe = fetchMessages(sessionId, setMessages);
-      return () => unsubscribe();
-    }
+    const unsubscribe = fetchMessages(sessionId as string, setMessages);
+    return () => unsubscribe();
   }, [sessionId]);
 
   const handleSendMessage = async () => {
-    if (newMessage.trim() && currentUserId && sessionId) {
-      await addMessage(sessionId, newMessage.trim(), currentUserId);
+    if (newMessage.trim()) {
+      await addMessage(sessionId as string, newMessage.trim(), currentUser.id);
       setNewMessage('');
       Keyboard.dismiss();
     }
   };
 
-  const fetchMessages = (sessionId: string, callback: (messages: Message[]) => void) => {
-    const messagesRef = collection(FIREBASE_DB, 'sessions', sessionId, 'messages');
+  // Firestore message fetching function.
+  const fetchMessages = (sessionId: string, callback: (msgs: Message[]) => void) => {
+    const messagesRef = collection(FIREBASE_DB, 'sessions_test1', sessionId, 'messages');
     const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
     const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
       const fetchedMessages: Message[] = snapshot.docs.map((doc) => ({
@@ -59,8 +66,9 @@ const ChatPage = () => {
     return unsubscribe;
   };
 
+  // Firestore message sending function.
   const addMessage = async (sessionId: string, messageText: string, userId: string) => {
-    const messagesRef = collection(FIREBASE_DB, 'sessions', sessionId, 'messages');
+    const messagesRef = collection(FIREBASE_DB, 'sessions_test1', sessionId, 'messages');
     await addDoc(messagesRef, {
       userId,
       message: messageText,
@@ -69,71 +77,17 @@ const ChatPage = () => {
     });
   };
 
-  const renderMessage = ({ item }: { item: Message }) => (
-    <View
-      style={{
-        padding: 10,
-        backgroundColor: item.userId === currentUserId ? '#0D99FF' : '#E5E5EA',
-        marginVertical: 5,
-        borderRadius: 20,
-        alignSelf: item.userId === currentUserId ? 'flex-end' : 'flex-start',
-        maxWidth: '75%',
-      }}
-    >
-      <Text style={{ fontWeight: 'bold', color: item.userId === currentUserId ? '#FFF' : '#000' }}>
-        {item.userId === currentUserId ? 'You' : otherUser.firstName}
-      </Text>
-      <Text style={{ color: item.userId === currentUserId ? '#FFF' : '#000' }}>{item.message}</Text>
-    </View>
-  );
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <SafeAreaView className="flex-1 bg-white">
       <ChatHeader
-        session={sessionData}
-        user={otherUser}
-        isExpanded={isExpanded}
-        toggleExpanded={() => setIsExpanded((prev) =>!prev)}
-        />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
-        <FlatList
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={renderMessage}
-          contentContainerStyle={{ padding: 10 }}
-        />
-        <View style={{ flexDirection: 'row', padding: 10, alignItems: 'center' }}>
-          <TextInput
-            value={newMessage}
-            onChangeText={setNewMessage}
-            placeholder="Type a message..."
-            placeholderTextColor={'#ccc'}
-            style={{
-              flex: 1,
-              borderWidth: 1,
-              borderColor: '#ccc',
-              padding: 10,
-              borderRadius: 20,
-              backgroundColor: '#f9f9f9',
-              marginRight: 8,
-            }}
-          />
-          <TouchableOpacity
-            onPress={handleSendMessage}
-            style={{
-              backgroundColor: '#007AFF',
-              padding: 10,
-              borderRadius: 20,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Send</Text>
-          </TouchableOpacity>
-        </View>
+        session={activeSession}
+        user={otherUser!}
+        isExpanded={isHeaderExpanded}
+        toggleExpanded={() => setIsHeaderExpanded((prev) => !prev)}
+      />
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
+        <ChatMessageList messages={messages} otherUserName={otherUser?.firstName || ''} currentUserId={currentUser.id} />
+        <ChatInput newMessage={newMessage} setNewMessage={setNewMessage} handleSendMessage={handleSendMessage} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
