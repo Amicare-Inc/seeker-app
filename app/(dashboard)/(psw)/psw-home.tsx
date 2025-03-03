@@ -1,62 +1,31 @@
-import { View, Text, SafeAreaView, ActivityIndicator, FlatList, Modal, TouchableOpacity,} from "react-native";
-import React, { useEffect, useState } from "react";
-import { User } from "@/types/User";
-import { createBookingSession, getListOfUsers } from "@/services/firebase/firestore";
+import React, { useState } from "react";
+import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
+import useAvailableUsers from "@/hooks/useHomeTab";
+import { router } from "expo-router";
+import { FIREBASE_AUTH } from "@/firebase.config";
 import UserCard from "@/components/UserCard";
 import UserCardExpanded from "@/components/UserCardExpanded";
-import { useFocusEffect, router } from "expo-router";
-import { FIREBASE_AUTH } from "@/firebase.config";
+import { User } from "@/types/User";
 
 const PswHomeTab = () => {
-  const [seekerUsers, setSeekerUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+  // Fetch available PSWs (isPsw=true)
+  const { users, loading, error } = useAvailableUsers(true);
+  const [expandedUserId, setExpandedUserId] = React.useState<string | null>(null);
 
-  const fetchPswUsers = async () => {
-    try {
-        const users = await getListOfUsers(false)
-        setSeekerUsers(users)
-    }
-    catch (error) {
-      console.error((error as any).message);
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchPswUsers();
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchPswUsers();
-    }, [])
-  );
-
-  const handleBookRequest = async (userId: string) => {
-    const targetUserObj = seekerUsers.find(user => user.id === userId);
+  const handleBookRequest = (userId: string) => {
+    const targetUserObj = users.find(user => user.id === userId);
     router.push({
       pathname: "/request-sessions",
       params: { targetUser: JSON.stringify(targetUserObj), requesterId: FIREBASE_AUTH.currentUser?.uid },
     });
-    // try {
-    //   await createBookingSession(userId);
-    //   const updatedUsers = seekerUsers.filter(user => user.id !== userId);
-    //   setSeekerUsers(updatedUsers);
-    //   console.log("Booking request sent successfully!");
-    //   setExpandedUserId(null);
-    // } catch (error) {
-    //   console.error((error as any).message);
-    // }
   };
 
   const handleCardPress = (userId: string) => {
-    setExpandedUserId(prevUserId => (prevUserId === userId ? null : userId));
+    setExpandedUserId(prev => (prev === userId ? null : userId));
   };
 
   const renderItem = ({ item }: { item: User }) => (
-    <View className="">
+    <View>
       {expandedUserId === item.id ? (
         <UserCardExpanded user={item} onPress={() => setExpandedUserId(null)} />
       ) : (
@@ -66,25 +35,22 @@ const PswHomeTab = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 h-full bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 px-6 mt-6">
-        <Text className="text-3xl font-bold text-center mb-3">
-          Explore Seekers
-        </Text>
+        <Text className="text-3xl font-bold text-center mb-3">Explore Care Seekers</Text>
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
+        ) : error ? (
+          <Text>Error: {error}</Text>
         ) : (
-          <View className="mt-2">
-            <FlatList
-              data={seekerUsers}
-              keyExtractor={(item) => item.id}
-              renderItem={renderItem}
-              contentContainerStyle={{ paddingBottom: 200 }}
-            />
-          </View>
+          <FlatList
+            data={users}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingBottom: 200 }}
+          />
         )}
       </View>
-      {/* Display the Request Session button when a user is expanded */}
       {expandedUserId && (
         <View className="absolute bottom-0 left-0 right-0 p-4 pt-1 pb-2 bg-white">
           <TouchableOpacity
