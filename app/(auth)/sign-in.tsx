@@ -6,7 +6,7 @@ import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
 import { signInWithEmail } from '@/services/firebase/auth';
 import { getUserDoc } from '@/services/firebase/firestore';
-import { fetchUserById } from '@/redux/userSlice';
+import { fetchUserById, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -17,6 +17,7 @@ const SignIn = () => {
     password: "asdfgh",
   });
   const userData = useSelector((state: RootState) => state.user.userData);
+  const initialNavComplete = useSelector((state: RootState) => state.user.initialNavigationComplete);
   const [error, setError] = useState('');
 
   const handleSignIn = async () => {
@@ -35,12 +36,14 @@ const SignIn = () => {
   // PATCH: FIX isPSW vs isPsw
   // PATCH: REMOVE OLD TEST OF userData.first_name
   useEffect(() => {
-    if (userData) {
+    if (userData && !initialNavComplete) {
       console.log('User Data:', userData);
       if (userData.onboardingComplete == true){
+        dispatch(setNavigationComplete(true));
         if (userData.isPsw == true) {
           router.push('/(psw)/psw-home');
         } else if (userData.isPsw == false) {
+          console.log('IN SIGN IN', initialNavComplete);
             router.push('/(seeker)/seeker-home');
         }
       }

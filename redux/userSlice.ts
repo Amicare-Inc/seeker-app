@@ -19,7 +19,8 @@ export const fetchUserById = createAsyncThunk(
 // Extend your state interface to include an "allUsers" mapping
 interface UserState {
   userData: User | null;              // The current logged-in user
-  allUsers: { [id: string]: User };    // A mapping of all loaded users
+  allUsers: { [id: string]: User };
+  initialNavigationComplete: boolean;    // A mapping of all loaded users
   loading: boolean;
   error: string | null;
 }
@@ -28,6 +29,7 @@ interface UserState {
 const initialState: UserState = {
   userData: null,
   allUsers: {},
+  initialNavigationComplete: false,
   loading: false,
   error: null,
 };
@@ -40,6 +42,7 @@ const userSlice = createSlice({
     setUserData(state, action: PayloadAction<User>) {
         state.userData = action.payload;
         state.allUsers[action.payload.id] = action.payload;
+        state.initialNavigationComplete = true;
         state.loading = false;
         state.error = null;
     },
@@ -49,6 +52,7 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.allUsers = {};
+      state.initialNavigationComplete = false;
     },
     // Update only specific fields of userData and update the allUsers map accordingly
     updateUserFields(state, action: PayloadAction<Partial<User>>) {
@@ -65,6 +69,9 @@ const userSlice = createSlice({
     upsertUser(state, action: PayloadAction<User>) {
       state.allUsers[action.payload.id] = action.payload;
     },
+    setNavigationComplete(state, action: PayloadAction<boolean>) {
+      state.initialNavigationComplete = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -87,5 +94,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUserData, clearUser, updateUserFields, upsertUser } = userSlice.actions;
+export const { setUserData, clearUser, updateUserFields, upsertUser, setNavigationComplete } = userSlice.actions;
 export default userSlice.reducer;
