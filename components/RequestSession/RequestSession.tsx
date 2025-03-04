@@ -19,6 +19,8 @@ import SessionLengthSelector from "@/components/RequestSession/SessionLengthSele
 import BillingCard from "@/components/RequestSession/BillingCard";
 import HelpOptionsDropdown from "@/components/RequestSession/HelpOptionsDropdown";
 import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from "@/scripts/dateHelpers";
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
 
 interface SessionData {
   id: string;
@@ -40,8 +42,8 @@ interface SessionData {
 }
 
 const RequestSession = () => {
-  const { targetUser, sessionObj } = useLocalSearchParams();
-  const targetUserObj: User = JSON.parse(targetUser as string);
+  const { otherUserId, sessionObj } = useLocalSearchParams();
+  const targetUserObj: User = useSelector((state: RootState) => state.userList.users.find((user) => user.id === otherUserId) as User);
   const existingSession: SessionData | null = sessionObj ? JSON.parse(sessionObj as string) : null;
 
   const [helpText, setHelpText] = useState<string>(existingSession?.note || "");
@@ -59,13 +61,22 @@ const RequestSession = () => {
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
   const [pickerTarget, setPickerTarget] = useState<"start" | "end">("start");
 
-  const currentUser = FIREBASE_AUTH.currentUser;
+  const currentUser = useSelector((state: RootState) => state.user.userData);
 
-  // Billing fields.
-  const basePrice = targetUserObj.isPsw ? targetUserObj.rate || 20 : 156;
-  const taxes = 24.2;
-  const serviceFee = 40;
-  const total = basePrice + taxes + serviceFee;
+  const pswRate =
+    currentUser?.isPsw
+      ? currentUser.rate || 20
+      : targetUserObj.isPsw
+      ? targetUserObj.rate || 20
+      : 20; // fallback default rate
+
+  // The dynamic base price is computed as the PSW rate multiplied by the session length.
+  const dynamicBasePrice = pswRate * sessionLength;
+  // Fixed additional costs.
+  const taxes = dynamicBasePrice * 0.13;
+  const serviceFee = dynamicBasePrice * 0.1;
+  const total = dynamicBasePrice + taxes + serviceFee;
+  // ------------------------------------
 
   // On mount, compute session length if startDate and endDate exist.
   useEffect(() => {
@@ -162,7 +173,7 @@ const RequestSession = () => {
         startTime: startDate.toISOString(),
         endTime: endDate.toISOString(),
         billingDetails: {
-          basePrice,
+          dynamicBasePrice,
           taxes,
           serviceFee,
           total,
@@ -173,13 +184,13 @@ const RequestSession = () => {
         await updateDoc(sessionRef, sessionData);
         alert("Session updated successfully!");
       } else {
-        const sessionId = `${currentUser.uid}_${Date.now()}`;
+        const sessionId = `${currentUser.id}_${Date.now()}`;
         const newSessionData = {
           ...sessionData,
           id: sessionId,
-          senderId: currentUser.uid,
+          senderId: currentUser.id,
           receiverId: targetUserObj.id,
-          participants: [currentUser.uid, targetUserObj.id],
+          participants: [currentUser.id, targetUserObj.id],
           status: "newRequest",
           createdAt: new Date().toISOString(),
           confirmedBy: [],
@@ -241,7 +252,7 @@ const RequestSession = () => {
 
         {/* Billing Info */}
         <BillingCard
-          basePrice={basePrice}
+          basePrice={dynamicBasePrice}
           taxes={taxes}
           serviceFee={serviceFee}
           total={total}

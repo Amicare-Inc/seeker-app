@@ -2,21 +2,19 @@ import React, { useState } from "react";
 import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import useAvailableUsers from "@/hooks/useHomeTab";
 import { router } from "expo-router";
-import { FIREBASE_AUTH } from "@/firebase.config";
 import UserCard from "@/components/UserCard";
 import UserCardExpanded from "@/components/UserCardExpanded";
 import { User } from "@/types/User";
 
 const PswHomeTab = () => {
-  // Fetch available PSWs (isPsw=true)
-  const { users, loading, error } = useAvailableUsers(true);
+  // Fetch available PSWs (isPsw=false)
+  const { users, loading, error } = useAvailableUsers(false);
   const [expandedUserId, setExpandedUserId] = React.useState<string | null>(null);
 
   const handleBookRequest = (userId: string) => {
-    const targetUserObj = users.find(user => user.id === userId);
     router.push({
       pathname: "/request-sessions",
-      params: { targetUser: JSON.stringify(targetUserObj), requesterId: FIREBASE_AUTH.currentUser?.uid },
+      params: { otherUserId: userId },
     });
   };
 
