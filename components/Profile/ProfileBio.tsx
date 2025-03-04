@@ -1,6 +1,6 @@
 // @/components/Profile/ProfileBio.tsx
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
 interface ProfileBioProps {
   bio?: string;
@@ -15,11 +15,20 @@ const ProfileBio: React.FC<ProfileBioProps> = ({ bio }) => {
 
   return (
     <View className="mb-4">
-      <Text className="text-sm text-gray-800 leading-5">
+      <Text 
+        className="text-sm text-gray-800 leading-5"
+        style = {styles.wrapText}
+      >
         {bio}
       </Text>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+    wrapText: {
+      flexWrap: "wrap",
+    },
+  });
 
 export default ProfileBio;

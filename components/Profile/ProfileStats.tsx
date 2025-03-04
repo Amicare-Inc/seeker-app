@@ -1,6 +1,6 @@
 // @/components/Profile/ProfileStats.tsx
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { User } from "@/types/User";
 
 interface ProfileStatsProps {
@@ -31,16 +31,24 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
       {/* Left column */}
       <View className="flex-1 mr-2">
         <Text className="text-sm font-semibold mb-1">{leftTitle}</Text>
-        <Text className="text-sm text-gray-700">{careType}</Text>
+        <Text className="text-sm text-gray-700" style={styles.wrapText}>{careType}</Text>
       </View>
 
       {/* Right column */}
       <View className="flex-1">
         <Text className="text-sm font-semibold mb-1">{rightTitle}</Text>
-        <Text className="text-sm text-gray-700">{tasks}</Text>
+        <Text className="text-sm text-gray-700" style={styles.wrapText}>{tasks}</Text>
       </View>
     </View>
   );
 };
+
+
+const styles = StyleSheet.create({
+    wrapText: {
+      flexWrap: "wrap",
+    },
+  });
+  
 
 export default ProfileStats;

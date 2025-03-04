@@ -19,7 +19,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onMenuPress,
 }) => {
   return (
-    <SafeAreaView>
       <View className="mb-4 flex-row items-center justify-between">
         {/* Left side: Photo + Name/Rating/Location */}
         <View className="flex-row items-center">
@@ -49,7 +48,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
   );
 };
 

@@ -7,6 +7,7 @@ import ProfileStats from "./ProfileStats";
 import ProfileActionRow from "./ProfileActionRow";
 import ProfileListItem from "./ProfileListItem";
 import { User } from "@/types/User";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ProfileScreenProps {
   user: User;
@@ -30,14 +31,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
   // const rightSubtitle = isMyProfile ? "Housekeeping, Mobility" : "Housekeeping, Mobility";
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 py-6">
-      <ProfileHeader
+    <SafeAreaView className="flex-1 bg-white px-4 py-6">
+    <ProfileHeader
         userName={`${firstName} ${lastName}`}
         userLocation={address || "Midtown, Toronto"}
         userRating="4.8 out of 5"
         userPhoto={user.profilePhotoUrl}
         onMenuPress={() => {}}
       />
+    <ScrollView className="flex-1 bg-white">
+      {/* <ProfileHeader
+        userName={`${firstName} ${lastName}`}
+        userLocation={address || "Midtown, Toronto"}
+        userRating="4.8 out of 5"
+        userPhoto={user.profilePhotoUrl}
+        onMenuPress={() => {}}
+      /> */}
 
       <ProfileBio
         bio={
@@ -53,7 +62,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
       {/* If it’s my profile, show the row of icons + the list items. */}
       {isMyProfile ? (
         <>
-          <ProfileActionRow/>
+          <ProfileActionRow user={user}/>
 
           {/* White container for the list items. */}
           <View className="bg-white border border-gray-200 rounded-lg mb-4">
@@ -74,6 +83,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
         </>
       )}
     </ScrollView>
+    </SafeAreaView>
   );
 };
 
