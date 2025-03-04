@@ -3,7 +3,7 @@ export interface Session {
   senderId: string;   // The user who created the session (previously "requesterId")
   receiverId: string; // The user receiving the session (previously "targetUserId")
   participants: string[]; // [senderId, receiverId] → Allows querying both in one request
-  status: "newRequest" | "pending" | "confirmed" | "rejected" | "declined" | "cancelled"; // Updated status flow
+  status: "newRequest" | "pending" | "confirmed" | "rejected" | "declined" | "cancelled" | "inProgress" | "completed" | "failed"; // Updated status flow
   createdAt?: string;
   updatedAt?: string;
   startTime?: string; // ISO date format

@@ -4,26 +4,21 @@ import { Stack } from "expo-router";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { store, RootState, AppDispatch } from "@/redux/store";
-import { fetchUsers } from "@/redux/userListSlice";
+import { fetchAvailableUsers } from "@/redux/userListSlice";
 import { listenToUserSessions } from "@/redux/sessionSlice";
+import { current } from "@reduxjs/toolkit";
 
 const GlobalDataLoader = () => {
   const dispatch = useDispatch<AppDispatch>();
   // Current user should be set after login.
   const currentUser = useSelector((state: RootState) => state.user.userData);
+  // const sessions = useSelector((state: RootState) => state.sessions.allSessions);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
     if (currentUser) {
-      // Load the user list. If you need both types, you can dispatch twice or combine them.
-      if (currentUser.isPsw) {
-        dispatch(fetchUsers(false));
-      }
-      else {
-        dispatch(fetchUsers(true));
-      }
-      // Set up a real-time listener for sessions.
       unsubscribe = listenToUserSessions(dispatch, currentUser.id);
+      dispatch(fetchAvailableUsers({isPsw:!currentUser.isPsw}));
     }
     return () => {
       if (unsubscribe) {

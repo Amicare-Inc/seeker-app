@@ -2,6 +2,8 @@ import { getDoc, doc, setDoc, query, collection, where, getDocs, updateDoc } fro
 import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { User } from '@/types/User';
 import { Session } from '@/types/Sessions';
+import { RootState } from '@/redux/store';
+import { useSelector } from 'react-redux';
 
 /**
  * Fetches the user document from Firestore based on the user's UID.
@@ -67,25 +69,73 @@ export const setUserDoc = async (uid: string, userData: any) => {
 
 
 /**
+ * Retrieves a list of available users (PSWs or care seekers) by excluding
+ * those with whom the current user already has a session.
+ *
+ * @param isPSW - boolean indicating whether to fetch PSWs (true) or care seekers (false)
+ * @param currentUserId - the current user's ID
+ * @param sessions - the array of sessions for the current user
+ * @returns A promise that resolves to an array of available users.
+ */
+export const getListOfUsers = async (
+  isPSW: boolean,
+  currentUserId: string,
+  sessions: Session[]
+): Promise<User[]> => {
+  // Build a set of engaged user IDs from the sessions data.
+  const excludedUserIds = new Set<string>();
+  sessions.forEach((session) => {
+    if (Array.isArray(session.participants)) {
+      session.participants.forEach((id: string) => {
+        if (id !== currentUserId) {
+          excludedUserIds.add(id);
+        }
+      });
+    }
+  });
+
+  console.log("Excluded user IDs:", Array.from(excludedUserIds));
+
+  // Query the users collection ("test1") for users with the specified isPSW flag.
+  const listQuery = query(
+    collection(FIREBASE_DB, "test1"),
+    where("isPsw", "==", isPSW)
+  );
+
+  const snapshot = await getDocs(listQuery);
+  const availableUsers: User[] = [];
+
+  snapshot.forEach((doc) => {
+    if (!excludedUserIds.has(doc.id)) {
+      availableUsers.push({ id: doc.id, ...doc.data() } as User);
+    }
+  });
+
+  return availableUsers;
+};
+
+
+/**
+ * DEPRICIATED
  * Retrieves a list of available PSWs, excluding those who are involved in a pending or accepted session with the current user.
  * @returns A promise that resolves to an array of available PSWs.
  */
-export const getListOfUsers = async (isPSW: boolean) => {
+export const old_getListOfUsers = async (isPSW: boolean) => {
     const currentUserId = FIREBASE_AUTH.currentUser?.uid;
     // if (!currentUser) throw new Error("User not authenticated");             CHECK AFTER
 
     // Query 1: Get sessions where currentUserId is the requester
     const requesterQuery = query(
-        collection(FIREBASE_DB, "sessions"),
+        collection(FIREBASE_DB, "sessions_test1"),
         where("requesterId", "==", currentUserId),
-        where("status", "in", ["pending", "accepted", "booked"])
+        where("status", "in", ["newRequest", "pending", "confirmed", "completed", "failed"])
     );
 
     // Query 2: Get sessions where currentUserId is the target
     const targetQuery = query(
-        collection(FIREBASE_DB, "sessions"),
+        collection(FIREBASE_DB, "sessions_test1"),
         where("targetUserId", "==", currentUserId),
-        where("status", "in", ["pending", "accepted", "booked"])
+        where("status", "in", ["newRequest", "pending", "confirmed", "completed", "failed"])
     );
 
     // Execute both queries
@@ -106,6 +156,8 @@ export const getListOfUsers = async (isPSW: boolean) => {
         const data = doc.data();
         excludedUserIds.add(data.requesterId);  // Exclude users that have requested the current user
     });
+
+    console.log("Excluded user IDs:", excludedUserIds);
     // Query to find all available PSWs
     const listQuery = query(
         collection(FIREBASE_DB, "test1"),

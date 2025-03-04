@@ -5,29 +5,30 @@ import { Session } from '@/types/Sessions';
 import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
 
-// Fetch all sessions where the user is a participant (excluding rejected/cancelled)
-export const fetchUserSessions = createAsyncThunk(
-  'sessions/fetchUserSessions',
-  async (userId: string, { rejectWithValue }) => {
-    try {
-      const q = query(
-        collection(FIREBASE_DB, 'sessions_test1'),
-        where('participants', 'array-contains', userId),
-        where('status', 'not-in', ['rejected', 'declined', 'cancelled']) // Exclude rejected, declined, and cancelled sessions
-      );
-      const querySnapshot = await getDocs(q);
-      console.log('USER SESSIONS REDUX:', querySnapshot);
-      const sessions: Session[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Session[];
+// DEPRECIATED
+// // Fetch all sessions where the user is a participant (excluding rejected/cancelled)
+// export const fetchUserSessions = createAsyncThunk(
+//   'sessions/fetchUserSessions',
+//   async (userId: string, { rejectWithValue }) => {
+//     try {
+//       const q = query(
+//         collection(FIREBASE_DB, 'sessions_test1'),
+//         where('participants', 'array-contains', userId),
+//         where('status', 'not-in', ['rejected', 'declined', 'cancelled']) // Exclude rejected, declined, and cancelled sessions
+//       );
+//       const querySnapshot = await getDocs(q);
+//       console.log('USER SESSIONS REDUX:', querySnapshot);
+//       const sessions: Session[] = querySnapshot.docs.map((doc) => ({
+//         id: doc.id,
+//         ...doc.data(),
+//       })) as Session[];
 
-      return sessions;
-    } catch (error) {
-      return rejectWithValue((error as any).message);
-    }
-  }
-);
+//       return sessions;
+//     } catch (error) {
+//       return rejectWithValue((error as any).message);
+//     }
+//   }
+// );
 
 // Real-time listener for session updates
 export const listenToUserSessions = (dispatch: any, userId: string) => {
@@ -42,7 +43,7 @@ export const listenToUserSessions = (dispatch: any, userId: string) => {
 
     // Remove any rejected, declined, or cancelled sessions
     const filteredSessions = sessions.filter(
-      (s) => !["rejected", "declined", "cancelled"].includes(s.status)
+      (s) => !["rejected", "declined"].includes(s.status)
     );
 
     dispatch(setSessions(filteredSessions));
@@ -68,6 +69,10 @@ interface SessionState {
   newRequests: Session[];
   pending: Session[];
   confirmed: Session[];
+  cancelled: Session[];
+  inProgress: Session[];
+  completed: Session[];
+  failed: Session[];
   loading: boolean;
   error: string | null;
 }
@@ -78,6 +83,10 @@ const initialState: SessionState = {
   newRequests: [],
   pending: [],
   confirmed: [],
+  cancelled: [],
+  inProgress: [],
+  completed: [],
+  failed: [],
   loading: false,
   error: null,
 };
@@ -93,6 +102,10 @@ const sessionSlice = createSlice({
       );
       state.pending = action.payload.filter((s) => s.status === 'pending');
       state.confirmed = action.payload.filter((s) => s.status === 'confirmed');
+      state.confirmed = action.payload.filter((s) => s.status === 'cancelled');
+      state.confirmed = action.payload.filter((s) => s.status === 'inProgress');
+      state.confirmed = action.payload.filter((s) => s.status === 'completed');
+      state.confirmed = action.payload.filter((s) => s.status === 'failed');
     },
     clearSessions(state) {
       state.allSessions = [];
@@ -106,33 +119,37 @@ const sessionSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUserSessions.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserSessions.fulfilled, (state, action) => {
-        state.loading = false;
-        state.allSessions = action.payload;
-        state.newRequests = action.payload.filter(
-          (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
-        );
-        state.pending = action.payload.filter((s) => s.status === 'pending');
-        state.confirmed = action.payload.filter((s) => s.status === 'confirmed');
-      })
-      .addCase(fetchUserSessions.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
+      // .addCase(fetchUserSessions.pending, (state) => {
+      //   state.loading = true;
+      //   state.error = null;
+      // })
+      // .addCase(fetchUserSessions.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.allSessions = action.payload;
+      //   state.newRequests = action.payload.filter(
+      //     (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
+      //   );
+      //   state.pending = action.payload.filter((s) => s.status === 'pending');
+      //   state.confirmed = action.payload.filter((s) => s.status === 'confirmed');
+      // })
+      // .addCase(fetchUserSessions.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.payload as string;
+      // })
       .addCase(updateSessionStatus.fulfilled, (state, action) => {
         const { sessionId, newStatus } = action.payload;
         state.allSessions = state.allSessions.filter(
-          (session) => session.id !== sessionId || !["rejected", "declined", "cancelled"].includes(newStatus)
+          (session) => session.id !== sessionId || !["rejected", "declined"].includes(newStatus)
         );
         state.newRequests = state.allSessions.filter(
           (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
         );
         state.pending = state.allSessions.filter((s) => s.status === 'pending');
         state.confirmed = state.allSessions.filter((s) => s.status === 'confirmed');
+        state.cancelled = state.allSessions.filter((s) => s.status === 'cancelled');
+        state.inProgress = state.allSessions.filter((s) => s.status === 'inProgress');
+        state.completed = state.allSessions.filter((s) => s.status === 'completed');
+        state.failed = state.allSessions.filter((s) => s.status === 'failed');
       });
   },
 });

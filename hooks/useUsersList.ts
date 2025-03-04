@@ -1,7 +1,7 @@
 // src/hooks/useUsersList.ts
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "@/redux/userListSlice";
+import { fetchAvailableUsers } from "@/redux/userListSlice";
 import { RootState, AppDispatch } from "@/redux/store";
 
 const useUsersList = (isPsw: boolean) => {
@@ -9,7 +9,7 @@ const useUsersList = (isPsw: boolean) => {
   const { users, loading, error } = useSelector((state: RootState) => state.userList);
 
   useEffect(() => {
-    dispatch(fetchUsers(isPsw));
+    dispatch(fetchAvailableUsers({ isPsw }));
   }, [dispatch, isPsw]);
 
   return { users, loading, error };
