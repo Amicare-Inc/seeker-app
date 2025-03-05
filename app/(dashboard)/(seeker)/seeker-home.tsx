@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import useAvailableUsers from "@/hooks/useHomeTab";
-import { router } from "expo-router";
 import UserCard from "@/components/UserCard";
 import UserCardExpanded from "@/components/UserCardExpanded";
 import { User } from "@/types/User";
@@ -12,13 +11,6 @@ const SeekerHomeTab = () => {
   const { users, loading, error } = useAvailableUsers(true);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
-  const handleBookRequest = (userId: string) => {
-    router.push({
-      pathname: "/request-sessions",
-      params: { otherUserId: userId },
-    });
-  };
-
   const handleCardPress = (userId: string) => {
     setExpandedUserId((prev) => (prev === userId ? null : userId));
   };
@@ -26,7 +18,7 @@ const SeekerHomeTab = () => {
   const renderItem = ({ item }: { item: User }) => (
     <View>
       {expandedUserId === item.id ? (
-        <UserCardExpanded user={item} onPress={() => setExpandedUserId(null)} />
+        <UserCardExpanded user={item} onClose={() => setExpandedUserId(null)} />
       ) : (
         <UserCard user={item} onPress={() => handleCardPress(item.id)} />
       )}
@@ -65,18 +57,6 @@ const SeekerHomeTab = () => {
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 10 }}
         />
-      )}
-
-      {/* Bottom action button if a user is expanded */}
-      {expandedUserId && (
-        <View className="absolute bottom-0 left-0 right-0 p-4 pt-1 pb-2 bg-white">
-          <TouchableOpacity
-            onPress={() => handleBookRequest(expandedUserId)}
-            className="bg-blue-500 rounded-lg py-4 flex items-center"
-          >
-            <Text className="text-white font-bold text-lg">Request Session</Text>
-          </TouchableOpacity>
-        </View>
       )}
     </SafeAreaView>
   );
