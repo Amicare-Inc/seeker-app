@@ -1,12 +1,14 @@
-// src/components/ChatHeader.tsx
+// src/components/Chat/ChatHeader.tsx
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, View, Text, Image } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { Session } from '@/types/Sessions';
 import { User } from '@/types/User';
 import { subscribeToSession, confirmSessionBooking, cancelSession } from '@/services/firebase/sessionService';
+import { setActiveProfile } from '@/redux/activeProfileSlice';
 
 interface ChatHeaderProps {
   session: Session;
@@ -15,7 +17,13 @@ interface ChatHeaderProps {
   toggleExpanded: () => void;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ session, user, isExpanded, toggleExpanded }) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({
+  session,
+  user,
+  isExpanded,
+  toggleExpanded,
+}) => {
+  const dispatch = useDispatch();
   const currentUser = useSelector((state: RootState) => state.user.userData);
   const [currentSession, setCurrentSession] = useState<Session>(session);
 
@@ -27,9 +35,52 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ session, user, isExpanded, togg
     return () => unsubscribe();
   }, [session.id]);
 
+  // Basic status checks
   const isConfirmed = currentSession.status === 'confirmed';
-  const isUserConfirmed = currentUser && currentSession.confirmedBy?.includes(currentUser.id);
+  const isUserConfirmed =
+    !!currentUser && currentSession.confirmedBy?.includes(currentUser.id);
 
+  // Format date/time
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return isNaN(date.getTime())
+      ? 'Invalid Date'
+      : date.toLocaleDateString('en-US', {
+          weekday: 'short',
+          day: '2-digit',
+          month: 'short',
+        });
+  };
+
+  const formatTimeRange = (start: string, end: string) => {
+    const s = new Date(start);
+    const e = new Date(end);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Invalid Time';
+    const startStr = s.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const endStr = e.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${startStr} - ${endStr}`;
+  };
+
+  const formattedDate = formatDate(currentSession.startTime || '');
+  const formattedTimeRange = formatTimeRange(
+    currentSession.startTime || '',
+    currentSession.endTime || ''
+  );
+
+  // If expanded => show location; else => show combined date/time
+  let subTitle = '';
+  if (isExpanded) {
+    // If current user is PSW & user has no address => "Current Address"
+    subTitle =
+      currentUser?.isPsw && !user.address
+        ? 'Current Address'
+        : user.address || 'No Address';
+  } else {
+    // e.g. "Wed, 30 Oct • 10:00 AM - 11:00 AM"
+    subTitle = `${formattedDate} • ${formattedTimeRange}`;
+  }
+
+  // Session actions
   const handleBookSession = async () => {
     if (!currentUser) return;
     try {
@@ -49,81 +100,124 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ session, user, isExpanded, togg
   };
 
   const handleNavigateToRequestSession = () => {
+    dispatch(setActiveProfile(user));
     router.push({
       pathname: '/request-sessions',
       params: {
-        targetUser: JSON.stringify(user),
+        otherUserId: user.id,
         sessionObj: JSON.stringify(currentSession),
       },
     });
   };
 
-  // Helper functions to format date and time.
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return isNaN(date.getTime())
-      ? 'Invalid Date'
-      : date.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' });
-  };
+  // Determine if Book button is disabled
+  const isDisabled = isConfirmed || isUserConfirmed;
+  const bookText = isConfirmed ? 'Confirmed' : isUserConfirmed ? 'Waiting...' : 'Book';
 
-  const formatTime = (start: string, end: string) => {
-    const s = new Date(start);
-    const e = new Date(end);
-    return isNaN(s.getTime()) || isNaN(e.getTime())
-      ? 'Invalid Time'
-      : `${s.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${e.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  };
-
-  const formattedDate = formatDate(currentSession.startTime || '');
-  const formattedTime = formatTime(currentSession.startTime || '', currentSession.endTime || '');
-
-  // Determine button style.
-  const buttonBg = isConfirmed ? 'bg-green-500' : isUserConfirmed ? 'bg-gray-300' : 'bg-blue-500';
-  const buttonText = isConfirmed ? 'Confirmed' : isUserConfirmed ? 'Waiting...' : 'Book';
-  const textColor = (isConfirmed || isUserConfirmed) ? 'text-black' : 'text-white';
+  // Extract total cost if present
+  const totalCost = currentSession.billingDetails?.total ?? 0;
+  const costLabel = `Total: $${totalCost.toFixed(2)}`;
 
   return (
-    <TouchableOpacity onPress={toggleExpanded} className={`bg-white p-4 ${isExpanded ? 'border-b border-gray-300' : ''}`}>
-      <View className="flex-row items-center">
-        <Image source={{ uri: user.profilePhotoUrl || 'https://via.placeholder.com/50' }} className="w-12 h-12 rounded-full mr-4" />
-        <View className="flex-1">
-          <Text className="font-bold text-lg">{`${user.firstName} ${user.lastName}`}</Text>
-          <Text className="text-gray-500 text-sm">{currentUser?.isPsw ? 'Current Address' : user.address}</Text>
-        </View>
+    <View className="bg-white border-b border-gray-300">
+      {/* Top row */}
+      <View className="flex-row items-center px-4 py-3">
+        {/* Back arrow */}
+        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <Ionicons name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+
+        {/* Photo */}
+        <Image
+          source={{ uri: user.profilePhotoUrl || 'https://via.placeholder.com/50' }}
+          className="w-12 h-12 rounded-full mr-3"
+        />
+
+        {/* Name + subTitle */}
+        <TouchableOpacity onPress={toggleExpanded} className="flex-1">
+          <Text className="font-bold text-base">
+            {user.firstName} {user.lastName}
+          </Text>
+          <Text className="text-xs text-gray-500 mt-0.5">{subTitle}</Text>
+        </TouchableOpacity>
+
+        {/* Info circle only if expanded */}
+        {isExpanded && (
+          <TouchableOpacity onPress={() => { /* do nothing for now */ }}>
+            <Ionicons name="information-circle-outline" size={24} color="#000" />
+          </TouchableOpacity>
+        )}
       </View>
+
+      {/* If expanded => session detail panel */}
       {isExpanded && (
-        <View className="mt-4">
+        <View className="px-4 pb-4">
+          {/* Note */}
           <Text className="text-gray-600 text-sm mb-2">
             {currentSession.note || 'No additional details provided.'}
           </Text>
-          <View className="flex-row justify-between items-center bg-gray-100 rounded-lg p-3 mb-4">
-            <View className="flex-row items-center">
-              <View className="bg-gray-300 rounded-full p-2 mr-2">
-                <Text>📅</Text>
-              </View>
-              <Text className="text-sm text-black">{formattedDate}</Text>
-            </View>
-            <View className="flex-row items-center">
-              <View className="bg-gray-300 rounded-full p-2 mr-2">
-                <Text>⏰</Text>
-              </View>
-              <Text className="text-sm text-black">{formattedTime}</Text>
-            </View>
+
+          {/* Date/Time row => center horizontally, bigger icons */}
+          <View className="flex-row items-center justify-center bg-gray-100 rounded-lg p-4 mb-4">
+            <Ionicons name="calendar" size={20} color="#000" style={{ marginRight: 6 }} />
+            <Text className="text-sm text-black">{formattedDate}</Text>
+
+            {/* faint vertical line */}
+            <View className="mx-3 w-px bg-gray-300" />
+
+            <Ionicons name="time" size={20} color="#000" style={{ marginRight: 6 }} />
+            <Text className="text-sm text-black">{formattedTimeRange}</Text>
           </View>
-          <View className="flex-row justify-between mb-4">
-            <TouchableOpacity onPress={handleNavigateToRequestSession} className="bg-black flex-1 p-3 rounded-lg mr-2 items-center">
+
+          {/* Row #1: Change Time & Cancel side by side */}
+          <View className="flex-row space-x-2 mb-3">
+            {/* Change Time (black) */}
+            <TouchableOpacity
+              onPress={handleNavigateToRequestSession}
+              className="flex-1 bg-black p-3 rounded-lg items-center"
+            >
               <Text className="text-white font-bold text-sm">Change Time</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleCancelSession} className="bg-red-500 flex-1 p-3 rounded-lg items-center">
-              <Text className="text-white font-bold text-sm">Cancel</Text>
+
+            {/* Cancel (white w/ black border) */}
+            <TouchableOpacity
+              onPress={handleCancelSession}
+              className="flex-1 bg-white border border-black p-3 rounded-lg items-center"
+            >
+              <Text className="text-black font-bold text-sm">Cancel</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={handleBookSession} disabled={isConfirmed || !!isUserConfirmed} className={`p-3 rounded-lg items-center mb-4 ${buttonBg}`}>
-            <Text className={`font-bold text-sm ${textColor}`}>{buttonText}</Text>
-          </TouchableOpacity>
+
+          {/* Row #2: Book & total side by side => each half width */}
+          <View className="flex-row space-x-2">
+            {/* Book button (half width) */}
+            <TouchableOpacity
+              onPress={handleBookSession}
+              disabled={isDisabled}
+              className={`flex-1 p-3 rounded-lg items-center ${
+                isDisabled ? 'bg-gray-300' : ''
+              }`}
+              style={{
+                backgroundColor: isDisabled ? undefined : '#1A8BF8',
+              }}
+            >
+              <Text
+                className={`font-bold text-sm ${
+                  isDisabled ? 'text-black' : 'text-white'
+                }`}
+              >
+                {bookText}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Total (half width), aligned right */}
+            <View className="flex-1 items-end justify-center">
+              <Text className="text-sm font-bold text-black">{costLabel}</Text>
+            </View>
+          </View>
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 

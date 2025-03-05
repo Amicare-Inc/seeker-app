@@ -30,13 +30,13 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
     <View className="flex-row justify-between mb-4">
       {/* Left column */}
       <View className="flex-1 mr-2">
-        <Text className="text-sm font-semibold mb-1">{leftTitle}</Text>
-        <Text className="text-sm text-gray-700" style={styles.wrapText}>{careType}</Text>
+        <Text className="text-sm mb-1">{leftTitle}</Text>
+        <Text className="text-sm" style={styles.wrapText}>{careType}</Text>
       </View>
 
       {/* Right column */}
       <View className="flex-1">
-        <Text className="text-sm font-semibold mb-1">{rightTitle}</Text>
+        <Text className="text-sm mb-1">{rightTitle}</Text>
         <Text className="text-sm text-gray-700" style={styles.wrapText}>{tasks}</Text>
       </View>
     </View>
@@ -47,6 +47,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
 const styles = StyleSheet.create({
     wrapText: {
       flexWrap: "wrap",
+      color: "#797979"
     },
   });
   

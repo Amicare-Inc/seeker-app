@@ -1,6 +1,6 @@
 // src/screens/ChatPage.tsx
 import React, { useState, useEffect } from 'react';
-import {SafeAreaView, KeyboardAvoidingView, Keyboard, Platform} from 'react-native';
+import {SafeAreaView, KeyboardAvoidingView, Keyboard, Platform, View} from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSelector } from 'react-redux';
 import ChatHeader from '@/components/Chat/ChatHeader';
@@ -22,7 +22,7 @@ const ChatPage = () => {
     state.sessions.activeEnrichedSession ||
     state.sessions.allSessions.find((s) => s.id === sessionId)
   ) as EnrichedSession | undefined;
-  const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
 
   // Debug logs
   console.log('ChatPage - sessionId:', sessionId);
@@ -78,17 +78,17 @@ const ChatPage = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
       <ChatHeader
         session={activeSession}
         user={otherUser!}
         isExpanded={isHeaderExpanded}
         toggleExpanded={() => setIsHeaderExpanded((prev) => !prev)}
       />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
-        <ChatMessageList messages={messages} otherUserName={otherUser?.firstName || ''} currentUserId={currentUser.id} />
-        <ChatInput newMessage={newMessage} setNewMessage={setNewMessage} handleSendMessage={handleSendMessage} />
-      </KeyboardAvoidingView>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
+          <ChatMessageList messages={messages} otherUserName={otherUser?.firstName || ''} currentUserId={currentUser.id} />
+          <ChatInput newMessage={newMessage} setNewMessage={setNewMessage} handleSendMessage={handleSendMessage} />
+        </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

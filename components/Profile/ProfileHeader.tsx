@@ -47,15 +47,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
       {/* Middle Column: User info */}
       <View className="flex-1">
-        <Text className="text-xl font-bold text-black">{userName}</Text>
+        <Text className="text-xl font-semibold text-black">{userName}</Text>
         {userRating && (
           <View className="flex-row items-center mt-1">
             <Ionicons name="checkmark-circle" size={16} color="#00BFFF" />
-            <Text className="text-sm text-gray-600 ml-1">{userRating}</Text>
+            <Text className="text-sm ml-1" style={{color:"#797979"}}>{userRating}</Text>
           </View>
         )}
         {userLocation && (
-          <Text className="text-xs text-gray-500 mt-1">{userLocation}</Text>
+          <Text className="text-xs text-gray-500 mt-1" style={{color:"#797979"}}>{userLocation}</Text>
         )}
       </View>
 
@@ -66,7 +66,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </TouchableOpacity>
       ) : (
         isPsw && rate != null && (
-          <Text className="ml-3 text-base font-bold text-black">
+          <Text className="ml-3 text-base font-bold" style={{color:"#797979"}}>
             ${rate.toFixed()}/hr
           </Text>
         )

@@ -52,7 +52,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
       {/* Bio Label + Bio */}
       {!!bio && (
           <View className="mb-4">
-            <Text className="text-base font-bold text-black mb-1">Bio</Text>
+            <Text className="text-base text-black mb-1">Bio</Text>
             <ProfileBio bio={bio} />
           </View>
       )}

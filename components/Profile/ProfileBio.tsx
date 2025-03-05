@@ -28,7 +28,10 @@ const ProfileBio: React.FC<ProfileBioProps> = ({ bio }) => {
 const styles = StyleSheet.create({
     wrapText: {
       flexWrap: "wrap",
+      color: "#797979"
     },
+    
+    
   });
 
 export default ProfileBio;
