@@ -1,5 +1,7 @@
+// @/screens/SeekerHomeTab.tsx
 import React, { useState } from "react";
 import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import useAvailableUsers from "@/hooks/useHomeTab";
 import { router } from "expo-router";
 import UserCard from "@/components/UserCard";
@@ -7,13 +9,10 @@ import UserCardExpanded from "@/components/UserCardExpanded";
 import { User } from "@/types/User";
 
 const SeekerHomeTab = () => {
-  // Fetch available PSWs (isPsw=true)
   const { users, loading, error } = useAvailableUsers(true);
-  const [expandedUserId, setExpandedUserId] = React.useState<string | null>(null);
-  console.log("USERS IN TAB",users);
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   const handleBookRequest = (userId: string) => {
-    // const targetUserObj = users.find(user => user.id === userId);
     router.push({
       pathname: "/request-sessions",
       params: { otherUserId: userId },
@@ -21,7 +20,7 @@ const SeekerHomeTab = () => {
   };
 
   const handleCardPress = (userId: string) => {
-    setExpandedUserId(prev => (prev === userId ? null : userId));
+    setExpandedUserId((prev) => (prev === userId ? null : userId));
   };
 
   const renderItem = ({ item }: { item: User }) => (
@@ -35,22 +34,40 @@ const SeekerHomeTab = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-6 mt-6">
-        <Text className="text-3xl font-bold text-center mb-3">Explore PSWs</Text>
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : error ? (
-          <Text>Error: {error}</Text>
-        ) : (
-          <FlatList
-            data={users}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 200 }}
-          />
-        )}
+    <SafeAreaView className="flex-1" style={{ backgroundColor: "#f0f0f0" }}>
+      {/* Header row */}
+      <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
+        {/* Left side: Icon + Title */}
+        <View className="flex-row items-center">
+          <Ionicons name="people" size={24} color="black" style={{ marginRight: 8 }} />
+          <Text className="text-xl font-mono text-black">Explore PSWs</Text>
+        </View>
+
+        {/* Right side: Filter icon */}
+        <TouchableOpacity onPress={() => { /* Filter button currently does nothing */ }}>
+          <Ionicons name="options" size={24} color="black" />
+        </TouchableOpacity>
       </View>
+
+      {/* Main content */}
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#000" />
+        </View>
+      ) : error ? (
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-black">Error: {error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={users}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 10 }}
+        />
+      )}
+
+      {/* Bottom action button if a user is expanded */}
       {expandedUserId && (
         <View className="absolute bottom-0 left-0 right-0 p-4 pt-1 pb-2 bg-white">
           <TouchableOpacity

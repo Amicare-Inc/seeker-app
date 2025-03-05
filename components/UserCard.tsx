@@ -1,3 +1,4 @@
+// @/components/UserCard.tsx
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { User } from "@/types/User";
@@ -8,20 +9,29 @@ interface UserCardProps {
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
+  const locationText = user.address || "Toronto, ON";
+  const rate = user.rate || 20;
+
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-gray-100 rounded-lg p-4 mb-4 flex-row items-center"
+      className="bg-white rounded-lg p-4 mb-4"
+      // Removed shadow styling for a cleaner card look.
     >
-      <Image
-        source={{ uri: user.profilePhotoUrl || "https://via.placeholder.com/50" }} // Placeholder image URL
-        className="w-12 h-12 rounded-full mr-4"
-      />
-      <View className="flex-1">
-        <Text className="font-bold text-lg">{`${user.firstName} ${user.lastName}`}</Text>
-        <Text className="text-gray-500">[Rating]</Text>
+      <View className="flex-row items-center">
+        <Image
+          source={{ uri: user.profilePhotoUrl || "https://via.placeholder.com/50" }}
+          // Increase profile image to 20x20 and use rounded corners.
+          className="w-20 h-20 rounded-lg mr-4"
+        />
+        <View className="flex-1">
+          <Text className="font-semibold text-base text-black">
+            {user.firstName} {user.lastName}
+          </Text>
+          <Text className="text-sm text-gray-500">{locationText}</Text>
+        </View>
+        <Text className="font-semibold text-base text-black">${rate}</Text>
       </View>
-      <Text className="font-bold text-lg">${`${user.isPsw? (user.rate? user.rate: 20) : ""}`}</Text>
     </TouchableOpacity>
   );
 };
