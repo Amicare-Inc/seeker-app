@@ -17,7 +17,7 @@ const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, tit
   // Decide border color based on the title
   let borderColor = "transparent";
   if (title === "New Requests") {
-    borderColor = "#ccc";         // gray border
+    borderColor = "#797979";         // gray border
   } else if (title === "Pending") {
     borderColor = "#1A8BF8";      // #1A8BF8 border
   }
