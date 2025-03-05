@@ -8,6 +8,8 @@ import ProfileActionRow from "./ProfileActionRow";
 import ProfileListItem from "./ProfileListItem";
 import { User } from "@/types/User";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import ProfileReviews from "./ProfileReviews";
 
 interface ProfileScreenProps {
   user: User;
@@ -29,31 +31,31 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
   // const leftSubtitle = isMyProfile ? "Cancer, Dementia" : "Dementia, Cancer";
   // const rightTitle = isMyProfile ? "Seeking support with" : "Skills";
   // const rightSubtitle = isMyProfile ? "Housekeeping, Mobility" : "Housekeeping, Mobility";
+  const handleBackPress = () => {
+    router.back();
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-4 py-6">
+    <SafeAreaView className="flex-1 px-4 py-6" style={{ backgroundColor: "#f0f0f0" }}>
     <ProfileHeader
         userName={`${firstName} ${lastName}`}
         userLocation={address || "Midtown, Toronto"}
         userRating="4.8 out of 5"
         userPhoto={user.profilePhotoUrl}
         onMenuPress={() => {}}
+        isMyProfile={isMyProfile}
+        isPsw={user.isPsw}
+        rate={user.rate}
+        onBackPress={handleBackPress}
     />
-    <ScrollView className="flex-1 bg-white">
-      {/* <ProfileHeader
-        userName={`${firstName} ${lastName}`}
-        userLocation={address || "Midtown, Toronto"}
-        userRating="4.8 out of 5"
-        userPhoto={user.profilePhotoUrl}
-        onMenuPress={() => {}}
-      /> */}
-
-      <ProfileBio
-        bio={
-          bio ||
-          "Hello, my name is Jane. I am a 60 year old cancer patient seeking support with daily tasks."
-        }
-      />
+    <ScrollView className="flex-1">
+      {/* Bio Label + Bio */}
+      {!!bio && (
+          <View className="mb-4">
+            <Text className="text-base font-bold text-black mb-1">Bio</Text>
+            <ProfileBio bio={bio} />
+          </View>
+      )}
 
       <ProfileStats
         user = {user}
@@ -75,11 +77,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
         </>
       ) : (
         <>
-          {/* For another user’s profile, you can show a rate or “reviews” section if you want. */}
-          {/* e.g. Rate or reviews placeholder. */}
-          <Text className="text-sm text-gray-600 mb-4">
-            {/* e.g. “$20/hr” if user.isPsw */}
-          </Text>
+          <ProfileReviews />
         </>
       )}
     </ScrollView>

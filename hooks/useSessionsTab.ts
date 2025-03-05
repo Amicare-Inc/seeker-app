@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateSessionStatus, setActiveEnrichedSession } from '@/redux/sessionSlice';
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { setActiveProfile } from '@/redux/activeProfileSlice';
 
 export function useSessionsTab(role: 'psw' | 'seeker') {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,7 +31,17 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
         pathname: '/(chat)/[sessionId]',
         params: {sessionId: session.id}
       });
-    } else {
+    } else if (session.status === 'newRequest') {
+      // NEW: For "newRequest," navigate to other-user-profile
+      if (session.otherUser) {
+        // 1) Store the other user in activeProfile (if you have that slice)
+        dispatch(setActiveProfile(session.otherUser));
+        // 2) Navigate to /other-user-profile with userId param
+        router.push({
+          pathname: '/other-user-profile',
+          params: { userId: session.otherUser.id },
+        });}
+      } else {
       setExpandedSession(session);
     }
   };
