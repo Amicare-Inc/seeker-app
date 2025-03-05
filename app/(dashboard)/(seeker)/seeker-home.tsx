@@ -32,7 +32,7 @@ const SeekerHomeTab = () => {
         {/* Left side: Icon + Title */}
         <View className="flex-row items-center">
           <Ionicons name="people" size={24} color="black" style={{ marginRight: 8 }} />
-          <Text className="text-xl font-mono text-black">Explore PSWs</Text>
+          <Text className="text-2xl font-mono text-black">Explore PSWs</Text>
         </View>
 
         {/* Right side: Filter icon */}

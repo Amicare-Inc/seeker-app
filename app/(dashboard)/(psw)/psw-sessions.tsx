@@ -1,6 +1,7 @@
 // src/screens/PswSessionsTab.tsx
 import React, { useEffect } from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import SessionList from '@/components/SessionList';
 import SessionModal from '@/components/SessionModal';
@@ -26,9 +27,8 @@ const PswSessionsTab = () => {
   const enrichedSessions = useSelector((state: RootState) => selectEnrichedSessions(state));
   const currentUserId = useSelector((state: RootState) => state.user.userData?.id);
   const userMap = useSelector((state: RootState) => state.user.allUsers);
-  console.log('Enriched sessions in PSWSessionsTab:', enrichedSessions);
 
-  // For each enriched session, if the otherUser is missing, fetch it.
+  // Fetch missing user data if not already in userMap
   useEffect(() => {
     if (!currentUserId) return;
     enrichedSessions.forEach(session => {
@@ -47,48 +47,54 @@ const PswSessionsTab = () => {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-white">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
         <Text>Loading...</Text>
       </SafeAreaView>
     );
   }
+
   if (error) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-white">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
         <Text>Error fetching sessions: {error}</Text>
       </SafeAreaView>
     );
   }
 
-  // Filter each category from enrichedSessions
+  // Filter sessions by status
   const newRequestSessions = enrichedSessions.filter(
     (s: EnrichedSession) => s.status === 'newRequest' && s.receiverId === currentUserId
   );
   const pendingSessions = enrichedSessions.filter(s => s.status === 'pending');
   const confirmedSessions = enrichedSessions.filter(s => s.status === 'confirmed');
 
-  // Single-argument callback
+  // Callback for tapping a session
   const onSessionPress = (session: EnrichedSession) => {
-    // We can call handleExpandSession, but note handleExpandSession expects a base Session
-    // We can pass the same session because EnrichedSession extends Session
     handleExpandSession(session);
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 p-4">
-        <Text className="text-2xl font-bold text-black mb-4">Sessions</Text>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: "#f0f0f0" }}>
+      {/* Header Row */}
+      <View className="flex-row items-center px-3.5 pt-4 pb-2">
+        <Ionicons name="time" size={24} color="black" style={{ marginRight: 8 }} />
+        <Text className="text-2xl font-mono text-black">Sessions</Text>
+      </View>
 
+      {/* Main Content */}
+      <View className="flex-1 px-3.5">
         <SessionList
           sessions={newRequestSessions}
           onSessionPress={onSessionPress}
           title="New Requests"
         />
+
         <SessionList
           sessions={pendingSessions}
           onSessionPress={onSessionPress}
           title="Pending"
         />
+
         <SessionBookedList
           sessions={confirmedSessions}
           onSessionPress={onSessionPress}
@@ -100,7 +106,6 @@ const PswSessionsTab = () => {
         onClose={handleCloseModal}
         isVisible={!!expandedSession}
         onAction={handleAction}
-        // If expandedSession is an EnrichedSession, you could pass expandedSession.otherUser
         user={expandedSession?.otherUser || null}
         isPending={
           expandedSession?.status === 'newRequest' ||

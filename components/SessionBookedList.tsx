@@ -1,3 +1,4 @@
+// @/components/SessionBookedList.tsx
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import { EnrichedSession } from "@/types/EnrichedSession";
@@ -9,8 +10,9 @@ interface SessionBookedListProps {
 }
 
 /**
- * Displays a vertical list of "blue pills" for confirmed sessions,
- * with a bigger avatar (w-16, h-16) and less horizontal padding (px-4) to bring it left.
+ * Displays a vertical list of larger "blue pills" for confirmed sessions,
+ * with a bigger avatar and more padding. The right panel now shows the start time on top
+ * and the start date (without year) underneath, both in white.
  */
 const SessionBookedList: React.FC<SessionBookedListProps> = ({
   sessions,
@@ -20,22 +22,29 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
   const renderItem = ({ item }: { item: EnrichedSession }) => {
     if (!item.otherUser) return null;
 
-    // Use item.note or fallback text for the main label
+    // Use item.note or fallback text for the main label (first value before comma)
     const mainLabel = item.note ? item.note.split(",")[0].trim() : "";
-    // Other user's name
     const otherName = item.otherUser.firstName;
-    // Example time
-    const timeLabel = item.startTime
+
+    // Format the start time
+    const formattedTime = item.startTime
       ? new Date(item.startTime).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         })
       : "Time?";
 
+    // Format the start date without the year
+    const formattedDate = item.startTime
+      ? new Date(item.startTime).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })
+      : "No Date";
+
     return (
       <TouchableOpacity
         onPress={() => onSessionPress(item)}
-        // Slightly less horizontal padding (px-4) to bring the photo further left
         className="flex-row items-center justify-between rounded-full px-4 py-3 mb-6"
         style={{ backgroundColor: "#1A8BF8" }}
       >
@@ -44,21 +53,22 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
             source={{
               uri: item.otherUser.profilePhotoUrl || "https://via.placeholder.com/50",
             }}
-            // Bigger photo: w-16 h-16
             className="w-16 h-16 rounded-full"
           />
           <View className="ml-3">
             <Text className="text-white text-lg">{mainLabel}</Text>
-            <Text className="text-base" style={{ color: "#00000099" }} >with {otherName}</Text>
+            <Text className="text-base" style={{ color: "#00000099" }}>with {otherName}</Text>
           </View>
         </View>
-        <Text className="text-white text-lg ml-2">{timeLabel}</Text>
+        <View className="ml-2 items-end">
+          <Text className="text-white text-lg">{formattedTime}</Text>
+          <Text className="text-white text-base">{formattedDate}</Text>
+        </View>
       </TouchableOpacity>
     );
   };
 
   return (
-    // Add top margin for spacing above this section
     <View className="mt-8">
       <Text className="text-xl mb-3 text-black">{title}</Text>
       <FlatList
