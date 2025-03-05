@@ -38,7 +38,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
         userRating="4.8 out of 5"
         userPhoto={user.profilePhotoUrl}
         onMenuPress={() => {}}
-      />
+    />
     <ScrollView className="flex-1 bg-white">
       {/* <ProfileHeader
         userName={`${firstName} ${lastName}`}

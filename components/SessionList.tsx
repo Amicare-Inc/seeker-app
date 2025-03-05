@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
-import { EnrichedSession } from '@/types/EnrichedSession';
+// @/components/SessionList.tsx
+import React from "react";
+import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
+import { EnrichedSession } from "@/types/EnrichedSession";
 
 interface SessionListProps {
   sessions: EnrichedSession[];
@@ -8,32 +9,38 @@ interface SessionListProps {
   title: string;
 }
 
+/**
+ * Displays a horizontal row of bigger circle avatars with the user’s first name below each.
+ */
 const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, title }) => {
   const renderItem = ({ item }: { item: EnrichedSession }) => {
-    if (!item.otherUser) return null; // Only render if the other user is loaded
+    if (!item.otherUser) return null;
     return (
       <TouchableOpacity
         onPress={() => onSessionPress(item)}
-        className="flex-col items-center mr-4"
+        className="items-center mr-6"
       >
         <Image
-          source={{ uri: item.otherUser?.profilePhotoUrl || 'https://via.placeholder.com/50' }}
-          className="w-16 h-16 rounded-full"
+          source={{
+            uri: item.otherUser.profilePhotoUrl || "https://via.placeholder.com/50",
+          }}
+          className="w-20 h-20 rounded-full mb-2"
         />
-        <Text className="text-center mt-2">{item.otherUser?.firstName}</Text>
+        <Text className="text-base " style={{ color: "#00000099" }} >{item.otherUser.firstName}</Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View>
-      <Text className="text-xl font-semibold mb-2">{title}</Text>
+    <View className="mt-5">
+      <Text className="text-xl mb-3 text-black">{title}</Text>
       <FlatList
         data={sessions}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         horizontal
-        contentContainerStyle={{ paddingHorizontal: 10 }}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 4 }}
       />
     </View>
   );

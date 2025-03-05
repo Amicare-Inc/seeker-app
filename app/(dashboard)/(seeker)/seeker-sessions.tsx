@@ -1,15 +1,15 @@
-// src/screens/SeekerSessionsTab.tsx
 import React, { useEffect } from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import SessionList from '@/components/SessionList';
+import SessionBookedList from '@/components/SessionBookedList';
 import SessionModal from '@/components/SessionModal';
 import { RootState, AppDispatch } from '@/redux/store';
 import { selectEnrichedSessions } from '@/redux/selectors';
 import { useSessionsTab } from '@/hooks/useSessionsTab';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { fetchUserById } from '@/redux/userSlice';
-import SessionBookedList from '@/components/SessionBookedList';
 
 const SeekerSessionsTab = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -20,15 +20,13 @@ const SeekerSessionsTab = () => {
     handleExpandSession,
     handleCloseModal,
     handleAction,
-  } = useSessionsTab('seeker'); // <-- Use 'seeker' role here
+  } = useSessionsTab('seeker');
 
-  // Get enriched sessions from the selector
   const enrichedSessions = useSelector((state: RootState) => selectEnrichedSessions(state));
   const currentUserId = useSelector((state: RootState) => state.user.userData?.id);
   const userMap = useSelector((state: RootState) => state.user.allUsers);
-  console.log('Enriched sessions in SeekerSessionsTab:', enrichedSessions);
 
-  // For each enriched session, if the otherUser is missing, fetch it.
+  // Fetch missing user data
   useEffect(() => {
     if (!currentUserId) return;
     enrichedSessions.forEach(session => {
@@ -39,7 +37,6 @@ const SeekerSessionsTab = () => {
         otherUserId = session.senderId;
       }
       if (otherUserId && !userMap[otherUserId]) {
-        console.log(`Fetching user data for ${otherUserId}`);
         dispatch(fetchUserById(otherUserId));
       }
     });
@@ -47,14 +44,14 @@ const SeekerSessionsTab = () => {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-white">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
         <Text>Loading sessions...</Text>
       </SafeAreaView>
     );
   }
   if (error) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-white">
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
         <Text>Error fetching sessions: {error}</Text>
       </SafeAreaView>
     );
@@ -67,26 +64,33 @@ const SeekerSessionsTab = () => {
   const pendingSessions = enrichedSessions.filter((s: EnrichedSession) => s.status === 'pending');
   const confirmedSessions = enrichedSessions.filter((s: EnrichedSession) => s.status === 'confirmed');
 
-  // Single-argument callback: pass the enriched session to the handler.
+  // Single-argument callback
   const onSessionPress = (session: EnrichedSession) => {
     handleExpandSession(session);
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 p-4">
-        <Text className="text-2xl font-bold text-black mb-4">Sessions</Text>
+      {/* Header Row */}
+      <View className="flex-row items-center px-3.5 pt-4 pb-2">
+        <Ionicons name="time" size={24} color="black" style={{ marginRight: 8 }} />
+        <Text className="text-2xl font-bold text-black">Sessions</Text>
+      </View>
 
+      {/* Categories */}
+      <View className="flex-1 px-3.5">
         <SessionList
           sessions={newRequestSessions}
           onSessionPress={onSessionPress}
           title="New Requests"
         />
+
         <SessionList
           sessions={pendingSessions}
           onSessionPress={onSessionPress}
           title="Pending"
         />
+
         <SessionBookedList
           sessions={confirmedSessions}
           onSessionPress={onSessionPress}
@@ -94,11 +98,11 @@ const SeekerSessionsTab = () => {
         />
       </View>
 
+      {/* Session Modal */}
       <SessionModal
         onClose={handleCloseModal}
         isVisible={!!expandedSession}
         onAction={handleAction}
-        // Pass the otherUser from the enriched session
         user={expandedSession?.otherUser || null}
         isPending={expandedSession?.status === 'newRequest' || expandedSession?.status === 'pending'}
         isConfirmed={expandedSession?.status === 'confirmed'}
