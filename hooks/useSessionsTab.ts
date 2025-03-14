@@ -22,7 +22,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 
   /**
    * If a session is 'confirmed' or 'pending', navigate to chat.
-   * Otherwise, open the modal for accept/reject.
+   * Otherwise, open the other user profile
    */
   const handleExpandSession = (session: EnrichedSession) => {
     dispatch(setActiveEnrichedSession(session));
@@ -32,16 +32,10 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
         params: {sessionId: session.id}
       });
     } else if (session.status === 'newRequest') {
-      // NEW: For "newRequest," navigate to other-user-profile
-      if (session.otherUser) {
-        // 1) Store the other user in activeProfile (if you have that slice)
-        dispatch(setActiveProfile(session.otherUser));
-        // 2) Navigate to /other-user-profile with userId param
         router.push(
           { pathname: '/other-user-profile',  
             params: {sessionId: session.id }
           });
-      }
     } else {
       setExpandedSession(session);
     }
