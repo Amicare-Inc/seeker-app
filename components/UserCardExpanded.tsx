@@ -40,10 +40,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onClose }) =>
   // Navigates to the profile page for this user; passes myProfile: false.
   const handleMoreInfo = () => {
     dispatch(setActiveProfile(user));
-    router.push({
-      pathname: "/other-user-profile",
-      params: { userId: user.id },
-    });
+    router.push("/other-user-profile");
   };
 
   return (

@@ -10,7 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
-import { FIREBASE_AUTH, FIREBASE_DB } from "@/firebase.config";
+import { FIREBASE_DB } from "@/firebase.config";
 import { useLocalSearchParams, router } from "expo-router";
 import { User } from "@/types/User";
 import RequestSessionHeader from "@/components/RequestSession/RequestSessionHeader";

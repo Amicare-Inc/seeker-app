@@ -33,7 +33,7 @@ const SessionList: React.FC<SessionListProps> = ({ sessions, onSessionPress, tit
           className="w-20 h-20 rounded-full mb-2 border-4"
           style={{ borderColor }}
         />
-        <Text className="text-base" style={{ color: "#000099" }}>
+        <Text className="text-base" style={{ color: "#000000" }}>
           {item.otherUser.firstName}
         </Text>
       </TouchableOpacity>
