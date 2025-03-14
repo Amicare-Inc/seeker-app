@@ -5,6 +5,7 @@ import { setActiveProfile } from "@/redux/activeProfileSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "expo-router";
 import { User } from "@/types/User";
+import { setActiveEnrichedSession } from "@/redux/sessionSlice";
 
 interface UserCardExpandedProps {
   user: User;
@@ -40,6 +41,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({ user, onClose }) =>
   // Navigates to the profile page for this user; passes myProfile: false.
   const handleMoreInfo = () => {
     dispatch(setActiveProfile(user));
+    dispatch(setActiveEnrichedSession(null));
     router.push("/other-user-profile");
   };
 

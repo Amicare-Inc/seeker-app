@@ -25,8 +25,8 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
    * Otherwise, open the modal for accept/reject.
    */
   const handleExpandSession = (session: EnrichedSession) => {
+    dispatch(setActiveEnrichedSession(session));
     if (session.status === 'confirmed' || session.status === 'pending') {
-      dispatch(setActiveEnrichedSession(session));
       router.push({
         pathname: '/(chat)/[sessionId]',
         params: {sessionId: session.id}
@@ -37,11 +37,12 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
         // 1) Store the other user in activeProfile (if you have that slice)
         dispatch(setActiveProfile(session.otherUser));
         // 2) Navigate to /other-user-profile with userId param
-        router.push({
-          pathname: '/other-user-profile',
-          params: { userId: session.otherUser.id },
-        });}
-      } else {
+        router.push(
+          { pathname: '/other-user-profile',  
+            params: {sessionId: session.id }
+          });
+      }
+    } else {
       setExpandedSession(session);
     }
   };
@@ -57,10 +58,6 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
     if (expandedSession.status === 'newRequest') {
       newStatus = action === 'accept' ? 'pending' : 'rejected';
     } 
-    // else if (expandedSession.status === 'pending') {
-    //   newStatus = action === 'accept' ? 'confirmed' : 'declined';
-    // }
-    // For confirmed sessions, you may not open the modal at all.
     
     try {
       await dispatch(updateSessionStatus({ sessionId: expandedSession.id, newStatus }));

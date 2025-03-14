@@ -113,7 +113,7 @@ const sessionSlice = createSlice({
       state.pending = [];
       state.confirmed = [];
     },
-    setActiveEnrichedSession(state, action: PayloadAction<EnrichedSession>) {
+    setActiveEnrichedSession(state, action: PayloadAction<EnrichedSession | null>) {
       state.activeEnrichedSession = action.payload;
     },
   },
