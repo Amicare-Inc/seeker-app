@@ -18,31 +18,47 @@ export function subscribeToSession(
   });
 }
 
-/** Add the current user to confirmedBy; if both are confirmed, set status=booked */
 
-export async function confirmSessionBooking(
-  sessionId: string,
-  currentUserId: string,
-  existingConfirmedBy?: string[]
-) {
-  const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
+//DEPRECATED
+// /** Add the current user to confirmedBy; if both are confirmed, set status=booked */
 
-  // Add current user to confirmedBy array
-  await updateDoc(sessionRef, {
-    confirmedBy: arrayUnion(currentUserId),
-  });
+// export async function confirmSessionBooking(
+//   sessionId: string,
+//   currentUserId: string,
+//   existingConfirmedBy?: string[]
+// ) {
+//   const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
 
-  // Determine new length: if existingConfirmedBy was undefined, treat as empty array.
-  const prevLength = existingConfirmedBy ? existingConfirmedBy.length : 0;
-  if (prevLength + 1 >= 2) {
-    // Both users have pressed Book, update status to 'confirmed'
-    await updateDoc(sessionRef, { status: 'confirmed' });
-  }
-}
+//   // Add current user to confirmedBy array
+//   await updateDoc(sessionRef, {
+//     confirmedBy: arrayUnion(currentUserId),
+//   });
 
-/** Cancel or reject session depending on current status */
-export async function cancelSession(sessionId: string, currentStatus: string) {
-  const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
-  const newStatus = currentStatus === 'confirmed' ? 'cancelled' : 'declined';
-  await updateDoc(sessionRef, { status: newStatus });
-}
+//   // Determine new length: if existingConfirmedBy was undefined, treat as empty array.
+//   const prevLength = existingConfirmedBy ? existingConfirmedBy.length : 0;
+//   if (prevLength + 1 >= 2) {
+//     // Both users have pressed Book, update status to 'confirmed'
+//     await updateDoc(sessionRef, { status: 'confirmed' });
+//   }
+// }
+
+// /** accept new session **/
+// export async function acceptSession(sessionId: string, currentStatus: string) {
+//   const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
+//   const newStatus = 'pending';
+//   await updateDoc(sessionRef, { status: newStatus });
+// }
+
+// /** reject new session **/
+// export async function rejectSession(sessionId: string, currentStatus: string) {
+//   const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
+//   const newStatus = 'rejected';
+//   await updateDoc(sessionRef, { status: newStatus });
+// }
+
+// /** Cancel confirmed session or decline pending session depending on current status */
+// export async function cancelSession(sessionId: string, currentStatus: string) {
+//   const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
+//   const newStatus = currentStatus === 'confirmed' ? 'cancelled' : 'declined';
+//   await updateDoc(sessionRef, { status: newStatus });
+// }

@@ -4,11 +4,13 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/redux/store';
+import { AppDispatch, RootState } from '@/redux/store';
 import { Session } from '@/types/Sessions';
 import { User } from '@/types/User';
-import { subscribeToSession, confirmSessionBooking, cancelSession } from '@/services/firebase/sessionService';
+import { subscribeToSession } from '@/services/firebase/sessionService';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
+import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
+import { confirmSessionBookingThunk, updateSessionStatus } from '@/redux/sessionSlice';
 
 interface ChatHeaderProps {
   session: Session;
@@ -23,7 +25,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   isExpanded,
   toggleExpanded,
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const currentUser = useSelector((state: RootState) => state.user.userData);
   const [currentSession, setCurrentSession] = useState<Session>(session);
 
@@ -37,29 +39,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
   // Basic status checks
   const isConfirmed = currentSession.status === 'confirmed';
-  const isUserConfirmed =
-    !!currentUser && currentSession.confirmedBy?.includes(currentUser.id);
-
-  // Format date/time
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return isNaN(date.getTime())
-      ? 'Invalid Date'
-      : date.toLocaleDateString('en-US', {
-          weekday: 'short',
-          day: '2-digit',
-          month: 'short',
-        });
-  };
-
-  const formatTimeRange = (start: string, end: string) => {
-    const s = new Date(start);
-    const e = new Date(end);
-    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Invalid Time';
-    const startStr = s.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const endStr = e.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `${startStr} - ${endStr}`;
-  };
+  const isUserConfirmed = !!currentUser && currentSession.confirmedBy?.includes(currentUser.id);
 
   const formattedDate = formatDate(currentSession.startTime || '');
   const formattedTimeRange = formatTimeRange(
@@ -84,7 +64,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const handleBookSession = async () => {
     if (!currentUser) return;
     try {
-      await confirmSessionBooking(currentSession.id, currentUser.id, currentSession.confirmedBy);
+      await dispatch(confirmSessionBookingThunk({
+        sessionId: currentSession.id,
+        currentUserId: currentUser.id,
+        existingConfirmedBy: currentSession.confirmedBy,
+      }));
     } catch (error) {
       console.error('Error booking session:', error);
     }
@@ -92,7 +76,17 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
   const handleCancelSession = async () => {
     try {
-      await cancelSession(currentSession.id, currentSession.status);
+      if (currentSession.status === 'pending') {
+        await dispatch(updateSessionStatus({
+          sessionId: currentSession.id,
+          newStatus: 'declined',
+        }));
+      } else if (currentSession.status === 'confirmed') {
+        await dispatch(updateSessionStatus({
+          sessionId: currentSession.id,
+          newStatus: 'cancelled',
+        }));
+      }
       router.back();
     } catch (error) {
       console.error('Error cancelling session:', error);

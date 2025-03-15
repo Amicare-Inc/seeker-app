@@ -1,34 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { collection, query, where, getDocs, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, onSnapshot, updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
-import { RootState } from '@/redux/store';
+import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
-
-// DEPRECIATED
-// // Fetch all sessions where the user is a participant (excluding rejected/cancelled)
-// export const fetchUserSessions = createAsyncThunk(
-//   'sessions/fetchUserSessions',
-//   async (userId: string, { rejectWithValue }) => {
-//     try {
-//       const q = query(
-//         collection(FIREBASE_DB, 'sessions_test1'),
-//         where('participants', 'array-contains', userId),
-//         where('status', 'not-in', ['rejected', 'declined', 'cancelled']) // Exclude rejected, declined, and cancelled sessions
-//       );
-//       const querySnapshot = await getDocs(q);
-//       console.log('USER SESSIONS REDUX:', querySnapshot);
-//       const sessions: Session[] = querySnapshot.docs.map((doc) => ({
-//         id: doc.id,
-//         ...doc.data(),
-//       })) as Session[];
-
-//       return sessions;
-//     } catch (error) {
-//       return rejectWithValue((error as any).message);
-//     }
-//   }
-// );
 
 // Real-time listener for session updates
 export const listenToUserSessions = (dispatch: any, userId: string) => {
@@ -57,6 +32,49 @@ export const updateSessionStatus = createAsyncThunk(
     try {
       await updateDoc(doc(FIREBASE_DB, 'sessions_test1', sessionId), { status: newStatus });
       return { sessionId, newStatus };
+    } catch (error) {
+      return rejectWithValue((error as any).message);
+    }
+  }
+);
+
+// Return type from the thunk
+type ConfirmBookingReturn = { sessionId: string; newStatus: string };
+
+// Argument type
+type ConfirmBookingArgs = {
+  sessionId: string;
+  currentUserId: string;
+  existingConfirmedBy?: string[];
+};
+
+export const confirmSessionBookingThunk = createAsyncThunk<
+  ConfirmBookingReturn,    // return type
+  ConfirmBookingArgs,      // argument type
+  {
+    dispatch: AppDispatch;
+    state: RootState;
+    rejectValue: string;   // or whatever type you prefer
+  }
+>(
+  'sessions/confirmSessionBooking',
+  async ({ sessionId, currentUserId, existingConfirmedBy }, { rejectWithValue }) => {
+    try {
+      const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
+      // Add current user to confirmedBy
+      await updateDoc(sessionRef, {
+        confirmedBy: arrayUnion(currentUserId)
+      });
+      // Calculate the new count
+      const prevCount = existingConfirmedBy ? existingConfirmedBy.length : 0;
+      const newCount = prevCount + 1;
+      // If both users have confirmed, update the status to 'confirmed'
+      if (newCount >= 2) {
+        await updateDoc(sessionRef, { status: 'confirmed' });
+        return { sessionId, newStatus: 'confirmed' };
+      }
+      // Otherwise, leave it as 'pending'
+      return { sessionId, newStatus: 'pending' };
     } catch (error) {
       return rejectWithValue((error as any).message);
     }
@@ -156,3 +174,29 @@ const sessionSlice = createSlice({
 
 export const { setSessions, clearSessions, setActiveEnrichedSession } = sessionSlice.actions;
 export default sessionSlice.reducer;
+
+
+// DEPRECIATED
+// // Fetch all sessions where the user is a participant (excluding rejected/cancelled)
+// export const fetchUserSessions = createAsyncThunk(
+//   'sessions/fetchUserSessions',
+//   async (userId: string, { rejectWithValue }) => {
+//     try {
+//       const q = query(
+//         collection(FIREBASE_DB, 'sessions_test1'),
+//         where('participants', 'array-contains', userId),
+//         where('status', 'not-in', ['rejected', 'declined', 'cancelled']) // Exclude rejected, declined, and cancelled sessions
+//       );
+//       const querySnapshot = await getDocs(q);
+//       console.log('USER SESSIONS REDUX:', querySnapshot);
+//       const sessions: Session[] = querySnapshot.docs.map((doc) => ({
+//         id: doc.id,
+//         ...doc.data(),
+//       })) as Session[];
+
+//       return sessions;
+//     } catch (error) {
+//       return rejectWithValue((error as any).message);
+//     }
+//   }
+// );

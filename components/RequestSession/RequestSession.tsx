@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Keyboard,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView, View, Text, TouchableOpacity, Keyboard, } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { FIREBASE_DB } from "@/firebase.config";
@@ -18,7 +10,7 @@ import DateTimeRow from "@/components/RequestSession/DateTimeRow";
 import SessionLengthSelector from "@/components/RequestSession/SessionLengthSelector";
 import BillingCard from "@/components/RequestSession/BillingCard";
 import HelpOptionsDropdown from "@/components/RequestSession/HelpOptionsDropdown";
-import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from "@/scripts/dateHelpers";
+import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from "@/scripts/datetimeHelpers";
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
 
