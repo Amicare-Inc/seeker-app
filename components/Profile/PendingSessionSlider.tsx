@@ -8,6 +8,7 @@ import { formatDate, formatTimeRange } from "@/scripts/datetimeHelpers";
 import { updateSessionStatus } from "@/redux/sessionSlice";
 import { AppDispatch } from "@/redux/store";
 import { useDispatch } from "react-redux";
+import { router } from "expo-router";
 
 interface PendingSessionSliderProps {
   session: EnrichedSession
@@ -31,6 +32,7 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
           newStatus: "pending" 
         })
       ).unwrap();  // <-- .unwrap() lets you catch rejections in this try/catch
+      router.back()
     } catch (err) {
       console.error("Error accepting session:", err);
     }
@@ -45,6 +47,7 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
           newStatus: "rejected" 
         })
       ).unwrap();
+      router.back()
     } catch (err) {
       console.error("Error rejecting session:", err);
     }
