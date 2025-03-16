@@ -193,7 +193,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               className={`px-6 py-3 rounded-lg`}
               style={{ width: "48%", backgroundColor: isConfirmed? '#fff' : isDisabled? '#d1d5db'  : '#008DF4' }}
             >
-              <Text className={`text-sm text-center ${isConfirmed ? 'text-black' : 'text-white'}`}>
+              <Text className={`text-sm text-center ${isDisabled? 'text-black' : isConfirmed? 'text-black':'text-white'}`}>
                 {bookText}
               </Text>
             </TouchableOpacity>
