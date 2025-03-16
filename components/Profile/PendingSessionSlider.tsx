@@ -68,9 +68,6 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
   const startDate = session.startTime ? new Date(session.startTime) : null;
   const endDate = session.endTime ? new Date(session.endTime) : null;
   const isNextDay = startDate && endDate ? endDate.getDate() !== startDate.getDate() : false;
-  
-  // Append " +1" to the date label if the session ends on the next day.
-  const finalDateLabel = isNextDay ? `${dateLabel} +1` : dateLabel;
 
   return (
     <View

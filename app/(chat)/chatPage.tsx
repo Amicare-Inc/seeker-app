@@ -1,6 +1,6 @@
 // src/screens/ChatPage.tsx
 import React, { useState, useEffect } from 'react';
-import {SafeAreaView, KeyboardAvoidingView, Keyboard, Platform, View} from 'react-native';
+import {SafeAreaView, KeyboardAvoidingView, Keyboard, Platform, View, StatusBar} from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSelector } from 'react-redux';
 import ChatHeader from '@/components/Chat/ChatHeader';
@@ -11,6 +11,8 @@ import { FIREBASE_DB } from '@/firebase.config';
 import { Message } from '@/types/Message';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { RootState } from '@/redux/store';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const ChatPage = () => {
   // Retrieve the session ID from route parameters.
@@ -23,6 +25,7 @@ const ChatPage = () => {
     state.sessions.allSessions.find((s) => s.id === sessionId)
   ) as EnrichedSession | undefined;
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
+  const insets = useSafeAreaInsets();
 
   // Debug logs
   console.log('ChatPage - sessionId:', sessionId);
@@ -78,7 +81,22 @@ const ChatPage = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
+    <SafeAreaView className="flex-1" style={{paddingTop: -1}}>
+      <StatusBar translucent backgroundColor="transparent" />
+      <LinearGradient
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        colors={activeSession.status==='confirmed'?["#008DF4", "#5CBAFF"]:["#ffffff", "#ffffff"]}
+        className=""
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 100 : 100, // Adjust height as needed
+          zIndex: 0,
+        }}
+      />
       <ChatHeader
         session={activeSession}
         user={otherUser!}

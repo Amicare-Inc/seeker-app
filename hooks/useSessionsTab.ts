@@ -32,10 +32,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
         params: {sessionId: session.id}
       });
     } else if (session.status === 'newRequest') {
-        router.push(
-          { pathname: '/other-user-profile',  
-            params: {sessionId: session.id }
-          });
+        router.push('/other-user-profile');
     } else {
       setExpandedSession(session);
     }

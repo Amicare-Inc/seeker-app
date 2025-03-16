@@ -11,6 +11,7 @@ import { subscribeToSession } from '@/services/firebase/sessionService';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
 import { confirmSessionBookingThunk, updateSessionStatus } from '@/redux/sessionSlice';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface ChatHeaderProps {
   session: Session;
@@ -104,41 +105,56 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     });
   };
 
+  const handleNavigateToUserProfile = () => {
+    dispatch(setActiveProfile(user));
+    router.push('/other-user-profile');
+  };
+
   // Determine if Book button is disabled
-  const isDisabled = isConfirmed || isUserConfirmed;
-  const bookText = isConfirmed ? 'Confirmed' : isUserConfirmed ? 'Waiting...' : 'Book';
+  const isDisabled = !isConfirmed && isUserConfirmed;
+  const bookText = isConfirmed ? 'Change' : isUserConfirmed ? 'Waiting...' : 'Book';
+  console.log('iConfirm:', isConfirmed, 'isUserConfirm:', isUserConfirmed, 'isDisabled: ', isDisabled, 'bookText:', bookText);
 
   // Extract total cost if present
   const totalCost = currentSession.billingDetails?.total ?? 0;
-  const costLabel = `Total: $${totalCost.toFixed(2)}`;
+  const costLabel = `${totalCost.toFixed(2)}`;
+  const startDate = session.startTime ? new Date(session.startTime) : null;
+  const endDate = session.endTime ? new Date(session.endTime) : null;
+  const isNextDay = startDate && endDate ? endDate.getDate() !== startDate.getDate() : false;
 
   return (
-    <View className="bg-white border-b border-gray-300">
+    <>
+      <LinearGradient
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        colors={isConfirmed?["#008DF4", "#5CBAFF"]:["#ffffff", "#ffffff"]}
+        className="py-2"
+      >
       {/* Top row */}
       <View className="flex-row items-center px-4 py-3">
         {/* Back arrow */}
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <Ionicons name="chevron-back" size={24} color="#000" />
+          <Ionicons name="chevron-back" size={24} color={isConfirmed ? '#fff' : '#000'} />
         </TouchableOpacity>
 
         {/* Photo */}
         <Image
           source={{ uri: user.profilePhotoUrl || 'https://via.placeholder.com/50' }}
-          className="w-12 h-12 rounded-full mr-3"
+          className="w-14 h-14 rounded-full mr-3"
         />
 
         {/* Name + subTitle */}
         <TouchableOpacity onPress={toggleExpanded} className="flex-1">
-          <Text className="font-bold text-base">
+          <Text className={`font-semibold text-lg ${isConfirmed ? 'text-white' : 'text-black'}`}>
             {user.firstName} {user.lastName}
           </Text>
-          <Text className="text-xs text-gray-500 mt-0.5">{subTitle}</Text>
+          <Text className={`text-xs mt-0.5 ${isConfirmed ? 'text-white' : 'text-gray-500'}`}>{subTitle}</Text>
         </TouchableOpacity>
 
         {/* Info circle only if expanded */}
         {isExpanded && (
           <TouchableOpacity onPress={() => { /* do nothing for now */ }}>
-            <Ionicons name="information-circle-outline" size={24} color="#000" />
+            <Ionicons name="information-circle-outline" size={27} color={isConfirmed ? '#fff' : '#000'} onPress={handleNavigateToUserProfile} />
           </TouchableOpacity>
         )}
       </View>
@@ -147,71 +163,77 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       {isExpanded && (
         <View className="px-4 pb-4">
           {/* Note */}
-          <Text className="text-gray-600 text-sm mb-2">
+          <Text className={`text-base mb-2 ${isConfirmed ? 'text-white' : 'text-gray-500'}`}>
             {currentSession.note || 'No additional details provided.'}
           </Text>
 
           {/* Date/Time row => center horizontally, bigger icons */}
-          <View className="flex-row items-center justify-center bg-gray-100 rounded-lg p-4 mb-4">
-            <Ionicons name="calendar" size={20} color="#000" style={{ marginRight: 6 }} />
-            <Text className="text-sm text-black">{formattedDate}</Text>
-
-            {/* faint vertical line */}
-            <View className="mx-3 w-px bg-gray-300" />
-
-            <Ionicons name="time" size={20} color="#000" style={{ marginRight: 6 }} />
-            <Text className="text-sm text-black">{formattedTimeRange}</Text>
+        <View
+          className={`flex-row items-center justify-center rounded-lg py-2 mb-4 ${isConfirmed? "border" : ""}`}
+          style={{ borderColor: "#ffffff", width: "100%", backgroundColor: isConfirmed? "transparent" : "#f0f0f0" }}
+        >
+          <View className="flex-1 flex-row items-center justify-center py-3">
+            <Ionicons name="calendar" size={18} color={isConfirmed ? '#fff' : '#000'} />
+            <Text className={`text-sm ml-2 ${isConfirmed ? 'text-white' : 'text-black'}`}>{formattedDate}</Text>
+            <Text className="text-xs text-green-400 ml-2">{`${isNextDay? '+1':""}`}</Text>
           </View>
-
-          {/* Row #1: Change Time & Cancel side by side */}
-          <View className="flex-row space-x-2 mb-3">
-            {/* Change Time (black) */}
-            <TouchableOpacity
-              onPress={handleNavigateToRequestSession}
-              className="flex-1 bg-black p-3 rounded-lg items-center"
-            >
-              <Text className="text-white font-bold text-sm">Change Time</Text>
-            </TouchableOpacity>
-
-            {/* Cancel (white w/ black border) */}
-            <TouchableOpacity
-              onPress={handleCancelSession}
-              className="flex-1 bg-white border border-black p-3 rounded-lg items-center"
-            >
-              <Text className="text-black font-bold text-sm">Cancel</Text>
-            </TouchableOpacity>
+          <View style={{ width: 1, height: 28}} className='bg-gray-300'/>
+          <View className="flex-1 flex-row items-center justify-center">
+            <Ionicons name="time" size={18} color={isConfirmed ? '#fff' : '#000'} />
+            <Text className={`text-sm ml-2 ${isConfirmed ? 'text-white' : 'text-black'}`}>{formattedTimeRange}</Text>
           </View>
+        </View>
 
-          {/* Row #2: Book & total side by side => each half width */}
-          <View className="flex-row space-x-2">
-            {/* Book button (half width) */}
+          {/* Row #1: Book & Cancel side by side then change */}
+          <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
-              onPress={handleBookSession}
+              onPress={isConfirmed? handleNavigateToRequestSession : handleBookSession}
               disabled={isDisabled}
-              className={`flex-1 p-3 rounded-lg items-center ${
-                isDisabled ? 'bg-gray-300' : ''
-              }`}
-              style={{
-                backgroundColor: isDisabled ? undefined : '#1A8BF8',
-              }}
+              activeOpacity={0.8}
+              className={`px-6 py-3 rounded-lg`}
+              style={{ width: "48%", backgroundColor: isConfirmed? '#fff' : isDisabled? '#d1d5db'  : '#008DF4' }}
             >
-              <Text
-                className={`font-bold text-sm ${
-                  isDisabled ? 'text-black' : 'text-white'
-                }`}
-              >
+              <Text className={`text-sm text-center ${isConfirmed ? 'text-black' : 'text-white'}`}>
                 {bookText}
               </Text>
             </TouchableOpacity>
-
-            {/* Total (half width), aligned right */}
-            <View className="flex-1 items-end justify-center">
-              <Text className="text-sm font-bold text-black">{costLabel}</Text>
-            </View>
+            <TouchableOpacity
+              onPress={handleCancelSession}
+              activeOpacity={0.8}
+              className="bg-black px-6 py-3 rounded-lg"
+              style={{ width: "48%" }}
+            >
+              <Text className="text-white text-sm text-center">Cancel</Text>
+            </TouchableOpacity>
           </View>
+
+          {/* Status & Total Cost Row */}
+          <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center">
+              <Text className={`text-xs ${isConfirmed ? 'text-white' : 'text-black'}`}>{isConfirmed ? "Appointment Confirmed" : "Awaiting confirmation"}</Text>
+              <Ionicons 
+              name={isConfirmed? 'checkmark-circle' : "alert-circle"} 
+              size={18} 
+              color={isConfirmed ? '#fff' : '#9ca3af'} 
+              style={{ marginLeft: 4 }} />
+            </View>
+            <Text className={`text-xs ${isConfirmed ? 'text-white' : 'text-black'}`}>
+              Total: <Text className="font-medium">${costLabel}</Text>
+            </Text>
+          </View>
+        
+          {/* Request Date/Time Change Button */}
+          {isConfirmed ? <></> : (<TouchableOpacity
+            onPress={handleNavigateToRequestSession}
+            activeOpacity={0.8}
+            className={`border px-5 py-2 items-center rounded-lg ${isConfirmed? "border-white" : "border-black"}`}
+          >
+            <Text className={`text-sm ${isConfirmed ? 'text-white' : 'text-black'}`}>Request Date/Time Change</Text>
+          </TouchableOpacity>)}
         </View>
       )}
-    </View>
+      </LinearGradient>
+    </>
   );
 };
 
