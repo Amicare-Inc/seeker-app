@@ -21,7 +21,7 @@ const BioScreen: React.FC = () => {
 
       // 2️⃣ Update Firebase
       if (userData?.id) {
-        await setDoc(doc(FIREBASE_DB, 'test1', userData.id), { ...userData, onboardingComplete: true }, { merge: true });
+        await setDoc(doc(FIREBASE_DB, 'test1', userData.id), { ...userData, onboardingComplete: true, bio: bio }, { merge: true });
         Alert.alert('Success', 'Your profile has been created successfully!');
       }
 
