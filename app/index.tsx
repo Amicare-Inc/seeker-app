@@ -1,23 +1,55 @@
-import CustomButton from "@/components/CustomButton";
+// app/index.tsx
+import React, { useState } from "react";
+import { SafeAreaView, View, TextInput, TouchableOpacity, Text, Alert } from "react-native";
 import { router } from "expo-router";
-import { ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+  const [input, setInput] = useState("");
+
+  const handleNext = () => {
+    if (input.trim().toLowerCase() === "qwerty") {
+      router.push("/index2");
+    } else {
+      Alert.alert("Incorrect input", "Please type 'qwerty' to continue.");
+    }
+  };
+
   return (
-    <SafeAreaView className="h-full bg-white" >
-      <ScrollView contentContainerStyle={{ height: '100%' }}>
-        <View className="flex w-full h-full justify-center items-center p-4">
-          <Text className="text-5xl text-black font-thin text-center mb-11">
-            Connect with {"\n"} trusted {"\n"} personal care {"\n"} support
-          </Text>
-          <CustomButton
-            title="Continue with Email"
-            handlePress={() => router.push("/sign-in")}
-            containerStyles="w-full mt-11"
-          />
-        </View>
-      </ScrollView>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: "white",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <View style={{ width: "80%", alignItems: "center" }}>
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          placeholder="Type here..."
+          style={{
+            width: "100%",
+            height: 50,
+            borderWidth: 1,
+            borderColor: "#ccc",
+            paddingHorizontal: 10,
+            marginBottom: 20,
+            borderRadius: 8,
+          }}
+        />
+        <TouchableOpacity
+          onPress={handleNext}
+          style={{
+            backgroundColor: "#1A8BF8",
+            paddingVertical: 15,
+            paddingHorizontal: 40,
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "bold" }}>Next</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }

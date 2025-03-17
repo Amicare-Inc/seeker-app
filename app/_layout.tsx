@@ -38,6 +38,7 @@ const RootLayout = () => {
         <GlobalDataLoader />
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="index2" options={{ headerShown: false, gestureEnabled: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(dashboard)" options={{ headerShown: false }} />
           <Stack.Screen name="(onboarding)" options={{ headerShown: false, gestureEnabled: false }} />

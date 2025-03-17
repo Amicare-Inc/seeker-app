@@ -13,7 +13,9 @@ import { useDispatch, useSelector } from 'react-redux';
 const SignIn = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [form, setForm] = useState({
-    email: "aisha.khan@example.com",
+    // email: "aisha.khan@example.com",
+    // password: "asdfgh",
+    email: "martin.droruga@example.com",
     password: "asdfgh",
   });
   const userData = useSelector((state: RootState) => state.user.userData);
@@ -39,11 +41,13 @@ const SignIn = () => {
     if (userData && !initialNavComplete) {
       console.log('User Data:', userData);
       if (userData.onboardingComplete == true){
+        console.log('IN SIGN IN', initialNavComplete);
         dispatch(setNavigationComplete(true));
         if (userData.isPsw == true) {
+          console.log('IN SIGN IN PSW', initialNavComplete);
           router.push('/(psw)/psw-home');
         } else if (userData.isPsw == false) {
-          console.log('IN SIGN IN', initialNavComplete);
+          console.log('IN SIGN IN SEEKER', initialNavComplete);
             router.push('/(seeker)/seeker-home');
         }
       }

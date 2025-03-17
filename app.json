@@ -6,11 +6,18 @@
     "orientation": "portrait",
     "scheme": "AmiCare",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1A8BF8"
+    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "This app requires access to the camera for identity verification purposes."
-      }
+        "NSCameraUsageDescription": "This app requires access to the camera for identity verification purposes.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.specul8tor.AmiCare"
     },
     "android": {
       "permissions": [
@@ -27,6 +34,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "5d43b14b-410b-4ea2-bf03-3cc6de49683a"
+      }
     }
   }
 }
