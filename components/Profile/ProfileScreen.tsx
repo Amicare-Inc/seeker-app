@@ -10,6 +10,11 @@ import { User } from "@/types/User";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import ProfileReviews from "./ProfileReviews";
+import { FIREBASE_AUTH } from "@/firebase.config";
+import { clearActiveProfile } from "@/redux/activeProfileSlice";
+import { clearSessions } from "@/redux/sessionSlice";
+import { clearUser } from "@/redux/userSlice";
+import { useDispatch } from "react-redux";
 
 interface ProfileScreenProps {
   user: User;
@@ -33,6 +38,26 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
   // const rightSubtitle = isMyProfile ? "Housekeeping, Mobility" : "Housekeeping, Mobility";
   const handleBackPress = () => {
     router.back();
+  };
+
+
+  const dispatch = useDispatch();
+  const handleSignOut = async () => {
+    try {
+      // Sign out from Firebase
+      await FIREBASE_AUTH.signOut();
+      
+      // Clear Redux state
+      dispatch(clearUser());
+      dispatch(clearSessions());
+      dispatch(clearActiveProfile());
+
+      // Navigate to the sign-in screen (or your landing page)
+      router.replace('/sign-in');
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // Optionally, show an alert or toast to the user.
+    }
   };
 
   return (
@@ -73,6 +98,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
             <ProfileListItem label="Help" iconName="help-circle" />
             <ProfileListItem label="Refer friends" iconName="gift" disabled />
             <ProfileListItem label="Legal" iconName="document-text" />
+            <ProfileListItem label="Sign Out" iconName="log-out" onPress={handleSignOut} />
           </View>
         </>
       ) : (
