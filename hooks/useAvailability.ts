@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { router } from 'expo-router';
+import { RootState } from '@/redux/store';
 
 export const useAvailability = () => {
   const dispatch = useDispatch();
+  const userData = useSelector((state: RootState) => state.user.userData);
   const [selectedDays, setSelectedDays] = useState<{ [day: string]: string[] }>({});
   const [activeDay, setActiveDay] = useState<string | null>(null);
 
@@ -51,10 +53,13 @@ export const useAvailability = () => {
     const formattedAvailability = formatAvailability(selectedDays);
   
     dispatch(updateUserFields({
-      carePreferences: { availability: formattedAvailability }
+      carePreferences: { 
+        ...userData?.carePreferences,
+        availability: formattedAvailability 
+      }
     }));
   
-    console.log('Availability saved successfully.');
+    console.log('Availability saved successfully.', userData);
     router.push('/add_profile_photo');
   };
 

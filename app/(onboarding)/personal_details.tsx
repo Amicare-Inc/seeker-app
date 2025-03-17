@@ -29,9 +29,9 @@ const PersonalDetails: React.FC = () => {
   const userData = useSelector((state: RootState) => state.user.userData);
 
   const [form, setForm] = useState({
-    firstName: userData?.firstName || 'Mazi',
-    lastName: userData?.lastName || 'Azam',
-    dob: userData?.dob || '06/16/2000',
+    firstName: userData?.firstName || 'Martin',
+    lastName: userData?.lastName || 'Droruga',
+    dob: userData?.dob || '03/15/1990',
     address: userData?.address || '159 Dundas St E',
     phone: userData?.phone || '5879730077',
     email: userData?.email || '',

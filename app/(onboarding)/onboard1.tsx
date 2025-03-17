@@ -41,7 +41,7 @@ const CarePreferences: React.FC = () => {
 
         if (selectedCareTypes.length > 0 || lookingForSelf !== null) {
             dispatch(updateUserFields({ carePreferences }));
-            console.log('Care preferences updated in Redux:', carePreferences);
+            console.log('Care preferences updated in Redux:', carePreferences, userData);
         }
 
         router.push('/tasks'); // Move to the next page regardless

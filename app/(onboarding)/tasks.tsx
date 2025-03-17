@@ -38,7 +38,7 @@ const TaskSelection: React.FC = () => {
                     tasks: selectedTasks,
                 },
             }));
-            console.log('Tasks updated in Redux:', selectedTasks);
+            console.log('Tasks updated in Redux:', selectedTasks, userData);
         }
         router.push('/availability'); // Move to the next page regardless
     };

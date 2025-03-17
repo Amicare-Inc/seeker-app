@@ -14,7 +14,7 @@ import { AppDispatch } from '@/redux/store';
 const SignUp = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [form, setForm] = useState({
-    email: "hfhkjhdjksdlhf@gmail.com",
+    email: "martin.droruga@example.com",
     password: "asdfgh",
     confirm_password: "asdfgh"
   });
