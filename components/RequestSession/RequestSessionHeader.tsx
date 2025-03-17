@@ -14,7 +14,7 @@ const RequestSessionHeader: React.FC<RequestSessionHeaderProps> = ({
   firstName,
 }) => {
   return (
-    <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
+    <View className="flex-row items-center px-4 py-3 border-b background-white">
       <TouchableOpacity onPress={onBack} className="mr-2">
         <Ionicons name="chevron-back" size={24} color="#000" />
       </TouchableOpacity>

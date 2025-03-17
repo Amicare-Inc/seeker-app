@@ -54,12 +54,11 @@ const RequestSession = () => {
   const [pickerTarget, setPickerTarget] = useState<"start" | "end">("start");
 
   const currentUser = useSelector((state: RootState) => state.user.userData);
-
   const pswRate =
     currentUser?.isPsw
       ? currentUser.rate || 20
-      : targetUserObj.isPsw
-      ? targetUserObj.rate || 20
+      : targetUserObj?.isPsw
+      ? targetUserObj?.rate || 20
       : 20; // fallback default rate
 
   // The dynamic base price is computed as the PSW rate multiplied by the session length.
@@ -175,22 +174,27 @@ const RequestSession = () => {
         const sessionRef = doc(FIREBASE_DB, "sessions_test1", existingSession.id);
         await updateDoc(sessionRef, sessionData);
         alert("Session updated successfully!");
+        router.back();
       } else {
         const sessionId = `${currentUser.id}_${Date.now()}`;
         const newSessionData = {
           ...sessionData,
           id: sessionId,
           senderId: currentUser.id,
-          receiverId: targetUserObj.id,
-          participants: [currentUser.id, targetUserObj.id],
+          receiverId: targetUserObj?.id,
+          participants: [currentUser.id, targetUserObj?.id],
           status: "newRequest",
           createdAt: new Date().toISOString(),
           confirmedBy: [],
         };
         await setDoc(doc(FIREBASE_DB, "sessions_test1", sessionId), newSessionData);
-        alert("Session request sent successfully!");
+        router.push({
+          pathname: "/sent-request",
+          params: {
+            otherUserId: targetUserObj?.id // so we can display their name/pic
+          }
+        });
       }
-      router.back();
     } catch (error) {
       console.error("Error submitting session request:", error);
       alert("An error occurred while sending your request.");
@@ -202,8 +206,8 @@ const RequestSession = () => {
       {/* Custom Header */}
       <RequestSessionHeader
         onBack={() => router.back()}
-        photoUrl={targetUserObj.profilePhotoUrl || ""}
-        firstName={targetUserObj.firstName}
+        photoUrl={targetUserObj?.profilePhotoUrl || ""}
+        firstName={targetUserObj?.firstName}
       />
 
       {/* Main Content */}
