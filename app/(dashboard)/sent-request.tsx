@@ -6,12 +6,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
-/**
- * If you want to pass the other user's ID or name from the previous screen,
- * you can read it via useLocalSearchParams. For instance:
- *   const { otherUserName } = useLocalSearchParams();
- * Then you can display that in the text below.
- */
 const SessionRequestSent = () => {
   // Optional: if you want the other user's name or photo from Redux:
   const {otherUserId} = useLocalSearchParams()
@@ -22,10 +16,8 @@ const SessionRequestSent = () => {
 
   const handleBack = () => {
     if (otherUser?.isPsw) {
-        console.log("pushing to seeker home");
         router.replace("/(seeker)/seeker-home");
     } else {
-        console.log("pushing to psw-home");
         router.replace("/(psw)/psw-home");
     }
   }

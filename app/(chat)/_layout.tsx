@@ -6,6 +6,7 @@ const RootLayout = () => {
     <Stack>
       <Stack.Screen name="chatPage" options={{headerShown:false}}/>
       <Stack.Screen name="[sessionId]" options={{headerShown:false}}/>
+      <Stack.Screen name="session-confirmation" options={{headerShown:false}}/>
     </Stack>
   )
 }
