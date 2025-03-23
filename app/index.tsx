@@ -10,7 +10,7 @@ export default function Index() {
     if (input.trim().toLowerCase() === "qwerty") {
       router.push("/index2");
     } else {
-      Alert.alert("Incorrect input", "Please type 'qwerty' to continue.");
+      Alert.alert("Incorrect input");
     }
   };
 

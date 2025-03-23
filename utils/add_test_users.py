@@ -10,7 +10,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Load user data from a JSON file
-with open('../test/user_test_data2.json', 'r') as f:
+with open('../test/user_test_data2_2.json', 'r') as f:
     users_data = json.load(f)
 print("Number of users: ", len(users_data))
 
