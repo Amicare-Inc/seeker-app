@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "AmiCare",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
@@ -21,8 +22,10 @@
     },
     "android": {
       "permissions": [
+        "CAMERA",
         "CAMERA"
-      ]
+      ],
+      "package": "com.specul8tor.AmiCare"
     },
     "web": {
       "bundler": "metro",

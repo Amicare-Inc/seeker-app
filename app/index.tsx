@@ -1,55 +1,62 @@
-// app/index.tsx
-import React, { useState } from "react";
-import { SafeAreaView, View, TextInput, TouchableOpacity, Text, Alert } from "react-native";
+import React from "react";
+import { View, Text, Image, ScrollView, StatusBar } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import CustomButton from "@/components/CustomButton";
 
 export default function Index() {
-  const [input, setInput] = useState("");
-
-  const handleNext = () => {
-    if (input.trim().toLowerCase() === "qwerty") {
-      router.push("/index2");
-    } else {
-      Alert.alert("Incorrect input");
-    }
-  };
-
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: "white",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <View style={{ width: "80%", alignItems: "center" }}>
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder="Type here..."
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      {/* Hide status bar so the image fills the top */}
+      <StatusBar hidden />
+
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {/* Top image container (covers top 60% of screen) */}
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, height: "60%" }}>
+          <Image
+            source={require("@/assets/landing.png")}
+            style={{ width: "100%", height: "100%", resizeMode: "cover" }}
+          />
+          {/* Gradient overlay for a faded effect */}
+          <LinearGradient
+            colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "40%",
+            }}
+          />
+        </View>
+
+        {/* Content container pushed down to the bottom third */}
+        <View
           style={{
-            width: "100%",
-            height: 50,
-            borderWidth: 1,
-            borderColor: "#ccc",
-            paddingHorizontal: 10,
-            marginBottom: 20,
-            borderRadius: 8,
-          }}
-        />
-        <TouchableOpacity
-          onPress={handleNext}
-          style={{
-            backgroundColor: "#1A8BF8",
-            paddingVertical: 15,
-            paddingHorizontal: 40,
-            borderRadius: 8,
+            flex: 1,
+            justifyContent: "flex-end",
+            alignItems: "center",
+            padding: 16,
+            paddingBottom: "50%",
           }}
         >
-          <Text style={{ color: "white", fontWeight: "bold" }}>Next</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          <Text
+            style={{
+              fontSize: 38,
+              fontWeight: "300",
+              textAlign: "center",
+              marginBottom: 24,
+            }} className="font-thin"
+          >
+            Connect with {"\n"} Trusted Personal {"\n"} Care Support
+          </Text>
+          <CustomButton
+            title="Continue with Email"
+            handlePress={() => router.push("/sign-in")}
+            containerStyles="w-full mt-6"
+          />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
