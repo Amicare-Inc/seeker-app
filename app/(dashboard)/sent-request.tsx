@@ -1,4 +1,3 @@
-// app/session-request-sent.tsx
 import React from 'react';
 import {
 	SafeAreaView,

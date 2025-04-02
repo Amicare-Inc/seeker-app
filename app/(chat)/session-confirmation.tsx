@@ -1,4 +1,3 @@
-// app/session-confirmation.tsx
 import React from 'react';
 import {
 	SafeAreaView,

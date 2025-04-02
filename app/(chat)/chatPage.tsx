@@ -39,9 +39,9 @@ const ChatPage = () => {
 	const insets = useSafeAreaInsets();
 
 	// Debug logs
-	console.log('ChatPage - sessionId:', sessionId);
-	console.log('ChatPage - currentUser:', currentUser);
-	console.log('ChatPage - activeSession:', activeSession);
+	// console.log('ChatPage - sessionId:', sessionId);
+	// console.log('ChatPage - currentUser:', currentUser);
+	// console.log('ChatPage - activeSession:', activeSession);
 
 	if (!sessionId || !activeSession || !currentUser) return null;
 	const otherUser = activeSession.otherUser;

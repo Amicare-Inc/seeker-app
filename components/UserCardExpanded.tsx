@@ -1,4 +1,3 @@
-// @/components/Profile/UserCardExpanded.tsx
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
@@ -9,7 +8,7 @@ import { setActiveEnrichedSession } from '@/redux/sessionSlice';
 
 interface UserCardExpandedProps {
 	user: User;
-	onClose: () => void; // Called when the user taps outside the buttons to collapse the card
+	onClose: () => void;
 }
 
 const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
@@ -31,9 +30,8 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 	const rating = '4.6 out of 5';
 	const rate = user.rate ?? 20;
 	const locationText = user.address || '4km away';
-	const languages = ''; // or empty string if not provided
+	const languages = '';
 
-	// Navigates to request-sessions with this user's ID
 	const handleRequestSession = () => {
 		router.push({
 			pathname: '/request-sessions',
@@ -49,7 +47,6 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 	};
 
 	return (
-		// The entire card closes on press (except on button presses)
 		<TouchableOpacity
 			onPress={onClose}
 			activeOpacity={1}
@@ -66,7 +63,6 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 									user.profilePhotoUrl ||
 									'https://via.placeholder.com/50',
 							}}
-							// Now a square image with rounded corners.
 							className="w-20 h-20 rounded-lg mr-3"
 						/>
 						<View>

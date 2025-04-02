@@ -45,8 +45,6 @@ const SignIn = () => {
 		}
 	};
 
-	// PATCH: FIX isPSW vs isPsw
-	// PATCH: REMOVE OLD TEST OF userData.first_name
 	useEffect(() => {
 		if (userData && !initialNavComplete) {
 			console.log('User Data:', userData);
