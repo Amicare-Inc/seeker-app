@@ -47,7 +47,7 @@
 //   // Function to map sessions with user data
 //   const mapSessionsWithUserData = async (sessions: Session[]) => {
 //     const sessionMap: { [key: string]: User } = {};
-    
+
 //     await Promise.all(sessions.map(async (session) => {
 //       // Determine which user ID to fetch (requester or target)
 //       const userIdToFetch = session.requesterId === currentUserId

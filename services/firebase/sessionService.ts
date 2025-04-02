@@ -5,19 +5,18 @@ import { Session } from '@/types/Sessions';
 
 /** Listen to changes for a single session doc */
 export function subscribeToSession(
-  sessionId: string,
-  callback: (session: Session) => void
+	sessionId: string,
+	callback: (session: Session) => void,
 ) {
-  const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
-  return onSnapshot(sessionRef, (docSnap) => {
-    if (docSnap.exists()) {
-      callback(docSnap.data() as Session);
-    } else {
-      console.error('No session data found for ID:', sessionId);
-    }
-  });
+	const sessionRef = doc(FIREBASE_DB, 'sessions_test1', sessionId);
+	return onSnapshot(sessionRef, (docSnap) => {
+		if (docSnap.exists()) {
+			callback(docSnap.data() as Session);
+		} else {
+			console.error('No session data found for ID:', sessionId);
+		}
+	});
 }
-
 
 //DEPRECATED
 // /** Add the current user to confirmedBy; if both are confirmed, set status=booked */

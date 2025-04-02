@@ -1,10 +1,10 @@
 // @/components/Profile/ProfileStats.tsx
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { User } from "@/types/User";
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { User } from '@/types/User';
 
 interface ProfileStatsProps {
-  user: User;
+	user: User;
 }
 
 /**
@@ -14,42 +14,42 @@ interface ProfileStatsProps {
  * Both are left-aligned, based on whether user.isPsw is true or false.
  */
 const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
-  const isPsw = user.isPsw;
+	const isPsw = user.isPsw;
 
-  // Determine titles
-  const leftTitle = isPsw
-    ? "Experience with"
-    : "Diagnoses";
-  const rightTitle = isPsw ? "Assisting with" : "Requiring";
+	// Determine titles
+	const leftTitle = isPsw ? 'Experience with' : 'Diagnoses';
+	const rightTitle = isPsw ? 'Assisting with' : 'Requiring';
 
-  // Pull data from user.carePreferences
-  const careType = user.carePreferences?.careType?.join(", ") || "N/A";
-  const tasks = user.carePreferences?.tasks?.join(", ") || "N/A";
+	// Pull data from user.carePreferences
+	const careType = user.carePreferences?.careType?.join(', ') || 'N/A';
+	const tasks = user.carePreferences?.tasks?.join(', ') || 'N/A';
 
-  return (
-    <View className="flex-row justify-between mb-4">
-      {/* Left column */}
-      <View className="flex-1 mr-2">
-        <Text className="text-sm mb-1">{leftTitle}</Text>
-        <Text className="text-sm" style={styles.wrapText}>{careType}</Text>
-      </View>
+	return (
+		<View className="flex-row justify-between mb-4">
+			{/* Left column */}
+			<View className="flex-1 mr-2">
+				<Text className="text-sm mb-1">{leftTitle}</Text>
+				<Text className="text-sm" style={styles.wrapText}>
+					{careType}
+				</Text>
+			</View>
 
-      {/* Right column */}
-      <View className="flex-1">
-        <Text className="text-sm mb-1">{rightTitle}</Text>
-        <Text className="text-sm text-gray-700" style={styles.wrapText}>{tasks}</Text>
-      </View>
-    </View>
-  );
+			{/* Right column */}
+			<View className="flex-1">
+				<Text className="text-sm mb-1">{rightTitle}</Text>
+				<Text className="text-sm text-gray-700" style={styles.wrapText}>
+					{tasks}
+				</Text>
+			</View>
+		</View>
+	);
 };
 
-
 const styles = StyleSheet.create({
-    wrapText: {
-      flexWrap: "wrap",
-      color: "#797979"
-    },
-  });
-  
+	wrapText: {
+		flexWrap: 'wrap',
+		color: '#797979',
+	},
+});
 
 export default ProfileStats;

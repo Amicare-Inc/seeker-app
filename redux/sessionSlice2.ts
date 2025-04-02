@@ -23,12 +23,12 @@
 //       console.log("pending redux ", pendingSessions)
 //       const acceptedSessions = [...acceptedSessionsRequester, ...acceptedSessionsTarget];
 //       const bookedSessions = [...bookedSessionsRequester, ...bookedSessionsTarget];
-  
+
 //       // Maps to store user data
 //       const pendingMap: { [key: string]: User } = {};
 //       const acceptedMap: { [key: string]: User } = {};
 //       const bookedMap: { [key: string]: User } = {};
-  
+
 //       // Fetch and populate maps with user data for pending sessions
 //       await Promise.all(pendingSessions.map(async (session) => {
 //         const userData = await getUserDoc(session.requesterId);  // Assuming getUserDoc fetches user data
@@ -36,7 +36,7 @@
 //           pendingMap[session.requesterId] = userData as User;
 //         }
 //       }));
-  
+
 //       // Fetch and populate maps with user data for accepted sessions
 //       await Promise.all(acceptedSessions.map(async (session) => {
 //         const userIdToFetch = session.requesterId === currentUserId
@@ -47,7 +47,7 @@
 //           acceptedMap[userIdToFetch] = userData as User;
 //         }
 //       }));
-  
+
 //       // Fetch and populate maps with user data for booked sessions
 //       await Promise.all(bookedSessions.map(async (session) => {
 //         const userIdToFetch = session.requesterId === currentUserId
@@ -59,7 +59,7 @@
 //         }
 //       }));
 //       console.log("Pending map", pendingMap)
-  
+
 //       return {
 //         pending: pendingSessions,
 //         accepted: acceptedSessions,
@@ -93,7 +93,7 @@
 //       if (sessionToAccept) {
 //         // Update the status to 'accepted'
 //         state.confirmedSessions = state.confirmedSessions.concat({ ...sessionToAccept, status: 'accepted' });
-        
+
 //         // Remove the session from notConfirmedSessions
 //         state.notConfirmedSessions = state.notConfirmedSessions.filter(session => session.id !== action.payload);
 //         state.acceptedMap[sessionToAccept.requesterId] = state.pendingMap[sessionToAccept.requesterId];
@@ -102,12 +102,12 @@
 //       console.log("ACCEPT PENDING CONFIRMED", state.confirmedSessions)
 //       console.log("ACCEPT PENDING NOT CONFIRMED", state.notConfirmedSessions)
 //     },
-  
+
 //     rejectSession(state, action) {
 //       // Move session to rejected state (we can assume this would be a separate state, or handle it as filtering out)
 //       state.notConfirmedSessions = state.notConfirmedSessions.filter(session => session.id !== action.payload);
 //     },
-  
+
 //     bookSession(state, action) {
 //       // Move session from confirmedSessions to bookedSessions
 //       const sessionToBook = state.confirmedSessions.find(session => session.id === action.payload);
@@ -116,7 +116,7 @@
 //         console.log("SESSION TO BOOK: ",sessionToBook)
 //         state.bookedSessions = state.bookedSessions.concat({ ...sessionToBook, status: 'booked' });
 //         console.log("BOOKED SESSIONS IN IF: ",state.bookedSessions)
-  
+
 //         // Remove the session from confirmedSessions
 //         state.confirmedSessions = state.confirmedSessions.filter(session => session.id !== action.payload);
 //         console.log("BOOKED REQUESTER", sessionToBook.requesterId)

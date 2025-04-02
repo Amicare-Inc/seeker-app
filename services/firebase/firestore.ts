@@ -1,4 +1,13 @@
-import { getDoc, doc, setDoc, query, collection, where, getDocs, updateDoc } from 'firebase/firestore';
+import {
+	getDoc,
+	doc,
+	setDoc,
+	query,
+	collection,
+	where,
+	getDocs,
+	updateDoc,
+} from 'firebase/firestore';
 import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { User } from '@/types/User';
 import { Session } from '@/types/Sessions';
@@ -11,19 +20,21 @@ import { useSelector } from 'react-redux';
  * @returns A promise resolving to the user data if it exists, otherwise null.
  */
 export const getUserDoc = async (uid: string) => {
-    try {
-        const userDocRef = doc(FIREBASE_DB, 'test1', uid);
-        const userDoc = await getDoc(userDocRef);
+	try {
+		const userDocRef = doc(FIREBASE_DB, 'test1', uid);
+		const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-            return userDoc.data();
-        } else {
-            console.log('No such document!');
-            return null;
-        }
-    } catch (error) {
-        throw new Error(`Failed to get user document: ${(error as any).message}`);
-    }
+		if (userDoc.exists()) {
+			return userDoc.data();
+		} else {
+			console.log('No such document!');
+			return null;
+		}
+	} catch (error) {
+		throw new Error(
+			`Failed to get user document: ${(error as any).message}`,
+		);
+	}
 };
 
 /**
@@ -33,13 +44,15 @@ export const getUserDoc = async (uid: string) => {
  * @returns A promise resolving when the document has been written.
  */
 export const setUserDoc = async (uid: string, userData: any) => {
-    try {
-        const userDocRef = doc(FIREBASE_DB, 'test1', uid);
-        await setDoc(userDocRef, userData, { merge: true }); // merge: true will merge with existing data
-        console.log('User document successfully written!');
-    } catch (error) {
-        throw new Error(`Failed to set user document: ${(error as any).message}`);
-    }
+	try {
+		const userDocRef = doc(FIREBASE_DB, 'test1', uid);
+		await setDoc(userDocRef, userData, { merge: true }); // merge: true will merge with existing data
+		console.log('User document successfully written!');
+	} catch (error) {
+		throw new Error(
+			`Failed to set user document: ${(error as any).message}`,
+		);
+	}
 };
 
 /**
@@ -67,7 +80,6 @@ export const setUserDoc = async (uid: string, userData: any) => {
 //     }
 // };
 
-
 /**
  * Retrieves a list of available users (PSWs or care seekers) by excluding
  * those with whom the current user already has a session.
@@ -78,42 +90,41 @@ export const setUserDoc = async (uid: string, userData: any) => {
  * @returns A promise that resolves to an array of available users.
  */
 export const getListOfUsers = async (
-  isPSW: boolean,
-  currentUserId: string,
-  sessions: Session[]
+	isPSW: boolean,
+	currentUserId: string,
+	sessions: Session[],
 ): Promise<User[]> => {
-  // Build a set of engaged user IDs from the sessions data.
-  const excludedUserIds = new Set<string>();
-  sessions.forEach((session) => {
-    if (Array.isArray(session.participants)) {
-      session.participants.forEach((id: string) => {
-        if (id !== currentUserId) {
-          excludedUserIds.add(id);
-        }
-      });
-    }
-  });
+	// Build a set of engaged user IDs from the sessions data.
+	const excludedUserIds = new Set<string>();
+	sessions.forEach((session) => {
+		if (Array.isArray(session.participants)) {
+			session.participants.forEach((id: string) => {
+				if (id !== currentUserId) {
+					excludedUserIds.add(id);
+				}
+			});
+		}
+	});
 
-  console.log("Excluded user IDs:", Array.from(excludedUserIds));
+	console.log('Excluded user IDs:', Array.from(excludedUserIds));
 
-  // Query the users collection ("test1") for users with the specified isPSW flag.
-  const listQuery = query(
-    collection(FIREBASE_DB, "test1"),
-    where("isPsw", "==", isPSW)
-  );
+	// Query the users collection ("test1") for users with the specified isPSW flag.
+	const listQuery = query(
+		collection(FIREBASE_DB, 'test1'),
+		where('isPsw', '==', isPSW),
+	);
 
-  const snapshot = await getDocs(listQuery);
-  const availableUsers: User[] = [];
+	const snapshot = await getDocs(listQuery);
+	const availableUsers: User[] = [];
 
-  snapshot.forEach((doc) => {
-    if (!excludedUserIds.has(doc.id)) {
-      availableUsers.push({ id: doc.id, ...doc.data() } as User);
-    }
-  });
+	snapshot.forEach((doc) => {
+		if (!excludedUserIds.has(doc.id)) {
+			availableUsers.push({ id: doc.id, ...doc.data() } as User);
+		}
+	});
 
-  return availableUsers;
+	return availableUsers;
 };
-
 
 /**
  * DEPRICIATED
@@ -121,60 +132,72 @@ export const getListOfUsers = async (
  * @returns A promise that resolves to an array of available PSWs.
  */
 export const old_getListOfUsers = async (isPSW: boolean) => {
-    const currentUserId = FIREBASE_AUTH.currentUser?.uid;
-    // if (!currentUser) throw new Error("User not authenticated");             CHECK AFTER
+	const currentUserId = FIREBASE_AUTH.currentUser?.uid;
+	// if (!currentUser) throw new Error("User not authenticated");             CHECK AFTER
 
-    // Query 1: Get sessions where currentUserId is the requester
-    const requesterQuery = query(
-        collection(FIREBASE_DB, "sessions_test1"),
-        where("requesterId", "==", currentUserId),
-        where("status", "in", ["newRequest", "pending", "confirmed", "completed", "failed"])
-    );
+	// Query 1: Get sessions where currentUserId is the requester
+	const requesterQuery = query(
+		collection(FIREBASE_DB, 'sessions_test1'),
+		where('requesterId', '==', currentUserId),
+		where('status', 'in', [
+			'newRequest',
+			'pending',
+			'confirmed',
+			'completed',
+			'failed',
+		]),
+	);
 
-    // Query 2: Get sessions where currentUserId is the target
-    const targetQuery = query(
-        collection(FIREBASE_DB, "sessions_test1"),
-        where("targetUserId", "==", currentUserId),
-        where("status", "in", ["newRequest", "pending", "confirmed", "completed", "failed"])
-    );
+	// Query 2: Get sessions where currentUserId is the target
+	const targetQuery = query(
+		collection(FIREBASE_DB, 'sessions_test1'),
+		where('targetUserId', '==', currentUserId),
+		where('status', 'in', [
+			'newRequest',
+			'pending',
+			'confirmed',
+			'completed',
+			'failed',
+		]),
+	);
 
-    // Execute both queries
-    const [requesterSnapshot, targetSnapshot] = await Promise.all([
-        getDocs(requesterQuery),
-        getDocs(targetQuery),
-    ]);
+	// Execute both queries
+	const [requesterSnapshot, targetSnapshot] = await Promise.all([
+		getDocs(requesterQuery),
+		getDocs(targetQuery),
+	]);
 
-    const excludedUserIds = new Set<string>();
+	const excludedUserIds = new Set<string>();
 
-    // Process the results of both queries
-    requesterSnapshot.forEach(doc => {
-        const data = doc.data();
-        excludedUserIds.add(data.targetUserId);  // Exclude users that the current user has requested
-    });
+	// Process the results of both queries
+	requesterSnapshot.forEach((doc) => {
+		const data = doc.data();
+		excludedUserIds.add(data.targetUserId); // Exclude users that the current user has requested
+	});
 
-    targetSnapshot.forEach(doc => {
-        const data = doc.data();
-        excludedUserIds.add(data.requesterId);  // Exclude users that have requested the current user
-    });
+	targetSnapshot.forEach((doc) => {
+		const data = doc.data();
+		excludedUserIds.add(data.requesterId); // Exclude users that have requested the current user
+	});
 
-    console.log("Excluded user IDs:", excludedUserIds);
-    // Query to find all available PSWs
-    const listQuery = query(
-        collection(FIREBASE_DB, "test1"),
-        where("isPsw", "==", isPSW)
-    );
+	console.log('Excluded user IDs:', excludedUserIds);
+	// Query to find all available PSWs
+	const listQuery = query(
+		collection(FIREBASE_DB, 'test1'),
+		where('isPsw', '==', isPSW),
+	);
 
-    const pswSnapshot = await getDocs(listQuery);
-    const availableUser: User[] = [];
+	const pswSnapshot = await getDocs(listQuery);
+	const availableUser: User[] = [];
 
-    pswSnapshot.forEach(doc => {
-        if (!excludedUserIds.has(doc.id)) {
-            availableUser.push({ id: doc.id, ...doc.data() } as User);
-        }
-    });
+	pswSnapshot.forEach((doc) => {
+		if (!excludedUserIds.has(doc.id)) {
+			availableUser.push({ id: doc.id, ...doc.data() } as User);
+		}
+	});
 
-    return availableUser;
-  };
+	return availableUser;
+};
 
 /**
  * Creates a booking session in the Firestore database.
@@ -182,28 +205,30 @@ export const old_getListOfUsers = async (isPSW: boolean) => {
  * @returns A promise that resolves when the session is successfully created.
  */
 export const createBookingSession = async (userId: string) => {
-    try {
-      const status = 'pending'
-      const sessionId = `${FIREBASE_AUTH.currentUser?.uid}_${userId}_${status}`; // Create a unique session ID
-  
-      await setDoc(doc(collection(FIREBASE_DB, "sessions"), sessionId), {
-        requesterId: FIREBASE_AUTH.currentUser?.uid, // The ID of the user making the booking request
-        targetUserId: userId, // The ID of the user being booked
-        status: status, // Initial status
-        // createdAt: new Date(), // Timestamp of the request
-      });
-  
-      return sessionId; // Return session ID if needed for further processing
-    } catch (error) {
-      throw new Error(`Failed to create booking session: ${(error as any).message}`);
-    }
+	try {
+		const status = 'pending';
+		const sessionId = `${FIREBASE_AUTH.currentUser?.uid}_${userId}_${status}`; // Create a unique session ID
+
+		await setDoc(doc(collection(FIREBASE_DB, 'sessions'), sessionId), {
+			requesterId: FIREBASE_AUTH.currentUser?.uid, // The ID of the user making the booking request
+			targetUserId: userId, // The ID of the user being booked
+			status: status, // Initial status
+			// createdAt: new Date(), // Timestamp of the request
+		});
+
+		return sessionId; // Return session ID if needed for further processing
+	} catch (error) {
+		throw new Error(
+			`Failed to create booking session: ${(error as any).message}`,
+		);
+	}
 };
 
 const convertFirestoreTimestampToDate = (session: any) => {
-    return {
-      ...session,
-      createdAt: session.createdAt?.toString(), // Converts Firestore Timestamp to JS Date
-    };
+	return {
+		...session,
+		createdAt: session.createdAt?.toString(), // Converts Firestore Timestamp to JS Date
+	};
 };
 
 /**
@@ -211,47 +236,61 @@ const convertFirestoreTimestampToDate = (session: any) => {
  * @param status - An array of statuses to filter by. Default is ['pending', 'accepted'].
  * @returns A promise that resolves to an array of sessions.
  */
-export const oldFetchUserSessions = async (status: string, typeUser: string): Promise<Session[]> => {
-    const currentUserId = FIREBASE_AUTH.currentUser?.uid;
-    // if (!currentUser) throw new Error("User not authenticated");
-  
-    // const currentUserId = currentUser.uid;
-  
-    // Construct the Firestore query
-    const q = query(
-      collection(FIREBASE_DB, 'sessions'),
-    //   where(typeUser, '==', currentUserId),
-      where(typeUser === "requesterId" ? "requesterId" : "targetUserId", "==", currentUserId),
-      where('status', '==', status)
-    );
-  
-    // Execute the query and process the results
-    const querySnapshot = await getDocs(q);
-    const sessions = querySnapshot.docs.map(doc => ({
-      ...doc.data(),
-      id: doc.id
-    })) as Session[];
+export const oldFetchUserSessions = async (
+	status: string,
+	typeUser: string,
+): Promise<Session[]> => {
+	const currentUserId = FIREBASE_AUTH.currentUser?.uid;
+	// if (!currentUser) throw new Error("User not authenticated");
 
-    // const sessions_redux = sessions.map(convertFirestoreTimestampToDate)
-    // console.log("sessions redux",sessions_redux)
-    // console.log("sessions redux created",sessions_redux[0]["createdAt"])
-    // console.log("sessions redux created type",typeof sessions_redux[0]["createdAt"])
-    // console.log("sessions redux created after", sessions_redux[0]["createdAt"])
-    // return sessions_redux;
-    return sessions;
-  };
+	// const currentUserId = currentUser.uid;
 
-  /**
-   * Updates the status of a session.
-   * @param sessionId - The ID of the session to update.
-   * @param status - The new status to set.
-   */
-  export const directUpdateSessionStatus = async (sessionId: string, status: string): Promise<void> => {
-    try {
-      console.log(`Attempting to update session ${sessionId} to status ${status}`);
-      await updateDoc(doc(FIREBASE_DB, 'sessions', sessionId), { status });
-      console.log(`Session ${sessionId} updated to status ${status}`);
-    } catch (error) {
-      throw new Error(`Failed to update session status: ${(error as any).message}`);
-    }
-  };
+	// Construct the Firestore query
+	const q = query(
+		collection(FIREBASE_DB, 'sessions'),
+		//   where(typeUser, '==', currentUserId),
+		where(
+			typeUser === 'requesterId' ? 'requesterId' : 'targetUserId',
+			'==',
+			currentUserId,
+		),
+		where('status', '==', status),
+	);
+
+	// Execute the query and process the results
+	const querySnapshot = await getDocs(q);
+	const sessions = querySnapshot.docs.map((doc) => ({
+		...doc.data(),
+		id: doc.id,
+	})) as Session[];
+
+	// const sessions_redux = sessions.map(convertFirestoreTimestampToDate)
+	// console.log("sessions redux",sessions_redux)
+	// console.log("sessions redux created",sessions_redux[0]["createdAt"])
+	// console.log("sessions redux created type",typeof sessions_redux[0]["createdAt"])
+	// console.log("sessions redux created after", sessions_redux[0]["createdAt"])
+	// return sessions_redux;
+	return sessions;
+};
+
+/**
+ * Updates the status of a session.
+ * @param sessionId - The ID of the session to update.
+ * @param status - The new status to set.
+ */
+export const directUpdateSessionStatus = async (
+	sessionId: string,
+	status: string,
+): Promise<void> => {
+	try {
+		console.log(
+			`Attempting to update session ${sessionId} to status ${status}`,
+		);
+		await updateDoc(doc(FIREBASE_DB, 'sessions', sessionId), { status });
+		console.log(`Session ${sessionId} updated to status ${status}`);
+	} catch (error) {
+		throw new Error(
+			`Failed to update session status: ${(error as any).message}`,
+		);
+	}
+};

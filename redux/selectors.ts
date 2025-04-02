@@ -8,23 +8,23 @@ const selectUserMap = (state: RootState) => state.user.allUsers;
 const selectCurrentUserId = (state: RootState) => state.user.userData?.id;
 
 export const selectEnrichedSessions = createSelector(
-  [selectSessions, selectUserMap, selectCurrentUserId],
-  (sessions, userMap, currentUserId) => {
-    return sessions.map(session => {
-      // figure out which user is "otherUser"
-      let otherUserId: string | undefined;
-      if (session.senderId === currentUserId) {
-        otherUserId = session.receiverId;
-      } else {
-        otherUserId = session.senderId;
-      }
+	[selectSessions, selectUserMap, selectCurrentUserId],
+	(sessions, userMap, currentUserId) => {
+		return sessions.map((session) => {
+			// figure out which user is "otherUser"
+			let otherUserId: string | undefined;
+			if (session.senderId === currentUserId) {
+				otherUserId = session.receiverId;
+			} else {
+				otherUserId = session.senderId;
+			}
 
-      const enriched: EnrichedSession = {
-        ...session,
-        otherUser: otherUserId ? userMap[otherUserId] : undefined,
-      };
-      console.log('Enriched SESSIONS:', enriched); // debug log
-      return enriched;
-    });
-  }
+			const enriched: EnrichedSession = {
+				...session,
+				otherUser: otherUserId ? userMap[otherUserId] : undefined,
+			};
+			console.log('Enriched SESSIONS:', enriched); // debug log
+			return enriched;
+		});
+	},
 );

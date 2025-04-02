@@ -1,515 +1,515 @@
 [
-    {
-      "firstName": "Isabelle",
-      "lastName": "Tremblay",
-      "dob": "07/01/1978",
-      "age": "45",
-      "gender": "Female",
-      "address": "500 University Ave, Toronto, ON M5G 1W7",
-      "phone": "647-123-4567",
-      "email": "isabelle.tremblay@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fwhite_woman.jpg?alt=media&token=a7b8c9d0-e1f2-4345-9012-bcdef34567a8",
-      "rate": 24.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 1", "Option 3"],
-        "tasks": ["Option 2", "Option 4", "Option 6"],
-        "availability": {
-          "Tuesday": [{ "start": "09:00", "end": "17:00" }],
-          "Thursday": [{ "start": "13:00", "end": "21:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "A kind and patient PSW with over 10 years of experience. I specialize in elder care and helping individuals with mobility issues maintain their independence at home. I am fluent in English and French."
-    },
-    {
-      "firstName": "Ethan",
-      "lastName": "Garcia",
-      "dob": "02/28/2000",
-      "age": "24",
-      "gender": "Male",
-      "address": "75 Queen St W, Toronto, ON M5H 2N1",
-      "phone": "416-987-6543",
-      "email": "ethan.garcia@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fbrown_man.jpg?alt=media&token=b8c9d0e1-f234-4567-a890-cdef123456b9",
-      "rate": 19.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 5", "Option 7", "Option 8"],
-        "tasks": ["Option 1", "Option 3", "Option 5", "Option 7"],
-        "availability": {
-          "Monday": [{ "start": "15:00", "end": "20:00" }],
-          "Wednesday": [{ "start": "16:00", "end": "21:00" }],
-          "Friday": [{ "start": "17:00", "end": "22:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "A cheerful and energetic caregiver looking to assist with daily tasks and provide companionship. I am comfortable with light housekeeping, meal preparation, and running errands. I am currently studying part-time and have flexible availability."
-    },
-    {
-      "firstName": "Aisha",
-      "lastName": "Khan",
-      "dob": "12/05/1985",
-      "age": "38",
-      "gender": "Female",
-      "address": "300 Borough Dr, Scarborough, ON M1P 4P5",
-      "phone": "647-321-7890",
-      "email": "aisha.khan@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_woman.jpg?alt=media&token=c9d0e1f2-3456-4789-a012-efabc34567cd",
-      "rate": 26.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 2", "Option 4", "Option 6"],
-        "tasks": ["Option 1", "Option 3", "Option 5"],
-        "availability": {
-          "Sunday": [{ "start": "08:00", "end": "16:00" }],
-          "Tuesday": [{ "start": "10:00", "end": "18:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Experienced caregiver with a background in nursing. I am passionate about providing compassionate and reliable care to individuals in need. I am comfortable with medication administration, wound care, and personal hygiene assistance."
-    },
-    {
-      "firstName": "Samuel",
-      "lastName": "Johnson",
-      "dob": "04/12/1955",
-      "age": "69",
-      "gender": "Male",
-      "address": "1 Front St W, Toronto, ON M5J 2X5",
-      "phone": "416-741-8529",
-      "email": "samuel.johnson@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fold_white_guy.jpg?alt=media&token=d0e1f234-5678-49ab-b234-f0abc34567de",
-      "rate": 27.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 1", "Option 5", "Option 8"],
-        "tasks": ["Option 2", "Option 4", "Option 6", "Option 8"],
-        "availability": {
-          "Thursday": [{ "start": "14:00", "end": "22:00" }],
-          "Saturday": [{ "start": "10:00", "end": "18:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "A seasoned PSW with over 25 years of experience in the field. I have worked with a wide range of patients, from those with chronic illnesses to those recovering from surgery. I believe in treating each patient with dignity and respect."
-    },
-    {
-      "firstName": "Emily",
-      "lastName": "Brown",
-      "dob": "08/22/1990",
-      "age": "33",
-      "gender": "Female",
-      "address": "200 Bay St, Toronto, ON M5J 2J1",
-      "phone": "437-852-9630",
-      "email": "emily.brown@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fblonde_woman.jpg?alt=media&token=e1f23456-789a-4bcd-b456-789abcdef012",
-      "rate": 21.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 3", "Option 6", "Option 7"],
-        "tasks": ["Option 1", "Option 5", "Option 7", "Option 8"],
-        "availability": {
-          "Monday": [{ "start": "08:00", "end": "12:00" }],
-          "Wednesday": [{ "start": "13:00", "end": "17:00" }],
-          "Friday": [{ "start": "10:00", "end": "14:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "A responsible and caring individual with a passion for helping others. I have experience working with seniors and individuals with disabilities. I am patient, reliable, and dedicated to providing the best possible care."
-    },
-    {
-      "firstName": "John",
-      "lastName": "Doe",
-      "dob": "05/15/1980",
-      "age": "43",
-      "gender": "Male",
-      "address": "1 Yonge St, Toronto, ON M5E 1W7",
-      "phone": "416-555-1000",
-      "email": "john.doe@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fwhite_man.jpg?alt=media&token=f2345678-9abc-4def-b678-abcdef012345",
-      "rate": 28.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 1", "Option 3", "Option 5"],
-        "tasks": ["Option 2", "Option 4", "Option 6"],
-        "availability": {
-          "Monday": [{ "start": "09:00", "end": "17:00" }],
-          "Wednesday": [{ "start": "12:00", "end": "16:00" }],
-          "Friday": [{ "start": "14:00", "end": "20:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Experienced and compassionate caregiver with a passion for helping others live their best lives. Skilled in providing personalized care and support."
-    },
-    {
-      "firstName": "Jane",
-      "lastName": "Smith",
-      "dob": "11/22/1995",
-      "age": "28",
-      "gender": "Female",
-      "address": "10 Dundas St E, Toronto, ON M5B 2G9",
-      "phone": "647-555-2000",
-      "email": "jane.smith@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "",
-      "rate": 22.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": false,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 2", "Option 4", "Option 6"],
-        "tasks": ["Option 1", "Option 3", "Option 5"],
-        "availability": {
-          "Tuesday": [{ "start": "10:00", "end": "18:00" }],
-          "Thursday": [{ "start": "08:00", "end": "12:00" }],
-          "Saturday": [{ "start": "09:00", "end": "15:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Reliable and caring caregiver with a genuine interest in the well-being of others. Dedicated to providing safe and supportive care to meet individual needs."
-    },
-    {
-      "firstName": "Michael",
-      "lastName": "Brown",
-      "dob": "03/10/1970",
-      "age": "54",
-      "gender": "Male",
-      "address": "1 Adelaide St E, Toronto, ON M5C 2V9",
-      "phone": "416-555-3000",
-      "email": "michael.brown@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fbrown_man.jpg?alt=media&token=01234567-89ab-4cde-b012-f3456789abcd",
-      "rate": 30.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 3", "Option 5", "Option 7"],
-        "tasks": ["Option 4", "Option 6", "Option 8"],
-        "availability": {
-          "Sunday": [{ "start": "10:00", "end": "18:00" }],
-          "Tuesday": [{ "start": "14:00", "end": "20:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Experienced and patient caregiver with a strong commitment to providing exceptional care and support. Proficient in managing various health conditions."
-    },
-    {
-      "firstName": "Emily",
-      "lastName": "Wilson",
-      "dob": "09/18/1992",
-      "age": "31",
-      "gender": "Female",
-      "address": "1 University Ave, Toronto, ON M5J 2P1",
-      "phone": "647-555-4000",
-      "email": "emily.wilson@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "",
-      "rate": 20.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": false,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 4", "Option 6", "Option 8"],
-        "tasks": ["Option 1", "Option 2", "Option 3"],
-        "availability": {
-          "Monday": [{ "start": "10:00", "end": "14:00" }],
-          "Wednesday": [{ "start": "18:00", "end": "22:00" }],
-          "Friday": [{ "start": "09:00", "end": "12:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Dedicated and reliable caregiver with a genuine interest in helping others. Experienced in providing companionship and support to seniors and individuals with disabilities."
-    },
-    {
-      "firstName": "David",
-      "lastName": "Lee",
-      "dob": "06/01/1965",
-      "age": "59",
-      "gender": "Male",
-      "address": "1 Queen St W, Toronto, ON M5H 2N2",
-      "phone": "416-555-5000",
-      "email": "david.lee@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_man.jpg?alt=media&token=12345678-9abc-4def-b234-abcd012345ef",
-      "rate": 27.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 5", "Option 7", "Option 1"],
-        "tasks": ["Option 5", "Option 6", "Option 7"],
-        "availability": {
-          "Thursday": [{ "start": "14:00", "end": "22:00" }],
-          "Saturday": [{ "start": "10:00", "end": "18:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Seasoned caregiver with extensive experience in providing comprehensive care and support. Skilled in assisting with a wide range of medical and personal needs."
-    },
-    {
-      "firstName": "Sarah",
-      "lastName": "Garcia",
-      "dob": "04/10/1978",
-      "age": "46",
-      "gender": "Female",
-      "address": "1 Bay St, Toronto, ON M5J 2Z4",
-      "phone": "647-555-6000",
-      "email": "sarah.garcia@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fwhite_woman.jpg?alt=media&token=23456789-abcd-4ef0-b456-0123456789ab",
-      "rate": 25.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 6", "Option 8", "Option 2"],
-        "tasks": ["Option 2", "Option 3", "Option 8"],
-        "availability": {
-          "Tuesday": [{ "start": "09:00", "end": "17:00" }],
-          "Thursday": [{ "start": "13:00", "end": "21:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Caring and dedicated caregiver with a passion for providing compassionate care and support. Committed to ensuring the comfort, safety, and well-being of clients."
-    },
-    {
-      "firstName": "Robert",
-      "lastName": "Chen",
-      "dob": "01/25/1990",
-      "age": "34",
-      "gender": "Male",
-      "address": "20 Queen St W, Toronto, ON M5H 3R3",
-      "phone": "416-555-7000",
-      "email": "robert.chen@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_man.jpg?alt=media&token=3456789a-bcde-4012-b678-23456789abcd",
-      "rate": 26.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 2", "Option 5"],
-        "tasks": ["Option 3", "Option 7"],
-        "availability": {
-          "Monday": [
-            { "start": "09:00", "end": "17:00" },
-            { "start": "19:00", "end": "21:00" }
-          ],
-          "Wednesday": [{ "start": "10:00", "end": "16:00" }],
-          "Friday": [{ "start": "14:00", "end": "20:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "A dedicated and caring individual with a passion for helping others. Experienced in providing care and support to individuals with varying needs. Committed to creating a positive and comfortable environment for those in my care."
-    },
-    {
-      "firstName": "Olivia",
-      "lastName": "Rodriguez",
-      "dob": "07/14/1982",
-      "age": "41",
-      "gender": "Female",
-      "address": "88 Elm St, Toronto, ON M5G 0C6",
-      "phone": "416-999-1234",
-      "email": "olivia.rodriguez@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fblonde_woman.jpg?alt=media&token=456789ab-cdef-4234-b89a-3456789abcdef",
-      "rate": 23.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 4", "Option 6", "Option 8"],
-        "tasks": ["Option 1", "Option 3", "Option 5"],
-        "availability": {
-          "Sunday": [{ "start": "12:00", "end": "18:00" }],
-          "Wednesday": [{ "start": "09:00", "end": "15:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Energetic and compassionate caregiver with a passion for making a difference in people's lives. Experienced in providing companionship and support to individuals of all ages."
-    },
-    {
-      "firstName": "Omar",
-      "lastName": "Ali",
-      "dob": "03/01/1998",
-      "age": "26",
-      "gender": "Male",
-      "address": "123 Yonge St, Toronto, ON M5C 1W4",
-      "phone": "647-222-5678",
-      "email": "omar.ali@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_man.jpg?alt=media&token=56789abc-def0-4456-ba9a-456789abcdef0",
-      "rate": 29.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 1", "Option 3", "Option 5"],
-        "tasks": ["Option 2", "Option 4", "Option 6"],
-        "availability": {
-          "Tuesday": [{ "start": "11:00", "end": "19:00" }],
-          "Thursday": [{ "start": "14:00", "end": "20:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Dedicated and reliable PSW with experience in providing comprehensive care to individuals with various medical conditions. Committed to promoting independence and enhancing quality of life."
-    },
-    {
-      "firstName": "Sophia",
-      "lastName": "Nguyen",
-      "dob": "11/29/1994",
-      "age": "29",
-      "gender": "Female",
-      "address": "456 Bay St, Toronto, ON M5G 2E3",
-      "phone": "416-333-9012",
-      "email": "sophia.nguyen@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_woman.jpg?alt=media&token=6789abcd-ef01-4678-bcba-56789abcdef01",
-      "rate": 24.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 2", "Option 4", "Option 6"],
-        "tasks": ["Option 1", "Option 3", "Option 5"],
-        "availability": {
-          "Monday": [{ "start": "10:00", "end": "16:00" }],
-          "Friday": [{ "start": "11:00", "end": "17:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Compassionate and detail-oriented caregiver with a focus on providing personalized and attentive care. Skilled in assisting with daily living activities and creating a safe and supportive environment."
-    },
-    {
-      "firstName": "Daniel",
-      "lastName": "Kim",
-      "dob": "05/08/1975",
-      "age": "49",
-      "gender": "Male",
-      "address": "789 Queen St W, Toronto, ON M6J 1G1",
-      "phone": "647-444-3456",
-      "email": "daniel.kim@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "",
-      "rate": 31.0,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": false,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 3", "Option 5", "Option 7"],
-        "tasks": ["Option 4", "Option 6", "Option 8"],
-        "availability": {
-          "Wednesday": [{ "start": "08:00", "end": "14:00" }],
-          "Saturday": [{ "start": "10:00", "end": "16:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Experienced and patient caregiver with a strong commitment to providing exceptional care and support. Proficient in managing various health conditions and providing emotional support."
-    },
-    {
-      "firstName": "Ava",
-      "lastName": "Patel",
-      "dob": "01/17/2001",
-      "age": "23",
-      "gender": "Female",
-      "address": "100 King St W, Toronto, ON M5X 1A9",
-      "phone": "416-555-6789",
-      "email": "ava.patel@example.com",
-      "isPsw": false,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_woman.jpg?alt=media&token=89abcdef-0123-489a-cdab-789abcdef0123",
-      "rate": 21.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 4", "Option 6", "Option 8"],
-        "tasks": ["Option 1", "Option 2", "Option 3"],
-        "availability": {
-          "Monday": [{ "start": "07:00", "end": "13:00" }],
-          "Thursday": [{ "start": "10:00", "end": "16:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "Dedicated and reliable caregiver with a genuine interest in helping others. Experienced in providing companionship and support to seniors and individuals with disabilities. I am patient, kind and ready to serve."
-    },
-    {
-      "firstName": "Benjamin",
-      "lastName": "Singh",
-      "dob": "09/26/1960",
-      "age": "63",
-      "gender": "Male",
-      "address": "200 Bay St, Toronto, ON M5J 2J1",
-      "phone": "647-666-7890",
-      "email": "benjamin.singh@example.com",
-      "isPsw": true,
-      "profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fold_white_guy.jpg?alt=media&token=9abcdef0-1234-4abc-def0-89abcdef01234",
-      "rate": 28.5,
-      "idVerified": false,
-      "emailVerified": false,
-      "phoneVerified": false,
-      "hasProfilePhoto": true,
-      "carePreferences": {
-        "lookingForSelf": true,
-        "careType": ["Option 5", "Option 7", "Option 1"],
-        "tasks": ["Option 5", "Option 6", "Option 7"],
-        "availability": {
-          "Sunday": [{ "start": "09:00", "end": "15:00" }],
-          "Friday": [{ "start": "12:00", "end": "18:00" }]
-        }
-      },
-      "onboardingComplete": true,
-      "bio": "An empathetic senior caregiver with over 10 years experience in helping individuals maintain their independence at home. I believe everyone deserves quality care."
-    }
+	{
+		"firstName": "Isabelle",
+		"lastName": "Tremblay",
+		"dob": "07/01/1978",
+		"age": "45",
+		"gender": "Female",
+		"address": "500 University Ave, Toronto, ON M5G 1W7",
+		"phone": "647-123-4567",
+		"email": "isabelle.tremblay@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fwhite_woman.jpg?alt=media&token=a7b8c9d0-e1f2-4345-9012-bcdef34567a8",
+		"rate": 24.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 1", "Option 3"],
+			"tasks": ["Option 2", "Option 4", "Option 6"],
+			"availability": {
+				"Tuesday": [{ "start": "09:00", "end": "17:00" }],
+				"Thursday": [{ "start": "13:00", "end": "21:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "A kind and patient PSW with over 10 years of experience. I specialize in elder care and helping individuals with mobility issues maintain their independence at home. I am fluent in English and French."
+	},
+	{
+		"firstName": "Ethan",
+		"lastName": "Garcia",
+		"dob": "02/28/2000",
+		"age": "24",
+		"gender": "Male",
+		"address": "75 Queen St W, Toronto, ON M5H 2N1",
+		"phone": "416-987-6543",
+		"email": "ethan.garcia@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fbrown_man.jpg?alt=media&token=b8c9d0e1-f234-4567-a890-cdef123456b9",
+		"rate": 19.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 5", "Option 7", "Option 8"],
+			"tasks": ["Option 1", "Option 3", "Option 5", "Option 7"],
+			"availability": {
+				"Monday": [{ "start": "15:00", "end": "20:00" }],
+				"Wednesday": [{ "start": "16:00", "end": "21:00" }],
+				"Friday": [{ "start": "17:00", "end": "22:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "A cheerful and energetic caregiver looking to assist with daily tasks and provide companionship. I am comfortable with light housekeeping, meal preparation, and running errands. I am currently studying part-time and have flexible availability."
+	},
+	{
+		"firstName": "Aisha",
+		"lastName": "Khan",
+		"dob": "12/05/1985",
+		"age": "38",
+		"gender": "Female",
+		"address": "300 Borough Dr, Scarborough, ON M1P 4P5",
+		"phone": "647-321-7890",
+		"email": "aisha.khan@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_woman.jpg?alt=media&token=c9d0e1f2-3456-4789-a012-efabc34567cd",
+		"rate": 26.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 2", "Option 4", "Option 6"],
+			"tasks": ["Option 1", "Option 3", "Option 5"],
+			"availability": {
+				"Sunday": [{ "start": "08:00", "end": "16:00" }],
+				"Tuesday": [{ "start": "10:00", "end": "18:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Experienced caregiver with a background in nursing. I am passionate about providing compassionate and reliable care to individuals in need. I am comfortable with medication administration, wound care, and personal hygiene assistance."
+	},
+	{
+		"firstName": "Samuel",
+		"lastName": "Johnson",
+		"dob": "04/12/1955",
+		"age": "69",
+		"gender": "Male",
+		"address": "1 Front St W, Toronto, ON M5J 2X5",
+		"phone": "416-741-8529",
+		"email": "samuel.johnson@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fold_white_guy.jpg?alt=media&token=d0e1f234-5678-49ab-b234-f0abc34567de",
+		"rate": 27.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 1", "Option 5", "Option 8"],
+			"tasks": ["Option 2", "Option 4", "Option 6", "Option 8"],
+			"availability": {
+				"Thursday": [{ "start": "14:00", "end": "22:00" }],
+				"Saturday": [{ "start": "10:00", "end": "18:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "A seasoned PSW with over 25 years of experience in the field. I have worked with a wide range of patients, from those with chronic illnesses to those recovering from surgery. I believe in treating each patient with dignity and respect."
+	},
+	{
+		"firstName": "Emily",
+		"lastName": "Brown",
+		"dob": "08/22/1990",
+		"age": "33",
+		"gender": "Female",
+		"address": "200 Bay St, Toronto, ON M5J 2J1",
+		"phone": "437-852-9630",
+		"email": "emily.brown@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fblonde_woman.jpg?alt=media&token=e1f23456-789a-4bcd-b456-789abcdef012",
+		"rate": 21.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 3", "Option 6", "Option 7"],
+			"tasks": ["Option 1", "Option 5", "Option 7", "Option 8"],
+			"availability": {
+				"Monday": [{ "start": "08:00", "end": "12:00" }],
+				"Wednesday": [{ "start": "13:00", "end": "17:00" }],
+				"Friday": [{ "start": "10:00", "end": "14:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "A responsible and caring individual with a passion for helping others. I have experience working with seniors and individuals with disabilities. I am patient, reliable, and dedicated to providing the best possible care."
+	},
+	{
+		"firstName": "John",
+		"lastName": "Doe",
+		"dob": "05/15/1980",
+		"age": "43",
+		"gender": "Male",
+		"address": "1 Yonge St, Toronto, ON M5E 1W7",
+		"phone": "416-555-1000",
+		"email": "john.doe@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fwhite_man.jpg?alt=media&token=f2345678-9abc-4def-b678-abcdef012345",
+		"rate": 28.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 1", "Option 3", "Option 5"],
+			"tasks": ["Option 2", "Option 4", "Option 6"],
+			"availability": {
+				"Monday": [{ "start": "09:00", "end": "17:00" }],
+				"Wednesday": [{ "start": "12:00", "end": "16:00" }],
+				"Friday": [{ "start": "14:00", "end": "20:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Experienced and compassionate caregiver with a passion for helping others live their best lives. Skilled in providing personalized care and support."
+	},
+	{
+		"firstName": "Jane",
+		"lastName": "Smith",
+		"dob": "11/22/1995",
+		"age": "28",
+		"gender": "Female",
+		"address": "10 Dundas St E, Toronto, ON M5B 2G9",
+		"phone": "647-555-2000",
+		"email": "jane.smith@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "",
+		"rate": 22.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": false,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 2", "Option 4", "Option 6"],
+			"tasks": ["Option 1", "Option 3", "Option 5"],
+			"availability": {
+				"Tuesday": [{ "start": "10:00", "end": "18:00" }],
+				"Thursday": [{ "start": "08:00", "end": "12:00" }],
+				"Saturday": [{ "start": "09:00", "end": "15:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Reliable and caring caregiver with a genuine interest in the well-being of others. Dedicated to providing safe and supportive care to meet individual needs."
+	},
+	{
+		"firstName": "Michael",
+		"lastName": "Brown",
+		"dob": "03/10/1970",
+		"age": "54",
+		"gender": "Male",
+		"address": "1 Adelaide St E, Toronto, ON M5C 2V9",
+		"phone": "416-555-3000",
+		"email": "michael.brown@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fbrown_man.jpg?alt=media&token=01234567-89ab-4cde-b012-f3456789abcd",
+		"rate": 30.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 3", "Option 5", "Option 7"],
+			"tasks": ["Option 4", "Option 6", "Option 8"],
+			"availability": {
+				"Sunday": [{ "start": "10:00", "end": "18:00" }],
+				"Tuesday": [{ "start": "14:00", "end": "20:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Experienced and patient caregiver with a strong commitment to providing exceptional care and support. Proficient in managing various health conditions."
+	},
+	{
+		"firstName": "Emily",
+		"lastName": "Wilson",
+		"dob": "09/18/1992",
+		"age": "31",
+		"gender": "Female",
+		"address": "1 University Ave, Toronto, ON M5J 2P1",
+		"phone": "647-555-4000",
+		"email": "emily.wilson@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "",
+		"rate": 20.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": false,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 4", "Option 6", "Option 8"],
+			"tasks": ["Option 1", "Option 2", "Option 3"],
+			"availability": {
+				"Monday": [{ "start": "10:00", "end": "14:00" }],
+				"Wednesday": [{ "start": "18:00", "end": "22:00" }],
+				"Friday": [{ "start": "09:00", "end": "12:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Dedicated and reliable caregiver with a genuine interest in helping others. Experienced in providing companionship and support to seniors and individuals with disabilities."
+	},
+	{
+		"firstName": "David",
+		"lastName": "Lee",
+		"dob": "06/01/1965",
+		"age": "59",
+		"gender": "Male",
+		"address": "1 Queen St W, Toronto, ON M5H 2N2",
+		"phone": "416-555-5000",
+		"email": "david.lee@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_man.jpg?alt=media&token=12345678-9abc-4def-b234-abcd012345ef",
+		"rate": 27.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 5", "Option 7", "Option 1"],
+			"tasks": ["Option 5", "Option 6", "Option 7"],
+			"availability": {
+				"Thursday": [{ "start": "14:00", "end": "22:00" }],
+				"Saturday": [{ "start": "10:00", "end": "18:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Seasoned caregiver with extensive experience in providing comprehensive care and support. Skilled in assisting with a wide range of medical and personal needs."
+	},
+	{
+		"firstName": "Sarah",
+		"lastName": "Garcia",
+		"dob": "04/10/1978",
+		"age": "46",
+		"gender": "Female",
+		"address": "1 Bay St, Toronto, ON M5J 2Z4",
+		"phone": "647-555-6000",
+		"email": "sarah.garcia@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fwhite_woman.jpg?alt=media&token=23456789-abcd-4ef0-b456-0123456789ab",
+		"rate": 25.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 6", "Option 8", "Option 2"],
+			"tasks": ["Option 2", "Option 3", "Option 8"],
+			"availability": {
+				"Tuesday": [{ "start": "09:00", "end": "17:00" }],
+				"Thursday": [{ "start": "13:00", "end": "21:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Caring and dedicated caregiver with a passion for providing compassionate care and support. Committed to ensuring the comfort, safety, and well-being of clients."
+	},
+	{
+		"firstName": "Robert",
+		"lastName": "Chen",
+		"dob": "01/25/1990",
+		"age": "34",
+		"gender": "Male",
+		"address": "20 Queen St W, Toronto, ON M5H 3R3",
+		"phone": "416-555-7000",
+		"email": "robert.chen@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_man.jpg?alt=media&token=3456789a-bcde-4012-b678-23456789abcd",
+		"rate": 26.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 2", "Option 5"],
+			"tasks": ["Option 3", "Option 7"],
+			"availability": {
+				"Monday": [
+					{ "start": "09:00", "end": "17:00" },
+					{ "start": "19:00", "end": "21:00" }
+				],
+				"Wednesday": [{ "start": "10:00", "end": "16:00" }],
+				"Friday": [{ "start": "14:00", "end": "20:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "A dedicated and caring individual with a passion for helping others. Experienced in providing care and support to individuals with varying needs. Committed to creating a positive and comfortable environment for those in my care."
+	},
+	{
+		"firstName": "Olivia",
+		"lastName": "Rodriguez",
+		"dob": "07/14/1982",
+		"age": "41",
+		"gender": "Female",
+		"address": "88 Elm St, Toronto, ON M5G 0C6",
+		"phone": "416-999-1234",
+		"email": "olivia.rodriguez@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fblonde_woman.jpg?alt=media&token=456789ab-cdef-4234-b89a-3456789abcdef",
+		"rate": 23.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 4", "Option 6", "Option 8"],
+			"tasks": ["Option 1", "Option 3", "Option 5"],
+			"availability": {
+				"Sunday": [{ "start": "12:00", "end": "18:00" }],
+				"Wednesday": [{ "start": "09:00", "end": "15:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Energetic and compassionate caregiver with a passion for making a difference in people's lives. Experienced in providing companionship and support to individuals of all ages."
+	},
+	{
+		"firstName": "Omar",
+		"lastName": "Ali",
+		"dob": "03/01/1998",
+		"age": "26",
+		"gender": "Male",
+		"address": "123 Yonge St, Toronto, ON M5C 1W4",
+		"phone": "647-222-5678",
+		"email": "omar.ali@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_man.jpg?alt=media&token=56789abc-def0-4456-ba9a-456789abcdef0",
+		"rate": 29.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 1", "Option 3", "Option 5"],
+			"tasks": ["Option 2", "Option 4", "Option 6"],
+			"availability": {
+				"Tuesday": [{ "start": "11:00", "end": "19:00" }],
+				"Thursday": [{ "start": "14:00", "end": "20:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Dedicated and reliable PSW with experience in providing comprehensive care to individuals with various medical conditions. Committed to promoting independence and enhancing quality of life."
+	},
+	{
+		"firstName": "Sophia",
+		"lastName": "Nguyen",
+		"dob": "11/29/1994",
+		"age": "29",
+		"gender": "Female",
+		"address": "456 Bay St, Toronto, ON M5G 2E3",
+		"phone": "416-333-9012",
+		"email": "sophia.nguyen@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_woman.jpg?alt=media&token=6789abcd-ef01-4678-bcba-56789abcdef01",
+		"rate": 24.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 2", "Option 4", "Option 6"],
+			"tasks": ["Option 1", "Option 3", "Option 5"],
+			"availability": {
+				"Monday": [{ "start": "10:00", "end": "16:00" }],
+				"Friday": [{ "start": "11:00", "end": "17:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Compassionate and detail-oriented caregiver with a focus on providing personalized and attentive care. Skilled in assisting with daily living activities and creating a safe and supportive environment."
+	},
+	{
+		"firstName": "Daniel",
+		"lastName": "Kim",
+		"dob": "05/08/1975",
+		"age": "49",
+		"gender": "Male",
+		"address": "789 Queen St W, Toronto, ON M6J 1G1",
+		"phone": "647-444-3456",
+		"email": "daniel.kim@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "",
+		"rate": 31.0,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": false,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 3", "Option 5", "Option 7"],
+			"tasks": ["Option 4", "Option 6", "Option 8"],
+			"availability": {
+				"Wednesday": [{ "start": "08:00", "end": "14:00" }],
+				"Saturday": [{ "start": "10:00", "end": "16:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Experienced and patient caregiver with a strong commitment to providing exceptional care and support. Proficient in managing various health conditions and providing emotional support."
+	},
+	{
+		"firstName": "Ava",
+		"lastName": "Patel",
+		"dob": "01/17/2001",
+		"age": "23",
+		"gender": "Female",
+		"address": "100 King St W, Toronto, ON M5X 1A9",
+		"phone": "416-555-6789",
+		"email": "ava.patel@example.com",
+		"isPsw": false,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fasian_woman.jpg?alt=media&token=89abcdef-0123-489a-cdab-789abcdef0123",
+		"rate": 21.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 4", "Option 6", "Option 8"],
+			"tasks": ["Option 1", "Option 2", "Option 3"],
+			"availability": {
+				"Monday": [{ "start": "07:00", "end": "13:00" }],
+				"Thursday": [{ "start": "10:00", "end": "16:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "Dedicated and reliable caregiver with a genuine interest in helping others. Experienced in providing companionship and support to seniors and individuals with disabilities. I am patient, kind and ready to serve."
+	},
+	{
+		"firstName": "Benjamin",
+		"lastName": "Singh",
+		"dob": "09/26/1960",
+		"age": "63",
+		"gender": "Male",
+		"address": "200 Bay St, Toronto, ON M5J 2J1",
+		"phone": "647-666-7890",
+		"email": "benjamin.singh@example.com",
+		"isPsw": true,
+		"profilePhotoUrl": "https://firebasestorage.googleapis.com/v0/b/amicare-3e988.firebasestorage.app/o/test1profilePhotos%2Fold_white_guy.jpg?alt=media&token=9abcdef0-1234-4abc-def0-89abcdef01234",
+		"rate": 28.5,
+		"idVerified": false,
+		"emailVerified": false,
+		"phoneVerified": false,
+		"hasProfilePhoto": true,
+		"carePreferences": {
+			"lookingForSelf": true,
+			"careType": ["Option 5", "Option 7", "Option 1"],
+			"tasks": ["Option 5", "Option 6", "Option 7"],
+			"availability": {
+				"Sunday": [{ "start": "09:00", "end": "15:00" }],
+				"Friday": [{ "start": "12:00", "end": "18:00" }]
+			}
+		},
+		"onboardingComplete": true,
+		"bio": "An empathetic senior caregiver with over 10 years experience in helping individuals maintain their independence at home. I believe everyone deserves quality care."
+	}
 ]
