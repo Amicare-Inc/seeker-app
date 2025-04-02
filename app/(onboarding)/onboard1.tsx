@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { router } from 'expo-router';
+import careTypeOptions from '@/assets/careOptions';
 
 const CarePreferences: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -13,17 +14,6 @@ const CarePreferences: React.FC = () => {
 
     const [lookingForSelf, setLookingForSelf] = useState<boolean | null>(userData?.carePreferences?.lookingForSelf || null);
     const [selectedCareTypes, setSelectedCareTypes] = useState<string[]>(userData?.carePreferences?.careType || []);
-
-    const careOptions = [
-        'Option 1',
-        'Option 2',
-        'Option 3',
-        'Option 4',
-        'Option 5',
-        'Option 6',
-        'Option 7',
-        'Option 8',
-    ];
 
     const toggleCareType = (careType: string) => {
         setSelectedCareTypes((prev) =>
@@ -91,7 +81,7 @@ const CarePreferences: React.FC = () => {
                         {isPSW ? 'What types of care do you provide?' : 'What types of care are you interested in?'}
                     </Text>
                     <View className="flex-wrap flex-row justify-between">
-                        {careOptions.map((option) => (
+                        {careTypeOptions.map((option) => (
                             <CustomButton
                                 key={option}
                                 title={option}

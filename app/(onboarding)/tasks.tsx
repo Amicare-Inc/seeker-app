@@ -4,6 +4,7 @@ import CustomButton from '@/components/CustomButton';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
+import helpOptions from '@/assets/helpOptions';
 import { router } from 'expo-router';
 
 const TaskSelection: React.FC = () => {
@@ -13,16 +14,16 @@ const TaskSelection: React.FC = () => {
 
     const [selectedTasks, setSelectedTasks] = useState<string[]>(userData?.carePreferences?.tasks || []);
 
-    const taskOptions = [
-        'Option 1',
-        'Option 2',
-        'Option 3',
-        'Option 4',
-        'Option 5',
-        'Option 6',
-        'Option 7',
-        'Option 8',
-    ];
+    // const taskOptions = [
+    //     'Option 1',
+    //     'Option 2',
+    //     'Option 3',
+    //     'Option 4',
+    //     'Option 5',
+    //     'Option 6',
+    //     'Option 7',
+    //     'Option 8',
+    // ];
 
     const toggleTask = (task: string) => {
         setSelectedTasks((prev) =>
@@ -56,7 +57,7 @@ const TaskSelection: React.FC = () => {
 
                     {/* Task Options */}
                     <View className="flex-wrap flex-row justify-between">
-                        {taskOptions.map((task) => (
+                        {helpOptions.map((task) => (
                             <CustomButton
                                 key={task}
                                 title={task}

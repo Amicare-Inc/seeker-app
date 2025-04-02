@@ -1,13 +1,13 @@
 // src/assets/helpOptions.ts
 const helpOptions = [
-    "Option 1",
-    "Option 2",
-    "Option 3",
-    "Option 4",
-    "Option 5",
-    "Option 6",
-    "Option 7",
-    "Option 8",
+  "Bathing Assistance",       // help with bathing and personal hygiene
+  "Dressing Assistance",      // help with choosing and putting on clothes
+  "Grooming Support",         // assistance with grooming and personal care routines
+  "Toileting Assistance",     // help with using the bathroom and incontinence care
+  "Light Housekeeping",       // cleaning, laundry, and maintaining the home
+  "Grocery Shopping",         // running errands to get groceries
+  "Medication Reminders",     // ensuring timely intake of medication
+  "Emotional Support"  
   ];
   
   export default helpOptions;
