@@ -28,11 +28,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const ChatPage = () => {
-	// Retrieve the session ID from route parameters.
 	const { sessionId } = useLocalSearchParams();
-	// Get current user from Redux.
 	const currentUser = useSelector((state: RootState) => state.user.userData);
-	// Retrieve the active enriched session from Redux (or look it up by ID).
 	const activeSession = useSelector(
 		(state: RootState) =>
 			state.sessions.activeEnrichedSession ||
@@ -46,13 +43,8 @@ const ChatPage = () => {
 	console.log('ChatPage - currentUser:', currentUser);
 	console.log('ChatPage - activeSession:', activeSession);
 
-	// If essential data is missing, return null.
 	if (!sessionId || !activeSession || !currentUser) return null;
-
-	// Destructure otherUser from the enriched session.
 	const otherUser = activeSession.otherUser;
-
-	// Local state for messages.
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [newMessage, setNewMessage] = useState('');
 
@@ -73,7 +65,6 @@ const ChatPage = () => {
 		}
 	};
 
-	// Firestore message fetching function.
 	const fetchMessages = (
 		sessionId: string,
 		callback: (msgs: Message[]) => void,
@@ -95,7 +86,6 @@ const ChatPage = () => {
 		return unsubscribe;
 	};
 
-	// Firestore message sending function.
 	const addMessage = async (
 		sessionId: string,
 		messageText: string,

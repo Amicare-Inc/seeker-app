@@ -20,12 +20,9 @@ import { unwrapResult } from '@reduxjs/toolkit';
 const SessionConfirmation = () => {
 	const { sessionId, action, otherUserId } = useLocalSearchParams();
 	const dispatch = useDispatch<AppDispatch>();
-
-	// Get session from Redux (make sure your sessions slice is populated)
 	const session = useSelector((state: RootState) =>
 		state.sessions.allSessions.find((s) => s.id === sessionId),
 	);
-	// Get current user and other user from Redux
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const otherUser = useSelector((state: RootState) =>
 		state.userList.users.find((u) => u.id === otherUserId),
@@ -39,25 +36,23 @@ const SessionConfirmation = () => {
 		);
 	}
 
-	// Compute the difference (in hours) between the session start time and now.
 	const timeDiff = session.startTime
 		? (new Date(session.startTime).getTime() - new Date().getTime()) /
 			(1000 * 60 * 60)
 		: null;
 
-	// Determine message and button texts based on action and session status/time
 	let headerText = '';
 	let messageText = '';
 	let primaryButtonText = '';
 	let primaryButtonColor = ''; // e.g. blue for book/change, red for cancel
 	let onPrimaryPress: () => void = () => {};
-	const onBackPress = () => router.back(); // Back to chat
+	const onBackPress = () => router.back();
 
 	if (action === 'book') {
 		headerText = 'Confirm Booking';
 		messageText = `By clicking "Book Session" you agree to the terms and conditions. The session will be confirmed once ${otherUser.firstName} also books.`;
 		primaryButtonText = 'Book Session';
-		primaryButtonColor = '#008DF4'; // blue
+		primaryButtonColor = '#008DF4';
 		onPrimaryPress = async () => {
 			try {
 				const resultAction = await dispatch(
