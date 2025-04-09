@@ -85,7 +85,7 @@ const PswSessionsTab = () => {
 	return (
 		<SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
 			{/* Header Row */}
-			<View className="flex-row items-center px-3.5 pt-4 pb-2">
+			<View className="flex-row items-center px-3.5 pb-2">
 				<Ionicons
 					name="time"
 					size={24}

@@ -16,15 +16,10 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
 }) => {
 	const renderItem = ({ item }: { item: Message }) => (
 		<View
-			className={`p-3 my-1 rounded-lg max-w-3/4 ${item.userId === currentUserId ? 'self-end bg-blue-500' : 'self-start bg-gray-200'}`}
+			className={`p-3 my-1 rounded-3xl max-w-3/4 ${item.userId === currentUserId ? 'self-end bg-[#0e7ae2]' : 'self-start bg-gray-200'}`}
 		>
 			<Text
-				className={`font-bold ${item.userId === currentUserId ? 'text-white' : 'text-black'}`}
-			>
-				{item.userId === currentUserId ? 'You' : otherUserName}
-			</Text>
-			<Text
-				className={`${item.userId === currentUserId ? 'text-white' : 'text-black'}`}
+				className={`${item.userId === currentUserId ? 'text-white' : 'text-black'} px-1`}
 			>
 				{item.message}
 			</Text>

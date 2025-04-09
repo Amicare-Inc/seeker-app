@@ -47,12 +47,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 				onPress={() => onSessionPress(item)}
 				className="mb-6"
 			>
-				<LinearGradient
-					start={{ x: 0, y: 0.5 }}
-					end={{ x: 1, y: 0.5 }}
-					colors={['#008DF4', '#5CBAFF']}
-					className="rounded-full px-4 py-3"
-				>
+				<View className="rounded-full px-3 py-3 pr-10 bg-[#0e7ae2]">
 					<View className="flex-row items-center justify-between">
 						<View className="flex-row items-center">
 							<Image
@@ -61,30 +56,36 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 										item.otherUser.profilePhotoUrl ||
 										'https://via.placeholder.com/50',
 								}}
-								className="w-16 h-16 rounded-full"
+								className="w-12 h-12 rounded-full"
 							/>
 							<View className="ml-3">
-								<Text className="text-white text-lg">
-									{mainLabel}
+								<Text
+									className="text-white text-lg font-bold"
+									numberOfLines={1}
+									ellipsizeMode="tail"
+								>
+									{mainLabel.length > 10
+										? `${mainLabel.substring(0, 13)}...`
+										: mainLabel}
 								</Text>
 								<Text
-									className="text-base"
+									className="text-md"
 									style={{ color: '#fff' }}
 								>
 									with {otherName}
 								</Text>
 							</View>
 						</View>
-						<View className="ml-2 items-end">
-							<Text className="text-white text-lg">
-								{formattedTime}
-							</Text>
-							<Text className="text-white text-base">
+						<View className="items-end">
+							<Text className="text-white text-lg font-semibold">
 								{formattedDate}
+							</Text>
+							<Text className="text-white text-sm">
+								{formattedTime}
 							</Text>
 						</View>
 					</View>
-				</LinearGradient>
+				</View>
 			</TouchableOpacity>
 		);
 	};
