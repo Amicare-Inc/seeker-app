@@ -134,10 +134,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			colors={
 				isConfirmed ? ['#008DF4', '#5CBAFF'] : ['#ffffff', '#ffffff']
 			}
-			className="py-2"
 		>
 			{/* Top row */}
-			<View className="flex-row items-center px-4 py-3">
+			<View className="flex-row items-center px-4 pb-3">
 				<TouchableOpacity
 					onPress={() => router.back()}
 					className="mr-3"

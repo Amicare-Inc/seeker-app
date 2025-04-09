@@ -61,7 +61,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 
 	return (
 		<SafeAreaView
-			className="flex-1 px-4 py-6"
+			className="flex-1 px-4 pb-6"
 			style={{ backgroundColor: '#f0f0f0' }}
 		>
 			<ProfileHeader
