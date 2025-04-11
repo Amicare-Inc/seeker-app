@@ -80,7 +80,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 				{!!bio && (
 					<View className="mb-4">
 						<Text className="text-base text-black mb-1">Bio</Text>
-						<ProfileBio bio={bio} />
+						{/* <ProfileBio bio={bio} /> Disabled this because I have no idea why it's making large bottom gap*/}
 					</View>
 				)}
 
@@ -101,15 +101,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 							<ProfileListItem
 								label="Settings"
 								iconName="settings"
+								onPress={() => router.push('/(profile)/settings')}
 							/>
 							<ProfileListItem
 								label="Help"
 								iconName="help-circle"
+								onPress={() => router.push('/(profile)/help')}
 							/>
 							<ProfileListItem
-								label="Refer friends"
+								label="Referrals & Rewards"
 								iconName="gift"
-								disabled
+								onPress={() => router.push('/(profile)/refer')}
 							/>
 							<ProfileListItem
 								label="Legal"
