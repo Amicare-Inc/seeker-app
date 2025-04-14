@@ -80,7 +80,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 				{!!bio && (
 					<View className="mb-4">
 						<Text className="text-base text-black mb-1">Bio</Text>
-						{/* <ProfileBio bio={bio} /> Disabled this because I have no idea why it's making large bottom gap*/}
+						<ProfileBio bio={bio} />
 					</View>
 				)}
 
