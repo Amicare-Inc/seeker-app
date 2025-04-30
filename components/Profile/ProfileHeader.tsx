@@ -77,7 +77,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
 			{/* Right side: If my profile, show menu icon; otherwise, if PSW, show rate */}
 			{isMyProfile ? (
-				<TouchableOpacity onPress={onMenuPress} className="p-2">
+				<TouchableOpacity onPress={onMenuPress} className="p-4">
 					<Ionicons
 						name="ellipsis-horizontal"
 						size={24}
