@@ -10,8 +10,8 @@ const HelpScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-row items-center px-4 pb-3 border-b border-gray-200">
+    <SafeAreaView className="flex-1 bg-neutral-100">
+      <View className="flex-row items-center px-4 pb-3">
         <TouchableOpacity onPress={handleBackPress} className="mr-4">
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
@@ -19,50 +19,51 @@ const HelpScreen = () => {
       </View>
 
       <ScrollView className="flex-1">
-        <View className="bg-white border border-gray-200 rounded-lg mx-4 mt-4">
+        <View className="bg-white rounded-lg mx-4 mt-4">
           <ListItem
-            icon="help-circle"
-            label="Help with a Session"
+            icon="menu"
+            label="Help with a session"
             onPress={() => {}}
+            box
           />
           <ListItem
-            icon="person-circle"
+            icon="menu"
             label="Account"
             onPress={() => {}}
+            box
           />
           <ListItem
-            icon="book"
-            label="A Guide to Amicare"
+            icon="menu"
+            label="A guide to Amicare"
             onPress={() => {}}
+            box
           />
           <ListItem
-            icon="options"
+            icon="menu"
             label="Accessibility"
             onPress={() => {}}
-            noBorder
+            box
           />
         </View>
 
         <View className="mx-4 mt-8">
-          <Text className="text-base font-medium text-gray-500 mb-2">Need Help Now?</Text>
-          <View className="bg-white border border-gray-200 rounded-lg">
+          <Text className="text-lg font-medium text-gray-800 mb-2">Need Help Now?</Text>
+            <View className="bg-white rounded-lg">
             <ListItem
               icon="call"
               label="Call Support"
               onPress={() => {}}
-              noBorder
             />
-          </View>
+            </View>
         </View>
 
         <View className="mx-4 mt-8 mb-6">
-          <Text className="text-base font-medium text-gray-500 mb-2">Support Messages</Text>
-          <View className="bg-white border border-gray-200 rounded-lg">
+          <Text className="text-lg font-medium text-gray-800 mb-2">Support Messages</Text>
+          <View className="bg-white rounded-lg">
             <ListItem
-              icon="chatbubbles"
+              icon="chatbox"
               label="View all messages"
               onPress={() => {}}
-              noBorder
             />
           </View>
         </View>
@@ -75,27 +76,28 @@ interface ListItemProps {
   icon: string;
   label: string;
   onPress: () => void;
-  disabled?: boolean;
-  noBorder?: boolean;
+  box?: boolean;
 }
-
 const ListItem: React.FC<ListItemProps> = ({ 
   icon, 
   label, 
   onPress, 
-  disabled = false,
-  noBorder = false
+  box = false,
 }) => {
   return (
     <TouchableOpacity 
       onPress={onPress}
-      disabled={disabled}
-      className={`flex-row items-center p-4 ${!noBorder ? 'border-b border-gray-200' : ''}`}
+      className={`flex-row items-center p-4 gap-3`}
     >
-      <View className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center mr-3">
-        <Ionicons name={icon as any} size={18} color="black" />
+      <View className={`w-7 h-7 rounded-lg ${!box ? 'bg-white' : 'bg-[#303031]'} items-center justify-center`}>
+        <Ionicons 
+          name={icon as any} 
+          size={22} 
+          color={box ? "white" : "black"
+          } 
+        />
       </View>
-      <Text className="flex-1 text-base">{label}</Text>
+      <Text className="flex-1 text-base font-medium">{label}</Text>
       <Ionicons name="chevron-forward" size={20} color="#C5C5C7" />
     </TouchableOpacity>
   );

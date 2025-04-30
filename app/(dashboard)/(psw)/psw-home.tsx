@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import {
-	SafeAreaView,
 	View,
 	Text,
 	ActivityIndicator,
 	FlatList,
 	TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'; // Import from context library
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
 import { router } from 'expo-router';
@@ -40,7 +40,12 @@ const PswHomeTab = () => {
 	);
 
 	return (
-		<SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
+		<SafeAreaView // Use SafeAreaView from react-native-safe-area-context
+			className="flex-1"
+			style={{
+				backgroundColor: '#f0f0f0',
+			}}
+		>
 			{/* Header row */}
 			<View className="flex-row items-center justify-between px-4 pb-2">
 				{/* Left side: Icon + Title */}
