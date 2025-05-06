@@ -50,7 +50,7 @@ const SeekerHomeTab = () => {
 						color="black"
 						style={{ marginRight: 8 }}
 					/>
-					<Text className="text-2xl font-mono text-black">
+					<Text className="text-2xl text-black">
 						Explore PSWs
 					</Text>
 				</View>

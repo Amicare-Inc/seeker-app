@@ -56,7 +56,7 @@ const PswHomeTab = () => {
 						color="black"
 						style={{ marginRight: 8 }}
 					/>
-					<Text className="text-xl font-mono text-black">
+					<Text className="text-xl text-black">
 						Explore Care Seekers
 					</Text>
 				</View>

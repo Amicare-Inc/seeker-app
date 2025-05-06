@@ -88,7 +88,7 @@ const SeekerSessionsTab = () => {
 					color="black"
 					style={{ marginRight: 8 }}
 				/>
-				<Text className="text-2xl font-mono text-black">Sessions</Text>
+				<Text className="text-2xl text-black">Sessions</Text>
 			</View>
 
 			{/* Categories */}
