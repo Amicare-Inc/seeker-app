@@ -96,7 +96,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 							<ProfileListItem
 								label="Family"
 								iconName="people"
-								disabled
+								onPress={() => router.push('/(profile)/family')}
 							/>
 							<ProfileListItem
 								label="Settings"

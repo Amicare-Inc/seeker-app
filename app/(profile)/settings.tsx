@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import UserEditIcon from '../../assets/icons/user-edit.svg';
 
 const SettingsScreen = () => {
 
@@ -28,7 +29,7 @@ const SettingsScreen = () => {
       </View>
 
       <ScrollView className="flex-1">
-        <View className="bg-white rounded-lg mx-4 mt-6 shadow-sm">
+        <View className="bg-white rounded-lg mx-4 mt-6">
           <SettingsListItem
             icon="person"
             label="Personal Details"
