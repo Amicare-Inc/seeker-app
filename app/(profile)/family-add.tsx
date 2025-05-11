@@ -33,13 +33,12 @@ const FamilyAddScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
-      {/* Header */}
       <View className="flex-row items-center px-4">
         <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4">
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-xl font-semibold">Add Family Member</Text>
+          <Text className="text-xl font-medium">Add Family Member</Text>
         </View>
       </View>
 

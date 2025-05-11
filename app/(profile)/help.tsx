@@ -4,6 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
+import MenuIcon from '../../assets/icons/menu.svg';
+import CallIcon from '../../assets/icons/call.svg';
+import MessageTextIcon from '../../assets/icons/message-text.svg';
+
 const HelpScreen = () => {
   const handleBackPress = () => {
     router.back();
@@ -11,46 +15,45 @@ const HelpScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
-      <View className="flex-row items-center px-4 pb-3">
-        <TouchableOpacity onPress={handleBackPress} className="mr-4">
+      {/* Header */}
+      <View className="flex-row items-center px-4">
+        <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4">
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="text-xl font-semibold">Help</Text>
+        <View className="flex-1 items-center">
+          <Text className="text-xl font-medium">Help</Text>
+        </View>
       </View>
 
       <ScrollView className="flex-1">
         <View className="bg-white rounded-lg mx-4 mt-4">
           <ListItem
-            icon="menu"
+            icon={<MenuIcon width={28} height={28} />}
             label="Help with a session"
             onPress={() => {}}
-            box
           />
           <ListItem
-            icon="menu"
+            icon={<MenuIcon width={28} height={28} />}
             label="Account"
             onPress={() => {}}
-            box
           />
           <ListItem
-            icon="menu"
+            icon={<MenuIcon width={28} height={28} />}
             label="A guide to Amicare"
             onPress={() => {}}
-            box
           />
           <ListItem
-            icon="menu"
+            icon={<MenuIcon width={28} height={28} />}
             label="Accessibility"
             onPress={() => {}}
-            box
           />
         </View>
 
         <View className="mx-4 mt-8">
-          <Text className="text-lg font-medium text-gray-800 mb-2">Need Help Now?</Text>
+          <Text className="text-lg font-medium text-gray-80 mb-2">Need Help Now?</Text>
             <View className="bg-white rounded-lg">
             <ListItem
-              icon="call"
+              icon={<CallIcon width={28} height={28} />}
               label="Call Support"
               onPress={() => {}}
             />
@@ -58,10 +61,10 @@ const HelpScreen = () => {
         </View>
 
         <View className="mx-4 mt-8 mb-6">
-          <Text className="text-lg font-medium text-gray-800 mb-2">Support Messages</Text>
+          <Text className="text-lg font-medium text-gray-80 mb-2">Support Messages</Text>
           <View className="bg-white rounded-lg">
             <ListItem
-              icon="chatbox"
+              icon={<MessageTextIcon width={28} height={28} />}
               label="View all messages"
               onPress={() => {}}
             />
@@ -73,32 +76,22 @@ const HelpScreen = () => {
 };
 
 interface ListItemProps {
-  icon: string;
+  icon: React.ReactNode; // Accept any React node as the icon
   label: string;
   onPress: () => void;
-  box?: boolean;
 }
 const ListItem: React.FC<ListItemProps> = ({ 
   icon, 
   label, 
   onPress, 
-  box = false,
 }) => {
   return (
-    <TouchableOpacity 
-      onPress={onPress}
-      className={`flex-row items-center p-4 gap-3`}
-    >
-      <View className={`w-7 h-7 rounded-lg ${!box ? 'bg-white' : 'bg-[#303031]'} items-center justify-center`}>
-        <Ionicons 
-          name={icon as any} 
-          size={22} 
-          color={box ? "white" : "black"
-          } 
-        />
+    <TouchableOpacity onPress={onPress} className="flex-row items-center p-4 gap-3">
+      <View className="w-7 h-7 rounded-lg bg-white items-center justify-center">
+        {icon}
       </View>
-      <Text className="flex-1 text-base font-medium">{label}</Text>
-      <Ionicons name="chevron-forward" size={20} color="#C5C5C7" />
+      <Text className="flex-1 text-base text-grey-80 font-medium">{label}</Text>
+      <Ionicons name="chevron-forward" size={20} color="#bfbfc3" />
     </TouchableOpacity>
   );
 };

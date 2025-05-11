@@ -11,11 +11,14 @@ const ReferralsScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-row items-center px-4 pb-3 border-b border-gray-200">
-        <TouchableOpacity onPress={handleBackPress} className="mr-4">
+      {/* Header */}
+      <View className="flex-row items-center px-4">
+        <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4">
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="text-xl font-semibold">Referrals & Rewards</Text>
+        <View className="flex-1 items-center">
+          <Text className="text-xl font-medium">Referal</Text>
+        </View>
       </View>
 
       <ScrollView className="flex-1">

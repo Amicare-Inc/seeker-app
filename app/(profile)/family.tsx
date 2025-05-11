@@ -28,14 +28,14 @@ const FamilyScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
-      <View className="flex-row items-center px-4 pb-3">
-        <TouchableOpacity 
-          onPress={handleBackPress}
-          className="mr-4"
-        >
+      {/* Header */}
+      <View className="flex-row items-center px-4">
+        <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4">
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="text-xl font-semibold">Family</Text>
+        <View className="flex-1 items-center">
+          <Text className="text-xl font-medium">Family</Text>
+        </View>
       </View>
 
       <ScrollView className="flex-1">
@@ -75,7 +75,6 @@ interface FamilyListItemProps {
   number: string;
   relationship: string;
   onPress: () => void;
-  box?: boolean;
   isPrimary?: boolean; // New optional prop
 }
 
@@ -85,7 +84,6 @@ const FamilyListItem: React.FC<FamilyListItemProps> = ({
   number,
   relationship,
   onPress,
-  box = false,
   isPrimary = false, // Default to false
 }) => {
   return (
