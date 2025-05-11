@@ -20,7 +20,7 @@ import {
 import { FIREBASE_DB } from '@/firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { router } from 'expo-router';
-import { X } from 'lucide-react-native';
+// import { X } from 'lucide-react-native';
 
 const AddProfilePhoto: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -108,7 +108,7 @@ const AddProfilePhoto: React.FC = () => {
 							onPress={handleRemovePhoto}
 							className="absolute top-[-4px] right-[-4px] bg-red-500 rounded-full p-1"
 						>
-							<X size={14} color="white" />
+							{/* <X size={14} color="white" /> */}
 						</TouchableOpacity>
 					)}
 				</View>
