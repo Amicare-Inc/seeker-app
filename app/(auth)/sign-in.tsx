@@ -1,16 +1,10 @@
-import {
-	View,
-	Text,
-	ScrollView,
-	SafeAreaView,
-	KeyboardAvoidingView,
-} from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import ForumField from '@/components/ForumField';
 import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
-import { signInWithEmail } from '@/services/firebase/auth';
+import { Auth } from '@/services/node-express-backend/auth';
 import { getUserDoc } from '@/services/firebase/firestore';
 import { fetchUserById, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -32,13 +26,18 @@ const SignIn = () => {
 
 	const handleSignIn = async () => {
 		try {
-			const userCredential = await signInWithEmail(
+			const responseText = await Auth.signIn(
 				form.email,
 				form.password,
 			);
-			const user = userCredential.user;
-			console.log('User signed in:', user);
-			dispatch(fetchUserById(user.uid));
+			//TODO: Assuming the response text is "Successfully Logged In: [uid]", need to add auth
+			const uidMatch = responseText.match(/Successfully Logged In: (.+)/);
+            if (uidMatch && uidMatch[1]) {
+                const userId = uidMatch[1];
+                dispatch(fetchUserById(userId)); // Dispatch thunk to fetch user data into Redux
+            } else {
+                 throw new Error('Failed to parse user ID from backend response');
+            }
 		} catch (error) {
 			setError((error as any).message);
 			console.error('Error signing in:', error);
