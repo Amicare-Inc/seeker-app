@@ -1,6 +1,6 @@
 // frontend/services/backendAuthService.ts
 
-const API_BASE_URL = 'http://localhost:3000'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
+const API_BASE_URL = 'https://f89e-184-147-249-113.ngrok-free.app'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
 
 export const Auth = {
   async signUp(email: string, password: string): Promise<any> {
@@ -28,14 +28,15 @@ export const Auth = {
 
   async signIn(email: string, password: string): Promise<any> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+        console.log('FORUM: ', email, password);
+        const response = await fetch(`${API_BASE_URL}/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
-
+      console.log('SIGN IN RESPONSE: ', response);
       if (!response.ok) {
         // Assuming backend returns a 401 for invalid credentials
         const errorText = await response.text(); // Read as text since 401 might not return JSON

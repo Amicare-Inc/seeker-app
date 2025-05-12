@@ -26,17 +26,14 @@ const SignIn = () => {
 
 	const handleSignIn = async () => {
 		try {
-			const responseText = await Auth.signIn(
+			const responseJson = await Auth.signIn(
 				form.email,
 				form.password,
 			);
-			//TODO: Assuming the response text is "Successfully Logged In: [uid]", need to add auth
-			const uidMatch = responseText.match(/Successfully Logged In: (.+)/);
-            if (uidMatch && uidMatch[1]) {
-                const userId = uidMatch[1];
-                dispatch(fetchUserById(userId)); // Dispatch thunk to fetch user data into Redux
+            if (responseJson && responseJson.uid) {
+                dispatch(fetchUserById(responseJson.uid));
             } else {
-                 throw new Error('Failed to parse user ID from backend response');
+                throw new Error('Failed to get uid from response');
             }
 		} catch (error) {
 			setError((error as any).message);
