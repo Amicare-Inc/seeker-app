@@ -28,7 +28,6 @@ export const Auth = {
 
   async signIn(email: string, password: string): Promise<any> {
     try {
-        console.log('FORUM: ', email, password);
         const response = await fetch(`${API_BASE_URL}/auth/signin`, {
         method: 'POST',
         headers: {
@@ -36,17 +35,13 @@ export const Auth = {
         },
         body: JSON.stringify({ email, password }),
       });
-      console.log('SIGN IN RESPONSE: ', response);
       if (!response.ok) {
-        // Assuming backend returns a 401 for invalid credentials
-        const errorText = await response.text(); // Read as text since 401 might not return JSON
-        throw new Error(errorText || 'Sign in failed');
+        const errorText = await response.text();
+        throw new Error(errorText);
       }
-
-      const data = await response.json(); // Assuming success returns JSON, although controller sends plain text + UID
-      return data; // Backend currently returns "Successfully Logged In: [uid]"
+      const data = await response.json();
+      return data;
     } catch (error: any) {
-      console.error('Backend Sign In Error:', error);
       throw new Error(`Backend sign in failed: ${error.message}`);
     }
   },
