@@ -17,6 +17,7 @@ const BioScreen: React.FC = () => {
 
 	const handleFinish = async () => {
 		try {
+			console.log('User Data in bio before if:', userData);
 			dispatch(updateUserFields({ bio }));
 			if (userData?.id) {
 				// await setDoc(
@@ -24,7 +25,8 @@ const BioScreen: React.FC = () => {
 				// 	{ ...userData, onboardingComplete: true, bio: bio },
 				// 	{ merge: true },
 				// );
-				await Auth.addCriticalInfo(userData.id, { ...userData, onboardingComplete: true, bio: bio });
+				console.log('User Data in bio:', userData);
+				await Auth.addOptionalInfo(userData.id, { ...userData, onboardingComplete: true, bio: bio, idVerified: userData.idVerified });
 				Alert.alert(
 					'Success',
 					'Your profile has been created successfully!',

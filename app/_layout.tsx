@@ -13,7 +13,7 @@ const GlobalDataLoader = () => {
 
 	useEffect(() => {
 		let unsubscribe: (() => void) | undefined;
-		if (currentUser) {
+		if (currentUser && currentUser.id) {
 			unsubscribe = listenToUserSessions(dispatch, currentUser.id);
 			dispatch(fetchAvailableUsers({ isPsw: !currentUser.isPsw }));
 		}

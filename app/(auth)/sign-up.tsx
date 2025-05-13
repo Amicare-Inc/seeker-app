@@ -33,12 +33,11 @@ const SignUp = () => {
 					form.email,
 					form.password,
 				);
-				console.log('User signed up:', user);
 				verifyEmail(user);
 				dispatch(
 					updateUserFields({
-						id: user.uid,
-						email: user.email || '',
+						id: user,
+						email: form.email || '',
 					}),
 				);
 				router.push('/(onboarding)/role');

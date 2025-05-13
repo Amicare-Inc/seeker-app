@@ -5,7 +5,6 @@ import ForumField from '@/components/ForumField';
 import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
 import { Auth } from '@/services/node-express-backend/auth';
-import { getUserDoc } from '@/services/firebase/firestore';
 import { fetchUserById, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -42,16 +41,12 @@ const SignIn = () => {
 	};
 
 	useEffect(() => {
-		if (userData && !initialNavComplete) {
-			console.log('User Data:', userData);
+		if (!initialNavComplete && userData) {
 			if (userData.onboardingComplete == true) {
-				console.log('IN SIGN IN', initialNavComplete);
 				dispatch(setNavigationComplete(true));
 				if (userData.isPsw == true) {
-					console.log('IN SIGN IN PSW', initialNavComplete);
 					router.push('/(psw)/psw-home');
 				} else if (userData.isPsw == false) {
-					console.log('IN SIGN IN SEEKER', initialNavComplete);
 					router.push('/(seeker)/seeker-home');
 				}
 			}

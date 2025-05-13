@@ -61,8 +61,12 @@ const PersonalDetails: React.FC = () => {
 		if (await validateForm()) {
 			try {
 				dispatch(updateUserFields(form));
+				console.log('User Data Form:', form);
+				console.log('User Data ID:', userData);
 				if (userData?.id) {
-					await Auth.addCriticalInfo(userData.id, form);
+					console.log('SENDING TO BACKEND');
+					await Auth.addCriticalInfo(userData.id, {...form, isPsw: userData.isPsw});
+					console.log('SENT');
 				}
 				router.push('/onboard1');
 			} catch (error) {
