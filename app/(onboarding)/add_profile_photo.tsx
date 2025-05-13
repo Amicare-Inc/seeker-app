@@ -1,22 +1,11 @@
 import React, { useState } from 'react';
-import {
-	View,
-	Text,
-	SafeAreaView,
-	ScrollView,
-	TouchableOpacity,
-	Image,
-	Alert,
-} from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import CustomButton from '@/components/CustomButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import * as ImagePicker from 'expo-image-picker';
-import {
-	uploadPhotoToFirebase,
-	uploadProfilePhoto,
-} from '@/services/firebase/storage';
+import { uploadPhotoToFirebase } from '@/services/firebase/storage';
 import { FIREBASE_DB } from '@/firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { router } from 'expo-router';
@@ -54,11 +43,11 @@ const AddProfilePhoto: React.FC = () => {
 				dispatch(
 					updateUserFields({ profilePhotoUrl: downloadURL || '' }),
 				);
-				await setDoc(
-					doc(FIREBASE_DB, 'test1', userData.id),
-					{ profilePhotoUrl: downloadURL },
-					{ merge: true },
-				);
+				// await setDoc(
+				// 	doc(FIREBASE_DB, 'test1', userData.id),
+				// 	{ profilePhotoUrl: downloadURL },
+				// 	{ merge: true },
+				// );
 			} catch (error) {
 				console.error('Error uploading photo:', error);
 				Alert.alert(

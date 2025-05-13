@@ -13,17 +13,7 @@ import { updateUserFields } from '@/redux/userSlice';
 const Role = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const handleButtons = async (isPsw: boolean) => {
-		// const user = FIREBASE_AUTH.currentUser;
-		// if (user) {
-		// await setDoc(doc(FIREBASE_DB, "personal", user.uid), { isPSW }, { merge: true });
-		// }
 		dispatch(updateUserFields({ isPsw }));
-		// if (isPsw) {
-		//     router.push("/psw_intro_1");
-		// }
-		// else {
-		//     router.push("/seeker_intro_1");
-		// }
 		router.push('/personal_details');
 	};
 
