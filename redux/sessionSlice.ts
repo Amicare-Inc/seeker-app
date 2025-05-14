@@ -13,6 +13,7 @@ import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
 import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { getUserSessionTab } from '@/services/node-express-backend/session';
 
 // Real-time listener for session updates
 export const listenToUserSessions = (dispatch: any, userId: string) => {
@@ -54,6 +55,22 @@ export const updateSessionStatus = createAsyncThunk(
 		}
 	},
 );
+
+export const fetchUserSessionsFromBackend = createAsyncThunk<
+	EnrichedSession[], // Expected return type from the backend
+	string, // Argument type (userId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/fetchUserSessionsFromBackend',
+	async (userId: string, { rejectWithValue }) => {
+		try {
+			const sessions = await getUserSessionTab(userId);
+			// Assuming backend returns an array of EnrichedSession
+			return sessions as EnrichedSession[];
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to fetch sessions');
+		}
+	});
 
 // Return type from the thunk
 type ConfirmBookingReturn = { sessionId: string; newStatus: string };
@@ -104,15 +121,15 @@ export const confirmSessionBookingThunk = createAsyncThunk<
 );
 
 interface SessionState {
-	allSessions: Session[];
+	allSessions: EnrichedSession[];
 	activeEnrichedSession: EnrichedSession | null; // we'll store the active (enriched) session here
-	newRequests: Session[];
-	pending: Session[];
-	confirmed: Session[];
-	cancelled: Session[];
-	inProgress: Session[];
-	completed: Session[];
-	failed: Session[];
+	newRequests: EnrichedSession[]; // Change from Session[]
+	pending: EnrichedSession[]; // Change from Session[]
+	confirmed: EnrichedSession[]; // Change from Session[]
+	cancelled: EnrichedSession[]; // Change from Session[]
+	inProgress: EnrichedSession[]; // Change from Session[]
+	completed: EnrichedSession[]; // Change from Session[]
+	failed: EnrichedSession[]; // Change from Session[]
 	loading: boolean;
 	error: string | null;
 }
@@ -135,7 +152,7 @@ const sessionSlice = createSlice({
 	name: 'sessions',
 	initialState,
 	reducers: {
-		setSessions(state, action: PayloadAction<Session[]>) {
+		setSessions(state, action: PayloadAction<EnrichedSession[]>) {
 			state.allSessions = action.payload;
 			state.newRequests = action.payload.filter(
 				(s) =>
@@ -176,23 +193,41 @@ const sessionSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
-			// .addCase(fetchUserSessions.pending, (state) => {
-			//   state.loading = true;
-			//   state.error = null;
-			// })
-			// .addCase(fetchUserSessions.fulfilled, (state, action) => {
-			//   state.loading = false;
-			//   state.allSessions = action.payload;
-			//   state.newRequests = action.payload.filter(
-			//     (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
-			//   );
-			//   state.pending = action.payload.filter((s) => s.status === 'pending');
-			//   state.confirmed = action.payload.filter((s) => s.status === 'confirmed');
-			// })
-			// .addCase(fetchUserSessions.rejected, (state, action) => {
-			//   state.loading = false;
-			//   state.error = action.payload as string;
-			// })
+			.addCase(fetchUserSessionsFromBackend.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(fetchUserSessionsFromBackend.fulfilled, (state, action) => {
+				state.loading = false;
+				state.allSessions = action.payload;
+				// Re-filter the status arrays after fetching from the backend
+				state.newRequests = state.allSessions.filter(
+					(s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
+				);
+				state.pending = state.allSessions.filter(
+					(s) => s.status === 'pending'
+				);
+				state.confirmed = state.allSessions.filter(
+					(s) => s.status === 'confirmed'
+				);
+				state.cancelled = state.allSessions.filter(
+					(s) => s.status === 'cancelled'
+				);
+				state.inProgress = state.allSessions.filter(
+					(s) => s.status === 'inProgress'
+				);
+				state.completed = state.allSessions.filter(
+					(s) => s.status === 'completed'
+				);
+				state.failed = state.allSessions.filter(
+					(s) => s.status === 'failed'
+				);
+			})
+			.addCase(fetchUserSessionsFromBackend.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+
 			.addCase(updateSessionStatus.fulfilled, (state, action) => {
 				const { sessionId, newStatus } = action.payload;
 				state.allSessions = state.allSessions.filter(

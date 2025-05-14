@@ -5,8 +5,6 @@ import ForumField from '@/components/ForumField'; // Reusing your ForumField com
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
-import { FIREBASE_DB } from '@/firebase.config';
-import { doc, setDoc } from 'firebase/firestore';
 import { router } from 'expo-router';
 import { Auth } from '@/services/node-express-backend/auth';
 
@@ -20,12 +18,6 @@ const BioScreen: React.FC = () => {
 			console.log('User Data in bio before if:', userData);
 			dispatch(updateUserFields({ bio }));
 			if (userData?.id) {
-				// await setDoc(
-				// 	doc(FIREBASE_DB, 'test1', userData.id),
-				// 	{ ...userData, onboardingComplete: true, bio: bio },
-				// 	{ merge: true },
-				// );
-				console.log('User Data in bio:', userData);
 				await Auth.addOptionalInfo(userData.id, { ...userData, onboardingComplete: true, bio: bio, idVerified: userData.idVerified });
 				Alert.alert(
 					'Success',
