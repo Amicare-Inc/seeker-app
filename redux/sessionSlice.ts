@@ -239,18 +239,14 @@ const sessionSlice = createSlice({
 			})
 			.addCase(acceptSessionThunk.fulfilled, (state, action) => {
 				state.loading = false;
-				const updatedSession = action.payload;
-				state.newRequests = state.newRequests.filter(
-					(s) => s.id !== updatedSession.id,
-				);
-				// Find the index of the session to update
+				const updatedSession = action.payload; // The updated session from the backend
+
+				// Find the index of the session to update in allSessions
 				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+
 				if (index !== -1) {
 					// Replace the old session with the updated one
 					state.allSessions[index] = updatedSession;
-				} else {
-					// If the session wasn't already in allSessions (shouldn't happen with current flow, but as a safeguard)
-					state.allSessions.push(updatedSession);
 				}
 				// Filtering into status arrays is now handled by selectors
 			})

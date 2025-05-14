@@ -40,7 +40,7 @@ export const selectEnrichedSessions = createSelector(
 				...session,
 				otherUser: otherUserId ? userMap[otherUserId] : undefined,
 			};
-			console.log('Enriched SESSIONS:', enriched); // debug log
+			// console.log('Enriched SESSIONS:', enriched); // debug log
 			return enriched;
 		});
 	},

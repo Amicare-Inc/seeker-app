@@ -42,6 +42,8 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	const completed = useSelector(selectCompletedSessions);
 	const failed = useSelector(selectFailedSessions);
 
+	console.log('Sessions in useSessionsTab (Selectors):', { newRequests, pending, confirmed, cancelled, inProgress, completed, failed });
+
 	// Select loading and error directly from the slice
 	const loading = useSelector(
 		(state: RootState) => state.sessions,
