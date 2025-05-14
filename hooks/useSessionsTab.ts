@@ -6,6 +6,8 @@ import { AppDispatch, RootState } from '@/redux/store';
 import {
 	updateSessionStatus,
 	setActiveEnrichedSession,
+	acceptSessionThunk,
+	rejectSessionThunk,
 } from '@/redux/sessionSlice';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
@@ -49,18 +51,23 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	const handleAction = async (action: 'accept' | 'reject') => {
 		if (!expandedSession) return;
 
-		let newStatus = '';
-		if (expandedSession.status === 'newRequest') {
-			newStatus = action === 'accept' ? 'pending' : 'rejected';
-		}
+		// let newStatus = '';
+		// if (expandedSession.status === 'newRequest') {
+		// 	newStatus = action === 'accept' ? 'pending' : 'rejected';
+		// }
 
 		try {
-			await dispatch(
-				updateSessionStatus({
-					sessionId: expandedSession.id,
-					newStatus,
-				}),
-			);
+			if (action === 'accept') {
+				await dispatch(acceptSessionThunk(expandedSession));
+			} else if (action === 'reject') {
+				await dispatch(rejectSessionThunk(expandedSession.id));
+			}
+			// await dispatch(
+			// 	updateSessionStatus({
+			// 		sessionId: expandedSession.id,
+			// 		newStatus,
+			// 	}),
+			// );
 			setExpandedSession(null);
 		} catch (err) {
 			console.error('Error updating session status:', err);

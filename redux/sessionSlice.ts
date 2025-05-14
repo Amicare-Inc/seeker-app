@@ -13,9 +13,9 @@ import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
 import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { getUserSessionTab } from '@/services/node-express-backend/session';
+import { acceptSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
 
-// Real-time listener for session updates
+// Real-time listener for session updates NEED TO MOVE TO BACKEND
 export const listenToUserSessions = (dispatch: any, userId: string) => {
 	const sessionCollection = collection(FIREBASE_DB, 'sessions_test1');
 	const sessionQuery = query(
@@ -70,7 +70,44 @@ export const fetchUserSessionsFromBackend = createAsyncThunk<
 		} catch (error) {
 			return rejectWithValue((error as any).message || 'Failed to fetch sessions');
 		}
-	});
+	}
+);
+
+export const acceptSessionThunk = createAsyncThunk<
+	EnrichedSession, // Expected return type (the updated enriched session)
+	EnrichedSession, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/acceptSession',
+	async (enrichedSession: EnrichedSession, { rejectWithValue }) => {
+		try {
+			// Call the frontend service to interact with the backend API
+			const updatedSession = await acceptSession(enrichedSession);
+			// Assuming the backend returns the updated EnrichedSession
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to accept session');
+		}
+	}
+);
+// Define the thunk for rejecting a session
+export const rejectSessionThunk = createAsyncThunk<
+	EnrichedSession, // Expected return type (the updated enriched session)
+	string, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/rejectSession',
+	async (sessionId: string, { rejectWithValue }) => {
+		try {
+			// Call the frontend service to interact with the backend API
+			const updatedSession = await rejectSession(sessionId);
+			// Assuming the backend returns the updated EnrichedSession
+			return updatedSession as EnrichedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to reject session');
+		}
+	}
+);
 
 // Return type from the thunk
 type ConfirmBookingReturn = { sessionId: string; newStatus: string };
@@ -258,35 +295,21 @@ const sessionSlice = createSlice({
 				state.failed = state.allSessions.filter(
 					(s) => s.status === 'failed',
 				);
-			});
+			})
+			.addCase(acceptSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(acceptSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				state.newRequests = state.newRequests.filter(
+					(s) => s.id !== updatedSession.id,
+				);
+				state.pending.push(updatedSession);
+			})
 	},
 });
 
-export const { setSessions, clearSessions, setActiveEnrichedSession } =
-	sessionSlice.actions;
+export const { setSessions, clearSessions, setActiveEnrichedSession } = sessionSlice.actions;
 export default sessionSlice.reducer;
-
-// DEPRECIATED
-// // Fetch all sessions where the user is a participant (excluding rejected/cancelled)
-// export const fetchUserSessions = createAsyncThunk(
-//   'sessions/fetchUserSessions',
-//   async (userId: string, { rejectWithValue }) => {
-//     try {
-//       const q = query(
-//         collection(FIREBASE_DB, 'sessions_test1'),
-//         where('participants', 'array-contains', userId),
-//         where('status', 'not-in', ['rejected', 'declined', 'cancelled']) // Exclude rejected, declined, and cancelled sessions
-//       );
-//       const querySnapshot = await getDocs(q);
-//       console.log('USER SESSIONS REDUX:', querySnapshot);
-//       const sessions: Session[] = querySnapshot.docs.map((doc) => ({
-//         id: doc.id,
-//         ...doc.data(),
-//       })) as Session[];
-
-//       return sessions;
-//     } catch (error) {
-//       return rejectWithValue((error as any).message);
-//     }
-//   }
-// );

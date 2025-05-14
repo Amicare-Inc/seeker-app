@@ -20,3 +20,47 @@ export const getUserSessionTab = async (userId: string): Promise<EnrichedSession
     throw error;
   }
 };
+
+export const acceptSession = async (enrichedSession: EnrichedSession): Promise<EnrichedSession> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${enrichedSession.id}/accept`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any necessary authentication headers here (e.g., 'Authorization': `Bearer ${token}`)
+      },
+      // If your backend expects a request body (e.g., with userId), add it here
+      // body: JSON.stringify({ userId: 'currentUserId' }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const updatedSession: EnrichedSession = await response.json();
+    return updatedSession;
+  } catch (error: any) {
+    console.error(`Error accepting session ${enrichedSession.id}:`, error);
+    throw error;
+  }
+};
+
+export const rejectSession = async (sessionId: string): Promise<EnrichedSession> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/reject`, {
+      method: 'PATCH',
+      // Add headers and potential body similar to acceptSession if needed
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const updatedSession: EnrichedSession = await response.json();
+    return updatedSession;
+  } catch (error: any) {
+    console.error(`Error rejecting session ${sessionId}:`, error);
+    throw error;
+  }
+};
