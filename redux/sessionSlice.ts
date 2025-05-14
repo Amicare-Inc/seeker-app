@@ -191,29 +191,6 @@ const sessionSlice = createSlice({
 	reducers: {
 		setSessions(state, action: PayloadAction<EnrichedSession[]>) {
 			state.allSessions = action.payload;
-			state.newRequests = action.payload.filter(
-				(s) =>
-					s.status === 'newRequest' &&
-					s.receiverId === (state as any).userId,
-			);
-			state.pending = action.payload.filter(
-				(s) => s.status === 'pending',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'confirmed',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'cancelled',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'inProgress',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'completed',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'failed',
-			);
 		},
 		clearSessions(state) {
 			state.allSessions = [];
@@ -237,28 +214,6 @@ const sessionSlice = createSlice({
 			.addCase(fetchUserSessionsFromBackend.fulfilled, (state, action) => {
 				state.loading = false;
 				state.allSessions = action.payload;
-				// Re-filter the status arrays after fetching from the backend
-				state.newRequests = state.allSessions.filter(
-					(s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
-				);
-				state.pending = state.allSessions.filter(
-					(s) => s.status === 'pending'
-				);
-				state.confirmed = state.allSessions.filter(
-					(s) => s.status === 'confirmed'
-				);
-				state.cancelled = state.allSessions.filter(
-					(s) => s.status === 'cancelled'
-				);
-				state.inProgress = state.allSessions.filter(
-					(s) => s.status === 'inProgress'
-				);
-				state.completed = state.allSessions.filter(
-					(s) => s.status === 'completed'
-				);
-				state.failed = state.allSessions.filter(
-					(s) => s.status === 'failed'
-				);
 			})
 			.addCase(fetchUserSessionsFromBackend.rejected, (state, action) => {
 				state.loading = false;
@@ -272,29 +227,11 @@ const sessionSlice = createSlice({
 						session.id !== sessionId ||
 						!['rejected', 'declined'].includes(newStatus),
 				);
-				state.newRequests = state.allSessions.filter(
-					(s) =>
-						s.status === 'newRequest' &&
-						s.receiverId === (state as any).userId,
-				);
-				state.pending = state.allSessions.filter(
-					(s) => s.status === 'pending',
-				);
-				state.confirmed = state.allSessions.filter(
-					(s) => s.status === 'confirmed',
-				);
-				state.cancelled = state.allSessions.filter(
-					(s) => s.status === 'cancelled',
-				);
-				state.inProgress = state.allSessions.filter(
-					(s) => s.status === 'inProgress',
-				);
-				state.completed = state.allSessions.filter(
-					(s) => s.status === 'completed',
-				);
-				state.failed = state.allSessions.filter(
-					(s) => s.status === 'failed',
-				);
+				// Note: This thunk is likely using direct Firestore access
+				// and should ideally be refactored to use the backend API
+				// if you want consistent data flow. If it remains,
+				// you might need to decide how its status update affects
+				// allSessions and whether a fetch is needed afterward.
 			})
 			.addCase(acceptSessionThunk.pending, (state) => {
 				state.loading = true;
@@ -306,7 +243,20 @@ const sessionSlice = createSlice({
 				state.newRequests = state.newRequests.filter(
 					(s) => s.id !== updatedSession.id,
 				);
-				state.pending.push(updatedSession);
+				// Find the index of the session to update
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					// Replace the old session with the updated one
+					state.allSessions[index] = updatedSession;
+				} else {
+					// If the session wasn't already in allSessions (shouldn't happen with current flow, but as a safeguard)
+					state.allSessions.push(updatedSession);
+				}
+				// Filtering into status arrays is now handled by selectors
+			})
+			.addCase(acceptSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
 			})
 	},
 });

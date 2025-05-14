@@ -6,48 +6,22 @@ import { useSelector, useDispatch } from 'react-redux';
 import SessionList from '@/components/SessionList';
 import SessionModal from '@/components/SessionModal';
 import { RootState, AppDispatch } from '@/redux/store';
-import { selectEnrichedSessions } from '@/redux/selectors';
-import { useSessionsTab } from '@/hooks/useSessionsTab';
+import { useSessionsTab } from '@/hooks/useSessionsTab'; // Import useSessionsTab
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { fetchUserById } from '@/redux/userSlice';
 import SessionBookedList from '@/components/SessionBookedList';
 
 const PswSessionsTab = () => {
 	const {
+		newRequests, // Get newRequests from the hook
+		pending, // Get pending from the hook
+		confirmed, // Get confirmed from the hook
 		loading,
 		error,
 		expandedSession,
 		handleExpandSession,
 		handleCloseModal,
 		handleAction,
-	} = useSessionsTab('psw');
-
-	// Get enriched sessions from the selector
-	const dispatch: AppDispatch = useDispatch();
-	const enrichedSessions = useSelector((state: RootState) =>
-		selectEnrichedSessions(state),
-	);
-	const currentUserId = useSelector(
-		(state: RootState) => state.user.userData?.id,
-	);
-	const userMap = useSelector((state: RootState) => state.user.allUsers);
-
-	// Fetch missing user data if not already in userMap
-	useEffect(() => {
-		if (!currentUserId) return;
-		enrichedSessions.forEach((session) => {
-			let otherUserId: string | undefined;
-			if (session.senderId === currentUserId) {
-				otherUserId = session.receiverId;
-			} else {
-				otherUserId = session.senderId;
-			}
-			if (otherUserId && !userMap[otherUserId]) {
-				console.log(`Fetching user data for ${otherUserId}`);
-				dispatch(fetchUserById(otherUserId));
-			}
-		});
-	}, [enrichedSessions, currentUserId, userMap, dispatch]);
+	} = useSessionsTab('psw'); // Use the hook
 
 	if (loading) {
 		return (
@@ -65,17 +39,7 @@ const PswSessionsTab = () => {
 		);
 	}
 
-	// Filter sessions by status
-	const newRequestSessions = enrichedSessions.filter(
-		(s: EnrichedSession) =>
-			s.status === 'newRequest' && s.receiverId === currentUserId,
-	);
-	const pendingSessions = enrichedSessions.filter(
-		(s) => s.status === 'pending',
-	);
-	const confirmedSessions = enrichedSessions.filter(
-		(s) => s.status === 'confirmed',
-	);
+	// *** Removed local filtering logic ***
 
 	// Callback for tapping a session
 	const onSessionPress = (session: EnrichedSession) => {
@@ -98,22 +62,24 @@ const PswSessionsTab = () => {
 			{/* Main Content */}
 			<View className="flex-1 px-3.5">
 				<SessionList
-					sessions={newRequestSessions}
+					sessions={newRequests} // Use newRequests from the hook
 					onSessionPress={onSessionPress}
 					title="New Requests"
 				/>
 
 				<SessionList
-					sessions={pendingSessions}
+					sessions={pending} // Use pending from the hook
 					onSessionPress={onSessionPress}
 					title="Pending"
 				/>
 
 				<SessionBookedList
-					sessions={confirmedSessions}
+					sessions={confirmed} // Use confirmed from the hook
 					onSessionPress={onSessionPress}
 					title="Confirmed"
 				/>
+
+				{/* Add other SessionList components for other statuses if needed */}
 			</View>
 
 			<SessionModal
@@ -129,6 +95,6 @@ const PswSessionsTab = () => {
 			/>
 		</SafeAreaView>
 	);
-};
+	};
 
 export default PswSessionsTab;

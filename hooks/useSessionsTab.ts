@@ -11,6 +11,15 @@ import {
 } from '@/redux/sessionSlice';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
+import {
+	selectNewRequestSessions,
+	selectPendingSessions,
+	selectConfirmedSessions,
+	selectCancelledSessions,
+	selectInProgressSessions,
+	selectCompletedSessions,
+	selectFailedSessions,
+} from '@/redux/selectors';
 
 export function useSessionsTab(role: 'psw' | 'seeker') {
 	const dispatch = useDispatch<AppDispatch>();
@@ -20,10 +29,26 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		useState<EnrichedSession | null>(null);
 
 	// Redux state from your session slice
-	const { newRequests, pending, confirmed, loading, error } = useSelector(
+	// const { newRequests, pending, confirmed, loading, error } = useSelector(
+	// 	(state: RootState) => state.sessions,
+	// );
+
+	// Select filtered session arrays using memoized selectors
+	const newRequests = useSelector(selectNewRequestSessions);
+	const pending = useSelector(selectPendingSessions);
+	const confirmed = useSelector(selectConfirmedSessions);
+	const cancelled = useSelector(selectCancelledSessions);
+	const inProgress = useSelector(selectInProgressSessions);
+	const completed = useSelector(selectCompletedSessions);
+	const failed = useSelector(selectFailedSessions);
+
+	// Select loading and error directly from the slice
+	const loading = useSelector(
 		(state: RootState) => state.sessions,
-	);
-	console.log('Sessions in useSessionsTab:', newRequests, pending, confirmed);
+	).loading;
+	const error = useSelector(
+		(state: RootState) => state.sessions,
+	).error;
 	const userId = useSelector((state: RootState) => state.user.userData?.id);
 
 	/**
@@ -82,6 +107,10 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	return {
 		newRequests,
 		pending,
+		cancelled,
+		inProgress,
+		completed,
+		failed,
 		confirmed,
 		loading,
 		error,
