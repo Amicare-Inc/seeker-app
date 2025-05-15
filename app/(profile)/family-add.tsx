@@ -44,14 +44,14 @@ const FamilyAddScreen = () => {
 
       <ScrollView className="flex-1 px-4">
         {/* Profile Picture Holder */}
-        <View className="items-center mt-6">
+        <View className="items-center mt-8">
           <View className="h-[100px] w-[100px] bg-grey-9 rounded-full items-center justify-center">
             <Text className="text-grey-58">Add Photo</Text>
           </View>
         </View>
 
         {/* Input Fields */}
-        <View className="mt-6">
+        <View className="mt-8">
           <Text className="mb-2 text-base font-semibold">Name</Text>
           <TextInput
             value={name}
@@ -126,7 +126,7 @@ const FamilyAddScreen = () => {
       <View className="px-4 pb-6">
         <TouchableOpacity
           onPress={handleSave}
-          className="bg-grey-94 py-4 rounded-lg items-center"
+          className="bg-grey-94 py-4 rounded-xl items-center"
         >
           <Text className="text-white text-xl font-medium">Save</Text>
         </TouchableOpacity>

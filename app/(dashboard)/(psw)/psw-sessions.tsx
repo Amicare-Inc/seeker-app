@@ -15,6 +15,8 @@ import { EnrichedSession } from '@/types/EnrichedSession';
 import { fetchUserById } from '@/redux/userSlice';
 import SessionBookedList from '@/components/SessionBookedList';
 
+import SessionCard from '@/components/SessionCard';
+
 const PswSessionsTab = () => {
     const {
         loading,
@@ -136,6 +138,7 @@ const PswSessionsTab = () => {
                 }
                 isConfirmed={expandedSession?.status === 'confirmed'}
             />
+            <SessionCard />
         </SafeAreaView>
     );
 };

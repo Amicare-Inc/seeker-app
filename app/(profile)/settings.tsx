@@ -44,7 +44,7 @@ const SettingsScreen = () => {
           <SettingsListItem
             icon={<SecuritySafeIcon width={28} height={28} />}
             label="Security & Privacy"
-            onPress={() => console.log('Security & Privacy pressed')}
+            onPress={() => router.push('/security-privacy')}
           />
           {/* Care Needs */}
           <SettingsListItem

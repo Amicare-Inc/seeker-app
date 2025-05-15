@@ -15,14 +15,20 @@ const FamilyScreen = () => {
       name: "John Doe",
       number: "(234) 567-890",
       relationship: "Primary Contact",
-      onPress: () => {},
+      country: "USA",
+      city: "New York",
+      email: "john.doe@example.com",
+      isPrimary: true,
     },
     {
       icon: "person" as keyof typeof Ionicons.glyphMap,
       name: "Susan Doe",
       number: "(987) 654-321",
       relationship: "Other",
-      onPress: () => {},
+      country: "Canada",
+      city: "Toronto",
+      email: "susan.doe@example.com",
+      isPrimary: false,
     },
   ];
 
@@ -47,8 +53,13 @@ const FamilyScreen = () => {
               name={member.name}
               number={member.number}
               relationship={member.relationship}
-              onPress={member.onPress}
-              isPrimary={index === 0}
+              onPress={() => {
+                router.push({
+                  pathname: '/family-edit',
+                  // params: { member }, // Pass the entire member object
+                });
+              }}
+              isPrimary={member.isPrimary}
             />
           ))}
 
