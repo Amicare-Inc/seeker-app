@@ -18,6 +18,9 @@ module.exports = {
 				'grey-94': '#0f0f0f',
 
 				'brand-blue': '#0c7ae2',
+				'dark-blue': '#05549e',
+				'light-blue': '#399cf9',
+				'azure-blue': '#1a8bf8',
 			},
 		},
 	},
