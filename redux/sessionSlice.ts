@@ -75,15 +75,13 @@ export const fetchUserSessionsFromBackend = createAsyncThunk<
 
 export const acceptSessionThunk = createAsyncThunk<
 	EnrichedSession, // Expected return type (the updated enriched session)
-	EnrichedSession, // Argument type (sessionId)
+	string, // Argument type (sessionId)
 	{ rejectValue: string } // Optional: type for rejectValue
 >(
 	'sessions/acceptSession',
-	async (enrichedSession: EnrichedSession, { rejectWithValue }) => {
+	async (sessionId: string, { rejectWithValue }) => {
 		try {
-			// Call the frontend service to interact with the backend API
-			const updatedSession = await acceptSession(enrichedSession);
-			// Assuming the backend returns the updated EnrichedSession
+			const updatedSession = await acceptSession(sessionId);
 			return updatedSession;
 		} catch (error) {
 			return rejectWithValue((error as any).message || 'Failed to accept session');
@@ -240,15 +238,15 @@ const sessionSlice = createSlice({
 			.addCase(acceptSessionThunk.fulfilled, (state, action) => {
 				state.loading = false;
 				const updatedSession = action.payload; // The updated session from the backend
-
-				// Find the index of the session to update in allSessions
 				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
-
 				if (index !== -1) {
-					// Replace the old session with the updated one
-					state.allSessions[index] = updatedSession;
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
 				}
-				// Filtering into status arrays is now handled by selectors
 			})
 			.addCase(acceptSessionThunk.rejected, (state, action) => {
 				state.loading = false;

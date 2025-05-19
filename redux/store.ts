@@ -11,6 +11,7 @@ export const store = configureStore({
 		sessions: sessionReducer,
 		activeProfile: activeProfileReducer,
 	},
+	devTools: true
 });
 
 export type RootState = ReturnType<typeof store.getState>;

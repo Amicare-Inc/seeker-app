@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
-import { updateSessionStatus } from '@/redux/sessionSlice';
+import { acceptSessionThunk, updateSessionStatus } from '@/redux/sessionSlice';
 import { AppDispatch } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import { router } from 'expo-router';
@@ -24,12 +24,7 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 	// For "Accept" => set session to "pending"
 	const handleAccept = async () => {
 		try {
-			await dispatch(
-				updateSessionStatus({
-					sessionId: session.id,
-					newStatus: 'pending',
-				}),
-			).unwrap(); // <-- .unwrap() lets you catch rejections in this try/catch
+			await dispatch(acceptSessionThunk(session.id)).unwrap();
 			router.back();
 		} catch (err) {
 			console.error('Error accepting session:', err);

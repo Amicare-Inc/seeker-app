@@ -1,5 +1,7 @@
 
-const API_BASE_URL = 'https://f89e-184-147-249-113.ngrok-free.app'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
+// const API_BASE_URL = 'https://0919-2605-8d80-6c1-c8bf-7002-70be-a14b-3ddd.ngrok-free.app'
+// const API_BASE_URL = 'http://localhost:3000'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
+const API_BASE_URL = 'http://172.20.10.3:3000'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
 
 export const Auth = {
   async signUp(email: string, password: string): Promise<any> {

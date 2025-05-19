@@ -42,7 +42,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	const completed = useSelector(selectCompletedSessions);
 	const failed = useSelector(selectFailedSessions);
 
-	console.log('Sessions in useSessionsTab (Selectors):', { newRequests, pending, confirmed, cancelled, inProgress, completed, failed });
+	// console.log('New in useSessionsTab (Selectors):', { newRequests });
 
 	// Select loading and error directly from the slice
 	const loading = useSelector(
@@ -74,7 +74,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	const handleCloseModal = () => {
 		setExpandedSession(null);
 	};
-
+	// TODO: REMOVE THIS
 	const handleAction = async (action: 'accept' | 'reject') => {
 		if (!expandedSession) return;
 
@@ -85,7 +85,8 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 
 		try {
 			if (action === 'accept') {
-				await dispatch(acceptSessionThunk(expandedSession));
+				console.log('Accepting session: in ACTION', expandedSession);
+				// await dispatch(acceptSessionThunk(expandedSession));
 			} else if (action === 'reject') {
 				await dispatch(rejectSessionThunk(expandedSession.id));
 			}
