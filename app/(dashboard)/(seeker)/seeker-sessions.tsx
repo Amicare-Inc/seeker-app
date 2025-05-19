@@ -4,7 +4,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import SessionList from '@/components/SessionList';
 import SessionBookedList from '@/components/SessionBookedList';
-import SessionModal from '@/components/SessionModal';
 import { RootState, AppDispatch } from '@/redux/store';
 import { selectEnrichedSessions } from '@/redux/selectors';
 import { useSessionsTab } from '@/hooks/useSessionsTab';
@@ -18,8 +17,6 @@ const SeekerSessionsTab = () => {
 		error,
 		expandedSession,
 		handleExpandSession,
-		handleCloseModal,
-		handleAction,
 	} = useSessionsTab('seeker');
 
 	const enrichedSessions = useSelector((state: RootState) =>
@@ -111,19 +108,6 @@ const SeekerSessionsTab = () => {
 					title="Confirmed"
 				/>
 			</View>
-
-			{/* Session Modal */}
-			<SessionModal
-				onClose={handleCloseModal}
-				isVisible={!!expandedSession}
-				onAction={handleAction}
-				user={expandedSession?.otherUser || null}
-				isPending={
-					expandedSession?.status === 'newRequest' ||
-					expandedSession?.status === 'pending'
-				}
-				isConfirmed={expandedSession?.status === 'confirmed'}
-			/>
 		</SafeAreaView>
 	);
 };

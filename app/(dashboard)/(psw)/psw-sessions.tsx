@@ -2,10 +2,8 @@
 import React, { useEffect } from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useSelector, useDispatch } from 'react-redux';
 import SessionList from '@/components/SessionList';
 import SessionModal from '@/components/SessionModal';
-import { RootState, AppDispatch } from '@/redux/store';
 import { useSessionsTab } from '@/hooks/useSessionsTab'; // Import useSessionsTab
 import { EnrichedSession } from '@/types/EnrichedSession';
 import SessionBookedList from '@/components/SessionBookedList';
@@ -17,10 +15,7 @@ const PswSessionsTab = () => {
 		confirmed, // Get confirmed from the hook
 		loading,
 		error,
-		expandedSession,
 		handleExpandSession,
-		handleCloseModal,
-		handleAction,
 	} = useSessionsTab('psw'); // Use the hook
 
 	if (loading) {
@@ -38,10 +33,7 @@ const PswSessionsTab = () => {
 			</SafeAreaView>
 		);
 	}
-
-	// *** Removed local filtering logic ***
-
-	// Callback for tapping a session
+	
 	const onSessionPress = (session: EnrichedSession) => {
 		handleExpandSession(session);
 	};
@@ -81,18 +73,6 @@ const PswSessionsTab = () => {
 
 				{/* Add other SessionList components for other statuses if needed */}
 			</View>
-
-			<SessionModal
-				onClose={handleCloseModal}
-				isVisible={!!expandedSession}
-				onAction={handleAction}
-				user={expandedSession?.otherUser || null}
-				isPending={
-					expandedSession?.status === 'newRequest' ||
-					expandedSession?.status === 'pending'
-				}
-				isConfirmed={expandedSession?.status === 'confirmed'}
-			/>
 		</SafeAreaView>
 	);
 	};

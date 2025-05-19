@@ -74,7 +74,7 @@ export const fetchUserSessionsFromBackend = createAsyncThunk<
 );
 
 export const acceptSessionThunk = createAsyncThunk<
-	EnrichedSession, // Expected return type (the updated enriched session)
+	Session, // Expected return type (the updated enriched session)
 	string, // Argument type (sessionId)
 	{ rejectValue: string } // Optional: type for rejectValue
 >(
@@ -88,19 +88,17 @@ export const acceptSessionThunk = createAsyncThunk<
 		}
 	}
 );
-// Define the thunk for rejecting a session
+
 export const rejectSessionThunk = createAsyncThunk<
-	EnrichedSession, // Expected return type (the updated enriched session)
+	Session, // Expected return type (the updated enriched session)
 	string, // Argument type (sessionId)
 	{ rejectValue: string } // Optional: type for rejectValue
 >(
 	'sessions/rejectSession',
 	async (sessionId: string, { rejectWithValue }) => {
 		try {
-			// Call the frontend service to interact with the backend API
 			const updatedSession = await rejectSession(sessionId);
-			// Assuming the backend returns the updated EnrichedSession
-			return updatedSession as EnrichedSession;
+			return updatedSession;
 		} catch (error) {
 			return rejectWithValue((error as any).message || 'Failed to reject session');
 		}
@@ -237,7 +235,7 @@ const sessionSlice = createSlice({
 			})
 			.addCase(acceptSessionThunk.fulfilled, (state, action) => {
 				state.loading = false;
-				const updatedSession = action.payload; // The updated session from the backend
+				const updatedSession = action.payload;
 				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
 				if (index !== -1) {
 					const otherUser = state.allSessions[index].otherUser
@@ -249,6 +247,27 @@ const sessionSlice = createSlice({
 				}
 			})
 			.addCase(acceptSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(rejectSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(rejectSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(rejectSessionThunk.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload as string;
 			})

@@ -28,7 +28,6 @@ export const selectEnrichedSessions = createSelector(
 	[selectSessions, selectUserMap, selectCurrentUserId],
 	(sessions, userMap, currentUserId) => {
 		return sessions.map((session) => {
-			// figure out which user is "otherUser"
 			let otherUserId: string | undefined;
 			if (session.senderId === currentUserId) {
 				otherUserId = session.receiverId;

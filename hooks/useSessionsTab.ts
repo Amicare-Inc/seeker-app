@@ -24,16 +24,10 @@ import {
 export function useSessionsTab(role: 'psw' | 'seeker') {
 	const dispatch = useDispatch<AppDispatch>();
 
-	// This tracks the session displayed in the modal
+	// TODO: RENAME
 	const [expandedSession, setExpandedSession] =
 		useState<EnrichedSession | null>(null);
 
-	// Redux state from your session slice
-	// const { newRequests, pending, confirmed, loading, error } = useSelector(
-	// 	(state: RootState) => state.sessions,
-	// );
-
-	// Select filtered session arrays using memoized selectors
 	const newRequests = useSelector(selectNewRequestSessions);
 	const pending = useSelector(selectPendingSessions);
 	const confirmed = useSelector(selectConfirmedSessions);
@@ -56,6 +50,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	/**
 	 * If a session is 'confirmed' or 'pending', navigate to chat.
 	 * Otherwise, open the other user profile
+	 * // TODO: RENAME THIS BETTER
 	 */
 	const handleExpandSession = (session: EnrichedSession) => {
 		dispatch(setActiveEnrichedSession(session));
@@ -66,45 +61,9 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 			});
 		} else if (session.status === 'newRequest') {
 			router.push('/other-user-profile');
-		} else {
+		} else { //TODO REMOVE THIS
 			setExpandedSession(session);
 		}
-	};
-
-	const handleCloseModal = () => {
-		setExpandedSession(null);
-	};
-	// TODO: REMOVE THIS
-	const handleAction = async (action: 'accept' | 'reject') => {
-		if (!expandedSession) return;
-
-		// let newStatus = '';
-		// if (expandedSession.status === 'newRequest') {
-		// 	newStatus = action === 'accept' ? 'pending' : 'rejected';
-		// }
-
-		try {
-			if (action === 'accept') {
-				console.log('Accepting session: in ACTION', expandedSession);
-				// await dispatch(acceptSessionThunk(expandedSession));
-			} else if (action === 'reject') {
-				await dispatch(rejectSessionThunk(expandedSession.id));
-			}
-			// await dispatch(
-			// 	updateSessionStatus({
-			// 		sessionId: expandedSession.id,
-			// 		newStatus,
-			// 	}),
-			// );
-			setExpandedSession(null);
-		} catch (err) {
-			console.error('Error updating session status:', err);
-		}
-	};
-
-	// If you want to fetch user details for the modal, you can do so here. For now, returning null.
-	const getUserForExpandedSession = () => {
-		return null;
 	};
 
 	return {
@@ -119,8 +78,5 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		error,
 		expandedSession,
 		handleExpandSession,
-		handleCloseModal,
-		handleAction,
-		getUserForExpandedSession,
 	};
 }

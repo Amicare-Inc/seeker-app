@@ -34,12 +34,10 @@ export const acceptSession = async (sessionId: string): Promise<Session> => {
         // Add any necessary authentication headers here (e.g., 'Authorization': `Bearer ${token}`)
       },
     });
-
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
-
     const updatedSession: Session = await response.json();
     return updatedSession;
   } catch (error: any) {
@@ -48,7 +46,7 @@ export const acceptSession = async (sessionId: string): Promise<Session> => {
   }
 };
 
-export const rejectSession = async (sessionId: string): Promise<EnrichedSession> => {
+export const rejectSession = async (sessionId: string): Promise<Session> => {
   try {
     const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/reject`, {
       method: 'PATCH',
@@ -59,7 +57,7 @@ export const rejectSession = async (sessionId: string): Promise<EnrichedSession>
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
-    const updatedSession: EnrichedSession = await response.json();
+    const updatedSession: Session = await response.json();
     return updatedSession;
   } catch (error: any) {
     console.error(`Error rejecting session ${sessionId}:`, error);
