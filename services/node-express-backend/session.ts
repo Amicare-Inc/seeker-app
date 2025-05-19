@@ -1,5 +1,3 @@
-// frontend/services/node-express-backend/session.ts
-
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { Session } from '@/types/Sessions';
 // import { API_BASE_URL } from '@/config';
@@ -50,7 +48,31 @@ export const rejectSession = async (sessionId: string): Promise<Session> => {
   try {
     const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/reject`, {
       method: 'PATCH',
-      // Add headers and potential body similar to acceptSession if needed
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const updatedSession: Session = await response.json();
+    return updatedSession;
+  } catch (error: any) {
+    console.error(`Error rejecting session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
+export const bookSession = async (sessionId: string, currentUserId: string): Promise<Session> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/book`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: currentUserId }),
     });
     if (!response.ok) {
       const errorData = await response.json();

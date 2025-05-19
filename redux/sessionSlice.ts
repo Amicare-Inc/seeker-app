@@ -1,19 +1,10 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import {
-	collection,
-	query,
-	where,
-	getDocs,
-	onSnapshot,
-	updateDoc,
-	doc,
-	arrayUnion,
-} from 'firebase/firestore';
+import { createSlice, createAsyncThunk, PayloadAction, current } from '@reduxjs/toolkit';
+import { collection, query, where, onSnapshot, updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
 import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { acceptSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
+import { acceptSession, bookSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
 
 // Real-time listener for session updates NEED TO MOVE TO BACKEND
 export const listenToUserSessions = (dispatch: any, userId: string) => {
@@ -98,6 +89,31 @@ export const rejectSessionThunk = createAsyncThunk<
 	async (sessionId: string, { rejectWithValue }) => {
 		try {
 			const updatedSession = await rejectSession(sessionId);
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to reject session');
+		}
+	}
+);
+
+type BookSessionArgs = {
+	sessionId: string;
+	currentUserId: string;
+};
+
+export const bookSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated enriched session)
+	BookSessionArgs, // Argument type (sessionId)
+	{
+		dispatch: AppDispatch;
+		state: RootState;
+		rejectValue: string; // or whatever type you prefer
+	}// Optional: type for rejectValue
+>(
+	'sessions/bookSession',
+	async ({ sessionId, currentUserId }, { rejectWithValue }) => {
+		try {
+			const updatedSession = await bookSession(sessionId, currentUserId);
 			return updatedSession;
 		} catch (error) {
 			return rejectWithValue((error as any).message || 'Failed to reject session');
@@ -268,6 +284,27 @@ const sessionSlice = createSlice({
 				}
 			})
 			.addCase(rejectSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(bookSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(bookSessionThunk.fulfilled, (state, action) => {	
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(bookSessionThunk.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload as string;
 			})

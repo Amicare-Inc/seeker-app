@@ -1,22 +1,21 @@
 // src/screens/PswSessionsTab.tsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import SessionList from '@/components/SessionList';
-import SessionModal from '@/components/SessionModal';
-import { useSessionsTab } from '@/hooks/useSessionsTab'; // Import useSessionsTab
+import { useSessionsTab } from '@/hooks/useSessionsTab';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import SessionBookedList from '@/components/SessionBookedList';
 
 const PswSessionsTab = () => {
 	const {
-		newRequests, // Get newRequests from the hook
-		pending, // Get pending from the hook
-		confirmed, // Get confirmed from the hook
+		newRequests,
+		pending,
+		confirmed,
 		loading,
 		error,
 		handleExpandSession,
-	} = useSessionsTab('psw'); // Use the hook
+	} = useSessionsTab('psw');
 
 	if (loading) {
 		return (
@@ -33,7 +32,7 @@ const PswSessionsTab = () => {
 			</SafeAreaView>
 		);
 	}
-	
+
 	const onSessionPress = (session: EnrichedSession) => {
 		handleExpandSession(session);
 	};
@@ -54,24 +53,22 @@ const PswSessionsTab = () => {
 			{/* Main Content */}
 			<View className="flex-1 px-3.5">
 				<SessionList
-					sessions={newRequests} // Use newRequests from the hook
+					sessions={newRequests}
 					onSessionPress={onSessionPress}
 					title="New Requests"
 				/>
 
 				<SessionList
-					sessions={pending} // Use pending from the hook
+					sessions={pending}
 					onSessionPress={onSessionPress}
 					title="Pending"
 				/>
 
 				<SessionBookedList
-					sessions={confirmed} // Use confirmed from the hook
+					sessions={confirmed}
 					onSessionPress={onSessionPress}
 					title="Confirmed"
 				/>
-
-				{/* Add other SessionList components for other statuses if needed */}
 			</View>
 		</SafeAreaView>
 	);

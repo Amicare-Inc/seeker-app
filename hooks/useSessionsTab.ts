@@ -3,14 +3,8 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
 import { AppDispatch, RootState } from '@/redux/store';
-import {
-	updateSessionStatus,
-	setActiveEnrichedSession,
-	acceptSessionThunk,
-	rejectSessionThunk,
-} from '@/redux/sessionSlice';
+import { setActiveEnrichedSession } from '@/redux/sessionSlice';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { setActiveProfile } from '@/redux/activeProfileSlice';
 import {
 	selectNewRequestSessions,
 	selectPendingSessions,

@@ -1,25 +1,12 @@
 // src/screens/ChatPage.tsx
 import React, { useState, useEffect } from 'react';
-import {
-	SafeAreaView,
-	KeyboardAvoidingView,
-	Keyboard,
-	Platform,
-	View,
-	StatusBar,
-} from 'react-native';
+import { SafeAreaView, KeyboardAvoidingView, Keyboard, Platform, StatusBar } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSelector } from 'react-redux';
 import ChatHeader from '@/components/Chat/ChatHeader';
 import ChatMessageList from '@/components/Chat/ChatMessageList';
 import ChatInput from '@/components/Chat/ChatInput';
-import {
-	addDoc,
-	collection,
-	query,
-	orderBy,
-	onSnapshot,
-} from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { FIREBASE_DB } from '@/firebase.config';
 import { Message } from '@/types/Message';
 import { EnrichedSession } from '@/types/EnrichedSession';
