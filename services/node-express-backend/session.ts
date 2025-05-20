@@ -1,9 +1,9 @@
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { Session } from '@/types/Sessions';
 // import { API_BASE_URL } from '@/config';
-// const API_BASE_URL = 'https://0919-2605-8d80-6c1-c8bf-7002-70be-a14b-3ddd.ngrok-free.app'
+const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app'
 // const API_BASE_URL = 'http://localhost:3000'
-const API_BASE_URL = 'http://172.20.10.3:3000'
+// const API_BASE_URL = 'http://172.20.10.3:3000'
 
 export const getUserSessionTab = async (userId: string): Promise<EnrichedSession[]> => {
   try {
@@ -82,7 +82,49 @@ export const bookSession = async (sessionId: string, currentUserId: string): Pro
     const updatedSession: Session = await response.json();
     return updatedSession;
   } catch (error: any) {
-    console.error(`Error rejecting session ${sessionId}:`, error);
+    console.error(`Error booking session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
+export const declineSession = async (sessionId: string): Promise<Session> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/decline`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const updatedSession: Session = await response.json();
+    return updatedSession;
+  } catch (error: any) {
+    console.error(`Error declining session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
+export const cancelSession = async (sessionId: string): Promise<Session> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/cancel`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const updatedSession: Session = await response.json();
+    return updatedSession;
+  } catch (error: any) {
+    console.error(`Error cancelling session ${sessionId}:`, error);
     throw error;
   }
 };

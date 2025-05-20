@@ -4,7 +4,7 @@ import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
 import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { acceptSession, bookSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
+import { acceptSession, bookSession, cancelSession, declineSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
 
 // Real-time listener for session updates NEED TO MOVE TO BACKEND
 export const listenToUserSessions = (dispatch: any, userId: string) => {
@@ -65,7 +65,7 @@ export const fetchUserSessionsFromBackend = createAsyncThunk<
 );
 
 export const acceptSessionThunk = createAsyncThunk<
-	Session, // Expected return type (the updated enriched session)
+	Session, // Expected return type (the updated session)
 	string, // Argument type (sessionId)
 	{ rejectValue: string } // Optional: type for rejectValue
 >(
@@ -81,7 +81,7 @@ export const acceptSessionThunk = createAsyncThunk<
 );
 
 export const rejectSessionThunk = createAsyncThunk<
-	Session, // Expected return type (the updated enriched session)
+	Session, // Expected return type (the updated session)
 	string, // Argument type (sessionId)
 	{ rejectValue: string } // Optional: type for rejectValue
 >(
@@ -102,7 +102,7 @@ type BookSessionArgs = {
 };
 
 export const bookSessionThunk = createAsyncThunk<
-	Session, // Expected return type (the updated enriched session)
+	Session, // Expected return type (the updated session)
 	BookSessionArgs, // Argument type (sessionId)
 	{
 		dispatch: AppDispatch;
@@ -116,7 +116,39 @@ export const bookSessionThunk = createAsyncThunk<
 			const updatedSession = await bookSession(sessionId, currentUserId);
 			return updatedSession;
 		} catch (error) {
-			return rejectWithValue((error as any).message || 'Failed to reject session');
+			return rejectWithValue((error as any).message || 'Failed to book session');
+		}
+	}
+);
+
+export const declineSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated session)
+	string, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/declineSession',
+	async (sessionId: string, { rejectWithValue }) => {
+		try {
+			const updatedSession = await declineSession(sessionId);
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to decline session');
+		}
+	}
+);
+
+export const cancelSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated session)
+	string, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/cancelSession',
+	async (sessionId: string, { rejectWithValue }) => {
+		try {
+			const updatedSession = await cancelSession(sessionId);
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to cancel session');
 		}
 	}
 );
@@ -305,6 +337,48 @@ const sessionSlice = createSlice({
 				}
 			})
 			.addCase(bookSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(declineSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(declineSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(declineSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(cancelSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(cancelSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(cancelSessionThunk.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload as string;
 			})
