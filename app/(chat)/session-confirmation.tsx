@@ -66,7 +66,7 @@ const SessionConfirmation = () => {
 		primaryButtonText = 'Cancel Session';
 		primaryButtonColor = '#DC2626'; // red
 		onPrimaryPress = async () => {
-			try {
+			try { // TODO: WHEN DECLINED IT GOES BACK TO THE CHAT, NEED IT TO GO TO THE SESSION PAGE
 				if (session.status === 'pending') {
 					const result = await dispatch(declineSessionThunk(session.id)).unwrap();
 				} else if (session.status === 'confirmed') {
