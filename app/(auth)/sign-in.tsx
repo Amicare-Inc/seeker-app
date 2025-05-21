@@ -4,8 +4,7 @@ import React, { useEffect, useState } from 'react';
 import ForumField from '@/components/ForumField';
 import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
-import { Auth } from '@/services/node-express-backend/auth';
-import { fetchUserById, setNavigationComplete } from '@/redux/userSlice';
+import { fetchUserFromLoginThunk, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -25,14 +24,11 @@ const SignIn = () => {
 
 	const handleSignIn = async () => {
 		try {
-			const responseJson = await Auth.signIn(
-				form.email,
-				form.password,
-			);
-            if (responseJson && responseJson.uid) {
-                dispatch(fetchUserById(responseJson.uid));
+			const responseJson = await dispatch(fetchUserFromLoginThunk({email: form.email, password: form.password}))
+            if (responseJson) {
+                console.log('responseJson', responseJson);
             } else {
-                throw new Error('Failed to get uid from response');
+                throw new Error('Failed to login from response');
             }
 		} catch (error) {
 			setError((error as any).message);
