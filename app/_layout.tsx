@@ -5,23 +5,17 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { store, RootState, AppDispatch } from '@/redux/store';
 import { fetchAvailableUsers } from '@/redux/userListSlice';
-import { fetchUserSessionsFromBackend, listenToUserSessions } from '@/redux/sessionSlice';
+import { fetchUserSessionsFromBackend } from '@/redux/sessionSlice';
 
 const GlobalDataLoader = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 
 	useEffect(() => {
-		// let unsubscribe: (() => void) | undefined;
 		if (currentUser && currentUser.id) {
 			dispatch(fetchUserSessionsFromBackend(currentUser.id));// unsubscribe = listenToUserSessions(dispatch, currentUser.id);
 			dispatch(fetchAvailableUsers({ isPsw: !currentUser.isPsw }));
 		}
-		// return () => {
-		// 	if (unsubscribe) {
-		// 		unsubscribe();
-		// 	}
-		// };
 	}, [currentUser, dispatch]);
 
 	return null;

@@ -7,6 +7,7 @@ import { Link, router } from 'expo-router';
 import { fetchUserFromLoginThunk, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
+import { connectSocket } from '@/services/node-express-backend/sockets';
 
 const SignIn = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -46,6 +47,9 @@ const SignIn = () => {
 					router.push('/(seeker)/seeker-home');
 				}
 			}
+		}
+		if (userData && userData.id) {
+			connectSocket(userData.id, dispatch);
 		}
 	}, [userData]);
 

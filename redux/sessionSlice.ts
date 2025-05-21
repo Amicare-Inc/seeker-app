@@ -6,47 +6,6 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { acceptSession, bookSession, cancelSession, declineSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
 
-// Real-time listener for session updates NEED TO MOVE TO BACKEND
-export const listenToUserSessions = (dispatch: any, userId: string) => {
-	const sessionCollection = collection(FIREBASE_DB, 'sessions_test1');
-	const sessionQuery = query(
-		sessionCollection,
-		where('participants', 'array-contains', userId),
-	);
-
-	return onSnapshot(sessionQuery, (snapshot) => {
-		const sessions = snapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data(),
-		})) as Session[];
-
-		// Remove any rejected, declined, or cancelled sessions
-		const filteredSessions = sessions.filter(
-			(s) => !['rejected', 'declined'].includes(s.status),
-		);
-
-		dispatch(setSessions(filteredSessions));
-	});
-};
-
-// Update session status and remove rejected/declined sessions
-export const updateSessionStatus = createAsyncThunk(
-	'sessions/updateSessionStatus',
-	async (
-		{ sessionId, newStatus }: { sessionId: string; newStatus: string },
-		{ rejectWithValue },
-	) => {
-		try {
-			await updateDoc(doc(FIREBASE_DB, 'sessions_test1', sessionId), {
-				status: newStatus,
-			});
-			return { sessionId, newStatus };
-		} catch (error) {
-			return rejectWithValue((error as any).message);
-		}
-	},
-);
-
 export const fetchUserSessionsFromBackend = createAsyncThunk<
 	EnrichedSession[], // Expected return type from the backend
 	string, // Argument type (userId)
@@ -262,20 +221,6 @@ const sessionSlice = createSlice({
 			.addCase(fetchUserSessionsFromBackend.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload as string;
-			})
-
-			.addCase(updateSessionStatus.fulfilled, (state, action) => {
-				const { sessionId, newStatus } = action.payload;
-				state.allSessions = state.allSessions.filter(
-					(session) =>
-						session.id !== sessionId ||
-						!['rejected', 'declined'].includes(newStatus),
-				);
-				// Note: This thunk is likely using direct Firestore access
-				// and should ideally be refactored to use the backend API
-				// if you want consistent data flow. If it remains,
-				// you might need to decide how its status update affects
-				// allSessions and whether a fetch is needed afterward.
 			})
 			.addCase(acceptSessionThunk.pending, (state) => {
 				state.loading = true;
