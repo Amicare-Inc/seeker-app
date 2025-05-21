@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import CountryPicker, { CountryCode } from 'react-native-country-picker-modal';
 
 const RecoveryPhoneScreen = () => {
-  const [countryCode, setCountryCode] = useState<CountryCode>('US'); // Default country code
+  const [countryCode, setCountryCode] = useState<CountryCode>('CA'); // Default country code
   const [callingCode, setCallingCode] = useState('1'); // Default calling code
   const [phoneNumber, setPhoneNumber] = useState('');
 

@@ -1,9 +1,7 @@
 // src/screens/PswSessionsTab.tsx
-import React, { useEffect } from 'react';
-// Import SafeAreaView from react-native-safe-area-context
-import { SafeAreaView } from 'react-native-safe-area-context';
-// Keep other imports from react-native
-import { View, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, Keyboard, Platform, Animated, Easing } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import SessionList from '@/components/SessionList';
@@ -17,6 +15,8 @@ import SessionBookedList from '@/components/SessionBookedList';
 
 import SessionCard from '@/components/SessionCard';
 
+import SessionCardChecklist from '@/components/SessionCardChecklist';
+
 const PswSessionsTab = () => {
     const {
         loading,
@@ -27,7 +27,6 @@ const PswSessionsTab = () => {
         handleAction,
     } = useSessionsTab('psw');
 
-    // Get enriched sessions from the selector
     const dispatch: AppDispatch = useDispatch();
     const enrichedSessions = useSelector((state: RootState) =>
         selectEnrichedSessions(state),
@@ -37,7 +36,39 @@ const PswSessionsTab = () => {
     );
     const userMap = useSelector((state: RootState) => state.user.allUsers);
 
-    // Fetch missing user data if not already in userMap
+    // Track keyboard height
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+    const insets = useSafeAreaInsets();
+
+    // Animated value for keyboard height minus bottom inset
+    const animatedKeyboardHeight = React.useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        const showSub = Keyboard.addListener('keyboardWillShow', (e) => {
+            // Subtract the bottom inset so the card sits just above the keyboard
+            const height = Math.max(0, e.endCoordinates.height - insets.bottom);
+            Animated.timing(animatedKeyboardHeight, {
+                toValue: height,
+                duration: e.duration || 250,
+                easing: Easing.out(Easing.ease),
+                useNativeDriver: false,
+            }).start();
+        });
+        const hideSub = Keyboard.addListener('keyboardWillHide', (e) => {
+            Animated.timing(animatedKeyboardHeight, {
+                toValue: 0,
+                duration: e?.duration || 250,
+                easing: Easing.out(Easing.ease),
+                useNativeDriver: false,
+            }).start();
+        });
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, [animatedKeyboardHeight, insets.bottom]);
+
     useEffect(() => {
         if (!currentUserId) return;
         enrichedSessions.forEach((session) => {
@@ -48,14 +79,12 @@ const PswSessionsTab = () => {
                 otherUserId = session.senderId;
             }
             if (otherUserId && !userMap[otherUserId]) {
-                console.log(`Fetching user data for ${otherUserId}`);
                 dispatch(fetchUserById(otherUserId));
             }
         });
     }, [enrichedSessions, currentUserId, userMap, dispatch]);
 
     if (loading) {
-        // Use SafeAreaView from context here too
         return (
             <SafeAreaView className="flex-1 items-center justify-center bg-white">
                 <Text>Loading...</Text>
@@ -64,7 +93,6 @@ const PswSessionsTab = () => {
     }
 
     if (error) {
-        // Use SafeAreaView from context here too
         return (
             <SafeAreaView className="flex-1 items-center justify-center bg-white">
                 <Text>Error fetching sessions: {error}</Text>
@@ -72,7 +100,6 @@ const PswSessionsTab = () => {
         );
     }
 
-    // Filter sessions by status
     const newRequestSessions = enrichedSessions.filter(
         (s: EnrichedSession) =>
             s.status === 'newRequest' && s.receiverId === currentUserId,
@@ -84,18 +111,16 @@ const PswSessionsTab = () => {
         (s) => s.status === 'confirmed',
     );
 
-    // Callback for tapping a session
     const onSessionPress = (session: EnrichedSession) => {
         handleExpandSession(session);
     };
 
     return (
-        // Use SafeAreaView from context and add edges prop
         <SafeAreaView
             className="flex-1"
             style={{ backgroundColor: '#f0f0f0' }}
         >
-            {/* Header Row - Add top padding for spacing */}
+            {/* Header Row */}
             <View className="flex-row items-center px-3.5 pb-2">
                 <Ionicons
                     name="time"
@@ -138,7 +163,20 @@ const PswSessionsTab = () => {
                 }
                 isConfirmed={expandedSession?.status === 'confirmed'}
             />
-            <SessionCard />
+
+            {/* SessionCardChecklist always stays above the keyboard */}
+            <Animated.View
+                pointerEvents="box-none"
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: animatedKeyboardHeight, // No extra offset needed
+                    zIndex: 100,
+                }}
+            >
+                <SessionCard />
+            </Animated.View>
         </SafeAreaView>
     );
 };

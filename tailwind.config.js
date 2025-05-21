@@ -21,6 +21,10 @@ module.exports = {
 				'dark-blue': '#05549e',
 				'light-blue': '#399cf9',
 				'azure-blue': '#1a8bf8',
+
+				'light-green': '#ACE5B2',
+                'brand-green': '#75D87F',
+                'dark-green': '#5C9F63',
 			},
 		},
 	},
