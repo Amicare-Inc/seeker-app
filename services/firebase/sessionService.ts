@@ -73,6 +73,51 @@ export function subscribeToSession(
 //                 // allSessions and whether a fetch is needed afterward.
 //             })
 
+	// useEffect(() => {
+		// const unsubscribe = fetchMessages(sessionId as string, setMessages);
+	// 	return () => unsubscribe();
+	// }, [sessionId]);
+
+	// const fetchMessages = (
+	// 	sessionId: string,
+	// 	callback: (msgs: Message[]) => void,
+	// ) => {
+	// 	const messagesRef = collection(
+	// 		FIREBASE_DB,
+	// 		'sessions_test1',
+	// 		sessionId,
+	// 		'messages',
+	// 	);
+	// 	const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
+	// 	const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+	// 		const fetchedMessages: Message[] = snapshot.docs.map((doc) => ({
+	// 			...doc.data(),
+	// 			id: doc.id,
+	// 		})) as Message[];
+	// 		callback(fetchedMessages);
+	// 	});
+	// 	return unsubscribe;
+	// };
+
+	// const addMessage = async (
+	// 	sessionId: string,
+	// 	messageText: string,
+	// 	userId: string,
+	// ) => {
+	// 	const messagesRef = collection(
+	// 		FIREBASE_DB,
+	// 		'sessions_test1',
+	// 		sessionId,
+	// 		'messages',
+	// 	);
+	// 	await addDoc(messagesRef, {
+	// 		userId,
+	// 		message: messageText,
+	// 		sessionId,
+	// 		timestamp: new Date().toISOString(),
+	// 	});
+	// };
+
 //DEPRECATED
 // /** Add the current user to confirmedBy; if both are confirmed, set status=booked */
 

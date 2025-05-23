@@ -5,16 +5,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import ChatHeader from '@/components/Chat/ChatHeader';
 import ChatMessageList from '@/components/Chat/ChatMessageList';
 import ChatInput from '@/components/Chat/ChatInput';
-import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { FIREBASE_DB } from '@/firebase.config';
-import { Message } from '@/types/Message';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { AppDispatch, RootState } from '@/redux/store';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { sendMessage } from '@/services/node-express-backend/session';
 import { getSocket } from '@/services/node-express-backend/sockets';
-import { fetchMessagesBySessionId } from '@/redux/chatSlice';
+import { clearMessages, fetchMessagesBySessionId } from '@/redux/chatSlice';
 
 const ChatPage = () => {
 	const { sessionId } = useLocalSearchParams();
@@ -26,23 +22,10 @@ const ChatPage = () => {
 			state.sessions.allSessions.find((s) => s.id === sessionId),
 	) as EnrichedSession | undefined;
 	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
-	const insets = useSafeAreaInsets();
-
-	// Debug logs
-	// console.log('ChatPage - sessionId:', sessionId);
-	// console.log('ChatPage - currentUser:', currentUser);
-	// console.log('ChatPage - activeSession:', activeSession);
-
 	if (!sessionId || !activeSession || !currentUser) return null;
 	const otherUser = activeSession.otherUser;
-	// const [messages, setMessages] = useState<Message[]>([]);
 	const messages = useSelector((state: RootState) => state.chat.messages); // Get messages from Redux state
 	const [newMessage, setNewMessage] = useState('');
-
-	// useEffect(() => {
-		// const unsubscribe = fetchMessages(sessionId as string, setMessages);
-	// 	return () => unsubscribe();
-	// }, [sessionId]);
 
 	useEffect(() => {
 
@@ -57,17 +40,14 @@ const ChatPage = () => {
 		  // Emit 'chat:joinSession' when the component mounts for this sessionId
 		  console.log(`Emitting 'chat:joinSession' for session: ${sessionId}`);
 		  socket.emit('chat:joinSession', sessionId);
-	  
-		  // Cleanup function to emit 'chat:leaveSession' when the component unmounts or sessionId changes
-		  return () => {
-			console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
-			socket.emit('chat:leaveSession', sessionId);
-			// TODO: You might need to clear the chat messages from Redux state when leaving a chat
-			// dispatch(clearMessages()); // Assuming you have a clearMessages action in chatSlice
-		  };
+	  		return () => {
+				console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
+				socket.emit('chat:leaveSession', sessionId);
+				dispatch(clearMessages());
+		  	};
 		}
 		return undefined; 
-	},[sessionId])
+	},[sessionId, dispatch])
 
 	const handleSendMessage = async () => {
 		try {
@@ -79,46 +59,6 @@ const ChatPage = () => {
 		}} catch (error) {
 			console.error('Error sending message:', error);
 		}
-	};
-
-	const fetchMessages = (
-		sessionId: string,
-		callback: (msgs: Message[]) => void,
-	) => {
-		const messagesRef = collection(
-			FIREBASE_DB,
-			'sessions_test1',
-			sessionId,
-			'messages',
-		);
-		const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
-		const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-			const fetchedMessages: Message[] = snapshot.docs.map((doc) => ({
-				...doc.data(),
-				id: doc.id,
-			})) as Message[];
-			callback(fetchedMessages);
-		});
-		return unsubscribe;
-	};
-
-	const addMessage = async (
-		sessionId: string,
-		messageText: string,
-		userId: string,
-	) => {
-		const messagesRef = collection(
-			FIREBASE_DB,
-			'sessions_test1',
-			sessionId,
-			'messages',
-		);
-		await addDoc(messagesRef, {
-			userId,
-			message: messageText,
-			sessionId,
-			timestamp: new Date().toISOString(),
-		});
 	};
 
 	return (
