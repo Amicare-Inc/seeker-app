@@ -1,3 +1,4 @@
+import { SessionDTO } from '@/types/dtos/SessionDto';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { Message } from '@/types/Message';
 import { Session } from '@/types/Sessions';
@@ -22,6 +23,50 @@ export const getUserSessionTab = async (userId: string): Promise<EnrichedSession
     throw error;
   }
 };
+
+export const requestSession = async (session: SessionDTO): Promise<void> => {
+
+	try {
+		const response = await fetch(`${API_BASE_URL}/sessions`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				// Add any necessary authentication headers here (e.g., 'Authorization': `Bearer ${token}`)
+			},
+			body: JSON.stringify(session)
+		})
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+		}
+    } catch (error: any) {
+		console.error('Error requesting session:', error);
+		throw error;
+    }
+
+}
+
+export const updateSession = async (sessionId: string, session: Partial<Session>): Promise<string> => {
+  try {
+	const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}`, {
+	  method: 'PATCH',
+	  headers: {
+		'Content-Type': 'application/json',
+	  },
+	  body: JSON.stringify(session),
+	});
+	if (!response.ok) {
+	  const errorData = await response.text
+	  throw new Error(errorData.toString() || `HTTP error! status: ${response.status}`);
+	}
+	const successString = await response.text();
+	return successString;
+  } catch (error: any) {
+	console.error(`Error updating session ${sessionId}:`, error);
+	throw error;
+  }
+}
 
 export const acceptSession = async (sessionId: string): Promise<Session> => {
   console.log('acceptSession called with:', sessionId);

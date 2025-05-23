@@ -16,13 +16,11 @@ import DateTimeRow from '@/components/RequestSession/DateTimeRow';
 import SessionLengthSelector from '@/components/RequestSession/SessionLengthSelector';
 import BillingCard from '@/components/RequestSession/BillingCard';
 import HelpOptionsDropdown from '@/components/RequestSession/HelpOptionsDropdown';
-import {
-	mergeDateAndTime,
-	roundDateTo15Min,
-	enforceTwoHourBuffer,
-} from '@/scripts/datetimeHelpers';
+import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from '@/scripts/datetimeHelpers';
 import { RootState } from '@/redux/store';
 import { useSelector } from 'react-redux';
+import { requestSession, updateSession } from '@/services/node-express-backend/session';
+import { SessionDTO } from '@/types/dtos/SessionDto';
 
 interface SessionData {
 	id: string;
@@ -80,11 +78,11 @@ const RequestSession = () => {
 			: 20; // fallback default rate
 
 	// The dynamic base price is computed as the PSW rate multiplied by the session length.
-	const dynamicBasePrice = pswRate * sessionLength;
+	const basePrice = pswRate * sessionLength;
 	// Fixed additional costs.
-	const taxes = dynamicBasePrice * 0.13;
-	const serviceFee = dynamicBasePrice * 0.1;
-	const total = dynamicBasePrice + taxes + serviceFee;
+	const taxes = basePrice * 0.13;
+	const serviceFee = basePrice * 0.1;
+	const total = basePrice + taxes + serviceFee;
 	// ------------------------------------
 
 	// On mount, compute session length if startDate and endDate exist.
@@ -203,37 +201,34 @@ const RequestSession = () => {
 				startTime: startDate.toISOString(),
 				endTime: endDate.toISOString(),
 				billingDetails: {
-					dynamicBasePrice,
+					dynamicBasePrice: basePrice,
 					taxes,
 					serviceFee,
 					total,
 				},
 			};
 			if (existingSession) {
-				const sessionRef = doc(
-					FIREBASE_DB,
-					'sessions_test1',
-					existingSession.id,
-				);
-				await updateDoc(sessionRef, sessionData);
+				console.log('session id', existingSession.id);
+				await updateSession(existingSession.id, {
+					...sessionData,
+					billingDetails: {
+						...sessionData.billingDetails,
+						basePrice: sessionData.billingDetails.dynamicBasePrice,
+					},
+				});
 				alert('Session updated successfully!');
 				router.back();
 			} else {
-				const sessionId = `${currentUser.id}_${Date.now()}`;
 				const newSessionData = {
 					...sessionData,
-					id: sessionId,
 					senderId: currentUser.id,
 					receiverId: targetUserObj?.id,
-					participants: [currentUser.id, targetUserObj?.id],
-					status: 'newRequest',
-					createdAt: new Date().toISOString(),
-					confirmedBy: [],
-				};
-				await setDoc(
-					doc(FIREBASE_DB, 'sessions_test1', sessionId),
-					newSessionData,
-				);
+					billingDetails: {
+						...sessionData.billingDetails,
+						basePrice: sessionData.billingDetails.dynamicBasePrice,
+					},
+				} as SessionDTO;
+				await requestSession(newSessionData);
 				router.push({
 					pathname: '/sent-request',
 					params: {
@@ -297,7 +292,7 @@ const RequestSession = () => {
 
 				{/* Billing Info */}
 				<BillingCard
-					basePrice={dynamicBasePrice}
+					basePrice={basePrice}
 					taxes={taxes}
 					serviceFee={serviceFee}
 					total={total}
