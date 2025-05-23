@@ -14,23 +14,17 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
 	otherUserName,
 	currentUserId,
 }) => {
-	const renderItem = ({ item }: { item: Message }) => {
-		return (
-			<View
-				className={`p-3 my-1 rounded-lg max-w-3/4 ${item.userId === currentUserId ? 'self-end bg-blue-500' : 'self-start bg-gray-200'}`}
+	const renderItem = ({ item }: { item: Message }) => (
+		<View
+			className={`p-3 my-1 rounded-3xl max-w-3/4 ${item.userId === currentUserId ? 'self-end bg-[#0e7ae2]' : 'self-start bg-gray-200'}`}
+		>
+			<Text
+				className={`${item.userId === currentUserId ? 'text-white' : 'text-black'} px-1`}
 			>
-				<Text
-					className={`font-bold ${item.userId === currentUserId ? 'text-white' : 'text-black'}`}
-				>
-					{item.userId === currentUserId ? 'You' : otherUserName}
-				</Text>
-				<Text
-					className={`${item.userId === currentUserId ? 'text-white' : 'text-black'}`}
-				>
-					{item.message}
-				</Text>
-			</View>
-	)};
+				{item.message}
+			</Text>
+		</View>
+	);
 
 	return (
 		<FlatList

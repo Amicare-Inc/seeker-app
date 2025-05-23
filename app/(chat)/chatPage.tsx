@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, KeyboardAvoidingView, Keyboard, Platform, StatusBar } from 'react-native';
+import { KeyboardAvoidingView, Keyboard, Platform, View, StatusBar } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import ChatHeader from '@/components/Chat/ChatHeader';
@@ -13,7 +14,8 @@ import { getSocket } from '@/services/node-express-backend/sockets';
 import { clearMessages, fetchMessagesBySessionId } from '@/redux/chatSlice';
 
 const ChatPage = () => {
-	const { sessionId } = useLocalSearchParams();
+    const { sessionId } = useLocalSearchParams();
+    const insets = useSafeAreaInsets();
 	const dispatch = useDispatch<AppDispatch>();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const activeSession = useSelector(
@@ -26,7 +28,6 @@ const ChatPage = () => {
 	const otherUser = activeSession.otherUser;
 	const messages = useSelector((state: RootState) => state.chat.messages); // Get messages from Redux state
 	const [newMessage, setNewMessage] = useState('');
-
 	useEffect(() => {
 
 		if (sessionId){
@@ -49,6 +50,16 @@ const ChatPage = () => {
 		return undefined; 
 	},[sessionId, dispatch])
 
+	const toggleHeaderExpanded = () => {
+        setIsHeaderExpanded(!isHeaderExpanded);
+    };
+
+    const handleInputFocusChange = (isFocused: boolean) => {
+        if (isFocused && isHeaderExpanded) {
+            setIsHeaderExpanded(false);
+        }
+    };
+
 	const handleSendMessage = async () => {
 		try {
 			if (newMessage.trim()) {
@@ -62,53 +73,52 @@ const ChatPage = () => {
 	};
 
 	return (
-		<SafeAreaView className="flex-1" style={{ paddingTop: -1 }}>
-			<StatusBar translucent backgroundColor="transparent" />
-			<LinearGradient
-				start={{ x: 0, y: 0.5 }}
-				end={{ x: 1, y: 0.5 }}
-				colors={
-					activeSession.status === 'confirmed'
-						? ['#008DF4', '#5CBAFF']
-						: ['#ffffff', '#ffffff']
-				}
-				className=""
-				style={{
-					position: 'absolute',
-					top: 0,
-					left: 0,
-					right: 0,
-					height:
-						Platform.OS === 'android'
-							? (StatusBar.currentHeight || 0) + 100
-							: 100, // Adjust height as needed
-					zIndex: 0,
-				}}
-			/>
-			<ChatHeader
-				session={activeSession}
-				user={otherUser!}
-				isExpanded={isHeaderExpanded}
-				toggleExpanded={() => setIsHeaderExpanded((prev) => !prev)}
-			/>
-			<KeyboardAvoidingView
-				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-				className="flex-1"
-				style={{ backgroundColor: '#f0f0f0' }}
-			>
-				<ChatMessageList
-					messages={messages}
-					otherUserName={otherUser?.firstName || ''}
-					currentUserId={currentUser.id}
-				/>
-				<ChatInput
-					newMessage={newMessage}
-					setNewMessage={setNewMessage}
-					handleSendMessage={handleSendMessage}
-				/>
-			</KeyboardAvoidingView>
-		</SafeAreaView>
-	);
-};
+        <SafeAreaView className="flex-1" edges={['left', 'right', 'bottom']}>
+            <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+            <LinearGradient
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                colors={
+                    activeSession.status === 'confirmed'
+                        ? ['#008DF4', '#5CBAFF']
+                        : ['#FFFFFF', '#FFFFFF']
+                }
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 0,
+                    paddingTop: insets.top,
+                }}
+            />
+            <View style={{ paddingTop: insets.top }}>
+                <ChatHeader
+                    session={activeSession}
+                    user={otherUser!}
+                    isExpanded={isHeaderExpanded}
+                    toggleExpanded={toggleHeaderExpanded}
+                />
+            </View>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                className="flex-1"
+                style={{ backgroundColor: '#f0f0f0' }}
+            >
+                <ChatMessageList
+                    messages={messages}
+                    otherUserName={otherUser?.firstName || ''}
+                    currentUserId={currentUser.id}
+                />
+                <ChatInput
+                    newMessage={newMessage}
+                    setNewMessage={setNewMessage}
+                    handleSendMessage={handleSendMessage}
+                    onFocusChange={handleInputFocusChange}
+                />
+            </KeyboardAvoidingView>
+        </SafeAreaView>
+    );
+}
 
 export default ChatPage;

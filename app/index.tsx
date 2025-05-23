@@ -66,7 +66,7 @@ export default function Index() {
 					<CustomButton
 						title="Continue with Email"
 						handlePress={() => router.push('/sign-in')}
-						containerStyles="w-full mt-6"
+						containerStyles="w-3/4 mt-6"
 					/>
 				</View>
 			</ScrollView>

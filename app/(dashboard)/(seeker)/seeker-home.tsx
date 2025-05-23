@@ -41,7 +41,7 @@ const SeekerHomeTab = () => {
 	return (
 		<SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
 			{/* Header row */}
-			<View className="flex-row items-center justify-between px-4 pt-4 pb-2">
+			<View className="flex-row items-center justify-between px-4 pb-2">
 				{/* Left side: Icon + Title */}
 				<View className="flex-row items-center">
 					<Ionicons
@@ -50,7 +50,7 @@ const SeekerHomeTab = () => {
 						color="black"
 						style={{ marginRight: 8 }}
 					/>
-					<Text className="text-2xl font-mono text-black">
+					<Text className="text-2xl text-black">
 						Explore PSWs
 					</Text>
 				</View>

@@ -39,14 +39,14 @@ const SeekerSessionsTab = () => {
 	return (
 		<SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
 			{/* Header Row */}
-			<View className="flex-row items-center px-3.5 pt-4 pb-2">
+			<View className="flex-row items-center px-3.5 pb-2">
 				<Ionicons
 					name="time"
 					size={24}
 					color="black"
 					style={{ marginRight: 8 }}
 				/>
-				<Text className="text-2xl font-mono text-black">Sessions</Text>
+				<Text className="text-2xl text-black">Sessions</Text>
 			</View>
 
 			{/* Main Content */}

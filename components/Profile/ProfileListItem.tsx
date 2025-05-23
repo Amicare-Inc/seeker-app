@@ -24,12 +24,11 @@ const ProfileListItem: React.FC<ProfileListItemProps> = ({
 				disabled ? 'opacity-50' : ''
 			}`}
 		>
-			<View className="flex-row items-center">
+			<View className="flex-row gap-3 items-center">
 				<Ionicons
 					name={iconName}
 					size={20}
 					color="#000"
-					className="mr-3"
 				/>
 				<Text className="text-sm font-semibold">{label}</Text>
 			</View>

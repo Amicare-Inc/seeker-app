@@ -134,10 +134,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			colors={
 				isConfirmed ? ['#008DF4', '#5CBAFF'] : ['#ffffff', '#ffffff']
 			}
-			className="py-2"
 		>
 			{/* Top row */}
-			<View className="flex-row items-center px-4 py-3">
+			<View className="flex-row items-center px-4 pb-3">
 				<TouchableOpacity
 					onPress={() => router.back()}
 					className="mr-3"
@@ -183,29 +182,29 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			{isExpanded && (
 				<View className="px-4 pb-4">
 					<Text
-						className={`text-base mb-2 ${isConfirmed ? 'text-white' : 'text-gray-500'}`}
+						className={`text-sm mb-3 ${isConfirmed ? 'text-white' : 'text-gray-400'}`}
 					>
 						{currentSession.note ||
 							'No additional details provided.'}
 					</Text>
 					<View
-						className={`flex-row items-center justify-center rounded-lg py-2 mb-4 ${isConfirmed ? 'border' : ''}`}
+						className={`flex-row items-center justify-center rounded-full py-0.5 mb-4 ${isConfirmed ? 'border' : ''}`}
 						style={{
 							borderColor: '#ffffff',
 							width: '100%',
 							backgroundColor: isConfirmed
 								? 'transparent'
-								: '#f0f0f0',
+								: '#dcdce0',
 						}}
 					>
 						<View className="flex-1 flex-row items-center justify-center py-3">
 							<Ionicons
 								name="calendar"
-								size={18}
+								size={22}
 								color={isConfirmed ? '#fff' : '#000'}
 							/>
 							<Text
-								className={`text-sm ml-2 ${isConfirmed ? 'text-white' : 'text-black'}`}
+								className={`text-sm ml-2 font-medium ${isConfirmed ? 'text-white' : 'text-black'}`}
 							>
 								{formattedDate}
 							</Text>
@@ -213,16 +212,16 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 						</View>
 						<View
 							style={{ width: 1, height: 28 }}
-							className="bg-gray-300"
+							className="bg-neutral-100"
 						/>
 						<View className="flex-1 flex-row items-center justify-center">
 							<Ionicons
 								name="time"
-								size={18}
+								size={22}
 								color={isConfirmed ? '#fff' : '#000'}
 							/>
 							<Text
-								className={`text-sm ml-2 ${isConfirmed ? 'text-white' : 'text-black'}`}
+								className={`text-xs ml-2 font-medium ${isConfirmed ? 'text-white' : 'text-black'}`}
 							>
 								{formattedTimeRange}
 							</Text>
@@ -267,30 +266,30 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 					</View>
 
 					<View className="flex-row items-center justify-between mb-3">
-						<View className="flex-row items-center">
-							<Text
-								className={`text-xs ${isConfirmed ? 'text-white' : 'text-black'}`}
-							>
-								{isConfirmed
-									? 'Appointment Confirmed'
-									: 'Awaiting confirmation'}
-							</Text>
+						<View className="flex-row items-center gap-1">
 							<Ionicons
 								name={
 									isConfirmed
 										? 'checkmark-circle'
 										: 'alert-circle'
 								}
-								size={18}
+								size={22}
 								color={isConfirmed ? '#fff' : '#9ca3af'}
 								style={{ marginLeft: 4 }}
 							/>
+							<Text
+								className={`text-sm ${isConfirmed ? 'text-white' : 'text-neutral-500'}`}
+							>
+								{isConfirmed
+									? 'Appointment Confirmed'
+									: 'Awaiting confirmation'}
+							</Text>
 						</View>
 						<Text
-							className={`text-xs ${isConfirmed ? 'text-white' : 'text-black'}`}
+							className={`text-sm ${isConfirmed ? 'text-white' : 'text-neutral-500'}`}
 						>
-							Total:{' '}
-							<Text className="font-medium">${costLabel}</Text>
+							Total Cost:{' '}
+							<Text className="font-bold">${costLabel}</Text>
 						</Text>
 					</View>
 

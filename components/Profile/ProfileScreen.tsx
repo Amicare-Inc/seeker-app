@@ -61,7 +61,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 
 	return (
 		<SafeAreaView
-			className="flex-1 px-4 py-6"
+			className="flex-1 px-4 pb-6"
 			style={{ backgroundColor: '#f0f0f0' }}
 		>
 			<ProfileHeader
@@ -96,20 +96,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 							<ProfileListItem
 								label="Family"
 								iconName="people"
-								disabled
+								onPress={() => router.push('/(profile)/family')}
 							/>
 							<ProfileListItem
 								label="Settings"
 								iconName="settings"
+								onPress={() => router.push('/(profile)/settings')}
 							/>
 							<ProfileListItem
 								label="Help"
 								iconName="help-circle"
+								onPress={() => router.push('/(profile)/help')}
 							/>
 							<ProfileListItem
-								label="Refer friends"
+								label="Referrals & Rewards"
 								iconName="gift"
-								disabled
+								onPress={() => router.push('/(profile)/refer')}
 							/>
 							<ProfileListItem
 								label="Legal"
