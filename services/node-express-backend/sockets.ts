@@ -4,6 +4,8 @@ import { FIREBASE_AUTH } from '@/firebase.config';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { setSessions } from '@/redux/sessionSlice';
 import { AppDispatch } from '@/redux/store'; // Import the dispatch function from your store
+import { Message } from '@/types/Message';
+import { addMessage } from '@/redux/chatSlice';
 
 const SOCKET_SERVER_URL = 'https://f964-184-147-249-113.ngrok-free.app'
 // const SOCKET_SERVER_URL = 'http://localhost:3000'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
@@ -53,6 +55,13 @@ export const connectSocket = async (userId: string, dispatch: AppDispatch) => {
         dispatch(setSessions(enrichedSessions)); // Ensure dispatch is passed as a parameter
     });
 
+    socket.on('chat:newMessage', (message: Message) => { // Assuming backend sends Message object
+        console.log('Received new message:', message);
+        // Dispatch Redux action to add the new message to state
+        // Assuming addMessage is an action creator from your chat slice
+        dispatch(addMessage(message)); 
+    });
+
     // Add listeners for custom events from the backend here later
     // Example:
     // socket.on('session:update', (data) => {
@@ -70,6 +79,8 @@ export const getSocket = () => socket;
 
 export const disconnectSocket = () => {
   if (socket) {
+    socket.off('session:update');
+    socket.off('chat:newMessage');
     socket.disconnect();
     socket = null;
     console.log('Socket disconnected manually.');

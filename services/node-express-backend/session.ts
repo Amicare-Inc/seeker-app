@@ -1,4 +1,5 @@
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { Message } from '@/types/Message';
 import { Session } from '@/types/Sessions';
 // import { API_BASE_URL } from '@/config';
 const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app'
@@ -128,3 +129,46 @@ export const cancelSession = async (sessionId: string): Promise<Session> => {
     throw error;
   }
 };
+
+export const sendMessage = async (sessionId: string, userId: string, message: string): Promise<Message> => {
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, message }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+	const newMessage: Message = await response.json();
+	return newMessage
+  } catch (error: any) {
+    console.error(`Error sending message in session ${sessionId}:`, error);
+    throw error;
+  }
+
+}
+
+export const getMessages = async (sessionId: string): Promise<Message[]> => {
+  try {
+	const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/messages`, {
+	  method: 'GET',
+	  headers: {
+		'Content-Type': 'application/json',
+	  },
+	});
+	if (!response.ok) {
+	  const errorData = await response.json();
+	  throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+	}
+	const messages: Message[] = await response.json();
+	return messages
+  } catch (error: any) {
+	console.error(`Error getting messages in session ${sessionId}:`, error);
+	throw error;
+  }
+}
