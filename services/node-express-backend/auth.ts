@@ -1,7 +1,8 @@
 
-const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app'
-// const API_BASE_URL = 'http://localhost:3000'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
-// const API_BASE_URL = 'http://172.20.10.3:3000'// process.env.EXPO_PUBLIC_API_URL; // Make sure you have this environment variable set up
+// const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app' // Ngrok Tunnel expo start --tunnel
+// const API_BASE_URL = 'http://localhost:3000' // expo start
+// const API_BASE_URL = 'http://172.20.10.3:3000' // ??
+const API_BASE_URL = 'https://backend-903865090190.us-east5.run.app' // GCP
 
 export const Auth = {
   async signUp(email: string, password: string): Promise<any> {

@@ -3,9 +3,10 @@ import { EnrichedSession } from '@/types/EnrichedSession';
 import { Message } from '@/types/Message';
 import { Session } from '@/types/Sessions';
 // import { API_BASE_URL } from '@/config';
-const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app'
-// const API_BASE_URL = 'http://localhost:3000'
-// const API_BASE_URL = 'http://172.20.10.3:3000'
+// const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app' // Ngrok Tunnel expo start --tunnel
+// const API_BASE_URL = 'http://localhost:3000' // expo start
+// const API_BASE_URL = 'http://172.20.10.3:3000' // ??
+const API_BASE_URL = 'https://backend-903865090190.us-east5.run.app' // GCP
 
 export const getUserSessionTab = async (userId: string): Promise<EnrichedSession[]> => {
   try {
