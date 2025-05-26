@@ -121,7 +121,7 @@ const PswSessionsTab = () => {
                     zIndex: 100,
                 }}
             >
-                <SessionCard />
+                {/* <SessionCard /> */}
             </Animated.View>
         </SafeAreaView>
     );
