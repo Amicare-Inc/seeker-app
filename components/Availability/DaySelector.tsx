@@ -1,5 +1,5 @@
 import React from 'react';
-import CustomButton from '@/components/CustomButton';
+import CustomButton from '@/components/Global/CustomButton';
 import { View } from 'react-native';
 
 interface DaySelectorProps {

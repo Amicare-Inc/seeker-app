@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import DaySelector from '@/components/Availability/DaySelector';
 import TimeSlotSelector from '@/components/Availability/TimeSlotSelector';
-import CustomButton from '@/components/CustomButton';
+import CustomButton from '@/components/Global/CustomButton';
 import { useAvailability } from '@/hooks/useAvailability';
 
 const days = ['Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat', 'Sun'];

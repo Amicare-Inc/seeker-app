@@ -11,8 +11,8 @@ import {
 	Alert,
 	Keyboard,
 } from 'react-native';
-import ForumField from '@/components/ForumField';
-import CustomButton from '@/components/CustomButton';
+import ForumField from '@/components/Global/ForumField';
+import CustomButton from '@/components/Global/CustomButton';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -22,7 +22,7 @@ import { FIREBASE_DB } from '@/firebase.config';
 import { router } from 'expo-router';
 import { verifyAddress } from '@/services/google/googleMaps';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import DatePickerField from '@/components/DatePickerField';
+import DatePickerField from '@/components/Global/DatePickerField';
 
 const PersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();

@@ -7,8 +7,8 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import ForumField from '@/components/ForumField';
-import CustomButton from '@/components/CustomButton';
+import ForumField from '@/components/Global/ForumField';
+import CustomButton from '@/components/Global/CustomButton';
 import { Link, router } from 'expo-router';
 import { signInWithEmail } from '@/services/firebase/auth';
 import { getUserDoc } from '@/services/firebase/firestore';

@@ -4,18 +4,16 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { View, Text, Keyboard, Platform, Animated, Easing } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
-import SessionList from '@/components/SessionList';
-import SessionModal from '@/components/SessionModal';
+import SessionList from '@/components/Session/SessionList';
+import SessionModal from '@/components/Session/SessionModal';
 import { RootState, AppDispatch } from '@/redux/store';
 import { selectEnrichedSessions } from '@/redux/selectors';
 import { useSessionsTab } from '@/hooks/useSessionsTab';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { fetchUserById } from '@/redux/userSlice';
-import SessionBookedList from '@/components/SessionBookedList';
+import SessionBookedList from '@/components/Session/BookedSession/SessionBookedList';
 
-import SessionCard from '@/components/SessionCard';
-
-import SessionCardChecklist from '@/components/SessionCardChecklist';
+import SessionCard from '@/components/Session/OngoingSession/SessionCard';
 
 const PswSessionsTab = () => {
     const {

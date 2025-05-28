@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, SafeAreaView, ScrollView } from 'react-native';
-import CustomButton from '@/components/CustomButton';
+import CustomButton from '@/components/Global/CustomButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
