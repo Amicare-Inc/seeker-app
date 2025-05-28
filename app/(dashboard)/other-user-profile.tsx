@@ -4,7 +4,7 @@ import { RootState } from '@/redux/store';
 import ProfileScreen from '@/components/Profile/ProfileScreen';
 import { User } from '@/types/User';
 import PendingSessionSlider from '@/components/Profile/PendingSessionSlider';
-import SessionCard from '@/components/SessionCard';
+import SessionCard from '@/components/Session/OngoingSession/SessionCard';
 
 const OtherUserProfileScreen = () => {
 	const activeProfileMoreInfo = useSelector(

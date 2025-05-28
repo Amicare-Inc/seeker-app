@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
-import ForumField from '@/components/ForumField';
-import CustomButton from '@/components/CustomButton';
+import ForumField from '@/components/Global/ForumField';
+import CustomButton from '@/components/Global/CustomButton';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -10,7 +10,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { FIREBASE_DB } from '@/firebase.config';
 import { router } from 'expo-router';
 import { verifyAddress } from '@/services/google/googleMaps';
-import DatePickerField from '@/components/DatePickerField';
+import DatePickerField from '@/components/Global/DatePickerField';
 import { Auth } from '@/services/node-express-backend/auth';
 
 const PersonalDetails: React.FC = () => {

@@ -2,8 +2,6 @@ import React, { useRef } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import CalendarIcon from '../assets/icons/calendar.svg';
-import ClockIcon from '../assets/icons/clock-session-card.svg';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatTimeRange } from '@/scripts/datetimeHelpers';
 import { useDispatch } from 'react-redux';
@@ -19,72 +17,72 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const SessionCard = (enrichedSession: EnrichedSession) => {
-	const [expanded, setExpanded] = React.useState(false);
-	const expandedRef = useRef(expanded);
+    const [expanded, setExpanded] = React.useState(false);
+    const expandedRef = useRef(expanded);
 
-	// Keep ref in sync with state
-	React.useEffect(() => {
-	expandedRef.current = expanded;
-	}, [expanded]);
+    // Keep ref in sync with state
+    React.useEffect(() => {
+    expandedRef.current = expanded;
+    }, [expanded]);
 
-	// PanResponder for swipe gestures
-	const panResponder = useRef(
-	PanResponder.create({
-		onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10,
-		onPanResponderRelease: (_, gestureState) => {
-		if (!expandedRef.current && gestureState.dy < -60) {
-			LayoutAnimation.easeInEaseOut();
-			setExpanded(true);
-		} else if (expandedRef.current && gestureState.dy > 60) {
-			LayoutAnimation.easeInEaseOut();
-			setExpanded(false);
-		}
-		},
-	})
-	).current;
+    // PanResponder for swipe gestures
+    const panResponder = useRef(
+    PanResponder.create({
+        onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10,
+        onPanResponderRelease: (_, gestureState) => {
+        if (!expandedRef.current && gestureState.dy < -60) {
+            LayoutAnimation.easeInEaseOut();
+            setExpanded(true);
+        } else if (expandedRef.current && gestureState.dy > 60) {
+            LayoutAnimation.easeInEaseOut();
+            setExpanded(false);
+        }
+        },
+    })
+    ).current;
 
-  	const dispatch = useDispatch<AppDispatch>();
+      const dispatch = useDispatch<AppDispatch>();
 
-	const handleAccept = async () => {
-		try {
-			await dispatch(acceptSessionThunk(enrichedSession.id)).unwrap();
-			router.back();
-		} catch (err) {
-			console.error('Error accepting session:', err);
-		}
-	};
+    const handleAccept = async () => {
+        try {
+            await dispatch(acceptSessionThunk(enrichedSession.id)).unwrap();
+            router.back();
+        } catch (err) {
+            console.error('Error accepting session:', err);
+        }
+    };
 
-	const handleReject = async () => {
-		try {
-			await dispatch(rejectSessionThunk(enrichedSession.id)).unwrap();
-			router.back();
-		} catch (err) {
-			console.error('Error rejecting session:', err);
-		}
-	};
-	const note = enrichedSession.note ?? 'Appointment';
-	const totalCost = enrichedSession.billingDetails?.total?.toFixed(2) ?? 'N/A';
+    const handleReject = async () => {
+        try {
+            await dispatch(rejectSessionThunk(enrichedSession.id)).unwrap();
+            router.back();
+        } catch (err) {
+            console.error('Error rejecting session:', err);
+        }
+    };
+    const note = enrichedSession.note ?? 'Appointment';
+    const totalCost = enrichedSession.billingDetails?.total?.toFixed(2) ?? 'N/A';
 
-	const dateLabel = enrichedSession.startTime
-		? formatDate(enrichedSession.startTime)
-		: 'Invalid Date';
+    const dateLabel = enrichedSession.startTime
+        ? formatDate(enrichedSession.startTime)
+        : 'Invalid Date';
 
-	const timeRange =
-		enrichedSession.startTime && enrichedSession.endTime
-			? formatTimeRange(enrichedSession.startTime, enrichedSession.endTime)
-			: 'Invalid Time';
+    const timeRange =
+        enrichedSession.startTime && enrichedSession.endTime
+            ? formatTimeRange(enrichedSession.startTime, enrichedSession.endTime)
+            : 'Invalid Time';
 
-	const startDate = enrichedSession.startTime ? new Date(enrichedSession.startTime) : null;
-	const endDate = enrichedSession.endTime ? new Date(enrichedSession.endTime) : null;
-	const isNextDay =
-		startDate && endDate
-			? endDate.getDate() !== startDate.getDate()
-			: false;
+    const startDate = enrichedSession.startTime ? new Date(enrichedSession.startTime) : null;
+    const endDate = enrichedSession.endTime ? new Date(enrichedSession.endTime) : null;
+    const isNextDay =
+        startDate && endDate
+            ? endDate.getDate() !== startDate.getDate()
+            : false;
 
-	const handleToggle = () => {
-		LayoutAnimation.easeInEaseOut();
-		setExpanded((prev) => !prev);
-	};
+    const handleToggle = () => {
+        LayoutAnimation.easeInEaseOut();
+        setExpanded((prev) => !prev);
+    };
 
   return (
     <View
@@ -142,14 +140,14 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
               Session Confirmed: <Text className="font-normal">{enrichedSession.note}</Text>
             </Text>
             {!expanded && (
-				<View className="flex-row items-center">
-					<Text className="text-white text-base">{dateLabel}</Text>
-					<Text className="text-xs text-green-400 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
-				</View>
+                <View className="flex-row items-center">
+                    <Text className="text-white text-base">{dateLabel}</Text>
+                    <Text className="text-xs text-green-400 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
+                </View>
             )}
           </View>
           {!expanded && (
-            <Ionicons name="calendar" size={32} color="#fff" style={{ position: 'absolute', right: 25, top: 15 }} />
+            <Ionicons name="calendar-outline" size={32} color="#fff" style={{ position: 'absolute', right: 25, top: 15 }} />
           )}
         </TouchableOpacity>
 
@@ -159,16 +157,16 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
             {/* Date & Time Row */}
             <View className="flex-row justify-between items-center bg-transparent rounded-full border border-white px-6 py-2.5 mb-4 mx-5 mt-2">
               <View className="flex-row items-center">
-                <CalendarIcon width={24} height={24}/>
+                <Ionicons name="calendar-outline" size={24} color="#fff" />
                 <Text className="text-white ml-2 text-[17px] font-medium">{dateLabel}</Text>
-				<Text className="text-xs text-green-400 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
+                <Text className="text-xs text-green-400 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
               </View>
               <View
                 style={{ width: 1, height: 28 }}
                 className="bg-neutral-100"
               />
               <View className="flex-row items-center">
-                <ClockIcon width={24} height={24}/>
+                <Ionicons name="time-outline" size={24} color="#fff" />
                 <Text className="text-white ml-2 text-[17px] font-medium">{timeRange}</Text>
               </View>
             </View>

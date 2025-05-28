@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, Keyboard, Platform, Animated, Easing } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import SessionList from '@/components/SessionList';
+import SessionList from '@/components/Session/SessionList';
 import { useSessionsTab } from '@/hooks/useSessionsTab';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { fetchUserById } from '@/redux/userSlice';
-import SessionBookedList from '@/components/SessionBookedList';
+import fetchUserById from '@/redux/userSlice';
+import SessionBookedList from '@/components/Session/BookedSession/SessionBookedList';
 
 import SessionCard from '@/components/Session/OngoingSession/SessionCard';
 
