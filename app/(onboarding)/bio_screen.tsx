@@ -5,9 +5,8 @@ import ForumField from '@/components/Global/ForumField'; // Reusing your ForumFi
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
-import { FIREBASE_DB } from '@/firebase.config';
-import { doc, setDoc } from 'firebase/firestore';
 import { router } from 'expo-router';
+import { Auth } from '@/services/node-express-backend/auth';
 
 const BioScreen: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -16,23 +15,15 @@ const BioScreen: React.FC = () => {
 
 	const handleFinish = async () => {
 		try {
-			// 1️⃣ Update Redux
+			console.log('User Data in bio before if:', userData);
 			dispatch(updateUserFields({ bio }));
-
-			// 2️⃣ Update Firebase
 			if (userData?.id) {
-				await setDoc(
-					doc(FIREBASE_DB, 'test1', userData.id),
-					{ ...userData, onboardingComplete: true, bio: bio },
-					{ merge: true },
-				);
+				await Auth.addOptionalInfo(userData.id, { ...userData, onboardingComplete: true, bio: bio, idVerified: userData.idVerified });
 				Alert.alert(
 					'Success',
 					'Your profile has been created successfully!',
 				);
 			}
-
-			// 3️⃣ Navigate to the Home Screen or any other final page
 			const nextRoute = userData?.isPsw
 				? '/(psw)/psw-home'
 				: '/(seeker)/seeker-home';

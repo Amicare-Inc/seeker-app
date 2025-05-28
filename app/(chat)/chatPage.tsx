@@ -1,72 +1,56 @@
-// src/screens/ChatPage.tsx
 import React, { useState, useEffect } from 'react';
-import {
-    KeyboardAvoidingView,
-    Keyboard,
-    Platform,
-    View,
-    StatusBar,
-} from 'react-native';
+import { KeyboardAvoidingView, Keyboard, Platform, View, StatusBar } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import ChatHeader from '@/components/Chat/ChatHeader';
 import ChatMessageList from '@/components/Chat/ChatMessageList';
 import ChatInput from '@/components/Chat/ChatInput';
-import {
-    addDoc,
-    collection,
-    query,
-    orderBy,
-    onSnapshot,
-    serverTimestamp,
-} from 'firebase/firestore';
-import { FIREBASE_DB } from '@/firebase.config';
-import { Message } from '@/types/Message';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { RootState } from '@/redux/store';
+import { AppDispatch, RootState } from '@/redux/store';
 import { LinearGradient } from 'expo-linear-gradient';
+import { sendMessage } from '@/services/node-express-backend/session';
+import { getSocket } from '@/services/node-express-backend/sockets';
+import { clearMessages, fetchMessagesBySessionId } from '@/redux/chatSlice';
 
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
-    const currentUser = useSelector((state: RootState) => state.user.userData);
-    const activeSession = useSelector(
-        (state: RootState) =>
-            state.sessions.activeEnrichedSession ||
-            state.sessions.allSessions.find((s) => s.id === sessionId),
-    ) as EnrichedSession | undefined;
-    const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
     const insets = useSafeAreaInsets();
+	const dispatch = useDispatch<AppDispatch>();
+	const currentUser = useSelector((state: RootState) => state.user.userData);
+	const activeSession = useSelector(
+		(state: RootState) =>
+			state.sessions.activeEnrichedSession ||
+			state.sessions.allSessions.find((s) => s.id === sessionId),
+	) as EnrichedSession | undefined;
+	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
+	if (!sessionId || !activeSession || !currentUser) return null;
+	const otherUser = activeSession.otherUser;
+	const messages = useSelector((state: RootState) => state.chat.messages); // Get messages from Redux state
+	const [newMessage, setNewMessage] = useState('');
+	useEffect(() => {
 
-    if (!sessionId || !activeSession || !currentUser) return null;
-    const otherUser = activeSession.otherUser;
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [newMessage, setNewMessage] = useState('');
+		if (sessionId){
+			dispatch(fetchMessagesBySessionId(sessionId as string));
+		}
 
-    useEffect(() => {
-        if (!sessionId) return;
-        const messagesRef = collection(
-            FIREBASE_DB,
-            'sessions_test1',
-            sessionId as string,
-            'messages',
-        );
-        const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
-        const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-            const fetchedMessages: Message[] = snapshot.docs.map((doc) => {
-                const data = doc.data();
-                return {
-                    ...data,
-                    id: doc.id,
-                    timestamp: data.timestamp?.toDate ? data.timestamp.toDate().toISOString() : data.timestamp,
-                } as Message;
-            });
-            setMessages(fetchedMessages);
-        });
-        return () => unsubscribe();
-    }, [sessionId]);
+		// Get the socket instance
+		const socket = getSocket();
+	  
+		if (socket) {
+		  // Emit 'chat:joinSession' when the component mounts for this sessionId
+		  console.log(`Emitting 'chat:joinSession' for session: ${sessionId}`);
+		  socket.emit('chat:joinSession', sessionId);
+	  		return () => {
+				console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
+				socket.emit('chat:leaveSession', sessionId);
+				dispatch(clearMessages());
+		  	};
+		}
+		return undefined; 
+	},[sessionId, dispatch])
 
-    const toggleHeaderExpanded = () => {
+	const toggleHeaderExpanded = () => {
         setIsHeaderExpanded(!isHeaderExpanded);
     };
 
@@ -76,42 +60,19 @@ const ChatPage = () => {
         }
     };
 
-    const addMessage = async (
-        sessionId: string,
-        messageText: string,
-        userId: string,
-    ) => {
-        const messagesRef = collection(
-            FIREBASE_DB,
-            'sessions_test1',
-            sessionId,
-            'messages',
-        );
-        try {
-            await addDoc(messagesRef, {
-                userId,
-                message: messageText,
-                sessionId,
-                timestamp: serverTimestamp(),
-            });
-        } catch (error) {
-            console.error("Error adding message: ", error);
-        }
-    };
+	const handleSendMessage = async () => {
+		try {
+			if (newMessage.trim()) {
+				const nextMessage = await sendMessage(sessionId as string, currentUser.id, newMessage.trim());
+				console.log('Message sent:', nextMessage);
+			setNewMessage('');
+			Keyboard.dismiss();
+		}} catch (error) {
+			console.error('Error sending message:', error);
+		}
+	};
 
-    const handleSendMessage = async () => {
-        if (newMessage.trim() && sessionId && currentUser) {
-            await addMessage(
-                sessionId as string,
-                newMessage.trim(),
-                currentUser.id,
-            );
-            setNewMessage('');
-            Keyboard.dismiss();
-        }
-    };
-    
-    return (
+	return (
         <SafeAreaView className="flex-1" edges={['left', 'right', 'bottom']}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
             <LinearGradient
@@ -158,6 +119,6 @@ const ChatPage = () => {
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
-};
+}
 
 export default ChatPage;

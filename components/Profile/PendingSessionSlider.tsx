@@ -1,11 +1,10 @@
-// @/components/Profile/PendingSessionSlider.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
-import { updateSessionStatus } from '@/redux/sessionSlice';
+import { acceptSessionThunk, rejectSessionThunk } from '@/redux/sessionSlice';
 import { AppDispatch } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import { router } from 'expo-router';
@@ -21,51 +20,35 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
 
-	// For "Accept" => set session to "pending"
 	const handleAccept = async () => {
 		try {
-			await dispatch(
-				updateSessionStatus({
-					sessionId: session.id,
-					newStatus: 'pending',
-				}),
-			).unwrap(); // <-- .unwrap() lets you catch rejections in this try/catch
+			await dispatch(acceptSessionThunk(session.id)).unwrap();
 			router.back();
 		} catch (err) {
 			console.error('Error accepting session:', err);
 		}
 	};
 
-	// For "Reject" => set session to "rejected"
 	const handleReject = async () => {
 		try {
-			await dispatch(
-				updateSessionStatus({
-					sessionId: session.id,
-					newStatus: 'rejected',
-				}),
-			).unwrap();
+			await dispatch(rejectSessionThunk(session.id)).unwrap();
 			router.back();
 		} catch (err) {
 			console.error('Error rejecting session:', err);
 		}
 	};
-	// Use the note attribute as the session title (fallback if empty)
 	const note = session.note ?? 'Appointment';
-	// Get the total cost from billing details (if available)
 	const totalCost = session.billingDetails?.total?.toFixed(2) ?? 'N/A';
 
-	// Format the start date using the provided formatDate function.
 	const dateLabel = session.startTime
 		? formatDate(session.startTime)
 		: 'Invalid Date';
-	// Format the time range using the provided formatTimeRange function.
+
 	const timeRange =
 		session.startTime && session.endTime
 			? formatTimeRange(session.startTime, session.endTime)
 			: 'Invalid Time';
 
-	// Check if the end time is on a later day than the start time.
 	const startDate = session.startTime ? new Date(session.startTime) : null;
 	const endDate = session.endTime ? new Date(session.endTime) : null;
 	const isNextDay =

@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
-import {
-	View,
-	Text,
-	ScrollView,
-	SafeAreaView,
-	KeyboardAvoidingView,
-	TouchableOpacity,
-	Platform,
-	TextInput,
-	Alert,
-	Keyboard,
-} from 'react-native';
-import ForumField from '@/components/Global/ForumField';
-import CustomButton from '@/components/Global/CustomButton';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import ForumField from '@/components/ForumField';
+import CustomButton from '@/components/CustomButton';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -21,8 +10,8 @@ import { doc, setDoc } from 'firebase/firestore';
 import { FIREBASE_DB } from '@/firebase.config';
 import { router } from 'expo-router';
 import { verifyAddress } from '@/services/google/googleMaps';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import DatePickerField from '@/components/Global/DatePickerField';
+import DatePickerField from '@/components/DatePickerField';
+import { Auth } from '@/services/node-express-backend/auth';
 
 const PersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -46,8 +35,6 @@ const PersonalDetails: React.FC = () => {
 		email: '',
 	});
 
-	const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
 	const handleInputChange = (field: string, value: string) => {
 		setForm({ ...form, [field]: value });
 		setErrors({ ...errors, [field]: '' });
@@ -62,7 +49,7 @@ const PersonalDetails: React.FC = () => {
 		if (!form.phone) newErrors.phone = 'Phone number is required';
 		if (!form.email) newErrors.email = 'Email is required';
 
-		// PATCH: MAP API NOT SET UP
+		// TODO: MAP API NOT SET UP
 		const isValidAddress = await verifyAddress(form.address);
 		if (!isValidAddress) newErrors.address = 'Invalid address';
 
@@ -74,10 +61,12 @@ const PersonalDetails: React.FC = () => {
 		if (await validateForm()) {
 			try {
 				dispatch(updateUserFields(form));
+				console.log('User Data Form:', form);
+				console.log('User Data ID:', userData);
 				if (userData?.id) {
-					await setDoc(doc(FIREBASE_DB, 'test1', userData.id), form, {
-						merge: true,
-					});
+					console.log('SENDING TO BACKEND');
+					await Auth.addCriticalInfo(userData.id, {...form, isPsw: userData.isPsw});
+					console.log('SENT');
 				}
 				router.push('/onboard1');
 			} catch (error) {

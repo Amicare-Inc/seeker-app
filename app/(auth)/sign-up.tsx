@@ -1,34 +1,24 @@
-import {
-	View,
-	Text,
-	ScrollView,
-	SafeAreaView,
-	KeyboardAvoidingView,
-} from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import ForumField from '@/components/Global/ForumField';
 import CustomButton from '@/components/Global/CustomButton';
 import { Link, router } from 'expo-router';
-import {
-	createUserWithEmailAndPassword,
-	sendEmailVerification,
-} from 'firebase/auth';
-import { FIREBASE_AUTH } from '@/firebase.config';
-import { signUpWithEmail, verifyEmail } from '@/services/firebase/auth';
+import { verifyEmail } from '@/services/firebase/auth';
 import { useDispatch } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { AppDispatch } from '@/redux/store';
+import { Auth } from '@/services/node-express-backend/auth';
 
 const SignUp = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [form, setForm] = useState({
-		// email: "martin.droruga@example.com",
-		// password: "asdfgh",
-		// confirm_password: "asdfgh"
-		email: '',
-		password: '',
-		confirm_password: '',
+		email: "martin.droruga@example.com",
+		password: "asdfgh",
+		confirm_password: "asdfgh"
+		// email: '',
+		// password: '',
+		// confirm_password: '',
 	});
 
 	const [error, setError] = useState('');
@@ -39,17 +29,15 @@ const SignUp = () => {
 			setPasswordError('Passwords do not match');
 		} else {
 			try {
-				const userCredential = await signUpWithEmail(
+				const user = await Auth.signUp(
 					form.email,
 					form.password,
 				);
-				const user = userCredential.user;
-				console.log('User signed up:', user);
 				verifyEmail(user);
 				dispatch(
 					updateUserFields({
-						id: user.uid,
-						email: user.email || '',
+						id: user,
+						email: form.email || '',
 					}),
 				);
 				router.push('/(onboarding)/role');

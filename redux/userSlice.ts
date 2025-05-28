@@ -1,20 +1,33 @@
-// redux/userSlice.ts
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { getUserDoc } from '@/services/firebase/firestore'; // your Firestore function
 import { User } from '@/types/User';
+import { AppDispatch, RootState } from './store';
+import { Auth } from '@/services/node-express-backend/auth';
 
-// 1) Define a thunk for fetching a user's Firestore doc by UID
-export const fetchUserById = createAsyncThunk(
-	'user/fetchUserById',
-	async (uid: string) => {
-		const userDoc = await getUserDoc(uid);
+type fetchUserFromLoginArgs = {
+	email: string;
+	password: string;
+};
+
+export const fetchUserFromLoginThunk = createAsyncThunk<
+	User, // Expected return type (User)
+	fetchUserFromLoginArgs, // Argument type (fetchUserFromLoginArgs)
+	{
+		dispatch: AppDispatch;
+		state: RootState;
+		rejectValue: string; // or whatever type you prefer
+	}
+>(
+	'user/fetchUserFromLogin',
+	async ({email, password}) => {
+		const userDoc = await Auth.signIn(email, password);
 		if (!userDoc) {
-			throw new Error('User doc not found in Firestore');
+			throw new Error('User doc not found from backend');
 		}
-		return { ...userDoc, id: uid } as User;
+		return { ...userDoc } as User;
 	},
 );
+
+
 
 // Extend your state interface to include an "allUsers" mapping
 interface UserState {
@@ -75,25 +88,22 @@ const userSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
-			.addCase(fetchUserById.pending, (state) => {
+			.addCase(fetchUserFromLoginThunk.pending, (state) => {
 				state.loading = true;
 				state.error = null;
 			})
-			.addCase(
-				fetchUserById.fulfilled,
-				(state, action: PayloadAction<User>) => {
-					// Update current user and also store it in allUsers
-					if (
-						!state.userData ||
-						state.userData.id === action.payload.id
-					) {
-						state.userData = action.payload;
-					}
-					state.allUsers[action.payload.id] = action.payload;
-					state.loading = false;
-				},
-			)
-			.addCase(fetchUserById.rejected, (state, action) => {
+			.addCase(fetchUserFromLoginThunk.fulfilled, (state, action: PayloadAction<User>) => {
+				// Update current user and also store it in allUsers
+				if (
+					!state.userData ||
+					state.userData.id === action.payload.id
+				) {
+					state.userData = action.payload;
+				}
+				state.allUsers[action.payload.id] = action.payload;
+				state.loading = false;
+			})
+			.addCase(fetchUserFromLoginThunk.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.error.message || 'Error fetching user';
 			});

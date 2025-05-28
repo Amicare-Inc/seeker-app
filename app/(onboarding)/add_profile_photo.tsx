@@ -1,22 +1,11 @@
 import React, { useState } from 'react';
-import {
-	View,
-	Text,
-	SafeAreaView,
-	ScrollView,
-	TouchableOpacity,
-	Image,
-	Alert,
-} from 'react-native';
-import CustomButton from '@/components/Global/CustomButton';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import CustomButton from '@/components/CustomButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import * as ImagePicker from 'expo-image-picker';
-import {
-	uploadPhotoToFirebase,
-	uploadProfilePhoto,
-} from '@/services/firebase/storage';
+import { uploadPhotoToFirebase } from '@/services/firebase/storage';
 import { FIREBASE_DB } from '@/firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { router } from 'expo-router';
@@ -45,29 +34,25 @@ const AddProfilePhoto: React.FC = () => {
 	};
 
 	const handleDone = async () => {
-		if (localPhotoUri && userData?.id) {
-			try {
-				const downloadURL = await uploadPhotoToFirebase(
-					userData.id,
-					localPhotoUri,
-				);
-				dispatch(
-					updateUserFields({ profilePhotoUrl: downloadURL || '' }),
-				);
-				await setDoc(
-					doc(FIREBASE_DB, 'test1', userData.id),
-					{ profilePhotoUrl: downloadURL },
-					{ merge: true },
-				);
-			} catch (error) {
-				console.error('Error uploading photo:', error);
-				Alert.alert(
-					'Upload Failed',
-					'There was an issue uploading your photo. Please try again.',
-				);
+		try {
+			if (localPhotoUri && userData?.id) {
+			const downloadURL = await uploadPhotoToFirebase(
+				userData.id,
+				localPhotoUri,
+			);
+			console.log('Download URL:', downloadURL);
+			dispatch(updateUserFields({ profilePhotoUrl: downloadURL || '' }));
+			} else {
+				dispatch(updateUserFields({ profilePhotoUrl:'' }));
 			}
+		} catch (error) {
+			console.error('Error uploading photo:', error);
+			Alert.alert(
+				'Upload Failed',
+				'There was an issue uploading your photo. Please try again.',
+			);
 		}
-		router.push('/verification_prompt');
+	router.push('/verification_prompt');
 	};
 
 	return (

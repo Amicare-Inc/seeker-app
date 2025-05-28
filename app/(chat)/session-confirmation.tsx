@@ -1,20 +1,10 @@
 import React from 'react';
-import {
-	SafeAreaView,
-	View,
-	Text,
-	Image,
-	TouchableOpacity,
-} from 'react-native';
+import { SafeAreaView, View, Text, Image, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import {
-	confirmSessionBookingThunk,
-	updateSessionStatus,
-} from '@/redux/sessionSlice';
-import { unwrapResult } from '@reduxjs/toolkit';
+import { bookSessionThunk, cancelSessionThunk, declineSessionThunk } from '@/redux/sessionSlice';
 
 const SessionConfirmation = () => {
 	const { sessionId, action, otherUserId } = useLocalSearchParams();
@@ -54,14 +44,7 @@ const SessionConfirmation = () => {
 		primaryButtonColor = '#008DF4';
 		onPrimaryPress = async () => {
 			try {
-				const resultAction = await dispatch(
-					confirmSessionBookingThunk({
-						sessionId: session.id,
-						currentUserId: currentUser.id,
-						existingConfirmedBy: session.confirmedBy,
-					}),
-				).unwrap();
-				console.log('Booking confirmed:', resultAction);
+				const resultAction = await dispatch(bookSessionThunk({sessionId: session.id, currentUserId: currentUser.id})).unwrap();
 				router.back();
 			} catch (error) {
 				console.error('Error booking session:', error);
@@ -83,21 +66,13 @@ const SessionConfirmation = () => {
 		primaryButtonText = 'Cancel Session';
 		primaryButtonColor = '#DC2626'; // red
 		onPrimaryPress = async () => {
-			try {
-				const newStatus =
-					session.status === 'pending'
-						? 'declined'
-						: session.status === 'confirmed'
-							? 'cancelled'
-							: '';
-				if (newStatus) {
-					const result = await dispatch(
-						updateSessionStatus({
-							sessionId: session.id,
-							newStatus,
-						}),
-					).unwrap();
-					console.log('Session cancelled:', result);
+			try { // TODO: WHEN DECLINED IT GOES BACK TO THE CHAT, NEED IT TO GO TO THE SESSION PAGE
+				if (session.status === 'pending') {
+					const result = await dispatch(declineSessionThunk(session.id)).unwrap();
+				} else if (session.status === 'confirmed') {
+					const result = await dispatch(cancelSessionThunk(session.id)).unwrap();
+				} else {
+					console.error('Invalid session status for cancel/decline');
 				}
 				router.back();
 			} catch (error) {

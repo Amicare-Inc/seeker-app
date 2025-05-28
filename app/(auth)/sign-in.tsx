@@ -1,20 +1,13 @@
-import {
-	View,
-	Text,
-	ScrollView,
-	SafeAreaView,
-	KeyboardAvoidingView,
-} from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import ForumField from '@/components/Global/ForumField';
 import CustomButton from '@/components/Global/CustomButton';
 import { Link, router } from 'expo-router';
-import { signInWithEmail } from '@/services/firebase/auth';
-import { getUserDoc } from '@/services/firebase/firestore';
-import { fetchUserById, setNavigationComplete } from '@/redux/userSlice';
+import { fetchUserFromLoginThunk, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
+import { connectSocket } from '@/services/node-express-backend/sockets';
 
 const SignIn = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -32,13 +25,12 @@ const SignIn = () => {
 
 	const handleSignIn = async () => {
 		try {
-			const userCredential = await signInWithEmail(
-				form.email,
-				form.password,
-			);
-			const user = userCredential.user;
-			console.log('User signed in:', user);
-			dispatch(fetchUserById(user.uid));
+			const responseJson = await dispatch(fetchUserFromLoginThunk({email: form.email, password: form.password}))
+            if (responseJson) {
+                console.log('responseJson', responseJson);
+            } else {
+                throw new Error('Failed to login from response');
+            }
 		} catch (error) {
 			setError((error as any).message);
 			console.error('Error signing in:', error);
@@ -46,19 +38,18 @@ const SignIn = () => {
 	};
 
 	useEffect(() => {
-		if (userData && !initialNavComplete) {
-			console.log('User Data:', userData);
+		if (!initialNavComplete && userData) {
 			if (userData.onboardingComplete == true) {
-				console.log('IN SIGN IN', initialNavComplete);
 				dispatch(setNavigationComplete(true));
 				if (userData.isPsw == true) {
-					console.log('IN SIGN IN PSW', initialNavComplete);
 					router.push('/(psw)/psw-home');
 				} else if (userData.isPsw == false) {
-					console.log('IN SIGN IN SEEKER', initialNavComplete);
 					router.push('/(seeker)/seeker-home');
 				}
 			}
+		}
+		if (userData && userData.id) {
+			connectSocket(userData.id, dispatch);
 		}
 	}, [userData]);
 

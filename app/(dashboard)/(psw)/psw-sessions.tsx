@@ -1,40 +1,25 @@
-// src/screens/PswSessionsTab.tsx
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, Keyboard, Platform, Animated, Easing } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useSelector, useDispatch } from 'react-redux';
-import SessionList from '@/components/Session/SessionList';
-import SessionModal from '@/components/Session/SessionModal';
-import { RootState, AppDispatch } from '@/redux/store';
-import { selectEnrichedSessions } from '@/redux/selectors';
+import SessionList from '@/components/SessionList';
 import { useSessionsTab } from '@/hooks/useSessionsTab';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { fetchUserById } from '@/redux/userSlice';
-import SessionBookedList from '@/components/Session/BookedSession/SessionBookedList';
+import SessionBookedList from '@/components/SessionBookedList';
 
 import SessionCard from '@/components/Session/OngoingSession/SessionCard';
 
 const PswSessionsTab = () => {
-    const {
-        loading,
-        error,
-        expandedSession,
-        handleExpandSession,
-        handleCloseModal,
-        handleAction,
-    } = useSessionsTab('psw');
+	const {
+		newRequests,
+		pending,
+		confirmed,
+		loading,
+		error,
+		handleExpandSession,
+	} = useSessionsTab('psw');
 
-    const dispatch: AppDispatch = useDispatch();
-    const enrichedSessions = useSelector((state: RootState) =>
-        selectEnrichedSessions(state),
-    );
-    const currentUserId = useSelector(
-        (state: RootState) => state.user.userData?.id,
-    );
-    const userMap = useSelector((state: RootState) => state.user.allUsers);
-
-    // Track keyboard height
     const [keyboardHeight, setKeyboardHeight] = useState(0);
 
     const insets = useSafeAreaInsets();
@@ -67,51 +52,25 @@ const PswSessionsTab = () => {
         };
     }, [animatedKeyboardHeight, insets.bottom]);
 
-    useEffect(() => {
-        if (!currentUserId) return;
-        enrichedSessions.forEach((session) => {
-            let otherUserId: string | undefined;
-            if (session.senderId === currentUserId) {
-                otherUserId = session.receiverId;
-            } else {
-                otherUserId = session.senderId;
-            }
-            if (otherUserId && !userMap[otherUserId]) {
-                dispatch(fetchUserById(otherUserId));
-            }
-        });
-    }, [enrichedSessions, currentUserId, userMap, dispatch]);
-
     if (loading) {
-        return (
-            <SafeAreaView className="flex-1 items-center justify-center bg-white">
-                <Text>Loading...</Text>
-            </SafeAreaView>
-        );
-    }
+		return (
+			<SafeAreaView className="flex-1 items-center justify-center bg-white">
+				<Text>Loading...</Text>
+			</SafeAreaView>
+		);
+	}
 
-    if (error) {
-        return (
-            <SafeAreaView className="flex-1 items-center justify-center bg-white">
-                <Text>Error fetching sessions: {error}</Text>
-            </SafeAreaView>
-        );
-    }
-
-    const newRequestSessions = enrichedSessions.filter(
-        (s: EnrichedSession) =>
-            s.status === 'newRequest' && s.receiverId === currentUserId,
-    );
-    const pendingSessions = enrichedSessions.filter(
-        (s) => s.status === 'pending',
-    );
-    const confirmedSessions = enrichedSessions.filter(
-        (s) => s.status === 'confirmed',
-    );
+	if (error) {
+		return (
+			<SafeAreaView className="flex-1 items-center justify-center bg-white">
+				<Text>Error fetching sessions: {error}</Text>
+			</SafeAreaView>
+		);
+	}
 
     const onSessionPress = (session: EnrichedSession) => {
-        handleExpandSession(session);
-    };
+		handleExpandSession(session);
+	};
 
     return (
         <SafeAreaView
@@ -130,37 +89,25 @@ const PswSessionsTab = () => {
             </View>
 
             {/* Main Content */}
-            <View className="flex-1 px-3.5">
+			<View className="flex-1 px-3.5">
                 <SessionList
-                    sessions={newRequestSessions}
+                    sessions={newRequests}
                     onSessionPress={onSessionPress}
                     title="New Requests"
                 />
 
                 <SessionList
-                    sessions={pendingSessions}
-                    onSessionPress={onSessionPress}
-                    title="Pending"
-                />
+					sessions={pending}
+					onSessionPress={onSessionPress}
+					title="Pending"
+				/>
 
                 <SessionBookedList
-                    sessions={confirmedSessions}
-                    onSessionPress={onSessionPress}
-                    title="Confirmed"
-                />
-            </View>
-
-            <SessionModal
-                onClose={handleCloseModal}
-                isVisible={!!expandedSession}
-                onAction={handleAction}
-                user={expandedSession?.otherUser || null}
-                isPending={
-                    expandedSession?.status === 'newRequest' ||
-                    expandedSession?.status === 'pending'
-                }
-                isConfirmed={expandedSession?.status === 'confirmed'}
-            />
+					sessions={confirmed}
+					onSessionPress={onSessionPress}
+					title="Confirmed"
+				/>
+			</View>
 
             {/* SessionCardChecklist always stays above the keyboard */}
             <Animated.View
@@ -173,10 +120,9 @@ const PswSessionsTab = () => {
                     zIndex: 100,
                 }}
             >
-                <SessionCard />
+                {/* <SessionCard /> */}
             </Animated.View>
         </SafeAreaView>
     );
-};
-
+}
 export default PswSessionsTab;

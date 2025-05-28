@@ -4,6 +4,7 @@ import { RootState } from '@/redux/store';
 import ProfileScreen from '@/components/Profile/ProfileScreen';
 import { User } from '@/types/User';
 import PendingSessionSlider from '@/components/Profile/PendingSessionSlider';
+import SessionCard from '@/components/SessionCard';
 
 const OtherUserProfileScreen = () => {
 	const activeProfileMoreInfo = useSelector(
@@ -20,7 +21,7 @@ const OtherUserProfileScreen = () => {
 			<ProfileScreen user={activeProfile as User} isMyProfile={false} />
 			{activeEnrichedProfile &&
 				activeEnrichedProfile.status === 'newRequest' && (
-					<PendingSessionSlider session={activeEnrichedProfile} />
+					<SessionCard {...activeEnrichedProfile} />
 				)}
 		</>
 	);

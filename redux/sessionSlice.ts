@@ -1,58 +1,115 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import {
-	collection,
-	query,
-	where,
-	getDocs,
-	onSnapshot,
-	updateDoc,
-	doc,
-	arrayUnion,
-} from 'firebase/firestore';
+import { createSlice, createAsyncThunk, PayloadAction, current } from '@reduxjs/toolkit';
+import { collection, query, where, onSnapshot, updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
 import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { acceptSession, bookSession, cancelSession, declineSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
 
-// Real-time listener for session updates
-export const listenToUserSessions = (dispatch: any, userId: string) => {
-	const sessionCollection = collection(FIREBASE_DB, 'sessions_test1');
-	const sessionQuery = query(
-		sessionCollection,
-		where('participants', 'array-contains', userId),
-	);
+export const fetchUserSessionsFromBackend = createAsyncThunk<
+	EnrichedSession[], // Expected return type from the backend
+	string, // Argument type (userId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/fetchUserSessionsFromBackend',
+	async (userId: string, { rejectWithValue }) => {
+		try {
+			const sessions = await getUserSessionTab(userId);
+			// Assuming backend returns an array of EnrichedSession
+			return sessions as EnrichedSession[];
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to fetch sessions');
+		}
+	}
+);
 
-	return onSnapshot(sessionQuery, (snapshot) => {
-		const sessions = snapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data(),
-		})) as Session[];
+export const acceptSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated session)
+	string, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/acceptSession',
+	async (sessionId: string, { rejectWithValue }) => {
+		try {
+			const updatedSession = await acceptSession(sessionId);
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to accept session');
+		}
+	}
+);
 
-		// Remove any rejected, declined, or cancelled sessions
-		const filteredSessions = sessions.filter(
-			(s) => !['rejected', 'declined'].includes(s.status),
-		);
+export const rejectSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated session)
+	string, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/rejectSession',
+	async (sessionId: string, { rejectWithValue }) => {
+		try {
+			const updatedSession = await rejectSession(sessionId);
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to reject session');
+		}
+	}
+);
 
-		dispatch(setSessions(filteredSessions));
-	});
+type BookSessionArgs = {
+	sessionId: string;
+	currentUserId: string;
 };
 
-// Update session status and remove rejected/declined sessions
-export const updateSessionStatus = createAsyncThunk(
-	'sessions/updateSessionStatus',
-	async (
-		{ sessionId, newStatus }: { sessionId: string; newStatus: string },
-		{ rejectWithValue },
-	) => {
+export const bookSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated session)
+	BookSessionArgs, // Argument type (sessionId)
+	{
+		dispatch: AppDispatch;
+		state: RootState;
+		rejectValue: string; // or whatever type you prefer
+	}// Optional: type for rejectValue
+>(
+	'sessions/bookSession',
+	async ({ sessionId, currentUserId }, { rejectWithValue }) => {
 		try {
-			await updateDoc(doc(FIREBASE_DB, 'sessions_test1', sessionId), {
-				status: newStatus,
-			});
-			return { sessionId, newStatus };
+			const updatedSession = await bookSession(sessionId, currentUserId);
+			return updatedSession;
 		} catch (error) {
-			return rejectWithValue((error as any).message);
+			return rejectWithValue((error as any).message || 'Failed to book session');
 		}
-	},
+	}
+);
+
+export const declineSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated session)
+	string, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/declineSession',
+	async (sessionId: string, { rejectWithValue }) => {
+		try {
+			const updatedSession = await declineSession(sessionId);
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to decline session');
+		}
+	}
+);
+
+export const cancelSessionThunk = createAsyncThunk<
+	Session, // Expected return type (the updated session)
+	string, // Argument type (sessionId)
+	{ rejectValue: string } // Optional: type for rejectValue
+>(
+	'sessions/cancelSession',
+	async (sessionId: string, { rejectWithValue }) => {
+		try {
+			const updatedSession = await cancelSession(sessionId);
+			return updatedSession;
+		} catch (error) {
+			return rejectWithValue((error as any).message || 'Failed to cancel session');
+		}
+	}
 );
 
 // Return type from the thunk
@@ -104,15 +161,15 @@ export const confirmSessionBookingThunk = createAsyncThunk<
 );
 
 interface SessionState {
-	allSessions: Session[];
+	allSessions: EnrichedSession[];
 	activeEnrichedSession: EnrichedSession | null; // we'll store the active (enriched) session here
-	newRequests: Session[];
-	pending: Session[];
-	confirmed: Session[];
-	cancelled: Session[];
-	inProgress: Session[];
-	completed: Session[];
-	failed: Session[];
+	newRequests: EnrichedSession[]; // Change from Session[]
+	pending: EnrichedSession[]; // Change from Session[]
+	confirmed: EnrichedSession[]; // Change from Session[]
+	cancelled: EnrichedSession[]; // Change from Session[]
+	inProgress: EnrichedSession[]; // Change from Session[]
+	completed: EnrichedSession[]; // Change from Session[]
+	failed: EnrichedSession[]; // Change from Session[]
 	loading: boolean;
 	error: string | null;
 }
@@ -135,31 +192,8 @@ const sessionSlice = createSlice({
 	name: 'sessions',
 	initialState,
 	reducers: {
-		setSessions(state, action: PayloadAction<Session[]>) {
+		setSessions(state, action: PayloadAction<EnrichedSession[]>) {
 			state.allSessions = action.payload;
-			state.newRequests = action.payload.filter(
-				(s) =>
-					s.status === 'newRequest' &&
-					s.receiverId === (state as any).userId,
-			);
-			state.pending = action.payload.filter(
-				(s) => s.status === 'pending',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'confirmed',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'cancelled',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'inProgress',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'completed',
-			);
-			state.confirmed = action.payload.filter(
-				(s) => s.status === 'failed',
-			);
 		},
 		clearSessions(state) {
 			state.allSessions = [];
@@ -176,82 +210,125 @@ const sessionSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
-			// .addCase(fetchUserSessions.pending, (state) => {
-			//   state.loading = true;
-			//   state.error = null;
-			// })
-			// .addCase(fetchUserSessions.fulfilled, (state, action) => {
-			//   state.loading = false;
-			//   state.allSessions = action.payload;
-			//   state.newRequests = action.payload.filter(
-			//     (s) => s.status === 'newRequest' && s.receiverId === (state as any).userId
-			//   );
-			//   state.pending = action.payload.filter((s) => s.status === 'pending');
-			//   state.confirmed = action.payload.filter((s) => s.status === 'confirmed');
-			// })
-			// .addCase(fetchUserSessions.rejected, (state, action) => {
-			//   state.loading = false;
-			//   state.error = action.payload as string;
-			// })
-			.addCase(updateSessionStatus.fulfilled, (state, action) => {
-				const { sessionId, newStatus } = action.payload;
-				state.allSessions = state.allSessions.filter(
-					(session) =>
-						session.id !== sessionId ||
-						!['rejected', 'declined'].includes(newStatus),
-				);
-				state.newRequests = state.allSessions.filter(
-					(s) =>
-						s.status === 'newRequest' &&
-						s.receiverId === (state as any).userId,
-				);
-				state.pending = state.allSessions.filter(
-					(s) => s.status === 'pending',
-				);
-				state.confirmed = state.allSessions.filter(
-					(s) => s.status === 'confirmed',
-				);
-				state.cancelled = state.allSessions.filter(
-					(s) => s.status === 'cancelled',
-				);
-				state.inProgress = state.allSessions.filter(
-					(s) => s.status === 'inProgress',
-				);
-				state.completed = state.allSessions.filter(
-					(s) => s.status === 'completed',
-				);
-				state.failed = state.allSessions.filter(
-					(s) => s.status === 'failed',
-				);
-			});
+			.addCase(fetchUserSessionsFromBackend.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(fetchUserSessionsFromBackend.fulfilled, (state, action) => {
+				state.loading = false;
+				state.allSessions = action.payload;
+			})
+			.addCase(fetchUserSessionsFromBackend.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(acceptSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(acceptSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(acceptSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(rejectSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(rejectSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(rejectSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(bookSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(bookSessionThunk.fulfilled, (state, action) => {	
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(bookSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(declineSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(declineSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(declineSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
+			.addCase(cancelSessionThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(cancelSessionThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				const updatedSession = action.payload;
+				const index = state.allSessions.findIndex(session => session.id === updatedSession.id);
+				if (index !== -1) {
+					const otherUser = state.allSessions[index].otherUser
+					const enrichedSession = {
+						...updatedSession,
+						otherUser: otherUser,
+					} as EnrichedSession;
+					state.allSessions[index] = enrichedSession;
+				}
+			})
+			.addCase(cancelSessionThunk.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			})
 	},
 });
 
-export const { setSessions, clearSessions, setActiveEnrichedSession } =
-	sessionSlice.actions;
+export const { setSessions, clearSessions, setActiveEnrichedSession } = sessionSlice.actions;
 export default sessionSlice.reducer;
-
-// DEPRECIATED
-// // Fetch all sessions where the user is a participant (excluding rejected/cancelled)
-// export const fetchUserSessions = createAsyncThunk(
-//   'sessions/fetchUserSessions',
-//   async (userId: string, { rejectWithValue }) => {
-//     try {
-//       const q = query(
-//         collection(FIREBASE_DB, 'sessions_test1'),
-//         where('participants', 'array-contains', userId),
-//         where('status', 'not-in', ['rejected', 'declined', 'cancelled']) // Exclude rejected, declined, and cancelled sessions
-//       );
-//       const querySnapshot = await getDocs(q);
-//       console.log('USER SESSIONS REDUX:', querySnapshot);
-//       const sessions: Session[] = querySnapshot.docs.map((doc) => ({
-//         id: doc.id,
-//         ...doc.data(),
-//       })) as Session[];
-
-//       return sessions;
-//     } catch (error) {
-//       return rejectWithValue((error as any).message);
-//     }
-//   }
-// );
