@@ -1,14 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, Keyboard, Platform, Animated, Easing } from 'react-native';
+import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import SessionList from '@/components/SessionList';
 import { useSessionsTab } from '@/hooks/useSessionsTab';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import SessionBookedList from '@/components/SessionBookedList';
-import LiveSessionCard from '@/components/LiveSessionCard';
-import SessionCard from '@/components/SessionCard';
-import SessionCardChecklist from '@/components/SessionCardChecklist';
 
 const PswSessionsTab = () => {
 	const {
@@ -20,45 +17,6 @@ const PswSessionsTab = () => {
 		handleExpandSession,
 	} = useSessionsTab('psw');
 
-    const [keyboardHeight, setKeyboardHeight] = useState(0);
-    const insets = useSafeAreaInsets();
-    const animatedKeyboardHeight = React.useRef(new Animated.Value(0)).current;
-
-    // Find the active session (first confirmed session that's within 2 hours of start time)
-    
-    
-    const activeSession = confirmed?.find(session => {
-        if (!session.startTime) return false;
-        const startTime = new Date(session.startTime);
-        const now = new Date();
-        const timeDiff = startTime.getTime() - now.getTime();
-        const hoursDiff = timeDiff / (1000 * 60 * 60);
-        return hoursDiff <= 2 && hoursDiff > -24; // Show for sessions starting within 2 hours or ongoing (up to 24 hours after start)
-    });
-
-    useEffect(() => {
-        const showSub = Keyboard.addListener('keyboardWillShow', (e) => {
-            const height = Math.max(0, e.endCoordinates.height - insets.bottom);
-            Animated.timing(animatedKeyboardHeight, {
-                toValue: height,
-                duration: e.duration || 250,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: false,
-            }).start();
-        });
-        const hideSub = Keyboard.addListener('keyboardWillHide', (e) => {
-            Animated.timing(animatedKeyboardHeight, {
-                toValue: 0,
-                duration: e?.duration || 250,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: false,
-            }).start();
-        });
-        return () => {
-            showSub.remove();
-            hideSub.remove();
-        };
-    }, [animatedKeyboardHeight, insets.bottom]);
 
     if (loading) {
 		return (
@@ -95,19 +53,6 @@ const PswSessionsTab = () => {
                 />
                 <Text className="text-2xl text-black">Sessions</Text>
             </View>
-            {/* TODO: look into this */}
-            {/* <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-            <View style={{ flex: 1 }}>
-                {/* Header Row */}
-                {/* <View className="flex-row items-center px-3.5 pb-2">
-                    <Ionicons
-                        name="time"
-                        size={24}
-                        color="black"
-                        style={{ marginRight: 8 }}
-                    />
-                    <Text className="text-2xl text-black">Sessions</Text>
-                </View> */}
 
             {/* Main Content */}
 			<View className="flex-1 px-3.5">
@@ -129,26 +74,6 @@ const PswSessionsTab = () => {
 					title="Confirmed"
 				/>
 			</View>
-
-            {/* LiveSessionCard */}
-            {activeSession && (
-                <Animated.View
-                    pointerEvents="box-none"
-                    style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        bottom: animatedKeyboardHeight,
-                        zIndex: 100,
-                    }}
-                >
-                    <LiveSessionCard
-                        session={activeSession}
-                        onExpand={() => console.log('expanded')}
-                        onCollapse={() => console.log('collapsed')}
-                    />
-                </Animated.View>
-            )}
         </SafeAreaView>
     );
 }
