@@ -74,8 +74,18 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 				tasks: tasksSelection,
 			};
 		}
+
 		try {
-			await setUserDoc(user.id, updatedFields);
+			await fetch('http://192.168.1.6:3000/api/users/updateProfile', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					uid: user.id,
+					...updatedFields,
+				}),
+			});
 			dispatch(updateUserFields(updatedFields));
 		} catch (error) {
 			console.error('Error updating profile:', error);
