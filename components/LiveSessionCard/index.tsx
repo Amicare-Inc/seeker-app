@@ -4,7 +4,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { LiveSessionCardProps } from '@/types/LiveSession';
 import LiveSessionHeader from './LiveSessionHeader';
 import { useSessionManager } from '@/hooks/useSessionManager';
-import LiveSessionTimer from './LiveSessionTimer';
+import { Feather } from '@expo/vector-icons';
+import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
+import { router } from 'expo-router';
+import { useDispatch } from 'react-redux';
+import { setActiveEnrichedSession } from '@/redux/sessionSlice';
 
 const { width } = Dimensions.get('window');
 
@@ -15,25 +19,28 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, onCollapse }) => {
   const [expanded, setExpanded] = useState(false);
   const expandedRef = useRef(expanded);
+  const dispatch = useDispatch();
   
   const {
     status,
-    elapsedTime,
     userConfirmed,
     otherUserConfirmed,
     confirmSession,
     isCurrentUser,
   } = useSessionManager(session);
 
-  // Add debug logging
-  console.log('LiveSessionCard - Current Status:', status);
-  console.log('LiveSessionCard - User Confirmed:', userConfirmed);
-  // console.log('LiveSessionCard - Session:', session);
-
   // Keep ref in sync with state
   React.useEffect(() => {
     expandedRef.current = expanded;
   }, [expanded]);
+
+  const handleMessagePress = () => {
+    dispatch(setActiveEnrichedSession(session));
+    router.push({
+      pathname: '/(chat)/[sessionId]',
+      params: { sessionId: session.id }
+    });
+  };
 
   // PanResponder for swipe gestures
   const panResponder = useRef(
@@ -53,56 +60,29 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
     })
   ).current;
 
+  const dateLabel = session.startTime ? formatDate(session.startTime) : 'Invalid Date';
+  const timeRange = formatTimeRange(session.startTime || '', session.endTime || '');
+  const startDate = session.startTime ? new Date(session.startTime) : null;
+  const endDate = session.endTime ? new Date(session.endTime) : null;
+  const isNextDay = startDate && endDate ? endDate.getDate() !== startDate.getDate() : false;
+
   const renderSessionControls = () => {
     // Add debug logging
     console.log('renderSessionControls - Current status:', status);
-    console.log('renderSessionControls - Should show buttons:', status === 'ready' && !userConfirmed);
     
-    // Only show controls in ready state
-    if (status !== 'ready') {
-      return null;
-    }
-
-    // Show start button if user hasn't confirmed yet
-    if (!userConfirmed) {
+    // Only show message button for upcoming sessions
+    if (session.liveStatus === 'upcoming') {
       return (
-        <View className="flex-row justify-between items-center px-4 mt-4">
-          <TouchableOpacity 
-            onPress={() => {
-              console.log('Start button pressed');
-              confirmSession();
-            }}
-            className="bg-white px-6 py-2 rounded-full"
-          >
-            <Text className="text-green-600 font-semibold">Start Now</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={() => {
-              console.log('Message button pressed');
-              /* Handle message */
-            }}
-            className="bg-black/20 px-6 py-2 rounded-full"
-          >
-            <Text className="text-white">Message</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity 
+          onPress={handleMessagePress}
+          className="bg-black/20 mx-5 py-2 rounded-full"
+        >
+          <Text className="text-white text-center">Message</Text>
+        </TouchableOpacity>
       );
     }
 
-    // If user has confirmed, just show the message button
-    return (
-      <View className="flex-row justify-end px-4 mt-4">
-        <TouchableOpacity 
-          onPress={() => {
-            console.log('Message button pressed');
-            /* Handle message */
-          }}
-          className="bg-black/20 px-6 py-2 rounded-full"
-        >
-          <Text className="text-white">Message</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    return null;
   };
 
   const renderStatusInfo = () => {
@@ -114,8 +94,8 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
     return (
       <View className="mt-4 px-4">
         <View className="flex-row justify-between items-center">
-          <Text className="text-white">Your status: {userConfirmed ? 'Ready' : 'Waiting'}</Text>
-          <Text className="text-white">Other user: {otherUserConfirmed ? 'Ready' : 'Waiting'}</Text>
+          <Text className="text-black">Your status: {userConfirmed ? 'Ready' : 'Waiting'}</Text>
+          <Text className="text-black">Other user: {otherUserConfirmed ? 'Ready' : 'Waiting'}</Text>
         </View>
       </View>
     );
@@ -123,10 +103,13 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
 
   return (
     <View
-      className="absolute left-0 right-0 bottom-0"
       style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: Platform.OS === 'ios' ? 83 : 64, // Adjust for different tab bar heights
         width,
-        zIndex: 50,
+        transform: [{ translateY: expanded ? 0 : 0 }], // Remove the upward shift when expanded
       }}
       {...panResponder.panHandlers}
     >
@@ -146,42 +129,66 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
           elevation: 10,
         }}
       >
+        {/* Handle Bar */}
+        {expanded && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 8,
+              left: 0,
+              right: 0,
+              alignItems: 'center',
+              zIndex: 10,
+            }}
+            pointerEvents="none"
+          >
+            <View
+              style={{
+                width: 56,
+                height: 3,
+                borderRadius: 3,
+                backgroundColor: 'rgba(0,0,0,0.35)',
+              }}
+            />
+          </View>
+        )}
+
         <LiveSessionHeader
           enrichedSession={session}
           expanded={expanded}
-          onToggle={() => setExpanded(!expanded)}
+          onToggle={() => {
+            LayoutAnimation.easeInEaseOut();
+            setExpanded(!expanded);
+            if (!expanded) {
+              onExpand?.();
+            } else {
+              onCollapse?.();
+            }
+          }}
         />
-        
-        <View className="px-4 mt-2">
-          <LiveSessionTimer
-            status={status}
-            elapsedTime={elapsedTime}
-            startTime={session.startTime || ''}
-            endTime={session.endTime || ''}
-            note={status === 'waiting' ? 'Session starts' : ''}
-          />
-        </View>
 
-        {renderSessionControls()}
-        {renderStatusInfo()}
-
-        {expanded && status === 'started' && (
-          <View className="mt-4 px-4">
-            <View className="flex-row justify-between items-center">
-              <TouchableOpacity 
-                onPress={() => {/* Handle message */}}
-                className="bg-black/20 px-6 py-2 rounded-full"
-              >
-                <Text className="text-white">Message</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={() => {/* Handle emergency */}}
-                className="bg-red-500 px-6 py-2 rounded-full"
-              >
-                <Text className="text-white">Emergency</Text>
-              </TouchableOpacity>
+        {expanded && (
+          <>
+            {/* Date & Time Row */}
+            <View className="flex-row justify-between items-center bg-transparent rounded-full border border-black px-6 py-2.5 mb-4 mx-5 mt-2">
+              <View className="flex-row items-center">
+                <Feather name="calendar" size={24} color="black" />
+                <Text className="text-black ml-2 text-[17px] font-medium">{dateLabel}</Text>
+                <Text className="text-xs text-black ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
+              </View>
+              <View
+                style={{ width: 1, height: 28 }}
+                className="bg-black"
+              />
+              <View className="flex-row items-center">
+                <Feather name="clock" size={24} color="black" />
+                <Text className="text-black ml-2 text-[17px] font-medium">{timeRange}</Text>
+              </View>
             </View>
-          </View>
+
+            {/* Message Button */}
+            {renderSessionControls()}
+          </>
         )}
       </LinearGradient>
     </View>

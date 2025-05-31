@@ -5,6 +5,7 @@ import {
 	ActivityIndicator,
 	FlatList,
 	TouchableOpacity,
+	Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'; // Import from context library
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -86,7 +87,7 @@ const PswHomeTab = () => {
 					keyExtractor={(item) => item.id}
 					renderItem={renderItem}
 					contentContainerStyle={{
-						paddingBottom: 120,
+						paddingBottom: Platform.OS === 'ios' ? 83 : 64,
 						paddingHorizontal: 10,
 					}}
 				/>

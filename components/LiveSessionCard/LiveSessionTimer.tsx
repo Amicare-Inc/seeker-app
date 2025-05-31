@@ -52,7 +52,16 @@ const LiveSessionTimer: React.FC<LiveSessionTimerProps> = ({
         );
 
       default:
-        return null;
+        return (
+          <View className="flex-row justify-between items-center">
+            <Text className="text-white text-base">
+              {note} in {timeUntilStart}
+            </Text>
+            <Text className="text-white/80 text-sm">
+              {sessionDuration}
+            </Text>
+          </View>
+        );
     }
   };
 

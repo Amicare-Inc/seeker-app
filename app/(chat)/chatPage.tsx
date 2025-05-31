@@ -79,9 +79,11 @@ const ChatPage = () => {
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 colors={
-                    activeSession.status === 'confirmed'
-                        ? ['#008DF4', '#5CBAFF']
-                        : ['#FFFFFF', '#FFFFFF']
+                    activeSession.status === 'inProgress'
+                        ? ['#05a73c', '#4ade80']  // Darker green to light green (similar contrast to blue)
+                        : activeSession.status === 'confirmed'
+                            ? ['#008DF4', '#5CBAFF']
+                            : ['#FFFFFF', '#FFFFFF']
                 }
                 style={{
                     position: 'absolute',

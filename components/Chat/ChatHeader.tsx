@@ -1,7 +1,7 @@
 // src/components/Chat/ChatHeader.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -68,7 +68,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			params: {
 				sessionId: currentSession.id,
 				action, // "book", "cancel", or "change"
-				otherUserId: user.id, // so the confirmation page can show “… once [name] also books”
+				otherUserId: user.id, // so the confirmation page can show "… once [name] also books"
 			},
 		});
 	};
@@ -132,7 +132,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			start={{ x: 0, y: 0.5 }}
 			end={{ x: 1, y: 0.5 }}
 			colors={
-				isConfirmed ? ['#008DF4', '#5CBAFF'] : ['#ffffff', '#ffffff']
+				currentSession.status === 'inProgress' 
+					? ['#05a73c', '#4ade80']  // Matching the parent gradient
+					: isConfirmed 
+						? ['#008DF4', '#5CBAFF']  // Blue gradient for confirmed
+						: ['#ffffff', '#ffffff']   // White for other states
 			}
 		>
 			{/* Top row */}
@@ -141,10 +145,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 					onPress={() => router.back()}
 					className="mr-3"
 				>
-					<Ionicons
-						name="chevron-back"
+					<Feather
+						name="chevron-left"
 						size={24}
-						color={isConfirmed ? '#fff' : '#000'}
+						color={currentSession.status === 'inProgress' ? 'black' : (isConfirmed ? '#fff' : '#000')}
 					/>
 				</TouchableOpacity>
 				<Image
@@ -157,22 +161,22 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 				/>
 				<TouchableOpacity onPress={toggleExpanded} className="flex-1">
 					<Text
-						className={`font-semibold text-lg ${isConfirmed ? 'text-white' : 'text-black'}`}
+						className={`font-semibold text-lg ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-black')}`}
 					>
 						{user.firstName} {user.lastName}
 					</Text>
 					<Text
-						className={`text-xs mt-0.5 ${isConfirmed ? 'text-white' : 'text-gray-500'}`}
+						className={`text-xs mt-0.5 ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-gray-500')}`}
 					>
 						{subTitle}
 					</Text>
 				</TouchableOpacity>
 				{isExpanded && (
 					<TouchableOpacity onPress={handleNavigateToUserProfile}>
-						<Ionicons
-							name="information-circle-outline"
-							size={27}
-							color={isConfirmed ? '#fff' : '#000'}
+						<Feather
+							name="info"
+							size={24}
+							color={currentSession.status === 'inProgress' ? 'black' : (isConfirmed ? '#fff' : '#000')}
 						/>
 					</TouchableOpacity>
 				)}
@@ -182,118 +186,137 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			{isExpanded && (
 				<View className="px-4 pb-4">
 					<Text
-						className={`text-sm mb-3 ${isConfirmed ? 'text-white' : 'text-gray-400'}`}
+						className={`text-sm mb-3 ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-gray-400')}`}
 					>
 						{currentSession.note ||
 							'No additional details provided.'}
 					</Text>
 					<View
-						className={`flex-row items-center justify-center rounded-full py-0.5 mb-4 ${isConfirmed ? 'border' : ''}`}
+						className={`flex-row items-center justify-center rounded-full py-0.5 mb-4 ${currentSession.status === 'inProgress' ? 'border border-black' : (isConfirmed ? 'border border-white' : '')}`}
 						style={{
-							borderColor: '#ffffff',
 							width: '100%',
-							backgroundColor: isConfirmed
-								? 'transparent'
-								: '#dcdce0',
+							backgroundColor: 'transparent'
 						}}
 					>
 						<View className="flex-1 flex-row items-center justify-center py-3">
-							<Ionicons
+							<Feather
 								name="calendar"
 								size={22}
-								color={isConfirmed ? '#fff' : '#000'}
+								color={currentSession.status === 'inProgress' ? 'black' : (isConfirmed ? '#fff' : '#000')}
 							/>
 							<Text
-								className={`text-sm ml-2 font-medium ${isConfirmed ? 'text-white' : 'text-black'}`}
+								className={`text-sm ml-2 font-medium ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-black')}`}
 							>
 								{formattedDate}
 							</Text>
-							<Text className="text-xs text-green-400 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
+							<Text className={`text-xs ml-2 ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-green-400')}`}>{`${isNextDay ? '+1' : ''}`}</Text>
 						</View>
 						<View
 							style={{ width: 1, height: 28 }}
-							className="bg-neutral-100"
+							className={currentSession.status === 'inProgress' ? 'bg-black' : (isConfirmed ? 'bg-white' : 'bg-neutral-100')}
 						/>
 						<View className="flex-1 flex-row items-center justify-center">
-							<Ionicons
-								name="time"
+							<Feather
+								name="clock"
 								size={22}
-								color={isConfirmed ? '#fff' : '#000'}
+								color={currentSession.status === 'inProgress' ? 'black' : (isConfirmed ? '#fff' : '#000')}
 							/>
 							<Text
-								className={`text-xs ml-2 font-medium ${isConfirmed ? 'text-white' : 'text-black'}`}
+								className={`text-xs ml-2 font-medium ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-black')}`}
 							>
 								{formattedTimeRange}
 							</Text>
 						</View>
 					</View>
 
-					<View className="flex-row items-center justify-between mb-4">
-						<TouchableOpacity
-							onPress={
-								isConfirmed
-									? handleNavigateToRequestSession
-									: handleBookSession
-							}
-							disabled={isDisabled}
-							activeOpacity={0.8}
-							className="px-6 py-3 rounded-lg"
-							style={{
-								width: '48%',
-								backgroundColor: isConfirmed
-									? '#fff'
-									: isDisabled
-										? '#d1d5db'
-										: '#008DF4',
-							}}
-						>
-							<Text
-								className={`text-sm text-center ${isDisabled ? 'text-black' : isConfirmed ? 'text-black' : 'text-white'}`}
+					{/* Show buttons section only if NOT in progress */}
+					{currentSession.status !== 'inProgress' ? (
+						<View className="flex-row items-center justify-between mb-4">
+							<TouchableOpacity
+								onPress={
+									isConfirmed
+										? handleNavigateToRequestSession
+										: handleBookSession
+								}
+								disabled={isDisabled}
+								activeOpacity={0.8}
+								className="px-6 py-3 rounded-lg"
+								style={{
+									width: '48%',
+									backgroundColor: isConfirmed
+										? '#fff'
+										: isDisabled
+											? '#d1d5db'
+											: '#008DF4',
+								}}
 							>
-								{bookText}
-							</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={handleCancelSession}
-							activeOpacity={0.8}
-							className="bg-black px-6 py-3 rounded-lg"
-							style={{ width: '48%' }}
-						>
-							<Text className="text-white text-sm text-center">
-								Cancel
-							</Text>
-						</TouchableOpacity>
-					</View>
+								<Text
+									className={`text-sm text-center ${isDisabled ? 'text-black' : isConfirmed ? 'text-black' : 'text-white'}`}
+								>
+									{bookText}
+								</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={handleCancelSession}
+								activeOpacity={0.8}
+								className="bg-black px-6 py-3 rounded-lg"
+								style={{ width: '48%' }}
+							>
+								<Text className="text-white text-sm text-center">
+									Cancel
+								</Text>
+							</TouchableOpacity>
+						</View>
+					) : (
+						/* Show cancel button for inProgress */
+						<View className="flex-row items-center justify-center mb-4">
+							<TouchableOpacity
+								onPress={handleCancelSession}
+								activeOpacity={0.8}
+								className="bg-black px-6 py-3 rounded-lg"
+								style={{ width: '100%' }}
+							>
+								<Text className="text-white text-sm text-center">
+									Cancel
+								</Text>
+							</TouchableOpacity>
+						</View>
+					)}
 
 					<View className="flex-row items-center justify-between mb-3">
 						<View className="flex-row items-center gap-1">
-							<Ionicons
+							<Feather
 								name={
-									isConfirmed
-										? 'checkmark-circle'
-										: 'alert-circle'
+									currentSession.status === 'inProgress'
+										? 'play-circle'
+										: isConfirmed
+											? 'check-circle'
+											: 'alert-circle'
 								}
 								size={22}
-								color={isConfirmed ? '#fff' : '#9ca3af'}
+								color={currentSession.status === 'inProgress' ? 'black' : (isConfirmed ? '#fff' : '#9ca3af')}
 								style={{ marginLeft: 4 }}
 							/>
 							<Text
-								className={`text-sm ${isConfirmed ? 'text-white' : 'text-neutral-500'}`}
+								className={`text-sm ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-neutral-500')}`}
 							>
-								{isConfirmed
-									? 'Appointment Confirmed'
-									: 'Awaiting confirmation'}
+								{currentSession.status === 'inProgress'
+									? 'Session in Progress'
+									: isConfirmed
+										? 'Appointment Confirmed'
+										: 'Awaiting confirmation'}
 							</Text>
 						</View>
 						<Text
-							className={`text-sm ${isConfirmed ? 'text-white' : 'text-neutral-500'}`}
+							className={`text-sm ${currentSession.status === 'inProgress' ? 'text-black' : (isConfirmed ? 'text-white' : 'text-neutral-500')}`}
 						>
 							Total Cost:{' '}
 							<Text className="font-bold">${costLabel}</Text>
 						</Text>
 					</View>
 
-					{isConfirmed ? null : (
+					{/* Show change time button only if NOT in progress */}
+					{currentSession.status !== 'inProgress' && !isConfirmed && (
 						<TouchableOpacity
 							onPress={handleNavigateToRequestSession}
 							activeOpacity={0.8}
