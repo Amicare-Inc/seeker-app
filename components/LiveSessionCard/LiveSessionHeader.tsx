@@ -1,16 +1,19 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { LiveSessionHeaderProps } from '@/types/LiveSession';
-import { getTimeUntilStart } from '@/scripts/datetimeHelpers';
 
 const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
   enrichedSession,
   expanded,
-  onToggle
+  onToggle,
+  formatTimeUntilSession
 }) => {
   if(!enrichedSession) return null;
   const otherUser = enrichedSession.otherUser;
-  const timeUntilStart = getTimeUntilStart(enrichedSession.startTime || '');
+  
+  // Use first value before comma as main label, like SessionBookedList
+  const mainLabel = enrichedSession.note ? enrichedSession.note.split(',')[0].trim() : '';
+  const countdown = formatTimeUntilSession ? formatTimeUntilSession(enrichedSession.startTime) : '';
 
   return (
     <TouchableOpacity onPress={onToggle} activeOpacity={1}>
@@ -22,8 +25,8 @@ const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
         
         <View className="flex-1">
           <View className="flex-row items-center justify-between">
-            <Text className="text-black text-[19px] font-bold flex-1">
-              {enrichedSession.note} in {timeUntilStart}
+            <Text className="text-black text-[19px] font-bold" numberOfLines={expanded ? undefined : 1} ellipsizeMode="tail">
+              {expanded ? enrichedSession.note : (mainLabel.length > 13 ? `${mainLabel.substring(0, 13)}...` : mainLabel)} {enrichedSession.liveStatus === 'upcoming' && !expanded && countdown ? `in ${countdown}` : ''}
             </Text>
           </View>
           <Text className="text-black text-[15px]">

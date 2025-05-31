@@ -22,6 +22,7 @@ export interface LiveSessionHeaderProps {
   enrichedSession: EnrichedSession;
   expanded: boolean;
   onToggle: () => void;
+  formatTimeUntilSession?: (startTime: string | undefined | null) => string;
 }
 
 export interface LiveSessionTimerProps {
