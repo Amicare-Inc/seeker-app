@@ -11,8 +11,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'; // Import from co
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
 import { router } from 'expo-router';
-import UserCard from '@/components/UserCard';
-import UserCardExpanded from '@/components/UserCardExpanded';
+import UserCard from '@/components/User/UserCard';
+import UserCardExpanded from '@/components/User/UserCardExpanded';
 import { User } from '@/types/User';
 
 const PswHomeTab = () => {

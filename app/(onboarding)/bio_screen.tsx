@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, ScrollView, View, Text, Alert } from 'react-native';
-import CustomButton from '@/components/CustomButton';
-import ForumField from '@/components/ForumField'; // Reusing your ForumField component
+import CustomButton from '@/components/Global/CustomButton';
+import ForumField from '@/components/Global/ForumField'; // Reusing your ForumField component
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';

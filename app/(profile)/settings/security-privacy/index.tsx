@@ -10,7 +10,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import FaceIdIcon from '../../assets/icons/face-id.svg'; // Assuming you have a Face ID icon
 
 const SecurityPrivaryScreen = () => {
   const [isFaceIDModalVisible, setFaceIDModalVisible] = useState(false);
@@ -53,7 +52,7 @@ const SecurityPrivaryScreen = () => {
           <SettingsListItem
             label="Password"
             description="Change your password"
-            onPress={() => router.push('/password')}
+            onPress={() => router.push('/(profile)/settings/security-privacy/password')}
           />
           <SettingsListItem
             label="Face ID"
@@ -63,7 +62,7 @@ const SecurityPrivaryScreen = () => {
           <SettingsListItem
             label="Recovery Phone"
             description="Add a backup phone number to access your account"
-            onPress={() => router.push('/recovery-phone')}
+            onPress={() => router.push('/(profile)/settings/security-privacy/recovery-phone')}
           />
         </View>
         <View className="bg-white rounded-lg mx-4 mt-8">
@@ -105,7 +104,7 @@ const SecurityPrivaryScreen = () => {
           >
             <TouchableWithoutFeedback>
               <View className="bg-white rounded-xl p-6 items-center mx-4">
-                <FaceIdIcon width={60} height={60} />
+                {/* Removed FaceIdIcon */}
                 <Text className="text-xl font-semibold mt-6">Face ID</Text>
                 <Text className="text-center text-base text-grey-58 mb-6 font-medium">
                   Would you like to enable Face ID? It’s a quicker and more secure alternative to
@@ -158,7 +157,7 @@ const SecurityPrivaryScreen = () => {
                   <TouchableOpacity
                     onPress={() => {
                       closeAccountDeletionModal(); // Close the modal
-                      router.push('/verify-contact'); // Navigate to the verification screen
+                      router.push('/(profile)/settings/security-privacy/verify/contact'); // Navigate to the verification screen
                     }}
                     className="bg-brand-blue w-[47%] h-10 rounded-xl flex items-center justify-center"
                   >

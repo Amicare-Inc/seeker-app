@@ -22,7 +22,7 @@ const ReferralsScreen = () => {
       </View>
 
       <ScrollView className="flex-1">
-        <View className="bg-white border border-gray-200 rounded-lg mx-4 mt-4">
+        {/* <View className="bg-white border border-gray-200 rounded-lg mx-4 mt-4">
           <ListItem
             icon="gift"
             label="Refer and earn $XX"
@@ -46,7 +46,7 @@ const ReferralsScreen = () => {
             onPress={() => {}}
             noBorder
           />
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );

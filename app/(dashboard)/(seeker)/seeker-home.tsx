@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
-import UserCard from '@/components/UserCard';
-import UserCardExpanded from '@/components/UserCardExpanded';
+import UserCard from '@/components/User/UserCard';
+import UserCardExpanded from '@/components/User/UserCardExpanded';
 import { User } from '@/types/User';
 
 const SeekerHomeTab = () => {

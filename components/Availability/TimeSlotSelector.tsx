@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import CustomButton from '@/components/CustomButton';
+import CustomButton from '@/components/Global/CustomButton';
 
 interface TimeSlotSelectorProps {
 	activeDay: string;

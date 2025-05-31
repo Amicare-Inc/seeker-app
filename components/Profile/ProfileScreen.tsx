@@ -112,10 +112,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 								label="Referrals & Rewards"
 								iconName="gift"
 								onPress={() => router.push('/(profile)/refer')}
+								disabled
 							/>
 							<ProfileListItem
 								label="Legal"
 								iconName="document-text"
+								disabled
 							/>
 							<ProfileListItem
 								label="Sign Out"

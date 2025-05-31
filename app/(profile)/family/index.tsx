@@ -55,7 +55,7 @@ const FamilyScreen = () => {
               relationship={member.relationship}
               onPress={() => {
                 router.push({
-                  pathname: '/family-edit',
+                  pathname: '/(profile)/family/edit',
                   // params: { member }, // Pass the entire member object
                 });
               }}
@@ -70,7 +70,7 @@ const FamilyScreen = () => {
             number=""
             relationship=""
             onPress={() => {
-              router.push('/family-add');
+              router.push('/(profile)/family/add');
             }}
             isPrimary={false} // Not styled as primary
           />

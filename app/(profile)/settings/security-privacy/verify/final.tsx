@@ -9,10 +9,6 @@ const VerifyFinalScreen = () => {
     router.back();
   };
 
-  const handleFeedbackPress = () => {
-    router.push('/verify-final'); // Navigate to the verify-final route
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
       {/* Header */}
@@ -35,13 +31,13 @@ const VerifyFinalScreen = () => {
         <View className="left-0 right-0 bg-neutral-100 px-4 py-4 flex gap-5 mt-20">
             <TouchableOpacity
             className="bg-grey-94 py-4 rounded-xl items-center"
-            onPress={() => router.push('/verify-feedback')}
+            // onPress={() => router.push('/(profile)/settings/security-privacy')}
             >
             <Text className="text-white text-xl font-medium">Delete Account</Text>
             </TouchableOpacity>
             <TouchableOpacity
             className="bg-white py-4 rounded-xl items-center"
-            onPress={() => router.push('/verify-feedback')}
+            // onPress={() => router.push('/(profile)/settings/security-privacy')}
 >
             <Text className="text-black text-xl font-medium">Cancel</Text>
             </TouchableOpacity>

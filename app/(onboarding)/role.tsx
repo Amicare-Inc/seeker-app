@@ -1,7 +1,7 @@
 import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
-import CustomButton from '@/components/CustomButton';
+import CustomButton from '@/components/Global/CustomButton';
 import { router } from 'expo-router';
 import { FIREBASE_AUTH, FIREBASE_DB } from '@/firebase.config';
 import { useAuthState } from 'react-firebase-hooks/auth';

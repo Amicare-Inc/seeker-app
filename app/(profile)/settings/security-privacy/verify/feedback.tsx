@@ -10,7 +10,7 @@ const VerifyFeedbackScreen = () => {
   };
 
   const handleFeedbackPress = () => {
-    router.push('/verify-final'); // Navigate to the verify-final route
+    router.push('/(profile)/settings/security-privacy/verify/final'); // Navigate to the verify-final route
   };
 
   return (

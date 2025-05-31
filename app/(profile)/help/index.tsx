@@ -4,10 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-import MenuIcon from '../../assets/icons/menu.svg';
-import CallIcon from '../../assets/icons/call.svg';
-import MessageTextIcon from '../../assets/icons/message-text.svg';
-
 const HelpScreen = () => {
   const handleBackPress = () => {
     router.back();
@@ -28,22 +24,22 @@ const HelpScreen = () => {
       <ScrollView className="flex-1">
         <View className="bg-white rounded-lg mx-4 mt-4">
           <ListItem
-            icon={<MenuIcon width={28} height={28} />}
+            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
             label="Help with a session"
             onPress={() => {}}
           />
           <ListItem
-            icon={<MenuIcon width={28} height={28} />}
+            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
             label="Account"
             onPress={() => {}}
           />
           <ListItem
-            icon={<MenuIcon width={28} height={28} />}
+            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
             label="A guide to Amicare"
             onPress={() => {}}
           />
           <ListItem
-            icon={<MenuIcon width={28} height={28} />}
+            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
             label="Accessibility"
             onPress={() => {}}
           />
@@ -53,7 +49,7 @@ const HelpScreen = () => {
           <Text className="text-lg font-medium text-gray-80 mb-2">Need Help Now?</Text>
             <View className="bg-white rounded-lg">
             <ListItem
-              icon={<CallIcon width={28} height={28} />}
+              icon={<Ionicons name="call" size={28} color="#303031" />}
               label="Call Support"
               onPress={() => {}}
             />
@@ -64,7 +60,7 @@ const HelpScreen = () => {
           <Text className="text-lg font-medium text-gray-80 mb-2">Support Messages</Text>
           <View className="bg-white rounded-lg">
             <ListItem
-              icon={<MessageTextIcon width={28} height={28} />}
+              icon={<Ionicons name="chatbubble-ellipses" size={28} color="#303031" />}
               label="View all messages"
               onPress={() => {}}
             />

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Modal, TouchableOpacity, View, Text } from 'react-native';
 import { BlurView } from 'expo-blur';
-import UserCardExpanded from './UserCardExpanded';
+import UserCardExpanded from '../User/UserCardExpanded';
 import { User } from '@/types/User';
 
 interface SessionModalProps {
@@ -45,7 +45,7 @@ const SessionModal: React.FC<SessionModalProps> = ({
 						onPress={onClose}
 						className="bg-transparent w-11/12 rounded-lg p-0"
 					>
-						<UserCardExpanded user={user} onPress={onClose} />
+
 					</TouchableOpacity>
 
 					<View className="mt-4 w-full px-6">

@@ -4,13 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-import UserEditIcon from '../../assets/icons/user-edit.svg';
-import SecuritySafeIcon from '../../assets/icons/security-safe.svg';
-import TaskSquareIcon from '../../assets/icons/task-square.svg';
-import ClockIcon from '../../assets/icons/clock.svg';
-import NotificationCircleIcon from '../../assets/icons/notification-circle.svg';
-import LogoutIcon from '../../assets/icons/logout.svg';
-
 const SettingsScreen = () => {
   const handleBackPress = () => {
     router.back();
@@ -36,37 +29,37 @@ const SettingsScreen = () => {
         <View className="bg-white rounded-lg mx-4 mt-6">
           {/* Personal Details */}
           <SettingsListItem
-            icon={<UserEditIcon width={28} height={28} />}
+            icon={<Ionicons name="person" size={28} color="#303031" />}
             label="Personal Details"
             onPress={() => console.log('Personal Details pressed')}
           />
           {/* Security & Privacy */}
           <SettingsListItem
-            icon={<SecuritySafeIcon width={28} height={28} />}
+            icon={<Ionicons name="shield" size={28} color="#303031" />}
             label="Security & Privacy"
-            onPress={() => router.push('/security-privacy')}
+            onPress={() => router.push('/(profile)/settings/security-privacy')}
           />
           {/* Care Needs */}
           <SettingsListItem
-            icon={<TaskSquareIcon width={28} height={28} />}
+            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
             label="Care Needs"
             onPress={() => console.log('Care Needs pressed')}
           />
           {/* Care Schedule */}
           <SettingsListItem
-            icon={<ClockIcon width={28} height={28} />}
+            icon={<Ionicons name="time" size={28} color="#303031" />}
             label="Care Schedule"
             onPress={() => console.log('Care Schedule pressed')}
           />
           {/* Notifications */}
           <SettingsListItem
-            icon={<NotificationCircleIcon width={28} height={28} />}
+            icon={<Ionicons name="notifications" size={28} color="#303031" />}
             label="Notifications"
             onPress={() => console.log('Notifications pressed')}
           />
           {/* Log Out */}
           <SettingsListItem
-            icon={<LogoutIcon width={28} height={28} />}
+            icon={<Ionicons name="log-out" size={28} color="#303031" />}
             label="Log Out"
             onPress={handleLogout}
           />
@@ -86,7 +79,7 @@ const SettingsListItem: React.FC<SettingsListItemProps> = ({ icon, label, onPres
   return (
     <TouchableOpacity onPress={onPress} className="flex-row items-center p-4 gap-3">
       <View className="w-7 h-7 items-center justify-center">
-        <Text>{icon}</Text>
+        {icon}
       </View>
       <Text className="flex-1 text-base text-grey-80 font-medium">{label}</Text>
       <Ionicons name="chevron-forward" size={20} color="#bfbfc3" />

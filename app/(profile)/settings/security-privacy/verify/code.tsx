@@ -60,7 +60,7 @@ const VerifyCodeScreen = () => {
     try {
       // TODO: Implement code verification logic
       // await verifyCode(code.join(''), contact);
-      router.push('/verify-feedback');
+      router.push('/(profile)/settings/security-privacy/verify/feedback');
     } catch (e) {
       setError('Invalid code. Please try again.');
     } finally {

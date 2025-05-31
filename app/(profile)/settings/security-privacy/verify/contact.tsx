@@ -36,7 +36,7 @@ const VerifyContactScreen = () => {
     try {
       // TODO: Send verification code to contact
       // await sendVerificationCode(contact);
-      router.push('/verify-code');
+      router.push('/(profile)/settings/security-privacy/verify/code');
     } catch (e) {
       setError('Failed to send verification code.');
     } finally {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView, ScrollView, View, Text } from 'react-native';
-import CustomButton from '@/components/CustomButton';
+import CustomButton from '@/components/Global/CustomButton';
 import { router } from 'expo-router';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
