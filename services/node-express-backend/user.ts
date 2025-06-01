@@ -10,28 +10,28 @@ export interface UpdateUserProfileResponse {
   message?: string;
 }
 
-export const updateUserProfile = async (
-  userId: string,
-  updatedFields: any
-): Promise<UpdateUserProfileResponse> => {
-  const response = await fetch('http://192.168.1.6:3000/users/update-profile', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      uid: userId,
-      ...updatedFields,
-    }),
-  });
+export const updateUserProfile = async (userId: string, updatedFields: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/update-profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uid: userId,
+        ...updatedFields,
+      }),
+    });
 
-  const contentType = response.headers.get('content-type') || '';
-  if (!contentType.includes('application/json')) {
-    const text = await response.text();
-    console.error('Expected JSON, got:', text);
-    throw new Error('Server returned non-JSON data');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data: UpdateUserProfileResponse = await response.json();
+    return data;
+  } catch (error: any) {
+    console.error('Error updating user profile:', error);
+    throw error;
   }
-
-  const data: UpdateUserProfileResponse = await response.json();
-  return data;
 };
