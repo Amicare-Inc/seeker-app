@@ -65,3 +65,33 @@ export const formatTimeRange = (start: string, end: string) => {
 	});
 	return `${startStr} - ${endStr}`;
 };
+
+/**
+ * Get time until start in a human-readable format
+ */
+export const getTimeUntilStart = (startTime: string): string => {
+	const start = new Date(startTime);
+	const now = new Date();
+	const diffMs = start.getTime() - now.getTime();
+	const diffMins = Math.round(diffMs / 60000);
+
+	if (diffMins < 60) {
+		return `${diffMins} min`;
+	} else {
+		const hours = Math.floor(diffMins / 60);
+		const mins = diffMins % 60;
+		return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+	}
+};
+
+/**
+ * Format duration in milliseconds to HH:MM:SS
+ */
+export const formatDuration = (ms: number): string => {
+	const seconds = Math.floor((ms / 1000) % 60);
+	const minutes = Math.floor((ms / (1000 * 60)) % 60);
+	const hours = Math.floor(ms / (1000 * 60 * 60));
+
+	const pad = (n: number) => n.toString().padStart(2, '0');
+	return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+};

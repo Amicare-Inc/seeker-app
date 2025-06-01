@@ -6,17 +6,17 @@ import SessionList from '@/components/Session/SessionList';
 import { useSessionsTab } from '@/hooks/useSessionsTab';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import SessionBookedList from '@/components/Session/BookedSession/SessionBookedList';
-import SessionCardChecklist from '@/components/Session/OngoingSession/SessionCardChecklist';
 
 const PswSessionsTab = () => {
-    const {
-        newRequests,
-        pending,
-        confirmed,
-        loading,
-        error,
-        handleExpandSession,
-    } = useSessionsTab('psw');
+	const {
+		newRequests,
+		pending,
+		confirmed,
+		loading,
+		error,
+		handleExpandSession,
+	} = useSessionsTab('psw');
+
 
     if (loading) {
         return (
@@ -69,25 +69,11 @@ const PswSessionsTab = () => {
                 />
 
                 <SessionBookedList
-                    sessions={confirmed}
-                    onSessionPress={onSessionPress}
-                    title="Confirmed"
-                />
-            </View>
-
-            {/* SessionCardChecklist */}
-            <View
-                pointerEvents="box-none"
-                style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: 100,
-                }}
-            >
-                <SessionCardChecklist />
-            </View>
+					sessions={confirmed}
+					onSessionPress={onSessionPress}
+					title="Confirmed"
+				/>
+			</View>
         </SafeAreaView>
     );
 }
