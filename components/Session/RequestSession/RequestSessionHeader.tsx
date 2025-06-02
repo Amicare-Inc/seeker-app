@@ -14,7 +14,7 @@ const RequestSessionHeader: React.FC<RequestSessionHeaderProps> = ({
 	firstName,
 }) => {
 	return (
-		<View className="flex-row items-center px-4 py-3 border-b background-white">
+		<View className="flex-row items-center px-4 py-3 border-b border-grey-21 background-white">
 			<TouchableOpacity onPress={onBack} className="mr-2">
 				<Ionicons name="chevron-back" size={24} color="#000" />
 			</TouchableOpacity>
@@ -23,7 +23,7 @@ const RequestSessionHeader: React.FC<RequestSessionHeaderProps> = ({
 				className="w-10 h-10 rounded-full mr-3"
 			/>
 			<View className="flex-1">
-				<Text className="text-base font-bold">Request Session</Text>
+				<Text className="text-lg font-bold">Request Session</Text>
 				<Text className="text-xs text-gray-500">with {firstName}</Text>
 			</View>
 		</View>
