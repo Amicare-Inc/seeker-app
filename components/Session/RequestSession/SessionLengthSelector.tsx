@@ -17,24 +17,24 @@ const SessionLengthSelector: React.FC<SessionLengthSelectorProps> = ({
 	onReset,
 }) => {
 	return (
-		<View className="mb-4 flex-row items-center justify-between">
-			<Text className="text-base font-semibold mb-2 text-grey-35">
+		<View className="mb-4 flex-row items-center justify-between border-b pb-3 border-grey-9 w-[99%] mx-auto">
+			<Text className="text-base font-semibold mb-2 text-grey-49">
 				Length
 			</Text>
 			<View className="flex-row items-center">
 				<TouchableOpacity
 					onPress={incrementBy30}
-					className="px-3 py-2 bg-grey-0 rounded-xl mr-2"
+					className="px-3 py-2 bg-white rounded-xl mr-2"
 				>
-					<Text className="text-sm font-bold">+0:30</Text>
+					<Text className="text-sm font-medium">+0:30</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					onPress={incrementBy60}
-					className="px-3 py-2 bg-grey-0 rounded-xl mr-2"
+					className="px-3 py-2 bg-white rounded-xl mr-2"
 				>
-					<Text className="text-sm font-bold">+1:00</Text>
+					<Text className="text-sm font-medium">+1:00</Text>
 				</TouchableOpacity>
-				<Text className="text-lg font-semibold border-2 px-3 py-1.5 rounded-xl border-grey-0 mr-2 text-grey-35">
+				<Text className="text-lg font-semibold border-2 px-3 py-1.5 rounded-xl border-grey-9 mr-2 text-grey-35">
 					{formatSessionLength(sessionLength)}
 				</Text>
 				<TouchableOpacity

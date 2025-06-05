@@ -15,7 +15,7 @@ const BillingCard: React.FC<BillingCardProps> = ({
 	total,
 }) => {
 	return (
-		<View className="bg-gray-100 p-4 rounded-xl mb-4">
+		<View className="bg-white p-3 rounded-xl mb-4">
 			<View className="flex-row justify-between mb-1">
 				<Text className="text-sm text-grey-58">Base Price:</Text>
 				<Text className="text-sm text-grey-58">${basePrice.toFixed(2)}</Text>

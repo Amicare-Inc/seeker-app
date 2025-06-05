@@ -251,7 +251,7 @@ const RequestSession = () => {
 
 	return (
 
-		<SafeAreaView className="flex-1 bg-white">
+		<SafeAreaView className="flex-1 bg-grey-0">
 			{/* Custom Header */}
 			<RequestSessionHeader
 				onBack={() => router.back()}
@@ -262,6 +262,8 @@ const RequestSession = () => {
 			{/* Main Content */}
 			<View className="flex-1 p-4">
 				{/* Help Options Dropdown */}
+
+				{/* TO DO update this so that when you add tasks it adds the bubble instead */}
 				<HelpOptionsDropdown
 					initialValue={helpText}
 					onChange={setHelpText}

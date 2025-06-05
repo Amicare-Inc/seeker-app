@@ -29,25 +29,31 @@ const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
 	return (
 		<View className="mb-4">
 			<Text className="text-lg font-bold mb-2">Session Checklist</Text>
-            <Text className="text-base mb-4">List all the specific tasks you would like accomplished during your session</Text>
+            <Text className="text-base mb-4 text-grey-80">
+                List all the specific tasks you would like accomplished during your session
+            </Text>
+            <View className="flex-row items-center bg-grey-9 rounded-full p-2 pl-5">
                 <TextInput
-                    className="p-3 pl-5 text-base bg-grey-0 rounded-full"
+                    className="flex-1 text-base font-medium"
                     placeholder="e.g. Drive me to medical appt. "
                     placeholderTextColor="#7B7B7E"
                     value={inputValue}
                     onChangeText={setInputValue}
-                    onSubmitEditing={(event) => addTask(event.nativeEvent.text)} 
+                    onSubmitEditing={(event) => addTask(event.nativeEvent.text)}
+                    style={{ paddingRight: 12 }}
                 />
+                <Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />
+            </View>
 			<View className="flex-wrap flex-row mt-3">
 				{tasks.map((task) => (
 					<View
 						key={task}
-						className="flex-row items-center justify-between bg-grey-0 rounded-full px-3 py-2 mr-2 mb-2"
+						className="flex-row items-center justify-between bg-white rounded-full px-3 py-2 mr-2 mb-2"
 					>
                         <TouchableOpacity onPress={() => removeTask(task)}>
-							<Text className="text-[12px] mr-1">X</Text>
+							<Text className="text-[12px] mr-2 text-grey-58">X</Text>
 						</TouchableOpacity>
-						<Text className="text-base">{task}</Text>
+						<Text className="text-sm">{task}</Text>
 
 					</View>
 				))}

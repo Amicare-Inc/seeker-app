@@ -34,12 +34,12 @@ const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 	};
 
 	return (
-		<View className="mb-4">
+		<View className="mb-4 border-b pb-3 border-grey-9">
 			<TouchableOpacity
 				onPress={() => setIsOpen((prev) => !prev)}
-				className="p-2 pl-5 bg-grey-0 rounded-full flex-row items-center justify-between"
+				className="p-2 pl-5 bg-grey-9 rounded-full flex-row items-center justify-between"
 			>
-				<Text className="text-base text-grey-49">
+				<Text className="text-base text-grey-49 font-medium">
 					{selectedOptions.length > 0
 						? selectedOptions.join(', ')
 						: 'I need help with...'}
@@ -47,7 +47,7 @@ const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 				<Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />
 			</TouchableOpacity>
 			{isOpen && (
-				<View className="mt-2 bg-grey-0 rounded-lg">
+				<View className="mt-2 bg-grey-9 rounded-lg">
 					{helpOptions.map((item, index) => (
 						<TouchableOpacity
 							key={item}
