@@ -20,25 +20,8 @@ import { useSelector } from 'react-redux';
 import { requestSession, updateSession } from '@/services/node-express-backend/session';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
 
 interface SessionData {
-    id: string;
-    senderId: string;
-    receiverId: string;
-    participants: string[];
-    status: string;
-    createdAt: string;
-    confirmedBy: string[];
-    note?: string;
-    startTime?: string;
-    endTime?: string;
-    billingDetails?: {
-        basePrice: number;
-        taxes: number;
-        serviceFee: number;
-        total: number;
-    };
     id: string;
     senderId: string;
     receiverId: string;
@@ -68,16 +51,6 @@ const helpOptions = [
 ];
 
 const RequestSession = () => {
-    const { otherUserId, sessionObj } = useLocalSearchParams();
-    const targetUserObj: User = useSelector(
-        (state: RootState) =>
-            state.userList.users.find(
-                (user) => user.id === otherUserId,
-            ) as User,
-    );
-    const existingSession: SessionData | null = sessionObj
-        ? JSON.parse(sessionObj as string)
-        : null;
     const { otherUserId, sessionObj } = useLocalSearchParams();
     const targetUserObj: User = useSelector(
         (state: RootState) =>
@@ -256,13 +229,6 @@ const RequestSession = () => {
                 photoUrl={targetUserObj?.profilePhotoUrl || ''}
                 firstName={targetUserObj?.firstName}
             />
-    return (
-        <SafeAreaView className="flex-1 bg-white">
-            <RequestSessionHeader
-                onBack={() => router.back()}
-                photoUrl={targetUserObj?.profilePhotoUrl || ''}
-                firstName={targetUserObj?.firstName}
-            />
 
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <View className="p-4 space-y-6">
@@ -298,11 +264,11 @@ const RequestSession = () => {
 
                     {/* Starts section */}
                     <View className="flex-row items-center justify-between">
-                        <Text className="text-gray-600 text-base mr-[75px]">Starts</Text>
+                        <Text className="text-gray-600 text-base mr-[50px]">Starts</Text>
                         <View className="flex-1 flex-row gap-3">
                             <TouchableOpacity
                                 onPress={() => showDatePicker('date')}
-                                className="flex-1 bg-gray-100 rounded-lg p-3"
+                                className="flex-1 bg-gray-100 rounded-lg p-2 py-2.5"
                             >
                                 <Text className="text-base text-black font-bold text-center">
                                     {formatDate(startDate)}
@@ -310,7 +276,7 @@ const RequestSession = () => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => showDatePicker('time')}
-                                className="flex-1 bg-gray-100 rounded-lg p-3"
+                                className="flex-1 bg-gray-100 rounded-lg p-2 py-2.5"
                             >
                                 <Text className="text-base text-black font-bold text-center">
                                     {formatTime(startDate)}
@@ -321,18 +287,18 @@ const RequestSession = () => {
 
                     {/* Session Length */}
                     <View>
-                        <View className="flex-row items-center justify-between mb-3">
+                        <View className="flex-row items-center justify-between mb-3 w-[99%] mx-auto border-b border-t border-gray-200 pb-3 pt-3">
                             <Text className="text-gray-600 text-base">Session Length</Text>
-                            <View className="flex-row items-center gap-2">
+                            <View className="flex-row items-center justify-between gap-1">
                                 <TouchableOpacity
                                     onPress={() => incrementSessionLength(0.5)}
-                                    className="bg-gray-100 rounded-xl px-3 py-2"
+                                    className="bg-gray-100 rounded-xl px-2.5 py-2.5"
                                 >
                                     <Text className="text-sm">+ 00:30</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => incrementSessionLength(1)}
-                                    className="bg-gray-100 rounded-xl px-3 py-2"
+                                    className="bg-gray-100 rounded-xl px-2.5 py-2.5"
                                 >
                                     <Text className="text-sm">+ 01:00</Text>
                                 </TouchableOpacity>
