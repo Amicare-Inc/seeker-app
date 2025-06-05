@@ -19,25 +19,25 @@ const DateTimeRow: React.FC<DateTimeRowProps> = ({
 	disabled = false,
 }) => {
 	return (
-		<>
-			<Text className="text-sm font-semibold mb-2">{label}</Text>
-			<View className="flex-row mb-4">
-				<TouchableOpacity
-					onPress={onPressDate}
-					disabled={disabled}
-					className={`flex-1 mr-2 p-3 border border-gray-300 rounded-lg items-center ${disabled ? 'bg-gray-200' : ''}`}
-				>
-					<Text className="text-base">{dateLabel}</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					onPress={onPressTime}
-					disabled={disabled}
-					className={`flex-1 p-3 border border-gray-300 rounded-lg items-center ${disabled ? 'bg-gray-200' : ''}`}
-				>
-					<Text className="text-base">{timeLabel}</Text>
-				</TouchableOpacity>
+			<View className="flex-row mb-4 items-center gap-5 justify-between">
+				<Text className="text-base text-grey-35 font-semibold mb-2">{label}</Text>
+				<View className="flex-row">
+					<TouchableOpacity
+						onPress={onPressDate}
+						disabled={disabled}
+						className={`mr-2 p-2 px-4 bg-grey-0 rounded-lg items-center ${disabled ? 'bg-gray-200' : ''}`}
+					>
+						<Text className="text-base font-semibold">{dateLabel}</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={onPressTime}
+						disabled={disabled}
+						className={`p-2 px-4 bg-grey-0 rounded-lg items-center ${disabled ? 'bg-gray-200' : ''}`}
+					>
+						<Text className="text-base font-semibold">{timeLabel}</Text>
+					</TouchableOpacity>
+				</View>
 			</View>
-		</>
 	);
 };
 
