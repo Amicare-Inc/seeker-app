@@ -7,11 +7,6 @@ import { AppDispatch } from '@/redux/store'; // Import the dispatch function fro
 import { Message } from '@/types/Message';
 import { setMessages } from '@/redux/chatSlice';
 
-// const SOCKET_SERVER_URL = 'https://f964-184-147-249-113.ngrok-free.app' // Ngrok Tunnel expo start --tunnel
-// const SOCKET_SERVER_URL = 'http://localhost:3000' // expo start
-// const SOCKET_SERVER_URL = 'http://172.20.10.3:3000' // ??
-const SOCKET_SERVER_URL = 'https://backend-903865090190.us-east5.run.app' // GCP
-
 let socket: Socket | null = null;
 
 export const connectSocket = async (userId: string, dispatch: AppDispatch) => {
@@ -28,7 +23,7 @@ export const connectSocket = async (userId: string, dispatch: AppDispatch) => {
     // console.log('Fetching ID token for socket connection:', token);
 
     // Establish socket connection with token in auth option
-    socket = io(SOCKET_SERVER_URL, {
+    socket = io(process.env.EXPO_PUBLIC_BACKEND_BASE_URL, {
     //   auth: {
     //     token: token,
     //   },
