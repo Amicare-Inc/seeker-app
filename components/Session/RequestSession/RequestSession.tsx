@@ -20,8 +20,25 @@ import { useSelector } from 'react-redux';
 import { requestSession, updateSession } from '@/services/node-express-backend/session';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 interface SessionData {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    participants: string[];
+    status: string;
+    createdAt: string;
+    confirmedBy: string[];
+    note?: string;
+    startTime?: string;
+    endTime?: string;
+    billingDetails?: {
+        basePrice: number;
+        taxes: number;
+        serviceFee: number;
+        total: number;
+    };
     id: string;
     senderId: string;
     receiverId: string;
@@ -51,6 +68,16 @@ const helpOptions = [
 ];
 
 const RequestSession = () => {
+    const { otherUserId, sessionObj } = useLocalSearchParams();
+    const targetUserObj: User = useSelector(
+        (state: RootState) =>
+            state.userList.users.find(
+                (user) => user.id === otherUserId,
+            ) as User,
+    );
+    const existingSession: SessionData | null = sessionObj
+        ? JSON.parse(sessionObj as string)
+        : null;
     const { otherUserId, sessionObj } = useLocalSearchParams();
     const targetUserObj: User = useSelector(
         (state: RootState) =>
@@ -222,6 +249,13 @@ const RequestSession = () => {
         }
     };
 
+    return (
+        <SafeAreaView className="flex-1 bg-white">
+            <RequestSessionHeader
+                onBack={() => router.back()}
+                photoUrl={targetUserObj?.profilePhotoUrl || ''}
+                firstName={targetUserObj?.firstName}
+            />
     return (
         <SafeAreaView className="flex-1 bg-white">
             <RequestSessionHeader

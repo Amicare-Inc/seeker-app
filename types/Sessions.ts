@@ -25,4 +25,15 @@ export interface Session {
 		total: number;
 	};
 	confirmedBy?: string[]; // Users who have confirmed the session
+	// New fields for live session
+	readyToStart?: {
+		[userId: string]: {
+			confirmed: boolean;
+			confirmedAt: string; // ISO date string
+		};
+	};
+	actualStartTime?: string | null; // ISO date string
+	actualEndTime?: string | null; // ISO date string
+	liveStatus?: 'upcoming' | 'ready' | 'inProgress' | 'completed' | 'failed';
+    liveStatusUpdatedAt?: string;
 }

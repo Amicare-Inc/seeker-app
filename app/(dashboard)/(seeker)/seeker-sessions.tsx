@@ -1,5 +1,6 @@
 import React from 'react';
-import { SafeAreaView, View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import SessionList from '@/components/Session/SessionList';
 import SessionBookedList from '@/components/Session/BookedSession/SessionBookedList';

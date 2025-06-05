@@ -7,6 +7,7 @@ import {
 	ActivityIndicator,
 	FlatList,
 	TouchableOpacity,
+	Platform,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
@@ -80,7 +81,7 @@ const SeekerHomeTab = () => {
 					keyExtractor={(item) => item.id}
 					renderItem={renderItem}
 					contentContainerStyle={{
-						paddingBottom: 120,
+						paddingBottom: Platform.OS === 'ios' ? 83 : 64,
 						paddingHorizontal: 10,
 					}}
 				/>

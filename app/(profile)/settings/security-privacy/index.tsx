@@ -103,9 +103,9 @@ const SecurityPrivaryScreen = () => {
             }}
           >
             <TouchableWithoutFeedback>
-              <View className="bg-white rounded-xl p-6 items-center mx-4">
+              <View className="bg-white rounded-[14px] p-6 items-center mx-4">
                 {/* Removed FaceIdIcon */}
-                <Text className="text-xl font-semibold mt-6">Face ID</Text>
+                <Text className="text-xl font-semibold mt-5 mb-5">Face ID</Text>
                 <Text className="text-center text-base text-grey-58 mb-6 font-medium">
                   Would you like to enable Face ID? It’s a quicker and more secure alternative to
                   entering your password.
@@ -147,7 +147,7 @@ const SecurityPrivaryScreen = () => {
             }}
           >
             <TouchableWithoutFeedback>
-              <View className="bg-white rounded-xl p-6 items-center mx-4">
+              <View className="bg-white rounded-[14px] p-6 items-center mx-4">
                 <Text className="text-xl font-semibold mt-2 mb-4">Verify your Identity</Text>
                 <Text className="text-center text-base text-grey-58 mb-6 font-medium">
                   For security reasons, you will be prompted to sign in and verify your identity in order to request account deletion.
