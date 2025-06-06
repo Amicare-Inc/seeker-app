@@ -1,10 +1,7 @@
-// const API_BASE_URL = 'http://localhost:3000'; // For local testing
-const API_BASE_URL = 'http://192.168.1.6:3000'; // Local network testing
-// const API_BASE_URL = 'https://backend-903865090190.us-east5.run.app'; // GCP deployment
 
 export const updateUserProfile = async (userId: string, updatedFields: any) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/update-profile`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/users/update-profile`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
