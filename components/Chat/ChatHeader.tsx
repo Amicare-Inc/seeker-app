@@ -7,10 +7,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { Session } from '@/types/Sessions';
 import { User } from '@/types/User';
-import { subscribeToSession } from '@/services/firebase/sessionService';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
 import { LinearGradient } from 'expo-linear-gradient';
+import { getSocket } from '@/services/node-express-backend/sockets';
 
 interface ChatHeaderProps {
 	session: Session;
@@ -27,14 +27,26 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 }) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
-	const [currentSession, setCurrentSession] = useState<Session>(session);
+	const currentSession = useSelector((state: RootState) => 
+		state.sessions.allSessions.find(s => s.id === session.id)
+	) || session; // Fallback to prop if not in Redux
 
 	useEffect(() => {
-		const unsubscribe = subscribeToSession(session.id, (updatedSession) => {
-			setCurrentSession(updatedSession);
-			console.log('Live session update:', updatedSession);
-		});
-		return () => unsubscribe();
+		if (!session.id) return;
+		
+		const socket = getSocket();
+		if (!socket) {
+			console.error('Socket not connected');
+			return;
+		}
+
+		// Join the session room
+		socket.emit('session:join', session.id);
+
+		// Cleanup
+		return () => {
+			socket.emit('session:leave', session.id);
+		};
 	}, [session.id]);
 
 	const isConfirmed = currentSession.status === 'confirmed';
