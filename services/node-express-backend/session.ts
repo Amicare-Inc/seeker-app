@@ -2,15 +2,10 @@ import { SessionDTO } from '@/types/dtos/SessionDto';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { Message } from '@/types/Message';
 import { Session } from '@/types/Sessions';
-// import { API_BASE_URL } from '@/config';
-// const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app' // Ngrok Tunnel expo start --tunnel
-// const API_BASE_URL = 'http://localhost:3000' // expo start
-// const API_BASE_URL = 'http://172.20.10.3:3000' // ??
-const API_BASE_URL = 'https://backend-903865090190.us-east5.run.app' // GCP
 
 export const getUserSessionTab = async (userId: string): Promise<EnrichedSession[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/sessions/tab?userId=${userId}`);
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/tab?userId=${userId}`);
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -28,7 +23,7 @@ export const getUserSessionTab = async (userId: string): Promise<EnrichedSession
 export const requestSession = async (session: SessionDTO): Promise<void> => {
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/sessions`, {
+		const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -50,7 +45,7 @@ export const requestSession = async (session: SessionDTO): Promise<void> => {
 
 export const updateSession = async (sessionId: string, session: Partial<Session>): Promise<string> => {
   try {
-	const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}`, {
+	const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}`, {
 	  method: 'PATCH',
 	  headers: {
 		'Content-Type': 'application/json',
@@ -72,7 +67,7 @@ export const updateSession = async (sessionId: string, session: Partial<Session>
 export const acceptSession = async (sessionId: string): Promise<Session> => {
   console.log('acceptSession called with:', sessionId);
   try {
-    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/accept`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/accept`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +88,7 @@ export const acceptSession = async (sessionId: string): Promise<Session> => {
 
 export const rejectSession = async (sessionId: string): Promise<Session> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/reject`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/reject`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -114,7 +109,7 @@ export const rejectSession = async (sessionId: string): Promise<Session> => {
 
 export const bookSession = async (sessionId: string, currentUserId: string): Promise<Session> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/book`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/book`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -136,7 +131,7 @@ export const bookSession = async (sessionId: string, currentUserId: string): Pro
 
 export const declineSession = async (sessionId: string): Promise<Session> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/decline`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/decline`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -157,7 +152,7 @@ export const declineSession = async (sessionId: string): Promise<Session> => {
 
 export const cancelSession = async (sessionId: string): Promise<Session> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/cancel`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/cancel`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -179,7 +174,7 @@ export const cancelSession = async (sessionId: string): Promise<Session> => {
 export const sendMessage = async (sessionId: string, userId: string, message: string): Promise<Message> => {
 
   try {
-    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/messages`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -201,7 +196,7 @@ export const sendMessage = async (sessionId: string, userId: string, message: st
 
 export const getMessages = async (sessionId: string): Promise<Message[]> => {
   try {
-	const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/messages`, {
+	const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/messages`, {
 	  method: 'GET',
 	  headers: {
 		'Content-Type': 'application/json',

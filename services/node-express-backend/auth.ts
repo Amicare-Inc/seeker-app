@@ -1,13 +1,8 @@
 
-// const API_BASE_URL = 'https://f964-184-147-249-113.ngrok-free.app' // Ngrok Tunnel expo start --tunnel
-// const API_BASE_URL = 'http://localhost:3000' // expo start
-// const API_BASE_URL = 'http://172.20.10.3:3000' // ??
-const API_BASE_URL = 'https://backend-903865090190.us-east5.run.app' // GCP
-
 export const Auth = {
   async signUp(email: string, password: string): Promise<any> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,7 +24,7 @@ export const Auth = {
   },
   async addCriticalInfo(uid: string, criticalInfoData: any): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup/${uid}/critical-info`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup/${uid}/critical-info`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +45,7 @@ export const Auth = {
   },
   async addOptionalInfo(uid: string, optionalInfoData: any): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup/${uid}/optional-info`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup/${uid}/optional-info`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +63,7 @@ export const Auth = {
   },
   async signIn(email: string, password: string): Promise<any> {
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

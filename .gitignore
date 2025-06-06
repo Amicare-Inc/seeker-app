@@ -16,7 +16,7 @@ test/*.jpg
 test/*.webp
 /ios
 /android
-
+.env
 # macOS
 .DS_Store
 
