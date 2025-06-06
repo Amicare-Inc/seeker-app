@@ -19,24 +19,24 @@ const PswSessionsTab = () => {
 
 
     if (loading) {
-		return (
-			<SafeAreaView className="flex-1 items-center justify-center bg-white">
-				<Text>Loading...</Text>
-			</SafeAreaView>
-		);
-	}
+        return (
+            <SafeAreaView className="flex-1 items-center justify-center bg-white">
+                <Text>Loading...</Text>
+            </SafeAreaView>
+        );
+    }
 
-	if (error) {
-		return (
-			<SafeAreaView className="flex-1 items-center justify-center bg-white">
-				<Text>Error fetching sessions: {error}</Text>
-			</SafeAreaView>
-		);
-	}
+    if (error) {
+        return (
+            <SafeAreaView className="flex-1 items-center justify-center bg-white">
+                <Text>Error fetching sessions: {error}</Text>
+            </SafeAreaView>
+        );
+    }
 
     const onSessionPress = (session: EnrichedSession) => {
-		handleExpandSession(session);
-	};
+        handleExpandSession(session);
+    };
 
     return (
         <SafeAreaView
@@ -55,7 +55,7 @@ const PswSessionsTab = () => {
             </View>
 
             {/* Main Content */}
-			<View className="flex-1 px-3.5">
+            <View className="flex-1 px-3.5">
                 <SessionList
                     sessions={newRequests}
                     onSessionPress={onSessionPress}
@@ -63,10 +63,10 @@ const PswSessionsTab = () => {
                 />
 
                 <SessionList
-					sessions={pending}
-					onSessionPress={onSessionPress}
-					title="Pending"
-				/>
+                    sessions={pending}
+                    onSessionPress={onSessionPress}
+                    title="Pending"
+                />
 
                 <SessionBookedList
 					sessions={confirmed}

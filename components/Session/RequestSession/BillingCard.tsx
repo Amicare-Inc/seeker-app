@@ -15,18 +15,22 @@ const BillingCard: React.FC<BillingCardProps> = ({
 	total,
 }) => {
 	return (
-		<View className="bg-gray-100 p-4 rounded-lg mb-4">
-			<Text className="text-base mb-1">
-				Base Price: ${basePrice.toFixed(2)}
-			</Text>
-			<Text className="text-base mb-1">Taxes: ${taxes.toFixed(2)}</Text>
-			<Text className="text-base mb-1">
-				Service Fee: ${serviceFee.toFixed(2)}
-			</Text>
-			<View className="border-t border-gray-300 mt-2 pt-2">
-				<Text className="text-base font-bold">
-					Total: ${total.toFixed(2)}
-				</Text>
+		<View className="bg-white p-3 rounded-xl mb-4">
+			<View className="flex-row justify-between mb-1">
+				<Text className="text-sm text-grey-58">Base Price:</Text>
+				<Text className="text-sm text-grey-58">${basePrice.toFixed(2)}</Text>
+			</View>
+			<View className="flex-row justify-between mb-1">
+				<Text className="text-sm text-grey-58">Taxes:</Text>
+				<Text className="text-sm text-grey-58">${taxes.toFixed(2)}</Text>
+			</View>
+			<View className="flex-row justify-between mb-2">
+				<Text className="text-sm text-grey-58">Service Fee:</Text>
+				<Text className="text-sm text-grey-58">${serviceFee.toFixed(2)}</Text>
+			</View>
+			<View className="flex-row justify-between">
+				<Text className="text-base font-medium">Total:</Text>
+				<Text className="text-base font-medium">${total.toFixed(2)}</Text>
 			</View>
 		</View>
 	);

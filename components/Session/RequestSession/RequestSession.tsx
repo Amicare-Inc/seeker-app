@@ -5,6 +5,7 @@ import {
 	Text,
 	TouchableOpacity,
 	Keyboard,
+	ScrollView,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
@@ -16,11 +17,13 @@ import DateTimeRow from '@/components/Session/RequestSession/DateTimeRow';
 import SessionLengthSelector from '@/components/Session/RequestSession/SessionLengthSelector';
 import BillingCard from '@/components/Session/RequestSession/BillingCard';
 import HelpOptionsDropdown from '@/components/Session/RequestSession/HelpOptionsDropdown';
+import SessionChecklist from '@/components/Session/RequestSession/SessionChecklist';
 import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from '@/scripts/datetimeHelpers';
 import { RootState } from '@/redux/store';
 import { useSelector } from 'react-redux';
 import { requestSession, updateSession } from '@/services/node-express-backend/session';
 import { SessionDTO } from '@/types/dtos/SessionDto';
+import { Ionicons } from '@expo/vector-icons';
 
 interface SessionData {
 	id: string;
@@ -69,6 +72,8 @@ const RequestSession = () => {
 	const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 	const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
 	const [pickerTarget, setPickerTarget] = useState<'start' | 'end'>('start');
+
+	const [checklist, setChecklist] = useState<string[]>([]);
 
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const pswRate = currentUser?.isPsw
@@ -182,78 +187,88 @@ const RequestSession = () => {
 	};
 
 	const handleSubmit = async () => {
-		Keyboard.dismiss();
-		if (!currentUser) {
-			alert('You must be signed in to send a request.');
-			return;
+	Keyboard.dismiss();
+	if (!currentUser) {
+		alert('You must be signed in to send a request.');
+		return;
+	}
+	if (!helpText.trim()) {
+		alert('Please specify what you need help with.');
+		return;
+	}
+	if (!startDate || !endDate) {
+		alert('Please select both start and end times.');
+		return;
+	}
+
+	try {
+		const sessionData = {
+		note: helpText,
+		startTime: startDate.toISOString(),
+		endTime: endDate.toISOString(),
+		billingDetails: {
+			dynamicBasePrice: basePrice,
+			taxes,
+			serviceFee,
+			total,
+		},
+		checklist: checklist.map((task, index) => ({
+			id: index.toString(),       // Use a UUID for real production use
+			task,
+			completed: false
+		})),
+		};
+
+		if (existingSession) {
+		console.log('session id', existingSession.id);
+		await updateSession(existingSession.id, {
+			...sessionData,
+			billingDetails: {
+			...sessionData.billingDetails,
+			basePrice: sessionData.billingDetails.dynamicBasePrice,
+			},
+		});
+		alert('Session updated successfully!');
+		router.back();
+		} else {
+		const newSessionData = {
+			...sessionData,
+			senderId: currentUser.id,
+			receiverId: targetUserObj?.id,
+			billingDetails: {
+			...sessionData.billingDetails,
+			basePrice: sessionData.billingDetails.dynamicBasePrice,
+			},
+		} as SessionDTO;
+		await requestSession(newSessionData);
+		router.push({
+			pathname: '/sent-request',
+			params: {
+			otherUserId: targetUserObj?.id,
+			},
+		});
 		}
-		if (!helpText.trim()) {
-			alert('Please specify what you need help with.');
-			return;
-		}
-		if (!startDate || !endDate) {
-			alert('Please select both start and end times.');
-			return;
-		}
-		try {
-			const sessionData = {
-				note: helpText,
-				startTime: startDate.toISOString(),
-				endTime: endDate.toISOString(),
-				billingDetails: {
-					dynamicBasePrice: basePrice,
-					taxes,
-					serviceFee,
-					total,
-				},
-			};
-			if (existingSession) {
-				console.log('session id', existingSession.id);
-				await updateSession(existingSession.id, {
-					...sessionData,
-					billingDetails: {
-						...sessionData.billingDetails,
-						basePrice: sessionData.billingDetails.dynamicBasePrice,
-					},
-				});
-				alert('Session updated successfully!');
-				router.back();
-			} else {
-				const newSessionData = {
-					...sessionData,
-					senderId: currentUser.id,
-					receiverId: targetUserObj?.id,
-					billingDetails: {
-						...sessionData.billingDetails,
-						basePrice: sessionData.billingDetails.dynamicBasePrice,
-					},
-				} as SessionDTO;
-				await requestSession(newSessionData);
-				router.push({
-					pathname: '/sent-request',
-					params: {
-						otherUserId: targetUserObj?.id, // so we can display their name/pic
-					},
-				});
-			}
-		} catch (error) {
-			console.error('Error submitting session request:', error);
-			alert('An error occurred while sending your request.');
-		}
+	} catch (error) {
+		console.error('Error submitting session request:', error);
+		alert('An error occurred while sending your request.');
+	}
 	};
 
 	return (
-		<SafeAreaView className="flex-1 bg-white">
+
+		<SafeAreaView className="flex-1 bg-grey-0">
 			{/* Custom Header */}
 			<RequestSessionHeader
 				onBack={() => router.back()}
 				photoUrl={targetUserObj?.profilePhotoUrl || ''}
 				firstName={targetUserObj?.firstName}
 			/>
-
+			<ScrollView>
 			{/* Main Content */}
 			<View className="flex-1 p-4">
 				{/* Help Options Dropdown */}
+
+				{/* TO DO update this so that when you add tasks it adds the bubble instead */}
 				<HelpOptionsDropdown
 					initialValue={helpText}
 					onChange={setHelpText}
@@ -289,6 +304,8 @@ const RequestSession = () => {
 						disabled={true}
 					/>
 				)}
+				
+				<SessionChecklist onChange={setChecklist} />
 
 				{/* Billing Info */}
 				<BillingCard
@@ -301,9 +318,10 @@ const RequestSession = () => {
 				{/* Submit Button */}
 				<TouchableOpacity
 					onPress={handleSubmit}
-					className="bg-blue-600 rounded-lg p-4 items-center"
+					className="bg-brand-blue rounded-xl p-4 items-center flex-row justify-center"
 				>
-					<Text className="text-white text-base font-bold">
+					<Ionicons name="paper-plane" size={22} color="white"/>
+					<Text className="text-white text-lg font-medium ml-3">
 						{existingSession ? 'Update Session' : 'Send Request'}
 					</Text>
 				</TouchableOpacity>
@@ -333,6 +351,7 @@ const RequestSession = () => {
 						: startDate || new Date()
 				}
 			/>
+			</ScrollView>
 		</SafeAreaView>
 	);
 };

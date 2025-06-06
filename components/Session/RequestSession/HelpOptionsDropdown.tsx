@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import helpOptions from '@/assets/helpOptions';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -34,41 +34,39 @@ const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 	};
 
 	return (
-		<View className="mb-4">
+		<View className="mb-4 border-b pb-3 border-grey-9">
 			<TouchableOpacity
 				onPress={() => setIsOpen((prev) => !prev)}
-				className="p-3 border border-gray-300 rounded-lg"
+				className="p-2 pl-5 bg-grey-9 rounded-full flex-row items-center justify-between"
 			>
-				<Text className="text-base text-gray-700">
+				<Text className="text-base text-grey-49 font-medium">
 					{selectedOptions.length > 0
 						? selectedOptions.join(', ')
-						: 'Select options'}
+						: 'I need help with...'}
 				</Text>
+				<Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />
 			</TouchableOpacity>
 			{isOpen && (
-				<View className="mt-2 border border-gray-300 rounded-lg">
-					<FlatList
-						data={helpOptions}
-						keyExtractor={(item) => item}
-						renderItem={({ item }) => (
-							<TouchableOpacity
-								onPress={() => {
-									toggleOption(item);
-									setIsOpen(false); // close dropdown immediately after selecting
-								}}
-								className="p-3 border-b border-gray-200 flex-row items-center justify-between"
-							>
-								<Text className="text-base">{item}</Text>
-								{selectedOptions.includes(item) && (
-									<Ionicons
-										name="checkmark"
-										size={20}
-										color="green"
-									/>
-								)}
-							</TouchableOpacity>
-						)}
-					/>
+				<View className="mt-2 bg-grey-9 rounded-lg">
+					{helpOptions.map((item, index) => (
+						<TouchableOpacity
+							key={item}
+							onPress={() => {
+								toggleOption(item);
+								setIsOpen(false); // close dropdown immediately after selecting
+							}}
+							className={`p-3 flex-row items-center justify-between ${
+								index === helpOptions.length - 1
+									? '' // No border for the last item
+									: 'border-b border-gray-200'
+							}`}
+						>
+							<Text className="text-base">{item}</Text>
+							{selectedOptions.includes(item) && (
+								<Ionicons name="checkmark" size={20} color="green" />
+							)}
+						</TouchableOpacity>
+					))}
 				</View>
 			)}
 		</View>

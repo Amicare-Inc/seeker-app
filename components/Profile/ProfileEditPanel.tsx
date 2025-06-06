@@ -11,8 +11,8 @@ import { useDispatch } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { User } from '@/types/User';
 import OptionsDropdown from './OptionsDropdown';
-import { setUserDoc } from '@/services/firebase/firestore';
 import helpOptions from '@/assets/helpOptions';
+import { updateUserProfile } from '@/services/node-express-backend/user';
 
 interface ProfileEditPanelProps {
 	user: User;
@@ -76,17 +76,10 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 		}
 
 		try {
-			await fetch('http://192.168.1.6:3000/api/users/updateProfile', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					uid: user.id,
-					...updatedFields,
-				}),
-			});
-			dispatch(updateUserFields(updatedFields));
+			const data = await updateUserProfile(user.id, updatedFields);
+			if (data.user) {
+				dispatch(updateUserFields(data.user));
+			}
 		} catch (error) {
 			console.error('Error updating profile:', error);
 		}
