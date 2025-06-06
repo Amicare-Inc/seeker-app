@@ -73,6 +73,8 @@ const RequestSession = () => {
 	const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
 	const [pickerTarget, setPickerTarget] = useState<'start' | 'end'>('start');
 
+	const [checklist, setChecklist] = useState<string[]>([]);
+
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const pswRate = currentUser?.isPsw
 		? currentUser.rate || 20
@@ -184,69 +186,72 @@ const RequestSession = () => {
 		});
 	};
 
-	const handleTaskChange = (updatedTasks: string) => {
-		console.log('Updated tasks:', updatedTasks);
-	};
-
 	const handleSubmit = async () => {
-		Keyboard.dismiss();
-		if (!currentUser) {
-			alert('You must be signed in to send a request.');
-			return;
+	Keyboard.dismiss();
+	if (!currentUser) {
+		alert('You must be signed in to send a request.');
+		return;
+	}
+	if (!helpText.trim()) {
+		alert('Please specify what you need help with.');
+		return;
+	}
+	if (!startDate || !endDate) {
+		alert('Please select both start and end times.');
+		return;
+	}
+
+	try {
+		const sessionData = {
+		note: helpText,
+		startTime: startDate.toISOString(),
+		endTime: endDate.toISOString(),
+		billingDetails: {
+			dynamicBasePrice: basePrice,
+			taxes,
+			serviceFee,
+			total,
+		},
+		checklist: checklist.map((task, index) => ({
+			id: index.toString(),       // Use a UUID for real production use
+			task,
+			completed: false
+		})),
+		};
+
+		if (existingSession) {
+		console.log('session id', existingSession.id);
+		await updateSession(existingSession.id, {
+			...sessionData,
+			billingDetails: {
+			...sessionData.billingDetails,
+			basePrice: sessionData.billingDetails.dynamicBasePrice,
+			},
+		});
+		alert('Session updated successfully!');
+		router.back();
+		} else {
+		const newSessionData = {
+			...sessionData,
+			senderId: currentUser.id,
+			receiverId: targetUserObj?.id,
+			billingDetails: {
+			...sessionData.billingDetails,
+			basePrice: sessionData.billingDetails.dynamicBasePrice,
+			},
+		} as SessionDTO;
+		await requestSession(newSessionData);
+		router.push({
+			pathname: '/sent-request',
+			params: {
+			otherUserId: targetUserObj?.id,
+			},
+		});
 		}
-		if (!helpText.trim()) {
-			alert('Please specify what you need help with.');
-			return;
-		}
-		if (!startDate || !endDate) {
-			alert('Please select both start and end times.');
-			return;
-		}
-		try {
-			const sessionData = {
-				note: helpText,
-				startTime: startDate.toISOString(),
-				endTime: endDate.toISOString(),
-				billingDetails: {
-					dynamicBasePrice: basePrice,
-					taxes,
-					serviceFee,
-					total,
-				},
-			};
-			if (existingSession) {
-				console.log('session id', existingSession.id);
-				await updateSession(existingSession.id, {
-					...sessionData,
-					billingDetails: {
-						...sessionData.billingDetails,
-						basePrice: sessionData.billingDetails.dynamicBasePrice,
-					},
-				});
-				alert('Session updated successfully!');
-				router.back();
-			} else {
-				const newSessionData = {
-					...sessionData,
-					senderId: currentUser.id,
-					receiverId: targetUserObj?.id,
-					billingDetails: {
-						...sessionData.billingDetails,
-						basePrice: sessionData.billingDetails.dynamicBasePrice,
-					},
-				} as SessionDTO;
-				await requestSession(newSessionData);
-				router.push({
-					pathname: '/sent-request',
-					params: {
-						otherUserId: targetUserObj?.id, // so we can display their name/pic
-					},
-				});
-			}
-		} catch (error) {
-			console.error('Error submitting session request:', error);
-			alert('An error occurred while sending your request.');
-		}
+	} catch (error) {
+		console.error('Error submitting session request:', error);
+		alert('An error occurred while sending your request.');
+	}
 	};
 
 	return (
@@ -299,10 +304,8 @@ const RequestSession = () => {
 						disabled={true}
 					/>
 				)}
-
-				<SessionChecklist
-					onChange={handleTaskChange}
-				/>
+				
+				<SessionChecklist onChange={setChecklist} />
 
 				{/* Billing Info */}
 				<BillingCard

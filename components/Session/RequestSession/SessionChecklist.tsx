@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Keyboard } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 
 interface SessionChecklistProps {
-	onChange: (tasks: string) => void;
+  onChange: (tasks: string[]) => void;  // Change from string to string[]
 }
 
 const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
@@ -14,7 +14,7 @@ const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
 		if (task.trim() && !tasks.includes(task.trim())) {
 			const updatedTasks = [...tasks, task.trim()];
 			setTasks(updatedTasks);
-			onChange(updatedTasks.join(', '));
+			onChange(updatedTasks);
 			setInputValue(''); // Clear the text field
 			Keyboard.dismiss(); // Close the keyboard
 		}
@@ -23,7 +23,7 @@ const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
 	const removeTask = (task: string) => {
 		const updatedTasks = tasks.filter((t) => t !== task);
 		setTasks(updatedTasks);
-		onChange(updatedTasks.join(', '));
+		onChange(updatedTasks);
 	};
 
 	return (

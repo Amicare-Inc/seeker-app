@@ -5,7 +5,7 @@ const API_BASE_URL = 'http://192.168.1.6:3000'; // Local network testing
 export const updateUserProfile = async (userId: string, updatedFields: any) => {
   try {
     const response = await fetch(`${API_BASE_URL}/users/update-profile`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
