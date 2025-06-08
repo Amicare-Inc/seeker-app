@@ -172,7 +172,7 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
               </View>
             </View>
 
-            <SessionChecklistBox />
+            <SessionChecklistBox checklist={enrichedSession.checklist ?? []} editable={false} />
 
             {/* Price Breakdown */}
             <View className="mb-3 px-5">
