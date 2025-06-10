@@ -1,10 +1,11 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { bookSessionThunk, cancelSessionThunk, declineSessionThunk } from '@/redux/sessionSlice';
+import { useStripe } from '@stripe/stripe-react-native';
 
 const SessionConfirmation = () => {
 	const { sessionId, action, otherUserId } = useLocalSearchParams();
@@ -16,6 +17,7 @@ const SessionConfirmation = () => {
 	const otherUser = useSelector((state: RootState) =>
 		state.userList.users.find((u) => u.id === otherUserId),
 	);
+	const stripe = useStripe();
 
 	if (!session || !currentUser || !otherUser) {
 		return (
@@ -44,17 +46,54 @@ const SessionConfirmation = () => {
 		primaryButtonColor = '#008DF4';
 		onPrimaryPress = async () => {
 			try {
-				const resultAction = await dispatch(bookSessionThunk({sessionId: session.id, currentUserId: currentUser.id})).unwrap();
+				// Create payment intent
+				const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/payments/create-intent`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						amount: session.billingDetails!.basePrice, // TODO: REMOVE ? from 
+						currency: 'cad',
+						sessionId: session.id,
+						pswStripeAccountId: 'acct_1RXSGaQ7lSoEt20C'
+					})
+				});
+
+				const { clientSecret } = await response.json();
+				console.log('clientSecret', clientSecret);
+
+				// Initialize payment sheet
+				const { error: initError } = await stripe.initPaymentSheet({
+					paymentIntentClientSecret: clientSecret,
+					merchantDisplayName: 'Amicare',
+					returnURL: 'amicare://stripe-redirect',
+				});
+
+				if (initError) {
+					Alert.alert('Error INIT ERROR', initError.message);
+					return;
+				}
+
+				// Present payment sheet
+				const { error: presentError } = await stripe.presentPaymentSheet();
+
+				if (presentError) {
+					Alert.alert('Error Error', presentError.message);
+					return;
+				}
+
+				// If payment successful, book the session
+				await dispatch(bookSessionThunk({sessionId: session.id, currentUserId: currentUser.id})).unwrap();
 				router.back();
 			} catch (error) {
 				console.error('Error booking session:', error);
+				Alert.alert('Error', 'Failed to process payment');
 			}
 		};
 	} else if (action === 'cancel') {
 		headerText = 'Confirm Cancellation';
 		if (session.status === 'pending') {
 			messageText =
-				'Cancelling now will end your chat and you’ll need to send a new session request.';
+				"Cancelling now will end your chat and you'll need to send a new session request.";
 		} else if (session.status === 'confirmed') {
 			if (timeDiff !== null && timeDiff >= 2) {
 				messageText =
