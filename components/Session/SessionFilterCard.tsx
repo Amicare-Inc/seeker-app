@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, Animated, Easing } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { fetchFilteredUsers } from '@/services/node-express-backend/user';
 
 const { width } = Dimensions.get('window');
@@ -20,8 +21,21 @@ const SessionFilterCard = ({ onClose }: { onClose: () => void }) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const slideAnim = useRef(new Animated.Value(300)).current;
 
-  // Slide up animation when the filter card is opened
+  // Load persisted selected days from AsyncStorage when the card is opened
   useEffect(() => {
+    const loadSelectedDays = async () => {
+      try {
+        const storedDays = await AsyncStorage.getItem('selectedDays');
+        if (storedDays) {
+          setSelectedDays(JSON.parse(storedDays));
+        }
+      } catch (error) {
+        console.error('Error loading selected days:', error);
+      }
+    };
+
+    loadSelectedDays();
+
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 300,
@@ -41,15 +55,16 @@ const SessionFilterCard = ({ onClose }: { onClose: () => void }) => {
 
   const handleApply = async () => {
     try {
-      if (selectedDays.length === 0) {
+      await AsyncStorage.setItem('selectedDays', JSON.stringify(selectedDays));
+
+      if (selectedDays.length > 0) {
+        const users = await fetchFilteredUsers(selectedDays);
+        console.log('Filtered users:', users);
+
+      } else {
         console.log('No days selected');
-        return;
       }
 
-      const users = await fetchFilteredUsers(selectedDays);
-      console.log('Filtered users:', users);
-
-      // TODO: Handle filtered users (e.g., update UI, pass to parent, store in global state)
       onClose();
     } catch (error) {
       console.error('Error applying filter:', error);
@@ -104,6 +119,12 @@ const SessionFilterCard = ({ onClose }: { onClose: () => void }) => {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* Time Range */}
+      <Text className="text-black text-lg font-medium mb-3 mt-5">Time Available</Text>
+      <TouchableOpacity className="bg-grey-0 w-1/2 px-4 py-2 rounded-full">
+        <Text className="text-base font-medium">+ Add Time Range</Text>
+      </TouchableOpacity>
 
       {/* Apply Button */}
       <TouchableOpacity
