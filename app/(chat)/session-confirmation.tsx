@@ -5,21 +5,21 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { bookSessionThunk, cancelSessionThunk, declineSessionThunk } from '@/redux/sessionSlice';
-import { useStripe } from '@stripe/stripe-react-native';
+import { PaymentService } from '@/services/stripe/payment-service';
+import { EnrichedSession } from '@/types/EnrichedSession';
 
 const SessionConfirmation = () => {
-	const { sessionId, action, otherUserId } = useLocalSearchParams();
+	const { sessionId, action } = useLocalSearchParams();
 	const dispatch = useDispatch<AppDispatch>();
-	const session = useSelector((state: RootState) =>
-		state.sessions.allSessions.find((s) => s.id === sessionId),
-	);
 	const currentUser = useSelector((state: RootState) => state.user.userData);
-	const otherUser = useSelector((state: RootState) =>
-		state.userList.users.find((u) => u.id === otherUserId),
-	);
-	const stripe = useStripe();
+	const activeSession = useSelector(
+		(state: RootState) =>
+			state.sessions.activeEnrichedSession ||
+			state.sessions.allSessions.find((s) => s.id === sessionId),
+	) as EnrichedSession | undefined;
+	const paymentService = PaymentService.getInstance();
 
-	if (!session || !currentUser || !otherUser) {
+	if (!activeSession || !currentUser || !activeSession.otherUser) {
 		return (
 			<SafeAreaView className="flex-1 justify-center items-center bg-white">
 				<Text>Loading...</Text>
@@ -27,15 +27,16 @@ const SessionConfirmation = () => {
 		);
 	}
 
-	const timeDiff = session.startTime
-		? (new Date(session.startTime).getTime() - new Date().getTime()) /
+	const otherUser = activeSession.otherUser;
+	const timeDiff = activeSession.startTime
+		? (new Date(activeSession.startTime).getTime() - new Date().getTime()) /
 			(1000 * 60 * 60)
 		: null;
 
 	let headerText = '';
 	let messageText = '';
 	let primaryButtonText = '';
-	let primaryButtonColor = ''; // e.g. blue for book/change, red for cancel
+	let primaryButtonColor = '';
 	let onPrimaryPress: () => void = () => {};
 	const onBackPress = () => router.back();
 
@@ -46,55 +47,43 @@ const SessionConfirmation = () => {
 		primaryButtonColor = '#008DF4';
 		onPrimaryPress = async () => {
 			try {
-				// Create payment intent
-				const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/payments/create-intent`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						amount: session.billingDetails!.basePrice, // TODO: REMOVE ? from 
-						currency: 'cad',
-						sessionId: session.id,
-						pswStripeAccountId: 'acct_1RXSGaQ7lSoEt20C'
-					})
-				});
-
-				const { clientSecret } = await response.json();
-				console.log('clientSecret', clientSecret);
-
-				// Initialize payment sheet
-				const { error: initError } = await stripe.initPaymentSheet({
-					paymentIntentClientSecret: clientSecret,
-					merchantDisplayName: 'Amicare',
-					returnURL: 'amicare://stripe-redirect',
-				});
-
-				if (initError) {
-					Alert.alert('Error INIT ERROR', initError.message);
-					return;
+				if (!currentUser.isPsw) {
+					// Only process payment for non-PSW users
+					const paymentSuccess = await paymentService.initiatePayment(activeSession);
+					if (!paymentSuccess) {
+						return; // Exit if payment failed
+					}
 				}
 
-				// Present payment sheet
-				const { error: presentError } = await stripe.presentPaymentSheet();
+				// Book the session
+				await dispatch(bookSessionThunk({
+					sessionId: activeSession.id,
+					currentUserId: currentUser.id
+				})).unwrap();
 
-				if (presentError) {
-					Alert.alert('Error Error', presentError.message);
-					return;
-				}
-
-				// If payment successful, book the session
-				await dispatch(bookSessionThunk({sessionId: session.id, currentUserId: currentUser.id})).unwrap();
-				router.back();
+				Alert.alert(
+					'Success',
+					'Session booked successfully!',
+					[{ 
+						text: 'OK',
+						onPress: () => router.back()
+					}]
+				);
 			} catch (error) {
-				console.error('Error booking session:', error);
-				Alert.alert('Error', 'Failed to process payment');
+				console.error('Error in booking flow:', error);
+				Alert.alert(
+					'Error',
+					'Failed to book session. Please try again.',
+					[{ text: 'OK' }]
+				);
 			}
 		};
 	} else if (action === 'cancel') {
 		headerText = 'Confirm Cancellation';
-		if (session.status === 'pending') {
+		if (activeSession.status === 'pending') {
 			messageText =
 				"Cancelling now will end your chat and you'll need to send a new session request.";
-		} else if (session.status === 'confirmed') {
+		} else if (activeSession.status === 'confirmed') {
 			if (timeDiff !== null && timeDiff >= 2) {
 				messageText =
 					'Cancelling now will hurt your rating. Are you sure you want to cancel?';
@@ -103,24 +92,23 @@ const SessionConfirmation = () => {
 			}
 		}
 		primaryButtonText = 'Cancel Session';
-		primaryButtonColor = '#DC2626'; // red
+		primaryButtonColor = '#DC2626';
 		onPrimaryPress = async () => {
-			try { // TODO: WHEN DECLINED IT GOES BACK TO THE CHAT, NEED IT TO GO TO THE SESSION PAGE
-				if (session.status === 'pending') {
-					const result = await dispatch(declineSessionThunk(session.id)).unwrap();
-				} else if (session.status === 'confirmed') {
-					const result = await dispatch(cancelSessionThunk(session.id)).unwrap();
-				} else {
-					console.error('Invalid session status for cancel/decline');
+			try {
+				if (activeSession.status === 'pending') {
+					await dispatch(declineSessionThunk(activeSession.id)).unwrap();
+				} else if (activeSession.status === 'confirmed') {
+					await dispatch(cancelSessionThunk(activeSession.id)).unwrap();
 				}
 				router.back();
 			} catch (error) {
 				console.error('Error cancelling session:', error);
+				Alert.alert('Error', 'Failed to cancel session');
 			}
 		};
 	} else if (action === 'change') {
 		headerText = 'Confirm Change';
-		if (session.status === 'pending') {
+		if (activeSession.status === 'pending') {
 			messageText =
 				'Changing the time will send you to the session request page to update your request.';
 			primaryButtonText = 'Change Time';
@@ -130,10 +118,10 @@ const SessionConfirmation = () => {
 					pathname: '/request-sessions',
 					params: {
 						otherUserId: otherUser.id,
-						sessionObj: JSON.stringify(session),
+						sessionObj: JSON.stringify(activeSession),
 					},
 				});
-		} else if (session.status === 'confirmed') {
+		} else if (activeSession.status === 'confirmed') {
 			if (timeDiff !== null && timeDiff >= 2) {
 				messageText =
 					'Your session needs to be rebooked. Please update your session details. (This may affect your rating.)';
@@ -147,7 +135,7 @@ const SessionConfirmation = () => {
 					pathname: '/request-sessions',
 					params: {
 						otherUserId: otherUser.id,
-						sessionObj: JSON.stringify(session),
+						sessionObj: JSON.stringify(activeSession),
 					},
 				});
 		}

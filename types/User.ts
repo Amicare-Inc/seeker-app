@@ -25,4 +25,5 @@ export interface User {
 	};
 	onboardingComplete: boolean;
 	bio?: string;
+	stripeAccountId?: string;
 }

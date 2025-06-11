@@ -11,9 +11,10 @@ import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getSocket } from '@/services/node-express-backend/sockets';
+import { EnrichedSession } from '@/types/EnrichedSession';
 
 interface ChatHeaderProps {
-	session: Session;
+	session: EnrichedSession;
 	user: User;
 	isExpanded: boolean;
 	toggleExpanded: () => void;
@@ -243,42 +244,42 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
 					{/* Show buttons section only if NOT in progress */}
 					{currentSession.status !== 'inProgress' ? (
-						<View className="flex-row items-center justify-between mb-4">
-							<TouchableOpacity
-								onPress={
-									isConfirmed
-										? handleNavigateToRequestSession
-										: handleBookSession
-								}
-								disabled={isDisabled}
-								activeOpacity={0.8}
-								className="px-6 py-3 rounded-lg"
-								style={{
-									width: '48%',
-									backgroundColor: isConfirmed
-										? '#fff'
-										: isDisabled
-											? '#d1d5db'
-											: '#008DF4',
-								}}
+					<View className="flex-row items-center justify-between mb-4">
+						<TouchableOpacity
+							onPress={
+								isConfirmed
+									? handleNavigateToRequestSession
+									: handleBookSession
+							}
+							disabled={isDisabled}
+							activeOpacity={0.8}
+							className="px-6 py-3 rounded-lg"
+							style={{
+								width: '48%',
+								backgroundColor: isConfirmed
+									? '#fff'
+									: isDisabled
+										? '#d1d5db'
+										: '#008DF4',
+							}}
+						>
+							<Text
+								className={`text-sm text-center ${isDisabled ? 'text-black' : isConfirmed ? 'text-black' : 'text-white'}`}
 							>
-								<Text
-									className={`text-sm text-center ${isDisabled ? 'text-black' : isConfirmed ? 'text-black' : 'text-white'}`}
-								>
-									{bookText}
-								</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								onPress={handleCancelSession}
-								activeOpacity={0.8}
-								className="bg-black px-6 py-3 rounded-lg"
-								style={{ width: '48%' }}
-							>
-								<Text className="text-white text-sm text-center">
-									Cancel
-								</Text>
-							</TouchableOpacity>
-						</View>
+								{bookText}
+							</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							onPress={handleCancelSession}
+							activeOpacity={0.8}
+							className="bg-black px-6 py-3 rounded-lg"
+							style={{ width: '48%' }}
+						>
+							<Text className="text-white text-sm text-center">
+								Cancel
+							</Text>
+						</TouchableOpacity>
+					</View>
 					) : (
 						/* Show cancel button for inProgress */
 						<View className="flex-row items-center justify-center mb-4">
@@ -303,7 +304,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 										? 'play-circle'
 										: isConfirmed
 											? 'check-circle'
-											: 'alert-circle'
+										: 'alert-circle'
 								}
 								size={22}
 								color={currentSession.status === 'inProgress' ? 'black' : (isConfirmed ? '#fff' : '#9ca3af')}
@@ -315,8 +316,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 								{currentSession.status === 'inProgress'
 									? 'Session in Progress'
 									: isConfirmed
-										? 'Appointment Confirmed'
-										: 'Awaiting confirmation'}
+									? 'Appointment Confirmed'
+									: 'Awaiting confirmation'}
 							</Text>
 						</View>
 						<Text

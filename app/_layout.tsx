@@ -29,6 +29,7 @@ const LayoutWithProviders = () => {
 				<StripeProvider
 					publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
 					urlScheme="amicare"
+					merchantIdentifier="merchant.com.specul8tor.AmiCare"
 					>
 					{/* GlobalDataLoader preloads global slices (user list and sessions) as soon as the user is available */}
 					<GlobalDataLoader />
