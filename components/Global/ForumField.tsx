@@ -41,7 +41,7 @@ const ForumField: React.FC<ForumFieldProps> = ({
 	return (
 		<View className={otherStyles}>
 			<TouchableOpacity
-				className="w-full h-16 px-4 bg-gray-200 rounded-xl flex flex-row items-center"
+				className="w-full h-12 px-4 bg-white rounded-lg flex flex-row items-center"
 				onPress={() => isDateField && setShowDatePicker(true)}
 				activeOpacity={isDateField ? 0.7 : 1}
 			>
@@ -51,10 +51,10 @@ const ForumField: React.FC<ForumFieldProps> = ({
 					</Text>
 				) : (
 					<TextInput
-						className="flex-1 text-black font-normal text-base"
+						className="flex-1 text-black font-medium text-base"
 						value={value}
 						placeholder={title}
-						placeholderTextColor="#4B5563"
+						placeholderTextColor="#9D9DA1"
 						onChangeText={handleChangeText}
 						secureTextEntry={
 							(title === 'Password' ||
