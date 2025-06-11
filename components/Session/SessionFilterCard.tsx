@@ -17,7 +17,12 @@ const dayMapping: { [key: string]: string } = {
   Sun: 'Sunday',
 };
 
-const SessionFilterCard = ({ onClose }: { onClose: () => void }) => {
+interface SessionFilterCardProps {
+  onClose: () => void;
+  setFilteredUsers: (users: any[] | null) => void;
+}
+
+const SessionFilterCard = ({ onClose, setFilteredUsers }: SessionFilterCardProps) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const slideAnim = useRef(new Animated.Value(300)).current;
 
@@ -61,8 +66,11 @@ const SessionFilterCard = ({ onClose }: { onClose: () => void }) => {
         const users = await fetchFilteredUsers(selectedDays);
         console.log('Filtered users:', users);
 
+        setFilteredUsers(users);
+
       } else {
         console.log('No days selected');
+        setFilteredUsers(null);
       }
 
       onClose();

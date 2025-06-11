@@ -16,15 +16,16 @@ import { router } from 'expo-router';
 import UserCard from '@/components/User/UserCard';
 import UserCardExpanded from '@/components/User/UserCardExpanded';
 import { User } from '@/types/User';
-import SessionFilterCard from '@/components/Session/SessionFilterCard'; // Import the filter card
+import SessionFilterCard from '@/components/Session/SessionFilterCard';
 
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
-	const { users, loading, error } = useAvailableUsers(false);
+	const [filteredUsers, setFilteredUsers] = useState<User[] | null>(null);
+	const { users, loading, error } = useAvailableUsers(false, filteredUsers);
 	const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
-	const [filterVisible, setFilterVisible] = useState(false); // State for filter card visibility
-	const fadeAnim = useRef(new Animated.Value(0)).current; // Animation value for overlay opacity
-	const slideAnim = useRef(new Animated.Value(300)).current; // Animation value for card position
+	const [filterVisible, setFilterVisible] = useState(false);
+	const fadeAnim = useRef(new Animated.Value(0)).current;
+	const slideAnim = useRef(new Animated.Value(300)).current;
 
 	const handleCardPress = (userId: string) => {
 		setExpandedUserId((prev) => (prev === userId ? null : userId));
@@ -156,7 +157,7 @@ const PswHomeTab = () => {
 						zIndex: 100,
 					}}
 				>
-					<SessionFilterCard onClose={hideFilterCard} />
+					<SessionFilterCard onClose={hideFilterCard} setFilteredUsers={setFilteredUsers} />
 				</Animated.View>
 			)}
 		</SafeAreaView>
