@@ -79,6 +79,18 @@ export class PaymentService {
                 return false;
             }
 
+            // 4. Verify payment status
+            const verificationResult = await this.verifyPaymentStatus(clientSecret);
+            if (!verificationResult.success) {
+                console.error('Payment verification failed:', verificationResult.error);
+                Alert.alert(
+                    'Payment Error',
+                    verificationResult.error || 'Payment could not be verified. Please try again.',
+                    [{ text: 'OK' }]
+                );
+                return false;
+            }
+
             return true;
 
         } catch (error) {
@@ -89,6 +101,38 @@ export class PaymentService {
                 [{ text: 'OK' }]
             );
             return false;
+        }
+    }
+
+    private async verifyPaymentStatus(clientSecret: string): Promise<{success: boolean, error?: string}> {
+        try {
+            // Give webhook time to process
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const response = await fetch(`${this.apiBaseUrl}/payments/verify-status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientSecret })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                return { success: false, error: errorData.message || 'Payment verification failed' };
+            }
+
+            const { status } = await response.json();
+            
+            if (status === 'succeeded') {
+                return { success: true };
+            } else {
+                return { 
+                    success: false, 
+                    error: `Payment status: ${status}. Please try again.`
+                };
+            }
+        } catch (error) {
+            console.error('Error verifying payment status:', error);
+            return { success: false, error: 'Unable to verify payment status. Please contact support.' };
         }
     }
 
