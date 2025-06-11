@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, TouchableOpacity, Text } from 'react-native';
+import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, TouchableOpacity, Text, Keyboard, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiveSessionCardProps } from '@/types/LiveSession';
 import LiveSessionHeader from './LiveSessionHeader';
@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setActiveEnrichedSession } from '@/redux/sessionSlice';
 import SessionChecklistBox from '../OngoingSession/SessionChecklistBox';
 import { RootState } from '@/redux/store';
+import { updateSessionChecklist, addSessionComment } from '@/services/node-express-backend/session';
+import { ChecklistItem } from '@/types/Sessions';
 
 const { width } = Dimensions.get('window');
 
@@ -56,6 +58,7 @@ const formatTimeUntilSession = (startTime: string | undefined | null): string =>
 const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, onCollapse }) => {
   const [expanded, setExpanded] = useState(false);
   const [timer, setTimer] = useState(0);
+  const bottomOffset = useRef(new Animated.Value(Platform.OS === 'ios' ? 83 : 64)).current;
   const expandedRef = useRef(expanded);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dispatch = useDispatch();
@@ -73,6 +76,30 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   React.useEffect(() => {
     expandedRef.current = expanded;
   }, [expanded]);
+
+  // Keyboard listeners with smooth animation
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      Animated.timing(bottomOffset, {
+        toValue: e.endCoordinates.height,
+        duration: e.duration || 250,
+        useNativeDriver: false,
+      }).start();
+    });
+    
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', (e) => {
+      Animated.timing(bottomOffset, {
+        toValue: Platform.OS === 'ios' ? 83 : 64,
+        duration: e.duration || 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, [bottomOffset]);
 
   // Timer effect - calculate elapsed time from liveStatusUpdatedAt
   useEffect(() => {
@@ -160,14 +187,13 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
 
 
   return (
-    <View
+    <Animated.View
       style={{
         position: 'absolute',
         left: 0,
         right: 0,
-        bottom: Platform.OS === 'ios' ? 83 : 64,
+        bottom: bottomOffset,
         width,
-        transform: [{ translateY: expanded ? 0 : 0 }],
       }}
       {...panResponder.panHandlers}
     >
@@ -290,7 +316,29 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
               </View>
             </View>) : (
               	<View >
-              		<SessionChecklistBox checklist={session.checklist || []} editable={currentUser!.isPsw ? true : false} />
+              		<SessionChecklistBox 
+                    checklist={session.checklist || []} 
+                    comments={session.comments || []}
+                    editable={currentUser!.isPsw ? true : false}
+                    showComment={currentUser!.isPsw ? true : false}
+                    currentUserId={currentUser?.id}
+                    onChecklistUpdate={async (checklist: ChecklistItem[]) => {
+                      try {
+                        await updateSessionChecklist(session.id, checklist);
+                      } catch (error) {
+                        console.error('Error updating checklist:', error);
+                      }
+                    }}
+                    onCommentAdd={async (comment: string) => {
+                      try {
+                        if (currentUser?.id) {
+                          await addSessionComment(session.id, comment, currentUser.id);
+                        }
+                      } catch (error) {
+                        console.error('Error adding comment:', error);
+                      }
+                    }}
+                  />
             	</View>
             )}
 
@@ -329,7 +377,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
           </>
         )}
       </LinearGradient>
-    </View>
+    </Animated.View>
   );
 };
 

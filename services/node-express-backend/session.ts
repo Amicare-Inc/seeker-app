@@ -2,6 +2,7 @@ import { SessionDTO } from '@/types/dtos/SessionDto';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { Message } from '@/types/Message';
 import { Session } from '@/types/Sessions';
+import { ChecklistItem } from '@/types/Sessions';
 
 export const getUserSessionTab = async (userId: string): Promise<EnrichedSession[]> => {
   try {
@@ -213,3 +214,45 @@ export const getMessages = async (sessionId: string): Promise<Message[]> => {
 	throw error;
   }
 }
+
+export const updateSessionChecklist = async (sessionId: string, checklist: ChecklistItem[]): Promise<Session> => {
+  try {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/checklist`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ checklist }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating session checklist:', error);
+    throw error;
+  }
+};
+
+export const addSessionComment = async (sessionId: string, text: string, userId: string): Promise<Session> => {
+  try {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text, userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error adding session comment:', error);
+    throw error;
+  }
+};
