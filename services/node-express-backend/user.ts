@@ -24,3 +24,29 @@ export const updateUserProfile = async (userId: string, updatedFields: any) => {
     throw error;
   }
 };
+
+export const fetchFilteredUsers = async (selectedDays: string[]) => {
+  try {
+    const daysQuery = selectedDays.join(',');
+    const response = await fetch(
+      `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/users/filter-availability?days=${daysQuery}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const users = await response.json();
+    return users;
+  } catch (error: any) {
+    console.error('Error fetching filtered users:', error);
+    throw error;
+  }
+};

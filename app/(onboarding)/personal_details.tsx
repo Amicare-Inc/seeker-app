@@ -18,11 +18,11 @@ const PersonalDetails: React.FC = () => {
 	const userData = useSelector((state: RootState) => state.user.userData);
 
 	const [form, setForm] = useState({
-		firstName: userData?.firstName || 'Martin',
-		lastName: userData?.lastName || 'Droruga',
-		dob: userData?.dob || '03/15/1990',
-		address: userData?.address || '159 Dundas St E',
-		phone: userData?.phone || '5879730077',
+		firstName: userData?.firstName || '',
+		lastName: userData?.lastName || '',
+		dob: userData?.dob || '',
+		address: userData?.address || '',
+		phone: userData?.phone || '',
 		email: userData?.email || '',
 	});
 
@@ -76,7 +76,7 @@ const PersonalDetails: React.FC = () => {
 	};
 
 	return (
-		<SafeAreaView className="h-full bg-white">
+		<SafeAreaView className="h-full bg-grey-0">
 			<KeyboardAvoidingView
 				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
 				style={{ flex: 1 }}
@@ -86,22 +86,23 @@ const PersonalDetails: React.FC = () => {
 					contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}
 					keyboardShouldPersistTaps="never"
 				>
-					<View className="flex w-full h-full justify-center px-9">
-						<Text className="text-3xl text-black font-normal text-left mb-3">
+
+					<View className="flex w-full h-full px-7">
+						<Text className="text-2xl text-black font-medium text-center mb-10">
 							Personal Details
 						</Text>
-						<Text className="text-xs text-gray-500 font-normal text-left mb-4">
-							Please fill out the form below with your personal
-							details
-						</Text>
+						<View className="w-[100px] h-[100px] rounded-full bg-[#E1E1E6] mx-auto flex items-center justify-center mb-10">
+						<Text className="text-[#797979]">Add Photo</Text>
 
+						</View>
+						<View className="flex-row">
 						<ForumField
 							title="First Name"
 							value={form.firstName}
 							handleChangeText={(e) =>
 								handleInputChange('firstName', e)
 							}
-							otherStyles="mb-4"
+							otherStyles="mb-4 flex-1 mr-1"
 						/>
 						{errors.firstName ? (
 							<Text className="text-red-500 text-xs">
@@ -115,60 +116,14 @@ const PersonalDetails: React.FC = () => {
 							handleChangeText={(e) =>
 								handleInputChange('lastName', e)
 							}
-							otherStyles="mb-4"
+							otherStyles="mb-4 flex-1 ml-1"
 						/>
 						{errors.lastName ? (
 							<Text className="text-red-500 text-xs">
 								{errors.lastName}
 							</Text>
 						) : null}
-
-						{/* <TouchableOpacity
-                onPress={() => setDatePickerVisibility(true)}
-                onPressIn={() => setDatePickerVisibility(true)} // Improves responsiveness
-                activeOpacity={1} 
-                className="mb-4"
-            >
-              <ForumField
-                title="Date of Birth (MM/DD/YYYY)"
-                value={form.dob}
-                handleChangeText={() => {}}
-                editable={false}
-                pointerEvents="none"
-              />
-            </TouchableOpacity>
-            {errors.dob ? <Text className="text-red-500 text-xs">{errors.dob}</Text> : null}
-
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="date"
-              onConfirm={handleDateConfirm}
-              onCancel={() => setDatePickerVisibility(false)}
-              maximumDate={new Date()}
-            //   display={Platform.OS === 'ios' ? 'inline' : 'default'}
-            /> */}
-						<DatePickerField
-							title="Date of Birth"
-							value={form.dob}
-							onDateChange={(date) =>
-								handleInputChange('dob', date)
-							}
-							otherStyles="mb-4"
-						/>
-
-						<ForumField
-							title="Address"
-							value={form.address}
-							handleChangeText={(e) =>
-								handleInputChange('address', e)
-							}
-							otherStyles="mb-4"
-						/>
-						{errors.address ? (
-							<Text className="text-red-500 text-xs">
-								{errors.address}
-							</Text>
-						) : null}
+						</View>
 
 						<ForumField
 							title="Phone"
@@ -199,14 +154,104 @@ const PersonalDetails: React.FC = () => {
 								{errors.email}
 							</Text>
 						) : null}
+
+						<View className="flex-row">
+		
+						<ForumField
+							title="Country"
+							value={form.address}
+							handleChangeText={(e) =>
+								handleInputChange('address', e)
+							}
+							otherStyles="mb-4 flex-1 mr-1"
+						/>
+						{errors.address ? (
+							<Text className="text-red-500 text-xs">
+								{errors.address}
+							</Text>
+						) : null}
+
+						<ForumField
+							title="Province / State"
+							value={form.address}
+							handleChangeText={(e) =>
+								handleInputChange('address', e)
+							}
+							otherStyles="mb-4 flex-1 ml-1"
+						/>
+						{errors.address ? (
+							<Text className="text-red-500 text-xs">
+								{errors.address}
+							</Text>
+						) : null}
+						</View>
+						<ForumField
+							title="City / Town"
+							value={form.address}
+							handleChangeText={(e) =>
+								handleInputChange('address', e)
+							}
+							otherStyles="mb-4"
+						/>
+						{errors.address ? (
+							<Text className="text-red-500 text-xs">
+								{errors.address}
+							</Text>
+						) : null}
+						<ForumField
+							title="Address"
+							value={form.address}
+							handleChangeText={(e) =>
+								handleInputChange('address', e)
+							}
+							otherStyles="mb-4"
+						/>
+						{errors.address ? (
+							<Text className="text-red-500 text-xs">
+								{errors.address}
+							</Text>
+						) : null}
+						{/* <TouchableOpacity
+                onPress={() => setDatePickerVisibility(true)}
+                onPressIn={() => setDatePickerVisibility(true)} // Improves responsiveness
+                activeOpacity={1} 
+                className="mb-4"
+            >
+              <ForumField
+                title="Date of Birth (MM/DD/YYYY)"
+                value={form.dob}
+                handleChangeText={() => {}}
+                editable={false}
+                pointerEvents="none"
+              />
+            </TouchableOpacity>
+            {errors.dob ? <Text className="text-red-500 text-xs">{errors.dob}</Text> : null}
+
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="date"
+              onConfirm={handleDateConfirm}
+              onCancel={() => setDatePickerVisibility(false)}
+              maximumDate={new Date()}
+            //   display={Platform.OS === 'ios' ? 'inline' : 'default'}
+            /> */}
+						<DatePickerField
+							title="Date of birth DD.MM.YYYY"
+							value={form.dob}
+							onDateChange={(date) =>
+								handleInputChange('dob', date)
+							}
+							otherStyles="mb-4"
+						/>
+
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-			<View className="px-9 pb-0">
+			<View className="px-7 pb-0">
 				<CustomButton
 					title="Continue"
 					handlePress={handleContinue}
-					containerStyles="bg-black py-4 rounded-full"
+					containerStyles="bg-black py-4 rounded-xl"
 					textStyles="text-white text-lg"
 				/>
 			</View>

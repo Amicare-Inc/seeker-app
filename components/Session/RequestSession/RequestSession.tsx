@@ -213,7 +213,7 @@ const RequestSession = () => {
 			total,
 		},
 		checklist: checklist.map((task, index) => ({
-			id: index.toString(),       // Use a UUID for real production use
+			id: index.toString(),
 			task,
 			completed: false
 		})),
