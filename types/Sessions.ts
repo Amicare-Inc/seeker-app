@@ -1,3 +1,10 @@
+interface ChecklistItem {
+	id: string;
+	task: string;
+	checked: boolean;
+	time: string;
+}
+
 export interface Session {
 	id: string;
 	senderId: string; // The user who created the session (previously "requesterId")
@@ -34,6 +41,7 @@ export interface Session {
 	};
 	actualStartTime?: string | null; // ISO date string
 	actualEndTime?: string | null; // ISO date string
-	liveStatus?: 'upcoming' | 'ready' | 'inProgress' | 'completed' | 'failed';
+	liveStatus?: 'upcoming' | 'ready' | 'started' | 'completed' | 'failed';
     liveStatusUpdatedAt?: string;
+	checklist?: ChecklistItem[];
 }

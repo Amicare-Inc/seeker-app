@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export interface ChecklistItem {
   id: string;
-  text: string;
+  task: string;
   checked: boolean;
   time: string;
 }
@@ -21,6 +21,8 @@ const SessionChecklistBox: React.FC<SessionChecklistBoxProps> = ({
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(checklist);
   const [newItem, setNewItem] = useState('');
   const newItemInputRef = useRef<TextInput>(null);
+  console.log('checklist', checklist);
+  console.log('checklistItems', checklistItems[0].task);
 
   const getCurrentTimeString = () => {
     const now = new Date();
@@ -55,7 +57,7 @@ const SessionChecklistBox: React.FC<SessionChecklistBoxProps> = ({
 
     setChecklistItems((items) => [
       ...items,
-      { id: Date.now().toString(), text: newItem, time: '', checked: false },
+      { id: Date.now().toString(), task: newItem, time: '', checked: false },
     ]);
 
     setNewItem('');
@@ -87,7 +89,7 @@ const SessionChecklistBox: React.FC<SessionChecklistBoxProps> = ({
             )}
           </TouchableOpacity>
           <Text className="flex-1 text-[16px] text-black" numberOfLines={1}>
-            {item.text}
+            {item.task}
           </Text>
           <Text className="text-gray-500 text-xs ml-2" style={{ minWidth: 60 }}>
             {item.checked && item.time ? item.time : ''}
