@@ -20,13 +20,13 @@ const mapFirebaseStatusToLiveStatus = (liveStatus: string): LiveSessionStatus =>
 };
 
 export const useSessionManager = (enrichedSession: EnrichedSession) => {
-  console.log('useSessionManager called with session:', {
-    id: enrichedSession?.id,
-    status: enrichedSession?.status,
-    startTime: enrichedSession?.startTime,
-    liveStatus: enrichedSession?.liveStatus,
-    liveStatusUpdatedAt: enrichedSession?.liveStatusUpdatedAt
-  });
+  // console.log('useSessionManager called with session:', {
+  //   id: enrichedSession?.id,
+  //   status: enrichedSession?.status,
+  //   startTime: enrichedSession?.startTime,
+  //   liveStatus: enrichedSession?.liveStatus,
+  //   liveStatusUpdatedAt: enrichedSession?.liveStatusUpdatedAt
+  // });
 
   // Initialize with the current session status
   const [status, setStatus] = useState<LiveSessionStatus>(() => {
