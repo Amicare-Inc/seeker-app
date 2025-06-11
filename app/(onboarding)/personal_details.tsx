@@ -60,15 +60,13 @@ const PersonalDetails: React.FC = () => {
 	const handleContinue = async () => {
 		if (await validateForm()) {
 			try {
+				await Auth.addCriticalInfo(userData!.id, {...form, isPsw: userData!.isPsw});
 				dispatch(updateUserFields(form));
-				console.log('User Data Form:', form);
-				console.log('User Data ID:', userData);
-				if (userData?.id) {
-					console.log('SENDING TO BACKEND');
-					await Auth.addCriticalInfo(userData.id, {...form, isPsw: userData.isPsw});
-					console.log('SENT');
+				if (userData!.isPsw) {
+					router.push('/stripe-onboarding');
+				} else {
+					router.push('/onboard1');
 				}
-				router.push('/onboard1');
 			} catch (error) {
 				console.error('Error saving user details:', error);
 			}
