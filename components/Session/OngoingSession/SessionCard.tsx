@@ -9,6 +9,7 @@ import { AppDispatch } from '@/redux/store';
 import { router } from 'expo-router';
 import { acceptSessionThunk, rejectSessionThunk } from '@/redux/sessionSlice';
 import { formatDate } from '@/scripts/datetimeHelpers';
+import SessionChecklistBox from '@/components/Session/OngoingSession/SessionChecklistBox';
 
 const { width } = Dimensions.get('window');
 
@@ -170,6 +171,9 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
                 <Text className="text-white ml-2 text-[17px] font-medium">{timeRange}</Text>
               </View>
             </View>
+
+            <SessionChecklistBox checklist={enrichedSession.checklist ?? []} editable={false} />
+
             {/* Price Breakdown */}
             <View className="mb-3 px-5">
               <View className="flex-row justify-between mb-1.5">

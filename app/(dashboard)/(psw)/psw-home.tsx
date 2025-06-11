@@ -1,24 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
 	View,
 	Text,
 	ActivityIndicator,
 	FlatList,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
 	Platform,
+	Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Import from context library
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
 import { router } from 'expo-router';
 import UserCard from '@/components/User/UserCard';
 import UserCardExpanded from '@/components/User/UserCardExpanded';
 import { User } from '@/types/User';
+import SessionFilterCard from '@/components/Session/SessionFilterCard';
 
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
-	const { users, loading, error } = useAvailableUsers(false);
+	const [filteredUsers, setFilteredUsers] = useState<User[] | null>(null);
+	const { users, loading, error } = useAvailableUsers(false, filteredUsers);
 	const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+	const [filterVisible, setFilterVisible] = useState(false);
+	const fadeAnim = useRef(new Animated.Value(0)).current;
+	const slideAnim = useRef(new Animated.Value(300)).current;
 
 	const handleCardPress = (userId: string) => {
 		setExpandedUserId((prev) => (prev === userId ? null : userId));
@@ -40,8 +47,39 @@ const PswHomeTab = () => {
 		</View>
 	);
 
+	const showFilterCard = () => {
+		setFilterVisible(true);
+		Animated.parallel([
+			Animated.timing(fadeAnim, {
+				toValue: 1, // Fade in
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.timing(slideAnim, {
+				toValue: 0, // Slide up into view
+				duration: 300,
+				useNativeDriver: true,
+			}),
+		]).start();
+	};
+
+	const hideFilterCard = () => {
+		Animated.parallel([
+			Animated.timing(fadeAnim, {
+				toValue: 0, // Fade out
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.timing(slideAnim, {
+				toValue: 400, // Slide down off-screen
+				duration: 300,
+				useNativeDriver: true,
+			}),
+		]).start(() => setFilterVisible(false));
+	};
+
 	return (
-		<SafeAreaView // Use SafeAreaView from react-native-safe-area-context
+		<SafeAreaView
 			className="flex-1"
 			style={{
 				backgroundColor: '#f0f0f0',
@@ -63,11 +101,7 @@ const PswHomeTab = () => {
 				</View>
 
 				{/* Right side: Filter icon */}
-				<TouchableOpacity
-					onPress={() => {
-						/* Filter button currently does nothing */
-					}}
-				>
+				<TouchableOpacity onPress={showFilterCard}>
 					<Ionicons name="options" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
@@ -88,9 +122,43 @@ const PswHomeTab = () => {
 					renderItem={renderItem}
 					contentContainerStyle={{
 						paddingBottom: Platform.OS === 'ios' ? 83 : 64,
-						paddingHorizontal: 10,
+						paddingHorizontal: 20,
 					}}
 				/>
+			)}
+
+			{/* Filter Overlay */}
+			{filterVisible && (
+				<TouchableWithoutFeedback onPress={hideFilterCard}>
+					<Animated.View
+						style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							backgroundColor: 'rgba(0, 0, 0, 0.5)',
+							opacity: fadeAnim,
+							zIndex: 99,
+						}}
+					/>
+				</TouchableWithoutFeedback>
+			)}
+
+			{/* Filter Card */}
+			{filterVisible && (
+				<Animated.View
+					style={{
+						position: 'absolute',
+						left: 0,
+						right: 0,
+						bottom: 0,
+						transform: [{ translateY: slideAnim }], // Animated slide
+						zIndex: 100,
+					}}
+				>
+					<SessionFilterCard onClose={hideFilterCard} setFilteredUsers={setFilteredUsers} />
+				</Animated.View>
 			)}
 		</SafeAreaView>
 	);

@@ -54,7 +54,7 @@ const SignIn = () => {
 	}, [userData]);
 
 	return (
-		<SafeAreaView className="h-full bg-white">
+		<SafeAreaView className="h-full bg-grey-0">
 			<KeyboardAvoidingView behavior="padding">
 				<ScrollView contentContainerStyle={{ height: '100%' }}>
 					<View className="flex w-full h-full justify-center px-9">

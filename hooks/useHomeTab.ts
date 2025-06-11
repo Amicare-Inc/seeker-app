@@ -3,8 +3,9 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import useUsersList from './useUsersList';
 import { RootState } from '@/redux/store';
+import { User } from '@/types/User';
 
-const useHomeUsers = (isPsw: boolean) => {
+const useHomeUsers = (isPsw: boolean, filteredUsers?: User[] | null) => {
 	// Get the fetched users using your existing hook.
 	const { users, loading, error } = useUsersList(isPsw);
 	// Get the current user ID.
@@ -29,10 +30,12 @@ const useHomeUsers = (isPsw: boolean) => {
 		}, []);
 	}, [allSessions, currentUserId]);
 
+	const baseUsers = filteredUsers ?? users;
+
 	// Filter out users who are already engaged.
 	const availableUsers = useMemo(() => {
-		return users.filter((user) => !engagedUserIds.includes(user.id));
-	}, [users, engagedUserIds]);
+		return baseUsers.filter((user) => !engagedUserIds.includes(user.id));
+	}, [baseUsers, engagedUserIds]);
 
 	return { users: availableUsers, loading, error };
 };

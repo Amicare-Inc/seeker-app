@@ -38,12 +38,12 @@ const DatePickerField: React.FC<DatePickerFieldProps> = ({
 				onPress={() => setDatePickerVisibility(true)}
 				activeOpacity={0.9}
 			>
-				<View className="w-full h-16 px-4 bg-gray-200 rounded-xl flex flex-row items-center">
+				<View className="w-full h-12 px-4 bg-white rounded-lg flex flex-row items-center">
 					<TextInput
-						className="flex-1 text-black font-normal text-base"
+						className="flex-1 text-black font-medium text-base"
 						value={value}
 						placeholder={title}
-						placeholderTextColor="#4B5563"
+						placeholderTextColor="#9D9DA1"
 						editable={false}
 						pointerEvents="none" // Ensures the TouchableOpacity handles the tap
 					/>
