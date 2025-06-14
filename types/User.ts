@@ -1,11 +1,17 @@
 export interface User {
-	id: string;
+	id?: string;
 	firstName: string;
 	lastName: string;
-	dob?: string; // Date of Birth ISO string MM/DD/YYYY
-	age?: string;
+	dob: string; // Date of Birth ISO string MM/DD/YYYY
 	gender?: string;
-	address: string;
+	address: {
+		fullAddress: string;
+		street: string;
+		city: string;
+		province: string;
+		country: string;
+		postalCode: string;
+	}
 	phone: string;
 	email: string;
 	isPsw: boolean;

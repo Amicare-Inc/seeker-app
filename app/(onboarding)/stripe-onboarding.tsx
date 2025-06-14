@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
@@ -16,50 +16,47 @@ const StripeOnboarding: React.FC = () => {
     const [onboardingUrl, setOnboardingUrl] = useState<string | null>(null);
     const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [onboardingComplete, setOnboardingComplete] = useState(false);
     const [isPolling, setIsPolling] = useState(false);
+    const [hasNavigated, setHasNavigated] = useState(false); // Prevent multiple navigation attempts
+    const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const stripeOnboardingService = StripeOnboardingService.getInstance();
 
     useEffect(() => {
         initializeStripeOnboarding();
+        
+        // Cleanup on unmount
+        return () => {
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+            }
+        };
     }, []);
 
     // Poll for onboarding completion every 3 seconds when WebView is active
     useEffect(() => {
-        let pollInterval: ReturnType<typeof setInterval>;
-        
-        if (isPolling && stripeAccountId && !onboardingComplete) {
-            pollInterval = setInterval(async () => {
+        if (isPolling && stripeAccountId && !hasNavigated) {
+            pollIntervalRef.current = setInterval(async () => {
                 try {
                     const status = await stripeOnboardingService.getOnboardingStatus(stripeAccountId);
                     
                     if (status.isOnboardingComplete && status.chargesEnabled) {
-                        setIsPolling(false);
-                        setOnboardingComplete(true);
-                        Alert.alert(
-                            'Success!',
-                            'Your Stripe account has been set up successfully.',
-                            [
-                                {
-                                    text: 'Continue',
-                                    onPress: () => router.push('/onboard1')
-                                }
-                            ]
-                        );
+                        await handleOnboardingComplete();
                     }
                 } catch (error) {
-                    console.log('Polling error (will retry):', error);
+                    // Silently continue polling on error
+                    console.log('Polling error (continuing):', error);
                 }
             }, 3000); // Poll every 3 seconds
         }
 
         return () => {
-            if (pollInterval) {
-                clearInterval(pollInterval);
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
             }
         };
-    }, [isPolling, stripeAccountId, onboardingComplete]);
+    }, [isPolling, stripeAccountId, hasNavigated]);
 
     const initializeStripeOnboarding = async () => {
         try {
@@ -71,19 +68,23 @@ const StripeOnboarding: React.FC = () => {
 
             // Create Express account and get onboarding URL
             const result = await stripeOnboardingService.createExpressAccount(
-                userData.id,
+                userData.id!,
                 userData.email,
-                userData.firstName,
-                userData.lastName,
+                userData.firstName!,
+                userData.lastName!,
                 userData.dob!,
-                userData.address,
-                userData.phone
+                userData.address.street,
+                userData.phone,
+                userData.address.city,
+                userData.address.province,
+                userData.address.country,
+                userData.address.postalCode
             );
 
             setStripeAccountId(result.accountId);
             setOnboardingUrl(result.onboardingUrl);
             
-            // Save stripe account ID to user data
+            // Save stripe account ID to Redux only
             dispatch(updateUserFields({ stripeAccountId: result.accountId }));
             
         } catch (error: any) {
@@ -94,33 +95,39 @@ const StripeOnboarding: React.FC = () => {
         }
     };
 
+    const handleOnboardingComplete = async () => {
+        if (hasNavigated) return; // Prevent multiple navigation attempts
+        
+        setHasNavigated(true);
+        setIsPolling(false);
+        
+        if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+        }
+        
+        // Navigate to success page with account ID
+        setTimeout(() => {
+            router.push(`/stripe-success?accountId=${stripeAccountId}`);
+        }, 500);
+    };
+
     const handleWebViewNavigationStateChange = async (navState: any) => {
         const url = navState.url;
         
         // Start polling when user navigates to Stripe onboarding
-        if (url.includes('connect.stripe.com') && !isPolling) {
+        if (url.includes('connect.stripe.com') && !isPolling && !hasNavigated) {
             setIsPolling(true);
         }
         
         // Check if user completed onboarding (fallback detection)
-        if (url.includes('stripe-onboarding-complete')) {
+        if (url.includes('stripe-onboarding-complete') && !hasNavigated) {
             try {
                 if (stripeAccountId) {
                     const status = await stripeOnboardingService.getOnboardingStatus(stripeAccountId);
                     
                     if (status.isOnboardingComplete && status.chargesEnabled) {
-                        setIsPolling(false);
-                        setOnboardingComplete(true);
-                        Alert.alert(
-                            'Success!',
-                            'Your Stripe account has been set up successfully.',
-                            [
-                                {
-                                    text: 'Continue',
-                                    onPress: () => router.push('/onboard1')
-                                }
-                            ]
-                        );
+                        await handleOnboardingComplete();
                     } else {
                         Alert.alert(
                             'Onboarding Incomplete',
@@ -129,7 +136,6 @@ const StripeOnboarding: React.FC = () => {
                                 {
                                     text: 'Continue Setup',
                                     onPress: () => {
-                                        // Refresh onboarding URL and reload
                                         refreshOnboarding();
                                     }
                                 }
@@ -166,7 +172,14 @@ const StripeOnboarding: React.FC = () => {
     };
 
     const handleSkipForNow = () => {
+        if (hasNavigated) return;
+        
         setIsPolling(false);
+        if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+        }
+        
         Alert.alert(
             'Skip Stripe Setup?',
             'You can set up payments later in your profile settings, but you won\'t be able to receive payments until this is completed.',
@@ -178,30 +191,25 @@ const StripeOnboarding: React.FC = () => {
                 {
                     text: 'Skip for Now',
                     style: 'destructive',
-                    onPress: () => router.push('/onboard1')
+                    onPress: () => {
+                        setHasNavigated(true);
+                        setTimeout(() => {
+                            router.push('/onboard1');
+                        }, 100);
+                    }
                 }
             ]
         );
     };
 
     const handleManualCheck = async () => {
-        if (stripeAccountId) {
+        if (stripeAccountId && !hasNavigated) {
             try {
                 setLoading(true);
                 const status = await stripeOnboardingService.getOnboardingStatus(stripeAccountId);
                 
                 if (status.isOnboardingComplete && status.chargesEnabled) {
-                    setOnboardingComplete(true);
-                    Alert.alert(
-                        'Success!',
-                        'Your Stripe account has been set up successfully.',
-                        [
-                            {
-                                text: 'Continue',
-                                onPress: () => router.push('/onboard1')
-                            }
-                        ]
-                    );
+                    await handleOnboardingComplete();
                 } else {
                     Alert.alert(
                         'Not Complete Yet',
@@ -247,24 +255,6 @@ const StripeOnboarding: React.FC = () => {
                     handlePress={handleSkipForNow}
                     containerStyles="bg-gray-300 py-3 px-8 rounded-lg"
                     textStyles="text-gray-700 font-semibold"
-                />
-                <StatusBar backgroundColor="#FFFFFF" style="dark" />
-            </SafeAreaView>
-        );
-    }
-
-    if (onboardingComplete) {
-        return (
-            <SafeAreaView className="flex-1 bg-white justify-center items-center px-6">
-                <Text className="text-2xl font-bold mb-4 text-green-600">Success!</Text>
-                <Text className="text-gray-600 text-center mb-6">
-                    Your Stripe account has been set up successfully. You can now receive payments from clients.
-                </Text>
-                <CustomButton
-                    title="Continue"
-                    handlePress={() => router.push('/onboard1')}
-                    containerStyles="bg-green-500 py-3 px-8 rounded-lg"
-                    textStyles="text-white font-semibold"
                 />
                 <StatusBar backgroundColor="#FFFFFF" style="dark" />
             </SafeAreaView>

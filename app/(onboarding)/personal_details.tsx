@@ -6,23 +6,29 @@ import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
-import { doc, setDoc } from 'firebase/firestore';
-import { FIREBASE_DB } from '@/firebase.config';
 import { router } from 'expo-router';
-import { verifyAddress } from '@/services/google/googleMaps';
 import DatePickerField from '@/components/Global/DatePickerField';
 import { Auth } from '@/services/node-express-backend/auth';
+import RegionValidatedAddressInput from '@/components/RegionValidatedAddressInput';
+import { type AddressComponents } from '@/services/google/googlePlacesService';
 
 const PersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 
 	const [form, setForm] = useState({
-		firstName: userData?.firstName || '',
-		lastName: userData?.lastName || '',
-		dob: userData?.dob || '',
-		address: userData?.address || '',
-		phone: userData?.phone || '',
+		firstName: userData?.firstName || 'Martin',
+		lastName: userData?.lastName || 'Droruga',
+		dob: userData?.dob || '03/15/1990',
+		address: userData?.address || {
+			fullAddress: '159 Dundas St E',
+			street: '',
+			city: '',
+			province: '',
+			country: '',
+			postalCode: '',
+		},
+		phone: userData?.phone || '5879730077',
 		email: userData?.email || '',
 	});
 
@@ -35,9 +41,33 @@ const PersonalDetails: React.FC = () => {
 		email: '',
 	});
 
+	const [isAddressValid, setIsAddressValid] = useState(false);
+
 	const handleInputChange = (field: string, value: string) => {
 		setForm({ ...form, [field]: value });
 		setErrors({ ...errors, [field]: '' });
+	};
+
+	const handleAddressSelected = (addressData: AddressComponents) => {
+		setForm({
+			...form,
+			address: {
+				fullAddress: addressData.fullAddress,
+				street: addressData.street,
+				city: addressData.city,
+				province: addressData.province,
+				country: addressData.country,
+				postalCode: addressData.postalCode,
+			}
+		});
+		setErrors({ ...errors, address: '' });
+	};
+
+	const handleAddressValidation = (isValid: boolean, error?: string) => {
+		setIsAddressValid(isValid);
+		if (!isValid && error) {
+			setErrors({ ...errors, address: error });
+		}
 	};
 
 	const validateForm = async () => {
@@ -45,13 +75,14 @@ const PersonalDetails: React.FC = () => {
 		if (!form.firstName) newErrors.firstName = 'First name is required';
 		if (!form.lastName) newErrors.lastName = 'Last name is required';
 		if (!form.dob) newErrors.dob = 'Date of birth is required';
-		if (!form.address) newErrors.address = 'Address is required';
+		if (!form.address.fullAddress) newErrors.address = 'Address is required';
 		if (!form.phone) newErrors.phone = 'Phone number is required';
 		if (!form.email) newErrors.email = 'Email is required';
 
-		// TODO: MAP API NOT SET UP
-		const isValidAddress = await verifyAddress(form.address);
-		if (!isValidAddress) newErrors.address = 'Invalid address';
+		// Address validation is now handled by the RegionValidatedAddressInput component
+		if (!isAddressValid) {
+			newErrors.address = 'Please select a valid address from the suggestions';
+		}
 
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
@@ -60,8 +91,13 @@ const PersonalDetails: React.FC = () => {
 	const handleContinue = async () => {
 		if (await validateForm()) {
 			try {
-				await Auth.addCriticalInfo(userData!.id, {...form, isPsw: userData!.isPsw});
+				const userId = userData?.id;
+				if (!userId) {
+					console.error('User ID is missing');
+					return;
+				}
 				dispatch(updateUserFields(form));
+				await Auth.addCriticalInfo(userId, {...form, isPsw: userData!.isPsw});			
 				if (userData!.isPsw) {
 					router.push('/stripe-onboarding');
 				} else {
@@ -74,7 +110,7 @@ const PersonalDetails: React.FC = () => {
 	};
 
 	return (
-		<SafeAreaView className="h-full bg-grey-0">
+		<SafeAreaView className="h-full bg-white">
 			<KeyboardAvoidingView
 				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
 				style={{ flex: 1 }}
@@ -82,25 +118,21 @@ const PersonalDetails: React.FC = () => {
 			>
 				<ScrollView
 					contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}
-					keyboardShouldPersistTaps="never"
+					keyboardShouldPersistTaps="handled"
 				>
-
-					<View className="flex w-full h-full px-7">
-						<Text className="text-2xl text-black font-medium text-center mb-10">
+					<View className="flex w-full h-full justify-center px-9">
+						<Text className="text-3xl text-black font-normal text-left mb-3">
 							Personal Details
 						</Text>
-						<View className="w-[100px] h-[100px] rounded-full bg-[#E1E1E6] mx-auto flex items-center justify-center mb-10">
-						<Text className="text-[#797979]">Add Photo</Text>
+						<Text className="text-xs text-gray-500 font-normal text-left mb-4">
+							Please fill out the form below with your personal details
+						</Text>
 
-						</View>
-						<View className="flex-row">
 						<ForumField
 							title="First Name"
 							value={form.firstName}
-							handleChangeText={(e) =>
-								handleInputChange('firstName', e)
-							}
-							otherStyles="mb-4 flex-1 mr-1"
+							handleChangeText={(e) => handleInputChange('firstName', e)}
+							otherStyles="mb-4"
 						/>
 						{errors.firstName ? (
 							<Text className="text-red-500 text-xs">
@@ -111,24 +143,44 @@ const PersonalDetails: React.FC = () => {
 						<ForumField
 							title="Last Name"
 							value={form.lastName}
-							handleChangeText={(e) =>
-								handleInputChange('lastName', e)
-							}
-							otherStyles="mb-4 flex-1 ml-1"
+							handleChangeText={(e) => handleInputChange('lastName', e)}
+							otherStyles="mb-4"
 						/>
 						{errors.lastName ? (
 							<Text className="text-red-500 text-xs">
 								{errors.lastName}
 							</Text>
 						) : null}
-						</View>
+
+						<DatePickerField
+							title="Date of Birth"
+							value={form.dob}
+							onDateChange={(date) => handleInputChange('dob', date)}
+							otherStyles="mb-4"
+						/>
+						{errors.dob ? (
+							<Text className="text-red-500 text-xs">
+								{errors.dob}
+							</Text>
+						) : null}
+
+						<RegionValidatedAddressInput
+							placeholder="Address"
+							initialValue={form.address.fullAddress}
+							onAddressSelected={handleAddressSelected}
+							onValidationResult={handleAddressValidation}
+							otherStyles="mb-4"
+						/>
+						{errors.address ? (
+							<Text className="text-red-500 text-xs">
+								{errors.address}
+							</Text>
+						) : null}
 
 						<ForumField
 							title="Phone"
 							value={form.phone}
-							handleChangeText={(e) =>
-								handleInputChange('phone', e)
-							}
+							handleChangeText={(e) => handleInputChange('phone', e)}
 							otherStyles="mb-4"
 							keyboardType="phone-pad"
 						/>
@@ -141,9 +193,7 @@ const PersonalDetails: React.FC = () => {
 						<ForumField
 							title="Email"
 							value={form.email}
-							handleChangeText={(e) =>
-								handleInputChange('email', e)
-							}
+							handleChangeText={(e) => handleInputChange('email', e)}
 							otherStyles="mb-4"
 							keyboardType="email-address"
 						/>
@@ -152,104 +202,16 @@ const PersonalDetails: React.FC = () => {
 								{errors.email}
 							</Text>
 						) : null}
-
-						<View className="flex-row">
-		
-						<ForumField
-							title="Country"
-							value={form.address}
-							handleChangeText={(e) =>
-								handleInputChange('address', e)
-							}
-							otherStyles="mb-4 flex-1 mr-1"
-						/>
-						{errors.address ? (
-							<Text className="text-red-500 text-xs">
-								{errors.address}
-							</Text>
-						) : null}
-
-						<ForumField
-							title="Province / State"
-							value={form.address}
-							handleChangeText={(e) =>
-								handleInputChange('address', e)
-							}
-							otherStyles="mb-4 flex-1 ml-1"
-						/>
-						{errors.address ? (
-							<Text className="text-red-500 text-xs">
-								{errors.address}
-							</Text>
-						) : null}
-						</View>
-						<ForumField
-							title="City / Town"
-							value={form.address}
-							handleChangeText={(e) =>
-								handleInputChange('address', e)
-							}
-							otherStyles="mb-4"
-						/>
-						{errors.address ? (
-							<Text className="text-red-500 text-xs">
-								{errors.address}
-							</Text>
-						) : null}
-						<ForumField
-							title="Address"
-							value={form.address}
-							handleChangeText={(e) =>
-								handleInputChange('address', e)
-							}
-							otherStyles="mb-4"
-						/>
-						{errors.address ? (
-							<Text className="text-red-500 text-xs">
-								{errors.address}
-							</Text>
-						) : null}
-						{/* <TouchableOpacity
-                onPress={() => setDatePickerVisibility(true)}
-                onPressIn={() => setDatePickerVisibility(true)} // Improves responsiveness
-                activeOpacity={1} 
-                className="mb-4"
-            >
-              <ForumField
-                title="Date of Birth (MM/DD/YYYY)"
-                value={form.dob}
-                handleChangeText={() => {}}
-                editable={false}
-                pointerEvents="none"
-              />
-            </TouchableOpacity>
-            {errors.dob ? <Text className="text-red-500 text-xs">{errors.dob}</Text> : null}
-
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="date"
-              onConfirm={handleDateConfirm}
-              onCancel={() => setDatePickerVisibility(false)}
-              maximumDate={new Date()}
-            //   display={Platform.OS === 'ios' ? 'inline' : 'default'}
-            /> */}
-						<DatePickerField
-							title="Date of birth DD.MM.YYYY"
-							value={form.dob}
-							onDateChange={(date) =>
-								handleInputChange('dob', date)
-							}
-							otherStyles="mb-4"
-						/>
-
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-			<View className="px-7 pb-0">
+			
+			{/* Fixed Continue Button - stays at bottom */}
+			<View className="px-9 pb-0">
 				<CustomButton
 					title="Continue"
 					handlePress={handleContinue}
-					containerStyles="bg-black py-4 rounded-xl"
+					containerStyles="bg-black py-4 rounded-full"
 					textStyles="text-white text-lg"
 				/>
 			</View>

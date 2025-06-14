@@ -34,7 +34,7 @@ const useHomeUsers = (isPsw: boolean, filteredUsers?: User[] | null) => {
 
 	// Filter out users who are already engaged.
 	const availableUsers = useMemo(() => {
-		return baseUsers.filter((user) => !engagedUserIds.includes(user.id));
+		return baseUsers.filter((user) => !engagedUserIds.includes(user.id!));
 	}, [baseUsers, engagedUserIds]);
 
 	return { users: availableUsers, loading, error };

@@ -66,7 +66,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 		>
 			<ProfileHeader
 				userName={`${firstName} ${lastName}`}
-				userLocation={address || 'Midtown, Toronto'}
+				userLocation={address?.fullAddress || 'Midtown, Toronto'}
 				userRating="4.8 out of 5"
 				userPhoto={user.profilePhotoUrl}
 				onMenuPress={() => {}}

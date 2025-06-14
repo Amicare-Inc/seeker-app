@@ -1,5 +1,5 @@
 // app/_layout.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Stack } from 'expo-router';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,13 +11,31 @@ import { fetchUserSessionsFromBackend } from '@/redux/sessionSlice';
 const GlobalDataLoader = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
+	const sessions = useSelector((state: RootState) => state.sessions.allSessions);
+	const prevSessionsRef = useRef<string>('');
 
+	// Initial data loading
 	useEffect(() => {
 		if (currentUser && currentUser.id) {
-			dispatch(fetchUserSessionsFromBackend(currentUser.id));// unsubscribe = listenToUserSessions(dispatch, currentUser.id);
+			dispatch(fetchUserSessionsFromBackend(currentUser.id));
 			dispatch(fetchAvailableUsers({ isPsw: !currentUser.isPsw }));
 		}
 	}, [currentUser, dispatch]);
+
+	// Refresh user list when sessions change (someone accepts/declines/etc)
+	useEffect(() => {
+		if (currentUser && sessions.length > 0) {
+			// Create a hash of session statuses to detect changes
+			const sessionHash = sessions.map(s => `${s.id}-${s.status}`).sort().join('|');
+			
+			if (prevSessionsRef.current && prevSessionsRef.current !== sessionHash) {
+				// Sessions have changed, refresh user list
+				dispatch(fetchAvailableUsers({ isPsw: !currentUser.isPsw }));
+			}
+			
+			prevSessionsRef.current = sessionHash;
+		}
+	}, [sessions, currentUser, dispatch]);
 
 	return null;
 };

@@ -5,7 +5,6 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { Session } from '@/types/Sessions';
 import { User } from '@/types/User';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
@@ -53,7 +52,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const isConfirmed = currentSession.status === 'confirmed';
 	const isPending = currentSession.status === 'pending';
 	const isUserConfirmed =
-		!!currentUser && currentSession.confirmedBy?.includes(currentUser.id);
+		!!currentUser && !!currentUser.id && currentSession.confirmedBy?.includes(currentUser.id);
 
 	const formattedDate = formatDate(currentSession.startTime || '');
 	const formattedTimeRange = formatTimeRange(
@@ -64,9 +63,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	let subTitle = '';
 	if (isExpanded) {
 		subTitle =
-			currentUser?.isPsw && !user.address
+			currentUser?.isPsw && !user.address?.fullAddress
 				? 'Current Address'
-				: user.address || 'No Address';
+				: user.address?.fullAddress || 'No Address';
 	} else {
 		subTitle = `${formattedDate} • ${formattedTimeRange}`;
 	}
@@ -76,6 +75,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const navigateToSessionConfirmation = (
 		action: 'book' | 'cancel' | 'change',
 	) => {
+		if (!user.id) return;
 		router.push({
 			pathname: '/session-confirmation',
 			params: {
@@ -108,6 +108,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			console.log('SESSION CONFIRMED');
 			handleChangeSession();
 		} else {
+			if (!user.id) return;
 			dispatch(setActiveProfile(user));
 			router.push({
 				pathname: '/request-sessions',

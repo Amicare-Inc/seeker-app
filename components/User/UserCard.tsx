@@ -9,7 +9,9 @@ interface UserCardProps {
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
-	const locationText = user.address || 'Toronto, ON';
+	const locationText = user.address?.city && user.address?.province 
+		? `${user.address.city}, ${user.address.province}` 
+		: 'Toronto, ON';
 	const rate = user.rate || 20;
 
 	return (

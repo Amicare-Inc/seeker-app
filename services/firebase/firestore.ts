@@ -81,6 +81,10 @@ export const setUserDoc = async (uid: string, userData: any) => {
 // };
 
 /**
+ * DEPRECATED - USE BACKEND SERVICE INSTEAD
+ * This function directly connects to Firebase and bypasses the backend.
+ * Use fetchExploreUsers from @/services/node-express-backend/user instead.
+ * 
  * Retrieves a list of available users (PSWs or care seekers) by excluding
  * those with whom the current user already has a session.
  *
@@ -94,6 +98,8 @@ export const getListOfUsers = async (
 	currentUserId: string,
 	sessions: Session[],
 ): Promise<User[]> => {
+	console.warn('⚠️ DEPRECATED: getListOfUsers is deprecated. Use fetchExploreUsers from backend service instead.');
+	
 	// Build a set of engaged user IDs from the sessions data.
 	const excludedUserIds = new Set<string>();
 	sessions.forEach((session) => {

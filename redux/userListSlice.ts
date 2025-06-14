@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getListOfUsers } from '@/services/firebase/firestore';
+import { fetchExploreUsers } from '@/services/node-express-backend/user';
 import { User } from '@/types/User';
 import { RootState } from './store';
 
@@ -12,18 +12,16 @@ export const fetchAvailableUsers = createAsyncThunk(
 	async ({ isPsw }: FetchUsersArgs, { getState, rejectWithValue }) => {
 		const state = getState() as RootState;
 		const currentUserId = state.user.userData?.id;
-		const sessions = state.sessions.allSessions;
 
 		if (!currentUserId) {
 			return rejectWithValue('No current user found');
 		}
 
 		try {
-			const availableUsers = await getListOfUsers(
-				isPsw,
-				currentUserId,
-				sessions,
-			);
+			// Determine the user type to fetch (opposite of current user)
+			const userType = isPsw ? 'psw' : 'seeker';
+			
+			const availableUsers = await fetchExploreUsers(userType, currentUserId);
 			return availableUsers as User[];
 		} catch (error) {
 			return rejectWithValue((error as any).message);

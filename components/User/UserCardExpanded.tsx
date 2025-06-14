@@ -29,10 +29,13 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 	const bioText = user.bio;
 	const rating = '4.6 out of 5';
 	const rate = user.rate ?? 20;
-	const locationText = user.address || '4km away';
+	const locationText = user.address?.city && user.address?.province 
+		? `${user.address.city}, ${user.address.province}` 
+		: '4km away';
 	const languages = '';
 
 	const handleRequestSession = () => {
+		if (!user.id) return;
 		router.push({
 			pathname: '/request-sessions',
 			params: { otherUserId: user.id },

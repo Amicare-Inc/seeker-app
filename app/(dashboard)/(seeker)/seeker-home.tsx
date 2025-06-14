@@ -33,7 +33,7 @@ const SeekerHomeTab = () => {
 			) : (
 				<UserCard
 					user={item}
-					onPress={() => handleCardPress(item.id)}
+					onPress={() => handleCardPress(item.id!)}
 				/>
 			)}
 		</View>
@@ -78,7 +78,7 @@ const SeekerHomeTab = () => {
 			) : (
 				<FlatList
 					data={users}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item.id!}
 					renderItem={renderItem}
 					contentContainerStyle={{
 						paddingBottom: Platform.OS === 'ios' ? 83 : 64,

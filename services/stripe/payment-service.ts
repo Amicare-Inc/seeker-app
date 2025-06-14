@@ -23,7 +23,7 @@ export class PaymentService {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    amount: session.billingDetails!.total * 100, // Convert to cents
+                    amount: Math.round(session.billingDetails!.total * 100), // Convert to cents and round to avoid floating-point precision errors
                     currency: 'cad',
                     sessionId: session.id,
                     pswStripeAccountId: session.otherUser?.stripeAccountId || 'acct_1RXSGaQ7lSoEt20C'

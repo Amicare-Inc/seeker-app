@@ -26,7 +26,7 @@ export class StripeOnboardingService {
     /**
      * Creates a Stripe Express account and returns onboarding URL
      */
-    async createExpressAccount(userId: string, email: string, firstName: string, lastName: string, dob: string, address: string, phone: string): Promise<CreateExpressAccountResponse> {
+    async createExpressAccount(userId: string, email: string, firstName: string, lastName: string, dob: string, street: string, phone: string, city: string, province: string, country: string, postalCode: string): Promise<CreateExpressAccountResponse> {
         try {
             const response = await fetch(`${this.apiBaseUrl}/payments/stripe/create-express-account`, {
                 method: 'POST',
@@ -37,8 +37,12 @@ export class StripeOnboardingService {
                     firstName,
                     lastName,
                     dob,
-                    address,
+                    street,
                     phone,
+                    city,
+                    province,
+                    country,
+                    postalCode,
                     returnUrl: 'https://amicare.app/stripe-onboarding-complete',
                     refreshUrl: 'https://amicare.app/stripe-onboarding-refresh'
                 })

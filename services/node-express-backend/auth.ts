@@ -1,4 +1,3 @@
-
 export const Auth = {
   async signUp(email: string, password: string): Promise<any> {
     try {
@@ -59,6 +58,25 @@ export const Auth = {
     } catch (error: any) {
       console.error('Backend addOptionalInfo Error:', error);
       throw new Error(`Failed to add optional information: ${error.message}`);
+    }
+  },
+  async updateStripeAccount(uid: string, stripeAccountId: string): Promise<void> {
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}/stripe-account`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ stripeAccountId }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update Stripe account');
+      }
+      console.log('Stripe account ID updated successfully');
+    } catch (error: any) {
+      console.error('Backend updateStripeAccount Error:', error);
+      throw new Error(`Failed to update Stripe account: ${error.message}`);
     }
   },
   async signIn(email: string, password: string): Promise<any> {
