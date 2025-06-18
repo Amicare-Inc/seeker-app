@@ -1,20 +1,28 @@
 import { useState, useEffect } from 'react';
-import { LiveSessionStatus } from '@/types/LiveSession';
-import { EnrichedSession } from '@/types/EnrichedSession';
 import { useSelector } from 'react-redux';
+import { router } from 'expo-router';
+import { EnrichedSession } from '@/types/EnrichedSession';
+import { LiveSessionStatus } from '@/types/LiveSession';
 import { RootState } from '@/redux/store';
+import { selectCompletedSessions } from '@/redux/selectors';
 import { getSocket } from '@/services/node-express-backend/sockets';
 
 const mapFirebaseStatusToLiveStatus = (liveStatus: string): LiveSessionStatus => {
-  console.log('Mapping Firebase liveStatus:', liveStatus);
+  console.log('Mapping Firebase status:', liveStatus);
+  
   switch (liveStatus) {
     case 'upcoming':
       return 'waiting';
     case 'ready':
       return 'ready';
-    case 'inProgress':
+    case 'started':
       return 'started';
+    case 'ending':
+      return 'ending';
+    case 'completed':
+      return 'completed';
     default:
+      console.log('Unknown status, defaulting to waiting');
       return 'waiting';
   }
 };
@@ -38,33 +46,72 @@ export const useSessionManager = (enrichedSession: EnrichedSession) => {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [userConfirmed, setUserConfirmed] = useState<boolean>(false);
   const [otherUserConfirmed, setOtherUserConfirmed] = useState<boolean>(false);
+  const [userEndConfirmed, setUserEndConfirmed] = useState<boolean>(false);
+  const [otherUserEndConfirmed, setOtherUserEndConfirmed] = useState<boolean>(false);
   const currentUser = useSelector((state: RootState) => state.user.userData);
+  const completedSessions = useSelector(selectCompletedSessions);
+
+  // Watch for session completion via Redux
+  useEffect(() => {
+    if (!enrichedSession?.id) return;
+    
+    const isSessionCompleted = completedSessions.some(session => session.id === enrichedSession.id);
+    
+    if (isSessionCompleted && status !== 'completed') {
+      console.log('🎯 Session completed detected via Redux, navigating to completion screen');
+      console.log('📱 Session data:', {
+        id: enrichedSession.id,
+        status: enrichedSession.status,
+        completedSessionsCount: completedSessions.length
+      });
+      
+      setStatus('completed');
+      
+      try {
+        router.push({
+          pathname: '/session-completed',
+          params: {
+            sessionId: enrichedSession.id
+          }
+        });
+        console.log('✅ Navigation to completion screen successful');
+      } catch (navigationError) {
+        console.error('❌ Navigation to completion screen failed:', navigationError);
+      }
+    }
+  }, [completedSessions, enrichedSession?.id, status]);
 
   // Update status when Firebase liveStatus changes
   useEffect(() => {
-    console.log('Status effect triggered:', {
+    console.log('🔍 Status effect triggered:', {
       currentStatus: status,
       liveStatus: enrichedSession?.liveStatus,
-      sessionId: enrichedSession?.id
+      sessionId: enrichedSession?.id,
+      sessionStatus: enrichedSession?.status
     });
 
     if (!enrichedSession?.liveStatus) {
-      console.log('No Firebase liveStatus available');
+      console.log('❌ No Firebase liveStatus available');
       return;
     }
 
     const newStatus = mapFirebaseStatusToLiveStatus(enrichedSession.liveStatus);
-    console.log('Firebase status changed:', {
+    console.log('🔄 Firebase status mapping:', {
       oldStatus: status,
       newStatus,
-      liveStatus: enrichedSession.liveStatus
+      liveStatus: enrichedSession.liveStatus,
+      sessionStatus: enrichedSession.status
     });
 
     if (newStatus !== status) {
-      console.log('Updating status to:', newStatus);
+      console.log('✅ Updating status to:', newStatus);
       setStatus(newStatus);
+      
+
+    } else {
+      console.log('⚠️ Status unchanged, not updating');
     }
-  }, [enrichedSession?.liveStatus, enrichedSession?.id, status]);
+  }, [enrichedSession?.liveStatus, enrichedSession?.id, enrichedSession?.status]);
 
   useEffect(() => {
     if (!enrichedSession?.id || !currentUser?.id) {
@@ -112,14 +159,29 @@ export const useSessionManager = (enrichedSession: EnrichedSession) => {
       }
     });
 
+    // Listen for end session confirmations
+    socket.on('session:userEndConfirmed', (data: { sessionId: string; userId: string }) => {
+      console.log('🔚 Received user end confirmation:', data);
+      if (data.sessionId === enrichedSession.id) {
+        if (data.userId === currentUser.id) {
+          setUserEndConfirmed(true);
+        } else {
+          setOtherUserEndConfirmed(true);
+        }
+      }
+    });
+
+
+
     // Cleanup
     return () => {
-      console.log('Cleaning up socket listeners');
+      console.log('🧹 Cleaning up socket listeners');
       socket.off('session:liveStatusUpdate');
       socket.off('session:userConfirmed');
+      socket.off('session:userEndConfirmed');
       socket.emit('session:leave', enrichedSession.id);
     };
-  }, [enrichedSession?.id, currentUser?.id, status]);
+  }, [enrichedSession?.id, currentUser?.id]);
 
   // Handle elapsed time for started sessions
   useEffect(() => {
@@ -143,6 +205,8 @@ export const useSessionManager = (enrichedSession: EnrichedSession) => {
     return () => clearInterval(intervalId);
   }, [status, enrichedSession?.startTime]);
 
+
+
   const confirmSession = () => {
     console.log('Confirming session:', { 
       sessionId: enrichedSession?.id, 
@@ -163,12 +227,35 @@ export const useSessionManager = (enrichedSession: EnrichedSession) => {
     });
   };
 
+  const confirmEndSession = () => {
+    console.log('Confirming end session:', { 
+      sessionId: enrichedSession?.id, 
+      userId: currentUser?.id,
+      status: status
+    });
+    
+    const socket = getSocket();
+    if (!socket || !enrichedSession?.id || !currentUser?.id) {
+      console.error('Cannot confirm end session - missing required data');
+      return;
+    }
+
+    setUserEndConfirmed(true);
+    socket.emit('session:userEndConfirm', {
+      sessionId: enrichedSession.id,
+      userId: currentUser.id
+    });
+  };
+
   return {
     status,
     elapsedTime,
     isCurrentUser: currentUser?.id === enrichedSession.senderId,
     userConfirmed,
     otherUserConfirmed,
+    userEndConfirmed,
+    otherUserEndConfirmed,
     confirmSession,
+    confirmEndSession,
   };
 }; 

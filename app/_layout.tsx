@@ -7,6 +7,8 @@ import { StripeProvider } from '@stripe/stripe-react-native';
 import { store, RootState, AppDispatch } from '@/redux/store';
 import { fetchAvailableUsers } from '@/redux/userListSlice';
 import { fetchUserSessionsFromBackend } from '@/redux/sessionSlice';
+import { router } from 'expo-router';
+import { selectCompletedSessions } from '@/redux/selectors';
 
 const GlobalDataLoader = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -40,6 +42,31 @@ const GlobalDataLoader = () => {
 	return null;
 };
 
+// Watches Redux for newly-completed sessions and navigates once per session
+const SessionCompletionWatcher = () => {
+	const completed = useSelector(selectCompletedSessions);
+	console.log('completed in GLOBAL', completed);
+	const routedIds = useRef<Set<string>>(new Set());
+
+	useEffect(() => {
+		const now = Date.now();
+		completed.forEach((s) => {
+			if (routedIds.current.has(s.id)) return;
+
+			// Only trigger if actualEndTime is within last 30 s (or missing for safety)
+			if (!s.actualEndTime) return;
+
+			const endTs = new Date(s.actualEndTime).getTime();
+			if (now - endTs <= 30_000) {
+				routedIds.current.add(s.id);
+				router.push({ pathname: '/(chat)/session-completed', params: { sessionId: s.id } });
+			}
+		});
+	}, [completed]);
+
+	return null;
+};
+
 const LayoutWithProviders = () => {
 	return (
 		<Provider store={store}>
@@ -49,8 +76,9 @@ const LayoutWithProviders = () => {
 					urlScheme="amicare"
 					merchantIdentifier="merchant.com.specul8tor.AmiCare"
 					>
-					{/* GlobalDataLoader preloads global slices (user list and sessions) as soon as the user is available */}
+					{/* GlobalDataLoader preloads global slices; SessionCompletionWatcher handles completion navigation */}
 					<GlobalDataLoader />
+					<SessionCompletionWatcher />
 					<Stack>
 						<Stack.Screen
 							name="index"

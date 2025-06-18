@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, TouchableOpacity, Text, Keyboard, Animated } from 'react-native';
+import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, TouchableOpacity, Text, Keyboard, Animated, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiveSessionCardProps } from '@/types/LiveSession';
 import LiveSessionHeader from './LiveSessionHeader';
 import { useSessionManager } from '@/hooks/useSessionManager';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
@@ -66,10 +66,13 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   
   const {
     status,
+    elapsedTime,
     userConfirmed,
     otherUserConfirmed,
+    userEndConfirmed,
+    otherUserEndConfirmed,
     confirmSession,
-    isCurrentUser,
+    confirmEndSession,
   } = useSessionManager(session);
 
   // Keep ref in sync with state
@@ -185,6 +188,43 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   const endDate = session.endTime ? new Date(session.endTime) : null;
   const isNextDay = startDate && endDate ? endDate.getDate() !== startDate.getDate() : false;
 
+  const handleExpand = () => {
+    LayoutAnimation.easeInEaseOut();
+    setExpanded(true);
+    onExpand?.();
+  };
+
+  const handleCollapse = () => {
+    LayoutAnimation.easeInEaseOut();
+    setExpanded(false);
+    onCollapse?.();
+  };
+
+  // PSW checklist validation
+  const validatePSWChecklist = () => {
+    if (!currentUser?.isPsw || !session.checklist) {
+      return true; // Not a PSW or no checklist, allow end session
+    }
+    
+    const incompleteTasks = session.checklist.filter(item => !item.checked);
+    return incompleteTasks.length === 0;
+  };
+
+  const handleEndSessionPress = () => {
+    if (currentUser?.isPsw && session.checklist) {
+      const isChecklistComplete = validatePSWChecklist();
+      if (!isChecklistComplete) {
+        Alert.alert(
+          'Incomplete Checklist',
+          'Please make sure all tasks in the checklist are completed before ending the session.',
+          [{ text: 'OK', style: 'default' }]
+        );
+        return;
+      }
+    }
+    
+    confirmEndSession();
+  };
 
   return (
     <Animated.View
@@ -267,6 +307,25 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
                   {userConfirmed ? 'Waiting' : 'Start'}
                 </Text>
               </TouchableOpacity>
+            )}
+
+            {/* End session button for ending state */}
+            {session.liveStatus === 'ending' && (
+              <View className="flex-row items-center mr-5">
+                <TouchableOpacity 
+                  onPress={handleEndSessionPress}
+                  className={`py-3 px-6 rounded-lg mr-2 ${userEndConfirmed ? 'border border-black bg-transparent' : 'bg-white'}`}
+                >
+                  <Text className="text-black font-medium text-[17px] text-center">
+                    {userEndConfirmed ? 'Waiting' : 'End'}
+                  </Text>
+                </TouchableOpacity>
+                {(userEndConfirmed && otherUserEndConfirmed) && (
+                  <View className="w-6 h-6 rounded-full bg-white items-center justify-center">
+                    <Ionicons name="checkmark" size={16} color="#000" />
+                  </View>
+                )}
+              </View>
             )}
 
             {/* Timer display for started sessions */}
@@ -362,6 +421,30 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
                       Message
                     </Text>
                   </TouchableOpacity>
+                </>
+              ) : session.liveStatus === 'ending' ? (
+                <>
+                  <TouchableOpacity 
+                    onPress={handleEndSessionPress}
+                    className={`py-3 px-6 rounded-lg flex-1 mr-2 ${userEndConfirmed ? 'border border-black bg-transparent' : 'bg-white'}`}
+                  >
+                    <Text className="text-black font-medium text-center text-[17px]">
+                      {userEndConfirmed ? 'Waiting' : 'End Session'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={handleMessagePress}
+                    className="bg-black py-3 px-6 rounded-lg flex-1 ml-2"
+                  >
+                    <Text className="text-white font-medium text-center text-[17px]">
+                      Message
+                    </Text>
+                  </TouchableOpacity>
+                  {(userEndConfirmed && otherUserEndConfirmed) && (
+                    <View className="w-8 h-8 rounded-full bg-white items-center justify-center ml-2">
+                      <Ionicons name="checkmark" size={20} color="#000" />
+                    </View>
+                  )}
                 </>
               ) : (
                 <TouchableOpacity 
