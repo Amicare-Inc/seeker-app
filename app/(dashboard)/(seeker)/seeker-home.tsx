@@ -1,14 +1,6 @@
 // @/screens/SeekerHomeTab.tsx
 import React, { useState } from 'react';
-import {
-	SafeAreaView,
-	View,
-	Text,
-	ActivityIndicator,
-	FlatList,
-	TouchableOpacity,
-	Platform,
-} from 'react-native';
+import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity, Platform } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
 import UserCard from '@/components/User/UserCard';

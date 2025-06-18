@@ -9,6 +9,7 @@ interface UserCardProps {
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
+	// Only show city/province, not distance info
 	const locationText = user.address?.city && user.address?.province 
 		? `${user.address.city}, ${user.address.province}` 
 		: 'Toronto, ON';

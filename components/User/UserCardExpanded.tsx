@@ -29,9 +29,10 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 	const bioText = user.bio;
 	const rating = '4.6 out of 5';
 	const rate = user.rate ?? 20;
+	// Only show city/province in location section, distance is now shown under name
 	const locationText = user.address?.city && user.address?.province 
 		? `${user.address.city}, ${user.address.province}` 
-		: '4km away';
+		: 'Toronto, ON';
 	const languages = '';
 
 	const handleRequestSession = () => {
@@ -72,6 +73,19 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 							<Text className="font-bold text-lg text-black">
 								{user.firstName} {user.lastName}
 							</Text>
+							{/* Show distance under full name if available */}
+							{user.distanceInfo && (
+								<View className="mb-1">
+									<Text className="text-blue-600 text-sm font-medium">
+										{user.distanceInfo.distance}
+									</Text>
+									{user.distanceInfo.duration && (
+										<Text className="text-gray-500 text-xs">
+											{user.distanceInfo.duration}
+										</Text>
+									)}
+								</View>
+							)}
 							<Text className="text-gray-500 text-sm">
 								{rating}
 							</Text>

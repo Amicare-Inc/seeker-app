@@ -49,6 +49,31 @@ export const fetchExploreUsers = async (userType: 'psw' | 'seeker', currentUserI
   }
 };
 
+export const fetchExploreUsersWithDistance = async (userType: 'psw' | 'seeker', currentUserId: string) => {
+  try {
+    const response = await fetch(
+      `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/users/explore-with-distance?userType=${userType}&currentUserId=${currentUserId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const users = await response.json();
+    return users;
+  } catch (error: any) {
+    console.error('Error fetching explore users with distance:', error);
+    throw error;
+  }
+};
+
 export const fetchFilteredUsers = async (selectedDays: string[]) => {
   try {
     const daysQuery = selectedDays.join(',');
