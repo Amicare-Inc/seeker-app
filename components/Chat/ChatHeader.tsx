@@ -54,21 +54,18 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const isUserConfirmed =
 		!!currentUser && !!currentUser.id && currentSession.confirmedBy?.includes(currentUser.id);
 
-	const formattedDate = formatDate(currentSession.startTime || '');
-	const formattedTimeRange = formatTimeRange(
-		currentSession.startTime || '',
-		currentSession.endTime || '',
-	);
+	// Address display logic
+	const cityProvince =
+		user.address?.city && user.address?.province
+			? `${user.address.city}, ${user.address.province}`
+			: user.address?.fullAddress || 'No Address';
 
-	let subTitle = '';
-	if (isExpanded) {
-		subTitle =
-			currentUser?.isPsw && !user.address?.fullAddress
-				? 'Current Address'
-				: user.address?.fullAddress || 'No Address';
-	} else {
-		subTitle = `${formattedDate} • ${formattedTimeRange}`;
-	}
+	const showFullAddress = isConfirmed || currentSession.status === 'inProgress';
+	const addressDisplay = showFullAddress
+		? user.address?.fullAddress || cityProvince
+		: cityProvince;
+
+	let subTitle = addressDisplay; // Show address regardless of expanded/collapsed
 
 	// NEW: Instead of performing the booking or cancellation directly,
 	// navigate to a new page called "session-confirmation" with an action parameter.
@@ -140,6 +137,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 		startDateObj && endDateObj
 			? endDateObj.getDate() !== startDateObj.getDate()
 			: false;
+
+	const formattedDate = formatDate(currentSession.startTime || '');
+	const formattedTimeRange = formatTimeRange(
+		currentSession.startTime || '',
+		currentSession.endTime || '',
+	);
 
 	return (
 		<LinearGradient

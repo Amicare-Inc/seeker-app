@@ -76,7 +76,7 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 		}
 
 		try {
-			const data = await updateUserProfile(user.id, updatedFields);
+			const data = await updateUserProfile(user.id!, updatedFields);
 			if (data.user) {
 				dispatch(updateUserFields(data.user));
 			}
@@ -104,7 +104,7 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 
 			{/* Dropdown for Care Type */}
 			<OptionsDropdown
-				label={user.isPsw ? 'Experience with' : 'Diagnoses'}
+				label={user.isPsw ? 'Experience with' : 'Requiring'}
 				options={careTypeOptions}
 				initialValue={careTypeSelection.join(', ')}
 				onChange={handleCareTypeChange}
@@ -112,7 +112,7 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 
 			{/* Dropdown for Tasks */}
 			<OptionsDropdown
-				label={user.isPsw ? 'Assisting with' : 'Requiring'}
+				label={user.isPsw ? 'Assisting with' : 'Need Assistance with'}
 				options={tasksOptions}
 				initialValue={tasksSelection.join(', ')}
 				onChange={handleTasksChange}

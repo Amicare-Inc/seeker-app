@@ -96,8 +96,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 					</Text>
 				</View>
 
-				{/* Bio Section */}
-				<Text className="font-bold text-gray-800 mb-1">Bio</Text>
+				{/* Bio Text (header removed as per design) */}
 				<Text className="text-gray-700 mb-3">{bioText}</Text>
 
 				{/* Skill Sets */}
@@ -111,22 +110,6 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 					{user.isPsw ? 'Services Provided' : 'Services Needed'}
 				</Text>
 				<Text className="text-gray-700 mb-3">{diagnosed}</Text>
-
-				{/* Languages and Location */}
-				<View className="flex-row justify-between">
-					<View className="mr-2">
-						<Text className="font-bold text-gray-800 mb-1">
-							Languages
-						</Text>
-						<Text className="text-gray-700">{languages}</Text>
-					</View>
-					<View className="ml-2">
-						<Text className="font-bold text-gray-800 mb-1">
-							Location
-						</Text>
-						<Text className="text-gray-700">{locationText}</Text>
-					</View>
-				</View>
 
 				{/* Bottom buttons row */}
 				<View className="flex-row mt-4" pointerEvents="box-none">

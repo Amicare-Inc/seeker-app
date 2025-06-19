@@ -9,7 +9,7 @@ import ProfileListItem from './ProfileListItem';
 import { User } from '@/types/User';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import ProfileReviews from './ProfileReviews';
+// import ProfileReviews from './ProfileReviews';
 import { FIREBASE_AUTH } from '@/firebase.config';
 import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { clearSessions } from '@/redux/sessionSlice';
@@ -27,11 +27,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 		lastName,
 		address,
 		bio,
-		// placeholders for your “Diagnoses” / “Experience” etc.
+		// placeholders for your "Diagnoses" / "Experience" etc.
 	} = user;
 
-	// If it’s my profile, we show certain placeholders (e.g. “Cancer, Dementia” vs “Housekeeping, Mobility”).
-	// If it’s another user’s profile, we can swap them or rename them “Experience” / “Skills.”
+	// If it's my profile, we show certain placeholders (e.g. "Cancer, Dementia" vs "Housekeeping, Mobility").
+	// If it's another user's profile, we can swap them or rename them "Experience" / "Skills."
 	// const leftTitle = isMyProfile ? "Diagnoses" : "Experience";
 	// const leftSubtitle = isMyProfile ? "Cancer, Dementia" : "Dementia, Cancer";
 	// const rightTitle = isMyProfile ? "Seeking support with" : "Skills";
@@ -66,7 +66,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 		>
 			<ProfileHeader
 				userName={`${firstName} ${lastName}`}
-				userLocation={address?.fullAddress || 'Midtown, Toronto'}
+				userLocation={
+					isMyProfile
+						? address?.fullAddress || 'Toronto, ON'
+						: address?.city && address?.province
+							? `${address.city}, ${address.province}`
+							: address?.fullAddress || 'Toronto, ON'
+				}
 				userRating="4.8 out of 5"
 				userPhoto={user.profilePhotoUrl}
 				onMenuPress={() => {}}
@@ -79,14 +85,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 				{/* Bio Label + Bio */}
 				{!!bio && (
 					<View className="mb-4">
-						<Text className="text-base text-black mb-1">Bio</Text>
 						<ProfileBio bio={bio} />
 					</View>
 				)}
 
 				<ProfileStats user={user} />
 
-				{/* If it’s my profile, show the row of icons + the list items. */}
+				{/* If it's my profile, show the row of icons + the list items. */}
 				{isMyProfile ? (
 					<>
 						<ProfileActionRow user={user} />
@@ -128,7 +133,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 					</>
 				) : (
 					<>
-						<ProfileReviews />
+						{/* <ProfileReviews /> */}
 					</>
 				)}
 			</ScrollView>
