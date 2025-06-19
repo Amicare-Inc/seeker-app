@@ -18,6 +18,7 @@ const StripeOnboarding: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
     const [hasNavigated, setHasNavigated] = useState(false); // Prevent multiple navigation attempts
+    const [refreshStarted, setRefreshStarted] = useState(false);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const stripeOnboardingService = StripeOnboardingService.getInstance();
@@ -40,7 +41,7 @@ const StripeOnboarding: React.FC = () => {
                 try {
                     const status = await stripeOnboardingService.getOnboardingStatus(stripeAccountId);
                     
-                    if (status.isOnboardingComplete && status.chargesEnabled) {
+                    if (status.isOnboardingComplete && status.payoutsEnabled) {
                         await handleOnboardingComplete();
                     }
                 } catch (error) {
@@ -97,15 +98,15 @@ const StripeOnboarding: React.FC = () => {
 
     const handleOnboardingComplete = async () => {
         if (hasNavigated) return; // Prevent multiple navigation attempts
-        
+
         setHasNavigated(true);
         setIsPolling(false);
-        
+
         if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;
         }
-        
+
         // Navigate to success page with account ID
         setTimeout(() => {
             router.push(`/stripe-success?accountId=${stripeAccountId}`);
@@ -126,21 +127,12 @@ const StripeOnboarding: React.FC = () => {
                 if (stripeAccountId) {
                     const status = await stripeOnboardingService.getOnboardingStatus(stripeAccountId);
                     
-                    if (status.isOnboardingComplete && status.chargesEnabled) {
+                    if (status.isOnboardingComplete && status.payoutsEnabled) {
                         await handleOnboardingComplete();
-                    } else {
-                        Alert.alert(
-                            'Onboarding Incomplete',
-                            'Please complete all required fields in the Stripe onboarding process.',
-                            [
-                                {
-                                    text: 'Continue Setup',
-                                    onPress: () => {
-                                        refreshOnboarding();
-                                    }
-                                }
-                            ]
-                        );
+                    } else if (status.isOnboardingComplete && !status.payoutsEnabled && !refreshStarted) {
+                        // Load remaining requirements (selfie/ID) via refreshed onboarding link
+                        await refreshOnboarding();
+                        setRefreshStarted(true);
                     }
                 }
             } catch (error: any) {
@@ -208,14 +200,11 @@ const StripeOnboarding: React.FC = () => {
                 setLoading(true);
                 const status = await stripeOnboardingService.getOnboardingStatus(stripeAccountId);
                 
-                if (status.isOnboardingComplete && status.chargesEnabled) {
+                if (status.isOnboardingComplete && status.payoutsEnabled) {
                     await handleOnboardingComplete();
-                } else {
-                    Alert.alert(
-                        'Not Complete Yet',
-                        'Please complete all required fields in the Stripe onboarding process above.',
-                        [{ text: 'OK' }]
-                    );
+                } else if (status.isOnboardingComplete && !status.payoutsEnabled && !refreshStarted) {
+                    await refreshOnboarding();
+                    setRefreshStarted(true);
                 }
             } catch (error: any) {
                 Alert.alert(

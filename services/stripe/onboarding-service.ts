@@ -107,4 +107,26 @@ export class StripeOnboardingService {
             throw error;
         }
     }
+
+    /**
+     * Requests an Identity verification session link for the connected account
+     */
+    async getIdentityVerificationLink(accountId: string): Promise<{ verificationUrl: string }> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/payments/stripe/identity-link/${accountId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create identity verification link');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error creating identity verification link:', error);
+            throw error;
+        }
+    }
 } 

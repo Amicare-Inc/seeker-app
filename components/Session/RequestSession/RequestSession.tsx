@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-	SafeAreaView,
-	View,
-	Text,
-	TouchableOpacity,
-	Keyboard,
-	ScrollView,
-} from 'react-native';
+import { SafeAreaView, View, Text, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
-import { FIREBASE_DB } from '@/firebase.config';
 import { useLocalSearchParams, router } from 'expo-router';
 import { User } from '@/types/User';
 import RequestSessionHeader from '@/components/Session/RequestSession/RequestSessionHeader';
@@ -227,6 +218,13 @@ const RequestSession = () => {
 			...sessionData.billingDetails,
 			basePrice: sessionData.billingDetails.dynamicBasePrice,
 			},
+			checklist: checklist.map((task, index) => ({
+				id: index.toString(),
+				task,
+				completed: false,
+				checked: false,
+				time: ''
+			})),
 		});
 		alert('Session updated successfully!');
 		router.back();
