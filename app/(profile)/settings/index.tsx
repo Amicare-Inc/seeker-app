@@ -3,15 +3,35 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useDispatch } from 'react-redux';
+import { FIREBASE_AUTH } from '@/firebase.config';
+import { clearActiveProfile } from '@/redux/activeProfileSlice';
+import { clearSessions } from '@/redux/sessionSlice';
+import { clearUser } from '@/redux/userSlice';
 
 const SettingsScreen = () => {
   const handleBackPress = () => {
     router.back();
   };
 
-  const handleLogout = () => {
-    console.log('Logout pressed');
-  };
+	const dispatch = useDispatch();
+	const handleSignOut = async () => {
+		try {
+			// Sign out from Firebase
+			await FIREBASE_AUTH.signOut();
+
+			// Clear Redux state
+			dispatch(clearUser());
+			dispatch(clearSessions());
+			dispatch(clearActiveProfile());
+
+			// Navigate to the sign-in screen (or your landing page)
+			router.replace('/sign-in');
+		} catch (error) {
+			console.error('Error signing out:', error);
+			// Optionally, show an alert or toast to the user.
+		}
+	};
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
@@ -61,7 +81,7 @@ const SettingsScreen = () => {
           <SettingsListItem
             icon={<Ionicons name="log-out" size={28} color="#303031" />}
             label="Log Out"
-            onPress={handleLogout}
+            onPress={handleSignOut}
           />
         </View>
       </ScrollView>

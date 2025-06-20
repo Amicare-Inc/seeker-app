@@ -50,7 +50,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 		<TouchableOpacity
 			onPress={onClose}
 			activeOpacity={1}
-			className="bg-white rounded-lg p-4 mb-2"
+			className="bg-white rounded-lg p-[12px] mb-[12px]"
 			style={{ elevation: 2 }}
 		>
 			<View pointerEvents="box-none">
@@ -63,7 +63,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 									user.profilePhotoUrl ||
 									'https://via.placeholder.com/50',
 							}}
-							className="w-20 h-20 rounded-lg mr-3"
+							className="w-[58px] h-[58px] rounded-lg mr-3"
 						/>
 						<View>
 							<Text className="font-bold text-lg text-black">
@@ -74,13 +74,12 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 							</Text>
 						</View>
 					</View>
-					<Text className="font-bold text-base text-black">
-						${rate.toFixed(2)}
+					<Text className="font-medium text-base text-grey-58 pl-6">
+						${rate.toFixed(2)}/hr
 					</Text>
 				</View>
 
 				{/* Bio Section */}
-				<Text className="font-bold text-gray-800 mb-1">Bio</Text>
 				<Text className="text-gray-700 mb-3">{bioText}</Text>
 
 				{/* Skill Sets */}

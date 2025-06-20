@@ -47,32 +47,33 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
 			{/* Middle Column: User info */}
 			<View className="flex-1">
-				<Text className="text-xl font-semibold text-black">
-					{userName}
-				</Text>
+				<View className="flex-row items-center gap-1">
+					<Text className="text-xl font-semibold text-black">
+						{userName}
+					</Text>
+					<Ionicons
+						name="checkmark-circle"
+						size={18}
+						color="#00BFFF"
+					/>
+				</View>
+				{userLocation && (
+					<Text
+						className="text-xs text-gray-500 mt-1"
+						style={{ color: '#797979' }}>
+						{userLocation}
+					</Text>
+				)}
 				{userRating && (
 					<View className="flex-row items-center mt-1">
-						<Ionicons
-							name="checkmark-circle"
-							size={16}
-							color="#00BFFF"
-						/>
 						<Text
-							className="text-sm ml-1"
-							style={{ color: '#797979' }}
-						>
+							className="text-xs"
+							style={{ color: '#797979' }}>
 							{userRating}
 						</Text>
 					</View>
 				)}
-				{userLocation && (
-					<Text
-						className="text-xs text-gray-500 mt-1"
-						style={{ color: '#797979' }}
-					>
-						{userLocation}
-					</Text>
-				)}
+
 			</View>
 
 			{/* Right side: If my profile, show menu icon; otherwise, if PSW, show rate */}

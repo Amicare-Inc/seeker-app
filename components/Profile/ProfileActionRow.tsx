@@ -38,12 +38,12 @@ const ProfileActionRow: React.FC<ProfileActionRowProps> = ({ user }) => {
 		<View>
 			{/* Rest State: Show three separate buttons filling the row */}
 			{!selectedAction && (
-				<View className="flex-row justify-between mb-4">
+				<View className="flex-row gap-[12px] mb-[12px]">
 					<TouchableOpacity
 						onPress={() => handlePressAction('wallet')}
 						className="bg-white border border-gray-200 rounded-lg flex-1 mr-1 items-center p-3"
 					>
-						<Ionicons name="wallet" size={28} color="#000" />
+						<Ionicons name="card" size={26} color="#000" />
 						<Text className="text-sm mt-2">Wallet</Text>
 					</TouchableOpacity>
 
@@ -51,7 +51,7 @@ const ProfileActionRow: React.FC<ProfileActionRowProps> = ({ user }) => {
 						onPress={() => handlePressAction('history')}
 						className="bg-white border border-gray-200 rounded-lg flex-1 items-center p-3"
 					>
-						<Ionicons name="time" size={28} color="#000" />
+						<Ionicons name="calendar" size={26} color="#000" />
 						<Text className="text-sm mt-2">History</Text>
 					</TouchableOpacity>
 
@@ -59,7 +59,7 @@ const ProfileActionRow: React.FC<ProfileActionRowProps> = ({ user }) => {
 						onPress={() => handlePressAction('edit')}
 						className="bg-white border border-gray-200 rounded-lg flex-1 ml-1 items-center p-3"
 					>
-						<Ionicons name="create" size={28} color="#000" />
+						<Ionicons name="person" size={26} color="#000" />
 						<Text className="text-sm mt-2">Edit Profile</Text>
 					</TouchableOpacity>
 				</View>
