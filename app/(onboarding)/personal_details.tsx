@@ -98,11 +98,7 @@ const PersonalDetails: React.FC = () => {
 				}
 				dispatch(updateUserFields(form));
 				await Auth.addCriticalInfo(userId, {...form, isPsw: userData!.isPsw});			
-				if (userData!.isPsw) {
-					router.push('/stripe-onboarding');
-				} else {
-					router.push('/onboard1');
-				}
+				router.push('/onboard1');
 			} catch (error) {
 				console.error('Error saving user details:', error);
 			}

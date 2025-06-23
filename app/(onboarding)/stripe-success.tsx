@@ -42,7 +42,7 @@ const StripeSuccess: React.FC = () => {
     };
 
     const handleContinue = () => {
-        router.push('/onboard1');
+        router.push('/bio_screen');
     };
 
     const handleTryAgain = () => {
