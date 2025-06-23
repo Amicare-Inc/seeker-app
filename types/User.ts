@@ -1,11 +1,17 @@
 export interface User {
-	id: string;
+	id?: string;
 	firstName: string;
 	lastName: string;
-	dob?: string; // Date of Birth ISO string MM/DD/YYYY
-	age?: string;
+	dob: string; // Date of Birth ISO string MM/DD/YYYY
 	gender?: string;
-	address: string;
+	address: {
+		fullAddress: string;
+		street: string;
+		city: string;
+		province: string;
+		country: string;
+		postalCode: string;
+	}
 	phone: string;
 	email: string;
 	isPsw: boolean;
@@ -25,4 +31,11 @@ export interface User {
 	};
 	onboardingComplete: boolean;
 	bio?: string;
+	stripeAccountId?: string;
+	// Distance information (populated when fetching with distance)
+	distanceInfo?: {
+		distance: string; // e.g., "5.2km away"
+		duration: string; // e.g., "12 min drive"
+		distanceValue: number; // raw distance in meters for sorting
+	};
 }

@@ -1,14 +1,6 @@
 // @/screens/SeekerHomeTab.tsx
 import React, { useState } from 'react';
-import {
-	SafeAreaView,
-	View,
-	Text,
-	ActivityIndicator,
-	FlatList,
-	TouchableOpacity,
-	Platform,
-} from 'react-native';
+import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity, Platform } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
 import UserCard from '@/components/User/UserCard';
@@ -33,7 +25,7 @@ const SeekerHomeTab = () => {
 			) : (
 				<UserCard
 					user={item}
-					onPress={() => handleCardPress(item.id)}
+					onPress={() => handleCardPress(item.id!)}
 				/>
 			)}
 		</View>
@@ -78,7 +70,7 @@ const SeekerHomeTab = () => {
 			) : (
 				<FlatList
 					data={users}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item.id!}
 					renderItem={renderItem}
 					contentContainerStyle={{
 						paddingBottom: Platform.OS === 'ios' ? 83 : 64,

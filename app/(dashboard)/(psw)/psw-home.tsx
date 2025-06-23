@@ -1,14 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-	View,
-	Text,
-	ActivityIndicator,
-	FlatList,
-	TouchableOpacity,
-	TouchableWithoutFeedback,
-	Platform,
-	Animated,
-} from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, TouchableWithoutFeedback, Platform, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
@@ -21,11 +12,14 @@ import SessionFilterCard from '@/components/Session/SessionFilterCard';
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
 	const [filteredUsers, setFilteredUsers] = useState<User[] | null>(null);
-	const { users, loading, error } = useAvailableUsers(false, filteredUsers);
+	const { users: fetchedUsers, loading, error } = useAvailableUsers(false, true); // isPsw = false, withDistance = true
 	const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 	const [filterVisible, setFilterVisible] = useState(false);
 	const fadeAnim = useRef(new Animated.Value(0)).current;
 	const slideAnim = useRef(new Animated.Value(300)).current;
+
+	// Use filtered users if available, otherwise use fetched users
+	const users = filteredUsers ?? fetchedUsers;
 
 	const handleCardPress = (userId: string) => {
 		setExpandedUserId((prev) => (prev === userId ? null : userId));
@@ -41,7 +35,7 @@ const PswHomeTab = () => {
 			) : (
 				<UserCard
 					user={item}
-					onPress={() => handleCardPress(item.id)}
+					onPress={() => handleCardPress(item.id!)}
 				/>
 			)}
 		</View>
@@ -118,7 +112,7 @@ const PswHomeTab = () => {
 			) : (
 				<FlatList
 					data={users}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item.id!}
 					renderItem={renderItem}
 					contentContainerStyle={{
 						paddingBottom: Platform.OS === 'ios' ? 83 : 64,

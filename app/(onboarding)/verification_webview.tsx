@@ -33,9 +33,12 @@ const PersonaVerification: React.FC = () => {
 
 			// Update Redux: Mark user as verified
 			dispatch(updateUserFields({ idVerified: true }));
-
-			// Navigate to the next screen
-			router.push('/bio_screen');
+			// Navigate based on role
+			if (userData?.isPsw) {
+				router.push('/stripe-onboarding');
+			} else {
+				router.push('/bio_screen');
+			}
 		}
 	};
 

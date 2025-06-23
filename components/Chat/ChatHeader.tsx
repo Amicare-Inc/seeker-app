@@ -5,15 +5,15 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { Session } from '@/types/Sessions';
 import { User } from '@/types/User';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getSocket } from '@/services/node-express-backend/sockets';
+import { EnrichedSession } from '@/types/EnrichedSession';
 
 interface ChatHeaderProps {
-	session: Session;
+	session: EnrichedSession;
 	user: User;
 	isExpanded: boolean;
 	toggleExpanded: () => void;
@@ -52,29 +52,27 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const isConfirmed = currentSession.status === 'confirmed';
 	const isPending = currentSession.status === 'pending';
 	const isUserConfirmed =
-		!!currentUser && currentSession.confirmedBy?.includes(currentUser.id);
+		!!currentUser && !!currentUser.id && currentSession.confirmedBy?.includes(currentUser.id);
 
-	const formattedDate = formatDate(currentSession.startTime || '');
-	const formattedTimeRange = formatTimeRange(
-		currentSession.startTime || '',
-		currentSession.endTime || '',
-	);
+	// Address display logic
+	const cityProvince =
+		user.address?.city && user.address?.province
+			? `${user.address.city}, ${user.address.province}`
+			: user.address?.fullAddress || 'No Address';
 
-	let subTitle = '';
-	if (isExpanded) {
-		subTitle =
-			currentUser?.isPsw && !user.address
-				? 'Current Address'
-				: user.address || 'No Address';
-	} else {
-		subTitle = `${formattedDate} • ${formattedTimeRange}`;
-	}
+	const showFullAddress = isConfirmed || currentSession.status === 'inProgress';
+	const addressDisplay = showFullAddress
+		? user.address?.fullAddress || cityProvince
+		: cityProvince;
+
+	let subTitle = addressDisplay; // Show address regardless of expanded/collapsed
 
 	// NEW: Instead of performing the booking or cancellation directly,
 	// navigate to a new page called "session-confirmation" with an action parameter.
 	const navigateToSessionConfirmation = (
 		action: 'book' | 'cancel' | 'change',
 	) => {
+		if (!user.id) return;
 		router.push({
 			pathname: '/session-confirmation',
 			params: {
@@ -107,6 +105,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			console.log('SESSION CONFIRMED');
 			handleChangeSession();
 		} else {
+			if (!user.id) return;
 			dispatch(setActiveProfile(user));
 			router.push({
 				pathname: '/request-sessions',
@@ -138,6 +137,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 		startDateObj && endDateObj
 			? endDateObj.getDate() !== startDateObj.getDate()
 			: false;
+
+	const formattedDate = formatDate(currentSession.startTime || '');
+	const formattedTimeRange = formatTimeRange(
+		currentSession.startTime || '',
+		currentSession.endTime || '',
+	);
 
 	return (
 		<LinearGradient
@@ -243,42 +248,42 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
 					{/* Show buttons section only if NOT in progress */}
 					{currentSession.status !== 'inProgress' ? (
-						<View className="flex-row items-center justify-between mb-4">
-							<TouchableOpacity
-								onPress={
-									isConfirmed
-										? handleNavigateToRequestSession
-										: handleBookSession
-								}
-								disabled={isDisabled}
-								activeOpacity={0.8}
-								className="px-6 py-3 rounded-lg"
-								style={{
-									width: '48%',
-									backgroundColor: isConfirmed
-										? '#fff'
-										: isDisabled
-											? '#d1d5db'
-											: '#008DF4',
-								}}
+					<View className="flex-row items-center justify-between mb-4">
+						<TouchableOpacity
+							onPress={
+								isConfirmed
+									? handleNavigateToRequestSession
+									: handleBookSession
+							}
+							disabled={isDisabled}
+							activeOpacity={0.8}
+							className="px-6 py-3 rounded-lg"
+							style={{
+								width: '48%',
+								backgroundColor: isConfirmed
+									? '#fff'
+									: isDisabled
+										? '#d1d5db'
+										: '#008DF4',
+							}}
+						>
+							<Text
+								className={`text-sm text-center ${isDisabled ? 'text-black' : isConfirmed ? 'text-black' : 'text-white'}`}
 							>
-								<Text
-									className={`text-sm text-center ${isDisabled ? 'text-black' : isConfirmed ? 'text-black' : 'text-white'}`}
-								>
-									{bookText}
-								</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								onPress={handleCancelSession}
-								activeOpacity={0.8}
-								className="bg-black px-6 py-3 rounded-lg"
-								style={{ width: '48%' }}
-							>
-								<Text className="text-white text-sm text-center">
-									Cancel
-								</Text>
-							</TouchableOpacity>
-						</View>
+								{bookText}
+							</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							onPress={handleCancelSession}
+							activeOpacity={0.8}
+							className="bg-black px-6 py-3 rounded-lg"
+							style={{ width: '48%' }}
+						>
+							<Text className="text-white text-sm text-center">
+								Cancel
+							</Text>
+						</TouchableOpacity>
+					</View>
 					) : (
 						/* Show cancel button for inProgress */
 						<View className="flex-row items-center justify-center mb-4">
@@ -303,7 +308,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 										? 'play-circle'
 										: isConfirmed
 											? 'check-circle'
-											: 'alert-circle'
+										: 'alert-circle'
 								}
 								size={22}
 								color={currentSession.status === 'inProgress' ? 'black' : (isConfirmed ? '#fff' : '#9ca3af')}
@@ -315,8 +320,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 								{currentSession.status === 'inProgress'
 									? 'Session in Progress'
 									: isConfirmed
-										? 'Appointment Confirmed'
-										: 'Awaiting confirmation'}
+									? 'Appointment Confirmed'
+									: 'Awaiting confirmation'}
 							</Text>
 						</View>
 						<Text

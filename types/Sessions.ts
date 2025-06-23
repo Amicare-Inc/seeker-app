@@ -1,8 +1,14 @@
-interface ChecklistItem {
+export interface ChecklistItem {
 	id: string;
 	task: string;
 	checked: boolean;
 	time: string;
+	checkedBy?: string; // userId who checked the item
+}
+
+export interface SessionComment {
+	text: string;
+	time: string; // Just the time in HH:MM format
 }
 
 export interface Session {
@@ -39,9 +45,16 @@ export interface Session {
 			confirmedAt: string; // ISO date string
 		};
 	};
+	readyToEnd?: {
+		[userId: string]: {
+			confirmed: boolean;
+			confirmedAt: string; // ISO date string
+		};
+	};
 	actualStartTime?: string | null; // ISO date string
 	actualEndTime?: string | null; // ISO date string
-	liveStatus?: 'upcoming' | 'ready' | 'started' | 'completed' | 'failed';
+	liveStatus?: 'upcoming' | 'ready' | 'started' | 'ending' | 'completed' | 'failed';
     liveStatusUpdatedAt?: string;
-	checklist?: ChecklistItem[];
+	checklist?: ChecklistItem[]; // Live checklist that both users can see and update
+	comments?: SessionComment[]; // Array of simple comment objects
 }

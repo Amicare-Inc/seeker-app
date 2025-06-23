@@ -63,7 +63,7 @@ const ChatPage = () => {
 	const handleSendMessage = async () => {
 		try {
 			if (newMessage.trim()) {
-				const nextMessage = await sendMessage(sessionId as string, currentUser.id, newMessage.trim());
+				const nextMessage = await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
 				console.log('Message sent:', nextMessage);
 			setNewMessage('');
 			Keyboard.dismiss();
@@ -110,7 +110,7 @@ const ChatPage = () => {
                 <ChatMessageList
                     messages={messages}
                     otherUserName={otherUser?.firstName || ''}
-                    currentUserId={currentUser.id}
+                    currentUserId={currentUser.id!}
                 />
                 <ChatInput
                     newMessage={newMessage}
