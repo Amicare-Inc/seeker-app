@@ -115,13 +115,14 @@ export const cancelSessionThunk = createAsyncThunk<
 // Return type from the thunk
 type ConfirmBookingReturn = { sessionId: string; newStatus: string };
 
-// Argument type
+// Argument type DEPRECATED
 type ConfirmBookingArgs = {
 	sessionId: string;
 	currentUserId: string;
 	existingConfirmedBy?: string[];
 };
 
+// DEPRECATED
 export const confirmSessionBookingThunk = createAsyncThunk<
 	ConfirmBookingReturn, // return type
 	ConfirmBookingArgs, // argument type

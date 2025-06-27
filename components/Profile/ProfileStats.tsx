@@ -16,31 +16,53 @@ interface ProfileStatsProps {
 const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
 	const isPsw = user.isPsw;
 
-	// Determine titles
-	const leftTitle = isPsw ? 'Experience with' : 'Diagnoses';
-	const rightTitle = isPsw ? 'Assisting with' : 'Requiring';
+	// Titles based on role
+	const tasksTitle = isPsw ? 'Assisting with:' : 'Seeking support with:';
+	const availabilityTitle = isPsw ? 'Times I can assist:' : 'Times I need support:';
 
-	// Pull data from user.carePreferences
-	const careType = user.carePreferences?.careType?.join(', ') || 'N/A';
+	// Data extraction
 	const tasks = user.carePreferences?.tasks?.join(', ') || 'N/A';
 
-	return (
-		<View className="flex-row justify-between mb-4">
-			{/* Left column */}
-			<View className="flex-1 mr-2">
-				<Text className="text-sm mb-1">{leftTitle}</Text>
-				<Text className="text-sm" style={styles.wrapText}>
-					{careType}
-				</Text>
-			</View>
+	// Build availability string  e.g., "Mon 18h-20h • Wed 17h-19h"
+	const availabilityObj = user.carePreferences?.availability || {};
+	const availabilityStrings: string[] = [];
+	for (const [day, slots] of Object.entries(availabilityObj)) {
+		const dayAbbrev = day.slice(0, 3); // Mon, Tue, etc.
+		slots.forEach(({ start, end }) => {
+			availabilityStrings.push(`${dayAbbrev} ${start}-${end}`);
+		});
+	}
+	const availabilityText = availabilityStrings.join(' · ') || 'N/A';
 
-			{/* Right column */}
-			<View className="flex-1">
-				<Text className="text-sm mb-1">{rightTitle}</Text>
-				<Text className="text-sm text-gray-700" style={styles.wrapText}>
-					{tasks}
-				</Text>
-			</View>
+	// Care type title
+	const careTypeTitle = isPsw ? 'Experience with:' : 'Requiring help with:';
+	const careType = user.carePreferences?.careType?.join(', ') || 'N/A';
+
+	return (
+		<View className="mb-4">
+			{/* Care Type */}
+			<Text className="font-bold text-black text-sm mb-1">
+				{careTypeTitle}
+			</Text>
+			<Text className="text-sm text-gray-700 mb-3" style={styles.wrapText}>
+				{careType}
+			</Text>
+
+			{/* Tasks / Seeking support */}
+			<Text className="font-bold text-black text-sm mb-1">
+				{tasksTitle}
+			</Text>
+			<Text className="text-sm text-gray-700 mb-3" style={styles.wrapText}>
+				{tasks}
+			</Text>
+
+			{/* Availability */}
+			<Text className="font-bold text-black text-sm mb-1">
+				{availabilityTitle}
+			</Text>
+			<Text className="text-sm text-gray-700" style={styles.wrapText}>
+				{availabilityText}
+			</Text>
 		</View>
 	);
 };

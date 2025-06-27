@@ -48,7 +48,10 @@ export const connectSocket = async (userId: string, dispatch: AppDispatch) => {
     });
 
     socket.on('session:update', (enrichedSessions: EnrichedSession[]) => { // Assuming backend sends EnrichedSession[]
+        console.log('📡 Received session:update with', enrichedSessions.length, 'sessions');
+        console.log('🔍 Sessions received:', enrichedSessions.map(s => ({ id: s.id, status: s.status, liveStatus: s.liveStatus })));
         dispatch(setSessions(enrichedSessions)); // Ensure dispatch is passed as a parameter
+        console.log('✅ Dispatched sessions to Redux');
     });
 
     socket.on('chat:newMessage', (messages: Message[]) => { // Assuming backend sends Message object

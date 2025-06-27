@@ -54,7 +54,9 @@ const userSlice = createSlice({
 		// Overwrite userData entirely and also update the allUsers map
 		setUserData(state, action: PayloadAction<User>) {
 			state.userData = action.payload;
-			state.allUsers[action.payload.id] = action.payload;
+			if (action.payload.id) {
+				state.allUsers[action.payload.id] = action.payload;
+			}
 			state.initialNavigationComplete = true;
 			state.loading = false;
 			state.error = null;
@@ -75,12 +77,14 @@ const userSlice = createSlice({
 				state.userData = { ...state.userData, ...action.payload };
 			}
 			if (state.userData) {
-				state.allUsers[state.userData.id] = state.userData;
+				state.allUsers[state.userData.id!] = state.userData;
 			}
 		},
 		// NEW: Upsert a user into the allUsers mapping (for when you fetch other users)
 		upsertUser(state, action: PayloadAction<User>) {
-			state.allUsers[action.payload.id] = action.payload;
+			if (action.payload.id) {
+				state.allUsers[action.payload.id] = action.payload;
+			}
 		},
 		setNavigationComplete(state, action: PayloadAction<boolean>) {
 			state.initialNavigationComplete = action.payload;
@@ -100,7 +104,9 @@ const userSlice = createSlice({
 				) {
 					state.userData = action.payload;
 				}
-				state.allUsers[action.payload.id] = action.payload;
+				if (action.payload.id) {
+					state.allUsers[action.payload.id] = action.payload;
+				}
 				state.loading = false;
 			})
 			.addCase(fetchUserFromLoginThunk.rejected, (state, action) => {

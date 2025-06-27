@@ -1,13 +1,31 @@
 // src/hooks/useAvailableUsers.ts
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/redux/store';
+import { fetchAvailableUsers, fetchAvailableUsersWithDistance } from '@/redux/userListSlice';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import useUsersList from './useUsersList';
-import { RootState } from '@/redux/store';
 import { User } from '@/types/User';
+
+const useAvailableUsers = (isPsw: boolean, withDistance: boolean = true) => {
+	const dispatch = useDispatch<AppDispatch>();
+	const { users, loading, error } = useSelector((state: RootState) => state.userList);
+
+	useEffect(() => {
+		if (withDistance) {
+			// Try to fetch with distance first
+			dispatch(fetchAvailableUsersWithDistance({ isPsw }));
+		} else {
+			// Fallback to regular fetch without distance
+			dispatch(fetchAvailableUsers({ isPsw }));
+		}
+	}, [dispatch, isPsw, withDistance]);
+
+	return { users, loading, error };
+};
 
 const useHomeUsers = (isPsw: boolean, filteredUsers?: User[] | null) => {
 	// Get the fetched users using your existing hook.
-	const { users, loading, error } = useUsersList(isPsw);
+	const { users: fetchedUsers, loading, error } = useAvailableUsers(isPsw);
 	// Get the current user ID.
 	const currentUserId = useSelector(
 		(state: RootState) => state.user.userData?.id,
@@ -30,14 +48,15 @@ const useHomeUsers = (isPsw: boolean, filteredUsers?: User[] | null) => {
 		}, []);
 	}, [allSessions, currentUserId]);
 
-	const baseUsers = filteredUsers ?? users;
+	const baseUsers = filteredUsers ?? fetchedUsers;
 
 	// Filter out users who are already engaged.
 	const availableUsers = useMemo(() => {
-		return baseUsers.filter((user) => !engagedUserIds.includes(user.id));
+		return baseUsers.filter((user: User) => !engagedUserIds.includes(user.id!));
 	}, [baseUsers, engagedUserIds]);
 
 	return { users: availableUsers, loading, error };
 };
 
-export default useHomeUsers;
+export default useAvailableUsers;
+export { useHomeUsers };

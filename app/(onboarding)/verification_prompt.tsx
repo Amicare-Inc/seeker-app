@@ -2,12 +2,13 @@ import React from 'react';
 import { SafeAreaView, ScrollView, View, Text } from 'react-native';
 import CustomButton from '@/components/Global/CustomButton';
 import { router } from 'expo-router';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 
 const VerificationPrompt: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
+	const userData = useSelector(((state: RootState) => state.user.userData));
 
 	const handleVerify = () => {
 		router.push('/verification_webview'); // Route to the webview page
@@ -15,7 +16,12 @@ const VerificationPrompt: React.FC = () => {
 
 	const handleSkip = () => {
 		dispatch(updateUserFields({ idVerified: false })); // Set idVerified to false in Redux
-		router.push('/bio_screen'); // Replace with the actual next page route
+		// Navigate based on rol
+		if (userData?.isPsw) {
+			router.push('/stripe-onboarding');
+		} else {
+			router.push('/bio_screen');
+		} // Replace with the actual next page route
 	};
 
 	return (

@@ -29,10 +29,14 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 	const bioText = user.bio;
 	const rating = '4.6 out of 5';
 	const rate = user.rate ?? 20;
-	const locationText = user.address || '4km away';
+	// Only show city/province in location section, distance is now shown under name
+	const locationText = user.address?.city && user.address?.province 
+		? `${user.address.city}, ${user.address.province}` 
+		: 'Toronto, ON';
 	const languages = '';
 
 	const handleRequestSession = () => {
+		if (!user.id) return;
 		router.push({
 			pathname: '/request-sessions',
 			params: { otherUserId: user.id },
@@ -69,6 +73,19 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 							<Text className="font-bold text-lg text-black">
 								{user.firstName} {user.lastName}
 							</Text>
+							{/* Show distance under full name if available */}
+							{user.distanceInfo && (
+								<View className="mb-1">
+									<Text className="text-blue-600 text-sm font-medium">
+										{user.distanceInfo.distance}
+									</Text>
+									{user.distanceInfo.duration && (
+										<Text className="text-gray-500 text-xs">
+											{user.distanceInfo.duration}
+										</Text>
+									)}
+								</View>
+							)}
 							<Text className="text-gray-500 text-sm">
 								{rating}
 							</Text>
@@ -80,6 +97,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 				</View>
 
 				{/* Bio Section */}
+				{/* Bio Text (header removed as per design) */}
 				<Text className="text-gray-700 mb-3">{bioText}</Text>
 
 				{/* Skill Sets */}
@@ -93,22 +111,6 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 					{user.isPsw ? 'Services Provided' : 'Services Needed'}
 				</Text>
 				<Text className="text-gray-700 mb-3">{diagnosed}</Text>
-
-				{/* Languages and Location */}
-				<View className="flex-row justify-between">
-					<View className="mr-2">
-						<Text className="font-bold text-gray-800 mb-1">
-							Languages
-						</Text>
-						<Text className="text-gray-700">{languages}</Text>
-					</View>
-					<View className="ml-2">
-						<Text className="font-bold text-gray-800 mb-1">
-							Location
-						</Text>
-						<Text className="text-gray-700">{locationText}</Text>
-					</View>
-				</View>
 
 				{/* Bottom buttons row */}
 				<View className="flex-row mt-4" pointerEvents="box-none">
