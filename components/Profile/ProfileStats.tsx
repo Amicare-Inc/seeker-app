@@ -41,28 +41,28 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
 	return (
 		<View className="mb-4">
 			{/* Care Type */}
-			<Text className="font-bold text-black text-sm mb-1">
+			<Text className="font-bold text-black text-base mb-1">
 				{careTypeTitle}
 			</Text>
-			<Text className="text-sm text-gray-700 mb-3" style={styles.wrapText}>
+			<Text className="text-base text-gray-700 mb-3 font-medium" style={styles.wrapText}>
 				{careType}
 			</Text>
 
 			{/* Tasks / Seeking support */}
-			<Text className="font-bold text-black text-sm mb-1">
+			<Text className="font-bold text-black text-base mb-1">
 				{tasksTitle}
 			</Text>
-			<Text className="text-sm text-gray-700 mb-3" style={styles.wrapText}>
+			<Text className="text-base text-gray-700 mb-3 font-medium" style={styles.wrapText}>
 				{tasks}
 			</Text>
 
-			{/* Availability */}
-			<Text className="font-bold text-black text-sm mb-1">
+			{/* Availability
+			<Text className="font-bold text-black text-base mb-1">
 				{availabilityTitle}
 			</Text>
 			<Text className="text-sm text-gray-700" style={styles.wrapText}>
 				{availabilityText}
-			</Text>
+			</Text> */}
 		</View>
 	);
 };

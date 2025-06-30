@@ -32,14 +32,14 @@ const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
 					className="w-[58px] h-[58px] rounded-[5px] mr-4"
 				/>
 				<View className="flex-1">
-					<Text className="font-semibold text-base text-black">
+					<Text className="font-bold text-lg text-black">
 						{user.firstName} {user.lastName}
 					</Text>
-					<Text className="text-xs text-gray-500">
+					<Text className="text-sm font-semibold text-gray-500">
 						{locationText}
 					</Text>
 				</View>
-				<Text className="font-medium text-base text-grey-58 pl-6">
+				<Text className="font-semibold text-xl text-grey-58 pl-6">
 					${rate}/hr
 				</Text>
 			</View>

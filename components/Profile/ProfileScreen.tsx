@@ -16,6 +16,8 @@ import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { clearSessions } from '@/redux/sessionSlice';
 import { clearUser } from '@/redux/userSlice';
 import { useDispatch } from 'react-redux';
+import ProfileScore from './ProfileScore';
+import ProfileAvailabilityTable from './ProfileAvailabilityTable';
 
 interface ProfileScreenProps {
 	user: User;
@@ -43,7 +45,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 
 	return (
 		<SafeAreaView
-			className="flex-1 px-4 pb-6"
+			className="flex-1 px-4 pb-16"
 			style={{ backgroundColor: '#f0f0f0' }}
 		>
 			<ProfileHeader
@@ -66,12 +68,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 			<ScrollView className="flex-1">
 				{/* Bio Label + Bio */}
 				{!!bio && (
-					<View className="mb-4">
+					<View className="">
+						<Text className="font-bold text-black text-base">Bio</Text>
 						<ProfileBio bio={bio} />
 					</View>
 				)}
 
 				<ProfileStats user={user} />
+
+				<ProfileScore user={user} />
+
+				<ProfileAvailabilityTable user={user} />
+
+				{/* If it's my profile, show the "Diagnoses" / "Experience" section. */}
 
 				{/* If it's my profile, show the row of icons + the list items. */}
 				{isMyProfile ? (
@@ -79,7 +88,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 						<ProfileActionRow user={user} />
 
 						{/* White container for the list items. */}
-						<View className="bg-white border border-gray-200 rounded-lg mb-4">
+						<View className="bg-white border-gray-200">
 							<ProfileListItem
 								label="Family"
 								iconName="people"
@@ -99,12 +108,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 								label="Refer friends"
 								iconName="gift"
 								onPress={() => router.push('/(profile)/refer')}
-								disabled
+								
 							/>
 							<ProfileListItem
 								label="Legal"
 								iconName="document-text"
-								disabled
+								
 							/>
 						</View>
 					</>

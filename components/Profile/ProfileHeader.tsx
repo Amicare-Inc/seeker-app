@@ -48,7 +48,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 			{/* Middle Column: User info */}
 			<View className="flex-1">
 				<View className="flex-row items-center gap-1">
-					<Text className="text-xl font-semibold text-black">
+					<Text className="text-lg font-bold text-black">
 						{userName}
 					</Text>
 					<Ionicons
@@ -59,15 +59,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 				</View>
 				{userLocation && (
 					<Text
-						className="text-xs text-gray-500 mt-1"
+						className="text-base text-gray-500"
 						style={{ color: '#797979' }}>
 						{userLocation}
 					</Text>
 				)}
 				{userRating && (
-					<View className="flex-row items-center mt-1">
+					<View className="flex-row items-center">
 						<Text
-							className="text-xs"
+							className="text-base"
 							style={{ color: '#797979' }}>
 							{userRating}
 						</Text>
@@ -76,8 +76,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
 			</View>
 
+			{/* Got rid of this for now since figma doesnt have it */}
+
 			{/* Right side: If my profile, show menu icon; otherwise, if PSW, show rate */}
-			{isMyProfile ? (
+
+			{/* {isMyProfile ? (
 				<TouchableOpacity onPress={onMenuPress} className="p-4">
 					<Ionicons
 						name="ellipsis-horizontal"
@@ -95,7 +98,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						${rate.toFixed()}/hr
 					</Text>
 				)
-			)}
+			)} */}
 		</View>
 	);
 };
