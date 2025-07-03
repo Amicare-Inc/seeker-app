@@ -65,14 +65,14 @@ export default function Index() {
 					</Text>
 					<CustomButton
 						title="Sign Up with Phone"
-						handlePress={() => router.push('/sign-up')}
+						handlePress={() => router.push('/sign-up-forum')}
 						containerStyles="w-full mb-4"
 						textStyles='font-medium'
 						iconName="call"
 					/>
 					<CustomButton
 						title="Sign Up with Email"
-						handlePress={() => router.push('/sign-up')}
+						handlePress={() => router.push('/sign-up-forum')}
 						containerStyles="w-full bg-white border border-1 border-grey-9 mb-12"
 						textStyles='font-medium text-black'
 						iconName="mail"
