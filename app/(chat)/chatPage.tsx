@@ -16,41 +16,43 @@ import { clearMessages, fetchMessagesBySessionId } from '@/redux/chatSlice';
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
     const insets = useSafeAreaInsets();
-	const dispatch = useDispatch<AppDispatch>();
-	const currentUser = useSelector((state: RootState) => state.user.userData);
-	const activeSession = useSelector(
-		(state: RootState) =>
-			state.sessions.activeEnrichedSession ||
-			state.sessions.allSessions.find((s) => s.id === sessionId),
-	) as EnrichedSession | undefined;
-	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
-	if (!sessionId || !activeSession || !currentUser) return null;
-	const otherUser = activeSession.otherUser;
-	const messages = useSelector((state: RootState) => state.chat.messages); // Get messages from Redux state
-	const [newMessage, setNewMessage] = useState('');
-	useEffect(() => {
+    const dispatch = useDispatch<AppDispatch>();
+    const currentUser = useSelector((state: RootState) => state.user.userData);
+    const activeSession = useSelector(
+        (state: RootState) =>
+            state.sessions.activeEnrichedSession ||
+            state.sessions.allSessions.find((s) => s.id === sessionId),
+    ) as EnrichedSession | undefined;
+    const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
+    
+    if (!sessionId || !activeSession || !currentUser) return null;
+    
+    const otherUser = activeSession.otherUser;
+    const messages = useSelector((state: RootState) => state.chat.messages);
+    const [newMessage, setNewMessage] = useState('');
 
-		if (sessionId){
-			dispatch(fetchMessagesBySessionId(sessionId as string));
-		}
+    useEffect(() => {
+        if (sessionId) {
+            dispatch(fetchMessagesBySessionId(sessionId as string));
+        }
 
-		// Get the socket instance
-		const socket = getSocket();
-	  
-		if (socket) {
-		  // Emit 'chat:joinSession' when the component mounts for this sessionId
-		  console.log(`Emitting 'chat:joinSession' for session: ${sessionId}`);
-		  socket.emit('chat:joinSession', sessionId);
-	  		return () => {
-				console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
-				socket.emit('chat:leaveSession', sessionId);
-				dispatch(clearMessages());
-		  	};
-		}
-		return undefined; 
-	},[sessionId, dispatch])
+        // Get the socket instance
+        const socket = getSocket();
+      
+        if (socket) {
+            // Emit 'chat:joinSession' when the component mounts for this sessionId
+            console.log(`Emitting 'chat:joinSession' for session: ${sessionId}`);
+            socket.emit('chat:joinSession', sessionId);
+              return () => {
+                console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
+                socket.emit('chat:leaveSession', sessionId);
+                dispatch(clearMessages());
+              };
+        }
+        return undefined; 
+    }, [sessionId, dispatch]);
 
-	const toggleHeaderExpanded = () => {
+    const toggleHeaderExpanded = () => {
         setIsHeaderExpanded(!isHeaderExpanded);
     };
 
@@ -60,19 +62,20 @@ const ChatPage = () => {
         }
     };
 
-	const handleSendMessage = async () => {
-		try {
-			if (newMessage.trim()) {
-				const nextMessage = await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
-				console.log('Message sent:', nextMessage);
-			setNewMessage('');
-			Keyboard.dismiss();
-		}} catch (error) {
-			console.error('Error sending message:', error);
-		}
-	};
+    const handleSendMessage = async () => {
+        try {
+            if (newMessage.trim()) {
+                const nextMessage = await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
+                console.log('Message sent:', nextMessage);
+                setNewMessage('');
+                Keyboard.dismiss();
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    };
 
-	return (
+    return (
         <SafeAreaView className="flex-1" edges={['left', 'right', 'bottom']}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
             <LinearGradient
@@ -109,7 +112,7 @@ const ChatPage = () => {
             >
                 <ChatMessageList
                     messages={messages}
-                    otherUserName={otherUser?.firstName || ''}
+                    otherUser={otherUser!}
                     currentUserId={currentUser.id!}
                 />
                 <ChatInput
@@ -121,6 +124,6 @@ const ChatPage = () => {
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
-}
+};
 
 export default ChatPage;

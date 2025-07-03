@@ -53,7 +53,7 @@ const SessionList: React.FC<SessionListProps> = ({
 
 	return (
 		<View className="mt-5">
-			<Text className="text-xl mb-3 text-black">{title}</Text>
+			<Text className="text-xl mb-3 text-black font-medium">{title}</Text>
 			<FlatList
 				data={sessions}
 				keyExtractor={(item) => item.id}

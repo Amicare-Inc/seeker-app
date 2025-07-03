@@ -44,14 +44,14 @@ const PswSessionsTab = () => {
             style={{ backgroundColor: '#f0f0f0' }}
         >
             {/* Header Row */}
-            <View className="flex-row items-center px-3.5 pb-2">
+            <View className="flex-row items-center px-3.5 border-b border-[#79797966] pb-4">
                 <Ionicons
                     name="time"
-                    size={24}
+                    size={26}
                     color="black"
                     style={{ marginRight: 8 }}
                 />
-                <Text className="text-2xl text-black">Sessions</Text>
+                <Text className="text-2xl text-black font-medium">My Sessions</Text>
             </View>
 
             {/* Main Content */}
@@ -59,7 +59,7 @@ const PswSessionsTab = () => {
                 <SessionList
                     sessions={newRequests}
                     onSessionPress={onSessionPress}
-                    title="New Requests"
+                    title=""
                 />
 
                 <SessionList

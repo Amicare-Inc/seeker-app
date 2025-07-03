@@ -47,7 +47,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 				onPress={() => onSessionPress(item)}
 				className="mb-6"
 			>
-				<View className="rounded-full px-3 py-3 pr-10 bg-[#0e7ae2]">
+				<View className="rounded-full px-3 py-3 pr-14 bg-[#0e7ae2]">
 					<View className="flex-row items-center justify-between">
 						<View className="flex-row items-center">
 							<Image
@@ -56,7 +56,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 										item.otherUser.profilePhotoUrl ||
 										'https://via.placeholder.com/50',
 								}}
-								className="w-12 h-12 rounded-full"
+								className="w-[60px] h-[60px] rounded-full"
 							/>
 							<View className="ml-3">
 								<Text
@@ -69,14 +69,14 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 										: mainLabel}
 								</Text>
 								<Text
-									className="text-md"
+									className="text-sm"
 									style={{ color: '#fff' }}
 								>
 									with {otherName}
 								</Text>
 							</View>
 						</View>
-						<View className="items-end">
+						<View className="">
 							<Text className="text-white text-lg font-semibold">
 								{formattedDate}
 							</Text>
@@ -92,7 +92,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 
 	return (
 		<View className="mt-8">
-			<Text className="text-xl mb-3 text-black">{title}</Text>
+			<Text className="text-xl mb-3 text-black font-medium">{title}</Text>
 			<FlatList
 				data={sessions}
 				keyExtractor={(item) => item.id}

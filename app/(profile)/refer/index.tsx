@@ -1,89 +1,112 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { ref } from 'firebase/storage';
 
 const ReferralsScreen = () => {
+  const [referralLink] = useState('amicare.io/invitejs/janedoe...');
+
   const handleBackPress = () => {
     router.back();
+  };
+
+  const handleTrackReferrals = () => {
+
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      Alert.alert('Copied!', 'Referral link copied to clipboard');
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+    }
+  };
+
+  const handleShareAmicare = async () => {
+    try {
+      await Share.share({
+        message: `Share Amicare with friends who need care in Scarborough, Brampton and Mississauga. ${referralLink}`,
+        title: 'Share Amicare',
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
-      <View className="flex-row items-center px-4">
-        <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4">
+      <View className="flex-row items-center justify-between px-4 py-3">
+        <TouchableOpacity onPress={handleBackPress}>
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <View className="flex-1 items-center">
-          <Text className="text-xl font-medium">Referal</Text>
+        <TouchableOpacity 
+          onPress={handleTrackReferrals}
+          className="bg-grey-9 px-4 py-1.5 rounded-full"
+        >
+          <Text className="text-sm text-grey-80 font-medium">Track Referrals</Text>
+        </TouchableOpacity>
+      </View>
+
+        <View className="bg-[#CCE3F9] mx-4 mt-2 mb-6 rounded-3xl py-12 px-6 h-[585px]">
+          <Text className="text-brand-blue text-3xl font-extrabold tracking-tighter text-center mb-4">
+            SHARE AMICARE
+          </Text>
+          
+          <Text className="text-grey-80 text-center text-base font-medium leading-6 mb-12">
+            Share Amicare with friends{'\n'}
+            who need care in Scarborough,{'\n'}
+            Brampton and Mississauga.
+          </Text>
+
+          {/* Profile Icon */}
+          <View className="items-center mb-20">
+            <View className="w-[178px] h-[178px] bg-white rounded-full items-center justify-center">
+
+              <Ionicons name="person" size={100} color="#0C7AE2" />
+
+              <View className="w-[48px] h-[48px] bg-[#75D87F] rounded-full items-center justify-center absolute bottom-8 right-8">
+                <Ionicons name="paper-plane" size={26} color="white" />
+              </View>
+            </View>
+          </View>
+
+          {/* Share Link Section */}
+          <View className="mb-6">
+            <Text className="text-grey-80 font-medium text-sm mb-2 ml-3">Share your link:</Text>
+            <View className="flex-row bg-transparent rounded-full p-2 px-4 pr-2 border border-grey-49 items-center relative">
+              <Text className="text-brand-blue text-base font-semibold flex-1">
+              {referralLink.length > 25
+                ? referralLink.slice(0, 25) + '...'
+                : referralLink}
+              </Text>
+              <TouchableOpacity
+              onPress={handleCopyLink}
+              className="bg-brand-blue px-5 py-2 rounded-full flex items-center justify-center ml-auto"
+              >
+              <Text className="text-white font-medium">Copy</Text>
+              </TouchableOpacity>
+            </View>
+            </View>
+          </View>
+
+
+        {/* Share Button */}
+        <View className="px-4 mb-6 border-t pt-4 border-[#79797966]">
+          <TouchableOpacity
+            onPress={handleShareAmicare}
+            className="bg-black py-4 rounded-xl"
+          >
+            <Text className="text-white text-center text-xl">
+              Share Amicare
+            </Text>
+          </TouchableOpacity>
         </View>
-      </View>
 
-      <ScrollView className="flex-1">
-        {/* <View className="bg-white border border-gray-200 rounded-lg mx-4 mt-4">
-          <ListItem
-            icon="gift"
-            label="Refer and earn $XX"
-            onPress={() => {}}
-          />
-          <ListItem
-            icon="analytics"
-            label="Track Referrals"
-            onPress={() => {}}
-          />
-          <ListItem
-            icon="link"
-            label="Enter a referral link"
-            subtitle="Only active in 30 day window from account creation"
-            onPress={() => {}}
-          />
-          <ListItem
-            icon="star"
-            label="Explore Partnerships"
-            subtitle="Get paid to promote Amicare"
-            onPress={() => {}}
-            noBorder
-          />
-        </View> */}
-      </ScrollView>
     </SafeAreaView>
-  );
-};
-
-interface ListItemProps {
-  icon: string;
-  label: string;
-  subtitle?: string;
-  onPress: () => void;
-  disabled?: boolean;
-  noBorder?: boolean;
-}
-
-const ListItem: React.FC<ListItemProps> = ({ 
-  icon, 
-  label,
-  subtitle,
-  onPress, 
-  disabled = false,
-  noBorder = false
-}) => {
-  return (
-    <TouchableOpacity 
-      onPress={onPress}
-      disabled={disabled}
-      className={`flex-row items-center p-4 ${!noBorder ? 'border-b border-gray-200' : ''}`}
-    >
-      <View className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center mr-3">
-        <Ionicons name={icon as any} size={18} color="black" />
-      </View>
-      <View className="flex-1">
-        <Text className="text-base">{label}</Text>
-        {subtitle && <Text className="text-sm text-gray-500">{subtitle}</Text>}
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#C5C5C7" />
-    </TouchableOpacity>
   );
 };
 
