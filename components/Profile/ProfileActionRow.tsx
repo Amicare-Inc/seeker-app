@@ -41,33 +41,33 @@ const ProfileActionRow: React.FC<ProfileActionRowProps> = ({ user }) => {
 				<View className="flex-row gap-[10px] mb-[10px]">
 					<TouchableOpacity
 						onPress={() => handlePressAction('wallet')}
-						className="bg-white border border-gray-200 rounded-xl flex-1 items-center p-3"
+						className="bg-white rounded-[10px] flex-1 items-center p-3"
 					>
 						<Ionicons name="card" size={26} color="#000" />
-						<Text className="text-sm mt-2">Wallet</Text>
+						<Text className="text-sm font-medium mt-2">Wallet</Text>
 					</TouchableOpacity>
 
 					<TouchableOpacity
 						onPress={() => handlePressAction('history')}
-						className="bg-white border border-gray-200 rounded-xl flex-1 items-center p-3"
+						className="bg-white rounded-[10px] flex-1 items-center p-3"
 					>
 						<Ionicons name="calendar" size={26} color="#000" />
-						<Text className="text-sm mt-2">History</Text>
+						<Text className="text-sm font-medium mt-2">History</Text>
 					</TouchableOpacity>
 
 					<TouchableOpacity
 						onPress={() => handlePressAction('edit')}
-						className="bg-white border border-gray-200 rounded-xl flex-1 items-center p-3"
+						className="bg-white rounded-[10px] flex-1 items-center p-3"
 					>
 						<Ionicons name="person" size={26} color="#000" />
-						<Text className="text-sm mt-2">Edit Profile</Text>
+						<Text className="text-sm font-medium mt-2">Edit Profile</Text>
 					</TouchableOpacity>
 				</View>
 			)}
 
 			{/* Expanded State: Show one large panel */}
 			{selectedAction && (
-				<View className="bg-white border border-gray-200 rounded-lg p-4 mb-2">
+				<View className="bg-white rounded-[10px] p-4 mb-2">
 					<TouchableOpacity
 						onPress={() => handlePressAction(null)}
 						className="flex-row justify-end mb-2"

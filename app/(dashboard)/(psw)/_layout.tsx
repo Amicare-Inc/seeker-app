@@ -10,19 +10,20 @@ const PswDashboardLayout = () => {
 	const activeLiveSession = useLiveSession();
 
 	return (
-		<SafeAreaProvider>
-			<View style={{ flex: 1 }}>
+		<SafeAreaProvider >
+			<View style={{ flex: 1 }} >
 				<Tabs
 					screenOptions={({ route }) => ({
 						tabBarShowLabel: true,
-						tabBarActiveTintColor: '#008DF4', // Active tint color
-						tabBarInactiveTintColor: '#999', // Inactive tint color
+						tabBarActiveTintColor: '#000', // Active tint color
+						tabBarInactiveTintColor: '#7B7B7E', // Inactive tint color
 						tabBarStyle: {
 							height: Platform.OS === 'ios' ? 83 : 64,
 							paddingBottom: Platform.OS === 'ios' ? 30 : 12,
 							paddingTop: 12,
-							backgroundColor: '#fff',
-							borderTopWidth: 0,
+							backgroundColor: '#F2F2F7',
+							borderTopWidth: 1,
+							borderTopColor: "#79797966",
 							elevation: 0,
 							shadowOpacity: 0,
 							position: 'absolute',
@@ -35,17 +36,18 @@ const PswDashboardLayout = () => {
 								typeof Ionicons
 							>['name'] = 'home';
 							if (route.name === 'psw-home') {
-								iconName = focused ? 'home' : 'home-outline';
+								iconName = 'home';
 							} else if (route.name === 'psw-sessions') {
-								iconName = focused ? 'time' : 'time-outline';
+								iconName = 'time';
 							} else if (route.name === 'psw-profile') {
-								iconName = focused ? 'person' : 'person-outline';
+								iconName =  'person';
 							}
 							return (
 								<Ionicons
 									name={iconName}
-									size={size}
+									size={22}
 									color={color}
+									style={{ marginBottom: 8 }}
 								/>
 							);
 						},

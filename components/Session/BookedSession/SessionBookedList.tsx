@@ -45,10 +45,9 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 		return (
 			<TouchableOpacity
 				onPress={() => onSessionPress(item)}
-				className="mb-6"
+				className="mb-[12px]"
 			>
-				<View className="rounded-full px-3 py-3 pr-14 bg-[#0e7ae2]">
-					<View className="flex-row items-center justify-between">
+				<View className="rounded-full w-[360px] h-[84px] flex-row items-center justify-between bg-[#0e7ae2] pl-4 pr-12">
 						<View className="flex-row items-center">
 							<Image
 								source={{
@@ -60,7 +59,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 							/>
 							<View className="ml-3">
 								<Text
-									className="text-white text-lg font-bold"
+									className="text-white text-lg font-semibold"
 									numberOfLines={1}
 									ellipsizeMode="tail"
 								>
@@ -69,8 +68,8 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 										: mainLabel}
 								</Text>
 								<Text
-									className="text-sm"
-									style={{ color: '#fff' }}
+									className="text-sm font-medium"
+									style={{ color: 'rgba(255,255,255,0.85)' }}
 								>
 									with {otherName}
 								</Text>
@@ -80,25 +79,27 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 							<Text className="text-white text-lg font-semibold">
 								{formattedDate}
 							</Text>
-							<Text className="text-white text-sm">
+							<Text 
+								className="text-sm"
+								style={{ color: 'rgba(255,255,255,0.85)' }}
+							>
 								{formattedTime}
 							</Text>
 						</View>
-					</View>
 				</View>
 			</TouchableOpacity>
 		);
 	};
 
 	return (
-		<View className="mt-8">
-			<Text className="text-xl mb-3 text-black font-medium">{title}</Text>
+		<View>
+			<Text className="text-xl text-black font-medium mt-[10px] mb-[20px]">{title}</Text>
 			<FlatList
 				data={sessions}
 				keyExtractor={(item) => item.id}
 				renderItem={renderItem}
 				showsVerticalScrollIndicator={false}
-				contentContainerStyle={{ paddingHorizontal: 4 }}
+				contentContainerStyle={{ paddingHorizontal: 4}}
 			/>
 		</View>
 	);

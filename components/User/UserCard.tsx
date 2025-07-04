@@ -13,7 +13,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
 	const locationText = user.address?.city && user.address?.province 
 		? `${user.address.city}, ${user.address.province}` 
 		: 'Toronto, ON';
-	const rate = user.rate || 20;
+	const rate = Math.round(user.rate || 20);
 
 	return (
 		<TouchableOpacity

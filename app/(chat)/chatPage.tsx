@@ -79,48 +79,42 @@ const ChatPage = () => {
         <SafeAreaView className="flex-1" edges={['left', 'right', 'bottom']}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
             <LinearGradient
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                colors={
-                    activeSession.status === 'inProgress'
-                        ? ['#05a73c', '#4ade80']  // Darker green to light green (similar contrast to blue)
-                        : activeSession.status === 'confirmed'
-                            ? ['#008DF4', '#5CBAFF']
-                            : ['#FFFFFF', '#FFFFFF']
-                }
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 0,
-                    paddingTop: insets.top,
-                }}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            colors={['#FFFFFF', '#FFFFFF']}
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 0,
+                paddingTop: insets.top,
+            }}
             />
             <View style={{ paddingTop: insets.top }}>
-                <ChatHeader
-                    session={activeSession}
-                    user={otherUser!}
-                    isExpanded={isHeaderExpanded}
-                    toggleExpanded={toggleHeaderExpanded}
-                />
+            <ChatHeader
+                session={activeSession}
+                user={otherUser!}
+                isExpanded={isHeaderExpanded}
+                toggleExpanded={toggleHeaderExpanded}
+            />
             </View>
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                className="flex-1"
-                style={{ backgroundColor: '#f0f0f0' }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            className="flex-1"
+            style={{ backgroundColor: '#f0f0f0' }}
             >
-                <ChatMessageList
-                    messages={messages}
-                    otherUser={otherUser!}
-                    currentUserId={currentUser.id!}
-                />
-                <ChatInput
-                    newMessage={newMessage}
-                    setNewMessage={setNewMessage}
-                    handleSendMessage={handleSendMessage}
-                    onFocusChange={handleInputFocusChange}
-                />
+            <ChatMessageList
+                messages={messages}
+                otherUser={otherUser!}
+                currentUserId={currentUser.id!}
+            />
+            <ChatInput
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                handleSendMessage={handleSendMessage}
+                onFocusChange={handleInputFocusChange}
+            />
             </KeyboardAvoidingView>
         </SafeAreaView>
     );

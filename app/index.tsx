@@ -4,8 +4,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import CustomButton from '@/components/Global/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
+import { updateUserFields } from '@/redux/userSlice';
 
 export default function Index() {
+    const dispatch = useDispatch<AppDispatch>();
+
+    const handleRoleSelection = async (isPsw: boolean) => {
+        dispatch(updateUserFields({ isPsw }));
+        router.push('/sign-up');
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: '#F2F2F7' }}>
             <StatusBar hidden />
@@ -61,13 +71,13 @@ export default function Index() {
                     </Text>
                     <CustomButton
                         title="I am a Care Seeker"
-                        handlePress={() => router.push('/sign-up')}
+                        handlePress={() => handleRoleSelection(false)}
                         containerStyles="w-full mb-4"
                         textStyles="font-medium"
                     />
                     <CustomButton
                         title="I am a Care Giver"
-                        handlePress={() => router.push('/sign-in')}
+                        handlePress={() => handleRoleSelection(true)}
                         containerStyles="w-full bg-white border border-1 border-gray-200 mb-8"
                         textStyles="font-medium text-black"
                     />
@@ -85,24 +95,21 @@ export default function Index() {
                             Log In!
                         </Text>
                     </Text>
-					<View className="flex flex-row justify-center items-center gap-1">
-
-					<Ionicons name="information-circle" size={24} color="#BFBFC3" />
-                    <Text style={{ textAlign: 'center', color: '#666', fontSize: 12 }}>
-						
-                        By continuing, you agree with our{' '}
-                        <Text
-                            style={{
-                                color: '#007AFF',
-                                textDecorationLine: 'none'
-                            }}
-                            onPress={() => {}}
-                        >
-                            Privacy Policy.
+                    <View className="flex flex-row justify-center items-center gap-1">
+                        <Ionicons name="information-circle" size={24} color="#BFBFC3" />
+                        <Text style={{ textAlign: 'center', color: '#666', fontSize: 12 }}>
+                            By continuing, you agree with our{' '}
+                            <Text
+                                style={{
+                                    color: '#007AFF',
+                                    textDecorationLine: 'none'
+                                }}
+                                onPress={() => {}}
+                            >
+                                Privacy Policy.
+                            </Text>
                         </Text>
-                    </Text>
-											
-					</View>
+                    </View>
                 </View>
             </ScrollView>
         </View>

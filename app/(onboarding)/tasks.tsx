@@ -1,100 +1,114 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import CustomButton from '@/components/Global/CustomButton';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import helpOptions from '@/assets/helpOptions';
 import { router } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const TaskSelection: React.FC = () => {
-	const dispatch = useDispatch<AppDispatch>();
-	const userData = useSelector((state: RootState) => state.user.userData);
-	const isPSW = userData?.isPsw;
+    const dispatch = useDispatch<AppDispatch>();
+    const userData = useSelector((state: RootState) => state.user.userData);
+    const isPSW = userData?.isPsw;
 
-	const [selectedTasks, setSelectedTasks] = useState<string[]>(
-		userData?.carePreferences?.tasks || [],
-	);
+    const [selectedTasks, setSelectedTasks] = useState<string[]>(
+        userData?.carePreferences?.tasks || [],
+    );
 
-	// const taskOptions = [
-	//     'Option 1',
-	//     'Option 2',
-	//     'Option 3',
-	//     'Option 4',
-	//     'Option 5',
-	//     'Option 6',
-	//     'Option 7',
-	//     'Option 8',
-	// ];
+    const toggleTask = (task: string) => {
+        setSelectedTasks((prev) =>
+            prev.includes(task)
+                ? prev.filter((t) => t !== task)
+                : [...prev, task],
+        );
+    };
 
-	const toggleTask = (task: string) => {
-		setSelectedTasks((prev) =>
-			prev.includes(task)
-				? prev.filter((t) => t !== task)
-				: [...prev, task],
-		);
-	};
+    const handleNext = () => {
+        if (selectedTasks.length > 0) {
+            dispatch(
+                updateUserFields({
+                    carePreferences: {
+                        ...userData?.carePreferences,
+                        tasks: selectedTasks,
+                    },
+                }),
+            );
+            console.log('Tasks updated in Redux:', selectedTasks, userData);
+        }
+        router.push('/availability'); // Move to the next page regardless
+    };
 
-	const handleNext = () => {
-		if (selectedTasks.length > 0) {
-			dispatch(
-				updateUserFields({
-					carePreferences: {
-						...userData?.carePreferences,
-						tasks: selectedTasks,
-					},
-				}),
-			);
-			console.log('Tasks updated in Redux:', selectedTasks, userData);
-		}
-		router.push('/availability'); // Move to the next page regardless
-	};
+    return (
+        <SafeAreaView className="flex-1 bg-grey-0">
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                <View className="px-[16px]">
+                    {/* Header */}
+                    <View className="flex-row items-center mb-[53px]">
+                        <TouchableOpacity className="absolute" onPress={() => router.back()}>
+                            <Ionicons name="chevron-back" size={24} color="#000" />
+                        </TouchableOpacity>
+                        <Text className="text-xl font-medium mx-auto">
+                            Care Needs 2/4
+                        </Text>
+                    </View>
 
-	return (
-		<SafeAreaView className="flex-1 bg-white">
-			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-				<View className="px-6">
-					{/* Dynamic Header Based on Role */}
-					<Text className="text-lg font-bold text-black mb-4">
-						{isPSW
-							? 'What tasks are you able to assist with?'
-							: 'What kind of tasks would you like help with?'}
-					</Text>
+                    {/* Question */}
+                    <Text className="text-lg text-grey-80 mb-[34px]">
+                        {isPSW
+                            ? 'What tasks are you able to assist with?'
+                            : 'What kind of tasks would you need help with?'}
+                    </Text>
 
-					{/* Task Options */}
-					<View className="flex-wrap flex-row justify-between">
-						{helpOptions.map((task) => (
-							<CustomButton
-								key={task}
-								title={task}
-								handlePress={() => toggleTask(task)}
-								containerStyles={`w-full mb-4 py-4 rounded-xl border ${
-									selectedTasks.includes(task)
-										? 'border-blue-500 bg-blue-500'
-										: 'border-gray-200 bg-gray-200'
-								}`}
-								textStyles={`text-base ${
-									selectedTasks.includes(task)
-										? 'text-white'
-										: 'text-black'
-								}`}
-							/>
-						))}
-					</View>
-				</View>
-			</ScrollView>
+                    {/* Task Options */}
+                    <View className="flex-wrap flex-row -mr-[10px] mb-[75px]">
+                        {helpOptions.map((task) => (
+                            <CustomButton
+                                key={task}
+                                title={task}
+                                handlePress={() => toggleTask(task)}
+                                containerStyles={`mb-[10px] mr-[10px] rounded-full w-full h-[44px] ${
+                                    selectedTasks.includes(task)
+                                        ? 'bg-brand-blue'
+                                        : 'bg-white'
+                                }`}
+                                textStyles={`text-sm font-medium ${
+                                    selectedTasks.includes(task)
+                                        ? 'text-white'
+                                        : 'text-black'
+                                }`}
+                            />
+                        ))}
+                    </View>
 
-			{/* Skip/Next Button */}
-			<View className="px-9 pb-0">
-				<CustomButton
-					title={selectedTasks.length > 0 ? 'Next' : 'Skip'}
-					handlePress={handleNext}
-					containerStyles="bg-black py-4 rounded-full"
-					textStyles="text-white text-lg"
-				/>
-			</View>
-		</SafeAreaView>
-	);
+                </View>
+            </ScrollView>
+
+            {/* Next Button */}
+            <View className="px-[16px]">
+				
+                    {/* Privacy Notice */}
+                    <View className="flex-row justify-center mx-auto px-[16px]">
+                        <Ionicons
+                            name="information-circle"
+                            size={30}
+                            color="#BFBFC3"
+                        />
+                        <Text className="text-xs text-grey-49 mb-[21px] ml-[16px] font-medium">
+                            We use your care preferences to personalize your matches. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
+                            <Text className="text-brand-blue">Privacy Policy</Text> and <Text className="text-brand-blue">Terms of Use</Text>.
+                        </Text>
+                    </View>
+                <CustomButton
+                    title={selectedTasks.length > 0 ? 'Next' : 'Skip'}
+                    handlePress={handleNext}
+                    containerStyles="bg-black py-4 rounded-lg"
+                    textStyles="text-white text-xl font-medium"
+                />
+            </View>
+        </SafeAreaView>
+    );
 };
 
 export default TaskSelection;

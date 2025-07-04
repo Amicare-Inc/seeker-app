@@ -51,7 +51,8 @@ const ReferralsScreen = () => {
         </TouchableOpacity>
       </View>
 
-        <View className="bg-[#CCE3F9] mx-4 mt-2 mb-6 rounded-3xl py-12 px-6 h-[585px]">
+      <ScrollView>
+        <View className="bg-[#CCE3F9] mx-4 mb-[39px] rounded-3xl py-12 px-6 h-[585px]">
           <Text className="text-brand-blue text-3xl font-extrabold tracking-tighter text-center mb-4">
             SHARE AMICARE
           </Text>
@@ -92,6 +93,28 @@ const ReferralsScreen = () => {
             </View>
             </View>
           </View>
+          <View className="flex mb-[53px] px-4">
+            <View className="flex-row items-center gap-[13px] mb-[31px]">
+              <View className="w-[38px] h-[38px] bg-[#CCE3F9] rounded-full flex items-center justify-center">
+                <Text className="text-[#05549E] font-bold text-xl">1</Text>
+              </View>
+                <Text className="text-base text-grey-58">Share your unique referral link with 3{'\n'}friends</Text>
+            </View>
+            <View className="flex-row items-center gap-[13px] mb-[31px]">
+              <View className="w-[38px] h-[38px] bg-[#CCE3F9] rounded-full flex items-center justify-center">
+                <Text className="text-[#05549E] font-bold text-xl">2</Text>
+              </View>
+                <Text className="text-base text-grey-58">They download Amicare and spend $XX+{'\n'}on Sessions</Text>
+            </View>
+            <View className="flex-row items-center gap-[13px]">
+              <View className="w-[38px] h-[38px] bg-[#CCE3F9] rounded-full flex items-center justify-center">
+                <Text className="text-[#05549E] font-bold text-xl">3</Text>
+              </View>
+                <Text className="text-base text-grey-58">You earn $XX</Text>
+            </View>
+
+          </View>
+        </ScrollView>
 
 
         {/* Share Button */}

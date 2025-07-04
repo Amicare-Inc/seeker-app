@@ -41,7 +41,7 @@ const SignUpForum = () => {
                         email: form.email || '',
                     }),
                 );
-                router.push('/(onboarding)/role');
+                router.push('/(onboarding)/personal_details');
             } catch (error) {
                 setPasswordError((error as any).message);
                 console.log((error as any).message);

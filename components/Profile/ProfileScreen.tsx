@@ -76,9 +76,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 
 				<ProfileStats user={user} />
 
-				<ProfileScore user={user} />
-
-				<ProfileAvailabilityTable user={user} />
+				{!isMyProfile && (
+					<>
+						<ProfileScore user={user} />
+						<ProfileAvailabilityTable user={user} />
+					</>
+				)}
 
 				{/* If it's my profile, show the "Diagnoses" / "Experience" section. */}
 
@@ -88,7 +91,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 						<ProfileActionRow user={user} />
 
 						{/* White container for the list items. */}
-						<View className="bg-white border-gray-200">
+						<View className="bg-white border-gray-200 rounded-[10px]">
 							<ProfileListItem
 								label="Family"
 								iconName="people"
