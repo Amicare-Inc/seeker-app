@@ -13,6 +13,9 @@ import SessionChecklistBox from '../OngoingSession/SessionChecklistBox';
 import { RootState } from '@/redux/store';
 import { updateSessionChecklist, addSessionComment } from '@/services/node-express-backend/session';
 import { ChecklistItem } from '@/types/Sessions';
+import { useElapsedTimer } from '@/hooks/useElapsedTimer';
+import { LiveStatus } from '@/constants/enums';
+import { BTN_BASE, BTN_PRIMARY, BTN_OUTLINE_BLACK } from '@/shared/styles';
 
 const { width } = Dimensions.get('window');
 
@@ -57,10 +60,9 @@ const formatTimeUntilSession = (startTime: string | undefined | null): string =>
 
 const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, onCollapse }) => {
   const [expanded, setExpanded] = useState(false);
-  const [timer, setTimer] = useState(0);
   const bottomOffset = useRef(new Animated.Value(Platform.OS === 'ios' ? 83 : 64)).current;
   const expandedRef = useRef(expanded);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timer = useElapsedTimer(session.liveStatus, session.liveStatusUpdatedAt);
   const dispatch = useDispatch();
   const currentUser = useSelector((state: RootState) => state.user.userData);
   
@@ -103,58 +105,6 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
       keyboardDidHideListener?.remove();
     };
   }, [bottomOffset]);
-
-  // Timer effect - calculate elapsed time from liveStatusUpdatedAt
-  useEffect(() => {
-    if (session.liveStatus === 'started' && session.liveStatusUpdatedAt) {
-
-      const updateTimer = () => {
-        const now = new Date();
-        // Handle Firebase Timestamp conversion
-        const timestamp = session.liveStatusUpdatedAt!;
-        
-        let startTime: Date;
-        if ((timestamp as any)?._seconds !== undefined) {
-          // Firebase timestamp format: convert _seconds and _nanoseconds to Date
-          const seconds = (timestamp as any)._seconds;
-          const nanoseconds = (timestamp as any)._nanoseconds || 0;
-          const milliseconds = seconds * 1000 + nanoseconds / 1000000;
-          startTime = new Date(milliseconds);
-        } else if ((timestamp as any)?.toDate) {
-          // Standard Firebase Timestamp with toDate method
-          startTime = (timestamp as any).toDate();
-        } else {
-          // Fallback for string timestamps
-          startTime = new Date(timestamp);
-        }
-        
-        if (isNaN(startTime.getTime())) {
-          console.log('Invalid start time, setting timer to 0');
-          setTimer(0);
-          return;
-        }
-        
-        const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-        setTimer(Math.max(0, elapsedSeconds));
-      };
-
-      // Update immediately
-      updateTimer();
-      
-      // Then update every second
-      timerRef.current = setInterval(updateTimer, 1000);
-    } else {
-      console.log('Timer debug - conditions not met:', {
-        liveStatus: session.liveStatus,
-        liveStatusUpdatedAt: session.liveStatusUpdatedAt
-      });
-      setTimer(0); // Reset timer if not started or no start time
-    }
-    
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [session.liveStatus, session.liveStatusUpdatedAt]);
 
   const handleMessagePress = () => {
     dispatch(setActiveEnrichedSession(session));
@@ -298,7 +248,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
             </View>
             
             {/* Start button on right for ready state */}
-            {session.liveStatus === 'ready' && (
+            {session.liveStatus === LiveStatus.Ready && (
               <TouchableOpacity 
                 onPress={confirmSession}
                 className={`py-3 px-6 rounded-lg mr-5 ${userConfirmed ? 'border border-black bg-transparent' : 'bg-white'}`}
@@ -310,7 +260,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
             )}
 
             {/* End session button for ending state */}
-            {session.liveStatus === 'ending' && (
+            {session.liveStatus === LiveStatus.Ending && (
               <View className="flex-row items-center mr-5">
                 <TouchableOpacity 
                   onPress={handleEndSessionPress}
@@ -329,7 +279,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
             )}
 
             {/* Timer display for started sessions */}
-            {session.liveStatus === 'started' && (
+            {session.liveStatus === LiveStatus.Started && (
               <View className="items-end mr-5">
                 <Text className="text-black text-[20px] font-bold">
                   {formatTime(timer)}
@@ -359,7 +309,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
             />
 
             {/* Date & Time Row */}
-            {(session.liveStatus === 'ready' || session.liveStatus === 'upcoming') ? (<View className="flex-row justify-between items-center bg-transparent rounded-full border border-black px-6 py-2.5 mb-4 mx-5 mt-2">
+            {(session.liveStatus === LiveStatus.Ready || session.liveStatus === LiveStatus.Upcoming) ? (<View className="flex-row justify-between items-center bg-transparent rounded-full border border-black px-6 py-2.5 mb-4 mx-5 mt-2">
               <View className="flex-row items-center">
                 <Feather name="calendar" size={24} color="black" />
                 <Text className="text-black ml-2 text-[17px] font-medium">{dateLabel}</Text>
@@ -403,7 +353,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
 
             {/* Button Row */}
             <View className="flex-row justify-between items-center mx-5 mt-4">
-              {session.liveStatus === 'ready' ? (
+              {session.liveStatus === LiveStatus.Ready ? (
                 <>
                   <TouchableOpacity 
                     onPress={confirmSession}
@@ -422,7 +372,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
                     </Text>
                   </TouchableOpacity>
                 </>
-              ) : session.liveStatus === 'ending' ? (
+              ) : session.liveStatus === LiveStatus.Ending ? (
                 <>
                   <TouchableOpacity 
                     onPress={handleEndSessionPress}

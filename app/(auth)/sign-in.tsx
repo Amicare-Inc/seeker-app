@@ -14,7 +14,7 @@ const SignIn = () => {
 	const [form, setForm] = useState({
 		// email: "aisha.khan@example.com",
 		// password: "asdfgh",
-		email: 'martin.droruga4@example.com',
+		email: 'martin.droruga666@example.com',
 		password: 'asdfgh',
 	});
 	const userData = useSelector((state: RootState) => state.user.userData);
@@ -49,7 +49,7 @@ const SignIn = () => {
 			}
 		}
 		if (userData && userData.id) {
-			connectSocket(userData.id, dispatch);
+			connectSocket(userData.id);
 		}
 	}, [userData]);
 

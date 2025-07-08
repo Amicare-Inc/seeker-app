@@ -9,12 +9,17 @@ import { fetchAvailableUsers } from '@/redux/userListSlice';
 import { fetchUserSessionsFromBackend } from '@/redux/sessionSlice';
 import { router } from 'expo-router';
 import { selectCompletedSessions } from '@/redux/selectors';
+import { useSocketListeners } from '@/hooks/useSocketListeners';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const GlobalDataLoader = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const sessions = useSelector((state: RootState) => state.sessions.allSessions);
 	const prevSessionsRef = useRef<string>('');
+
+	// Global socket listeners (will lazily connect when userId available)
+	useSocketListeners(currentUser?.id);
 
 	// Initial data loading
 	useEffect(() => {
@@ -67,50 +72,54 @@ const SessionCompletionWatcher = () => {
 	return null;
 };
 
+const queryClient = new QueryClient();
+
 const LayoutWithProviders = () => {
 	return (
 		<Provider store={store}>
-			<SafeAreaProvider>
-				<StripeProvider
-					publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
-					urlScheme="amicare"
-					merchantIdentifier="merchant.com.specul8tor.AmiCare"
-					>
-					{/* GlobalDataLoader preloads global slices; SessionCompletionWatcher handles completion navigation */}
-					<GlobalDataLoader />
-					<SessionCompletionWatcher />
-					<Stack>
-						<Stack.Screen
-							name="index"
-							options={{ headerShown: false }}
-						/>
-						<Stack.Screen
-							name="lock"
-							options={{ headerShown: false, gestureEnabled: false }}
-						/>
-						<Stack.Screen
-							name="(auth)"
-							options={{ headerShown: false }}
-						/>
-						<Stack.Screen
-							name="(dashboard)"
-							options={{ headerShown: false }}
-						/>
-						<Stack.Screen
-							name="(onboarding)"
-							options={{ headerShown: false, gestureEnabled: false }}
-						/>
-						<Stack.Screen
-							name="(chat)"
-							options={{ headerShown: false }}
-						/>
-						<Stack.Screen
-							name="(profile)"
-							options={{ headerShown: false }}
-						/>
-					</Stack>
-				</StripeProvider>
-			</SafeAreaProvider>
+			<QueryClientProvider client={queryClient}>
+				<SafeAreaProvider>
+					<StripeProvider
+						publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
+						urlScheme="amicare"
+						merchantIdentifier="merchant.com.specul8tor.AmiCare"
+						>
+						{/* GlobalDataLoader preloads global slices; SessionCompletionWatcher handles completion navigation */}
+						<GlobalDataLoader />
+						<SessionCompletionWatcher />
+						<Stack>
+							<Stack.Screen
+								name="index"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="lock"
+								options={{ headerShown: false, gestureEnabled: false }}
+							/>
+							<Stack.Screen
+								name="(auth)"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="(dashboard)"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="(onboarding)"
+								options={{ headerShown: false, gestureEnabled: false }}
+							/>
+							<Stack.Screen
+								name="(chat)"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="(profile)"
+								options={{ headerShown: false }}
+							/>
+						</Stack>
+					</StripeProvider>
+				</SafeAreaProvider>
+			</QueryClientProvider>
 		</Provider>
 	);
 };

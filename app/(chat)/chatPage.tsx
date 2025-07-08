@@ -11,7 +11,8 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { LinearGradient } from 'expo-linear-gradient';
 import { sendMessage } from '@/services/node-express-backend/session';
 import { getSocket } from '@/services/node-express-backend/sockets';
-import { clearMessages, fetchMessagesBySessionId } from '@/redux/chatSlice';
+import { useMessages } from '@/hooks/useMessages';
+import { useQueryClient } from '@tanstack/react-query';
 
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
@@ -26,14 +27,10 @@ const ChatPage = () => {
 	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
 	if (!sessionId || !activeSession || !currentUser) return null;
 	const otherUser = activeSession.otherUser;
-	const messages = useSelector((state: RootState) => state.chat.messages); // Get messages from Redux state
+	const { data: messages = [], refetch } = useMessages(sessionId as string);
+	const queryClient = useQueryClient();
 	const [newMessage, setNewMessage] = useState('');
 	useEffect(() => {
-
-		if (sessionId){
-			dispatch(fetchMessagesBySessionId(sessionId as string));
-		}
-
 		// Get the socket instance
 		const socket = getSocket();
 	  
@@ -44,7 +41,6 @@ const ChatPage = () => {
 	  		return () => {
 				console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
 				socket.emit('chat:leaveSession', sessionId);
-				dispatch(clearMessages());
 		  	};
 		}
 		return undefined; 
@@ -63,10 +59,11 @@ const ChatPage = () => {
 	const handleSendMessage = async () => {
 		try {
 			if (newMessage.trim()) {
-				const nextMessage = await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
-				console.log('Message sent:', nextMessage);
-			setNewMessage('');
-			Keyboard.dismiss();
+				await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
+				// Refresh messages list
+				queryClient.invalidateQueries(['messages', sessionId]);
+				setNewMessage('');
+				Keyboard.dismiss();
 		}} catch (error) {
 			console.error('Error sending message:', error);
 		}

@@ -1,15 +1,10 @@
 import { io, Socket } from 'socket.io-client';
 import 'firebase/auth';
 import { FIREBASE_AUTH } from '@/firebase.config';
-import { EnrichedSession } from '@/types/EnrichedSession';
-import { setSessions } from '@/redux/sessionSlice';
-import { AppDispatch } from '@/redux/store'; // Import the dispatch function from your store
-import { Message } from '@/types/Message';
-import { setMessages } from '@/redux/chatSlice';
 
 let socket: Socket | null = null;
 
-export const connectSocket = async (userId: string, dispatch: AppDispatch) => {
+export const connectSocket = async (userId: string) => {
   const user = FIREBASE_AUTH.currentUser;
 // TODO: ADD AUTHENTICATION AND HTTPS
 //   if (!user) {
@@ -47,17 +42,7 @@ export const connectSocket = async (userId: string, dispatch: AppDispatch) => {
       console.error('Socket connection error:', error);
     });
 
-    socket.on('session:update', (enrichedSessions: EnrichedSession[]) => { // Assuming backend sends EnrichedSession[]
-        console.log('📡 Received session:update with', enrichedSessions.length, 'sessions');
-        console.log('🔍 Sessions received:', enrichedSessions.map(s => ({ id: s.id, status: s.status, liveStatus: s.liveStatus })));
-        dispatch(setSessions(enrichedSessions)); // Ensure dispatch is passed as a parameter
-        console.log('✅ Dispatched sessions to Redux');
-    });
-
-    socket.on('chat:newMessage', (messages: Message[]) => { // Assuming backend sends Message object
-        dispatch(setMessages(messages)); 
-    });
-
+    // Event listeners are now registered elsewhere via useSocketListeners hook.
 
   } catch (error: any) {
     console.error('Error getting ID token or connecting socket:', error.message);
