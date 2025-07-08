@@ -9,12 +9,15 @@ import ProfileListItem from './ProfileListItem';
 import { User } from '@/types/User';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import ProfileReviews from './ProfileReviews';
 // import ProfileReviews from './ProfileReviews';
 import { FIREBASE_AUTH } from '@/firebase.config';
 import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { clearSessions } from '@/redux/sessionSlice';
 import { clearUser } from '@/redux/userSlice';
 import { useDispatch } from 'react-redux';
+import ProfileScore from './ProfileScore';
+import ProfileAvailabilityTable from './ProfileAvailabilityTable';
 
 interface ProfileScreenProps {
 	user: User;
@@ -40,28 +43,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 		router.back();
 	};
 
-	const dispatch = useDispatch();
-	const handleSignOut = async () => {
-		try {
-			// Sign out from Firebase
-			await FIREBASE_AUTH.signOut();
-
-			// Clear Redux state
-			dispatch(clearUser());
-			dispatch(clearSessions());
-			dispatch(clearActiveProfile());
-
-			// Navigate to the sign-in screen (or your landing page)
-			router.replace('/sign-in');
-		} catch (error) {
-			console.error('Error signing out:', error);
-			// Optionally, show an alert or toast to the user.
-		}
-	};
-
 	return (
 		<SafeAreaView
-			className="flex-1 px-4 pb-6"
+			className="flex-1 px-4 pb-16"
 			style={{ backgroundColor: '#f0f0f0' }}
 		>
 			<ProfileHeader
@@ -84,12 +68,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 			<ScrollView className="flex-1">
 				{/* Bio Label + Bio */}
 				{!!bio && (
-					<View className="mb-4">
+					<View className="">
+						<Text className="font-bold text-black text-base">Bio</Text>
 						<ProfileBio bio={bio} />
 					</View>
 				)}
 
 				<ProfileStats user={user} />
+
+				{!isMyProfile && (
+					<>
+						<ProfileScore user={user} />
+						<ProfileAvailabilityTable user={user} />
+					</>
+				)}
+
+				{/* If it's my profile, show the "Diagnoses" / "Experience" section. */}
 
 				{/* If it's my profile, show the row of icons + the list items. */}
 				{isMyProfile ? (
@@ -97,7 +91,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 						<ProfileActionRow user={user} />
 
 						{/* White container for the list items. */}
-						<View className="bg-white border border-gray-200 rounded-lg mb-4">
+						<View className="bg-white border-gray-200 rounded-[10px]">
 							<ProfileListItem
 								label="Family"
 								iconName="people"
@@ -110,24 +104,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 							/>
 							<ProfileListItem
 								label="Help"
-								iconName="help-circle"
+								iconName="warning"
 								onPress={() => router.push('/(profile)/help')}
 							/>
 							<ProfileListItem
-								label="Referrals & Rewards"
+								label="Refer friends"
 								iconName="gift"
 								onPress={() => router.push('/(profile)/refer')}
-								disabled
+								
 							/>
 							<ProfileListItem
 								label="Legal"
 								iconName="document-text"
-								disabled
-							/>
-							<ProfileListItem
-								label="Sign Out"
-								iconName="log-out"
-								onPress={handleSignOut}
+								
 							/>
 						</View>
 					</>

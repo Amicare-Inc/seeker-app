@@ -13,14 +13,14 @@ interface SessionListProps {
  * - New Requests: Gray (#ccc) border
  * - Pending: #1A8BF8 border
  */
-const SessionList: React.FC<SessionListProps> = ({
+const SessionList: React.FC<Omit<SessionListProps, 'title'> & { title?: string }> = ({
 	sessions,
 	onSessionPress,
 	title,
 }) => {
 	// Decide border color based on the title
 	let borderColor = 'transparent';
-	if (title === 'New Requests') {
+	if (!title) {
 		borderColor = '#797979'; // gray border
 	} else if (title === 'Pending') {
 		borderColor = '#1A8BF8'; // #1A8BF8 border
@@ -41,10 +41,10 @@ const SessionList: React.FC<SessionListProps> = ({
 							'https://via.placeholder.com/50',
 					}}
 					// Add border-2 from Tailwind, and override the color inline
-					className="w-20 h-20 rounded-full mb-2 border-4"
+					className="w-[78px] h-[78px] rounded-full border-4"
 					style={{ borderColor }}
 				/>
-				<Text className="text-base" style={{ color: '#000000' }}>
+				<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
 					{item.otherUser.firstName}
 				</Text>
 			</TouchableOpacity>
@@ -52,16 +52,23 @@ const SessionList: React.FC<SessionListProps> = ({
 	};
 
 	return (
-		<View className="mt-5">
-			<Text className="text-xl mb-3 text-black">{title}</Text>
+		<View>
+			{title && (
+				<Text className="text-xl text-black font-medium">{title}</Text>
+			)}
 			<FlatList
 				data={sessions}
 				keyExtractor={(item) => item.id}
 				renderItem={renderItem}
 				horizontal
 				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={{ paddingHorizontal: 4 }}
+				contentContainerStyle={{ paddingHorizontal: 4, marginTop: 20 }}
 			/>
+			{title === 'Pending' && sessions.length === 0 && (
+				<View className="w-[78px] h-[78px]" style={{ marginTop: 20, marginLeft: 4 }}>
+
+				</View>
+			)}
 		</View>
 	);
 };

@@ -17,36 +17,39 @@ import { useQueryClient } from '@tanstack/react-query';
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
     const insets = useSafeAreaInsets();
-	const dispatch = useDispatch<AppDispatch>();
-	const currentUser = useSelector((state: RootState) => state.user.userData);
-	const activeSession = useSelector(
-		(state: RootState) =>
-			state.sessions.activeEnrichedSession ||
-			state.sessions.allSessions.find((s) => s.id === sessionId),
-	) as EnrichedSession | undefined;
-	const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
-	if (!sessionId || !activeSession || !currentUser) return null;
-	const otherUser = activeSession.otherUser;
-	const { data: messages = [], refetch } = useMessages(sessionId as string);
-	const queryClient = useQueryClient();
-	const [newMessage, setNewMessage] = useState('');
-	useEffect(() => {
-		// Get the socket instance
-		const socket = getSocket();
-	  
-		if (socket) {
-		  // Emit 'chat:joinSession' when the component mounts for this sessionId
-		  console.log(`Emitting 'chat:joinSession' for session: ${sessionId}`);
-		  socket.emit('chat:joinSession', sessionId);
-	  		return () => {
-				console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
-				socket.emit('chat:leaveSession', sessionId);
-		  	};
-		}
-		return undefined; 
-	},[sessionId, dispatch])
+    const dispatch = useDispatch<AppDispatch>();
+    const currentUser = useSelector((state: RootState) => state.user.userData);
+    const activeSession = useSelector(
+        (state: RootState) =>
+            state.sessions.activeEnrichedSession ||
+            state.sessions.allSessions.find((s) => s.id === sessionId),
+    ) as EnrichedSession | undefined;
+    const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
 
-	const toggleHeaderExpanded = () => {
+    if (!sessionId || !activeSession || !currentUser) return null;
+
+    const otherUser = activeSession.otherUser;
+    const { data: messages = [] } = useMessages(sessionId as string);
+    const queryClient = useQueryClient();
+    const [newMessage, setNewMessage] = useState('');
+
+    useEffect(() => {
+        // Get the socket instance
+        const socket = getSocket();
+
+        if (socket) {
+            // Emit 'chat:joinSession' when the component mounts for this sessionId
+            console.log(`Emitting 'chat:joinSession' for session: ${sessionId}`);
+            socket.emit('chat:joinSession', sessionId);
+            return () => {
+                console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
+                socket.emit('chat:leaveSession', sessionId);
+            };
+        }
+        return undefined;
+    }, [sessionId, dispatch]);
+
+    const toggleHeaderExpanded = () => {
         setIsHeaderExpanded(!isHeaderExpanded);
     };
 
@@ -56,68 +59,63 @@ const ChatPage = () => {
         }
     };
 
-	const handleSendMessage = async () => {
-		try {
-			if (newMessage.trim()) {
-				await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
-				// Refresh messages list
-				queryClient.invalidateQueries(['messages', sessionId]);
-				setNewMessage('');
-				Keyboard.dismiss();
-		}} catch (error) {
-			console.error('Error sending message:', error);
-		}
-	};
+    const handleSendMessage = async () => {
+        try {
+            if (newMessage.trim()) {
+                await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
+                // Refresh messages list
+                queryClient.invalidateQueries({ queryKey: ['messages', sessionId] });
+                setNewMessage('');
+                Keyboard.dismiss();
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    };
 
-	return (
+    return (
         <SafeAreaView className="flex-1" edges={['left', 'right', 'bottom']}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
             <LinearGradient
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                colors={
-                    activeSession.status === 'inProgress'
-                        ? ['#05a73c', '#4ade80']  // Darker green to light green (similar contrast to blue)
-                        : activeSession.status === 'confirmed'
-                            ? ['#008DF4', '#5CBAFF']
-                            : ['#FFFFFF', '#FFFFFF']
-                }
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 0,
-                    paddingTop: insets.top,
-                }}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            colors={['#FFFFFF', '#FFFFFF']}
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 0,
+                paddingTop: insets.top,
+            }}
             />
             <View style={{ paddingTop: insets.top }}>
-                <ChatHeader
-                    session={activeSession}
-                    user={otherUser!}
-                    isExpanded={isHeaderExpanded}
-                    toggleExpanded={toggleHeaderExpanded}
-                />
+            <ChatHeader
+                session={activeSession}
+                user={otherUser!}
+                isExpanded={isHeaderExpanded}
+                toggleExpanded={toggleHeaderExpanded}
+            />
             </View>
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                className="flex-1"
-                style={{ backgroundColor: '#f0f0f0' }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            className="flex-1"
+            style={{ backgroundColor: '#f0f0f0' }}
             >
-                <ChatMessageList
-                    messages={messages}
-                    otherUserName={otherUser?.firstName || ''}
-                    currentUserId={currentUser.id!}
-                />
-                <ChatInput
-                    newMessage={newMessage}
-                    setNewMessage={setNewMessage}
-                    handleSendMessage={handleSendMessage}
-                    onFocusChange={handleInputFocusChange}
-                />
+            <ChatMessageList
+                messages={messages}
+                otherUser={otherUser!}
+                currentUserId={currentUser.id!}
+            />
+            <ChatInput
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                handleSendMessage={handleSendMessage}
+                onFocusChange={handleInputFocusChange}
+            />
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
-}
+};
 
 export default ChatPage;

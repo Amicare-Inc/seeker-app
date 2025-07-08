@@ -128,11 +128,12 @@ const SessionFilterCard = ({ onClose, setFilteredUsers }: SessionFilterCardProps
         ))}
       </View>
 
+      {/* TO DO: implmenet time range functionality */}
       {/* Time Range */}
-      <Text className="text-black text-lg font-medium mb-3 mt-5">Time Available</Text>
+      {/* <Text className="text-black text-lg font-medium mb-3 mt-5">Time Available</Text>
       <TouchableOpacity className="bg-grey-0 w-1/2 px-4 py-2 rounded-full">
         <Text className="text-base font-medium">+ Add Time Range</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Apply Button */}
       <TouchableOpacity

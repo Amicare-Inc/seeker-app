@@ -5,9 +5,9 @@ const helpOptions = [
 	'Grooming Support', // assistance with grooming and personal care routines
 	'Toileting Assistance', // help with using the bathroom and incontinence care
 	'Light Housekeeping', // cleaning, laundry, and maintaining the home
-	'Grocery Shopping', // running errands to get groceries
-	'Medication Reminders', // ensuring timely intake of medication
-	'Emotional Support',
+	// 'Grocery Shopping', // running errands to get groceries
+	// 'Medication Reminders', // ensuring timely intake of medication
+	// 'Emotional Support',
 ];
 
 export default helpOptions;

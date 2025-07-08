@@ -27,12 +27,12 @@ const ProfileListItem: React.FC<ProfileListItemProps> = ({
 			<View className="flex-row gap-3 items-center">
 				<Ionicons
 					name={iconName}
-					size={20}
-					color="#000"
+					size={25}
+					color="#303031"
 				/>
-				<Text className="text-sm font-semibold">{label}</Text>
+				<Text className="text-base font-medium">{label}</Text>
 			</View>
-			<Ionicons name="chevron-forward" size={18} color="#000" />
+			<Ionicons name="chevron-forward" size={18} color="#bfbfc3" />
 		</TouchableOpacity>
 	);
 };

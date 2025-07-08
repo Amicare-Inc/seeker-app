@@ -16,7 +16,7 @@ const ProfileBio: React.FC<ProfileBioProps> = ({ bio }) => {
 	return (
 		<View className="mb-4">
 			<Text
-				className="text-sm text-gray-800 leading-5"
+				className="text-base text-gray-800 leading-5 font-medium"
 				style={styles.wrapText}
 			>
 				{bio}

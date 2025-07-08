@@ -41,17 +41,17 @@ const PswSessionsTab = () => {
     return (
         <SafeAreaView
             className="flex-1"
-            style={{ backgroundColor: '#f0f0f0' }}
+            style={{ backgroundColor: '#F2F2F7' }}
         >
             {/* Header Row */}
-            <View className="flex-row items-center px-3.5 pb-2">
+            <View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
                 <Ionicons
                     name="time"
-                    size={24}
+                    size={26}
                     color="black"
                     style={{ marginRight: 8 }}
                 />
-                <Text className="text-2xl text-black">Sessions</Text>
+                <Text className="text-xl text-black font-medium">My Sessions</Text>
             </View>
 
             {/* Main Content */}
@@ -59,7 +59,6 @@ const PswSessionsTab = () => {
                 <SessionList
                     sessions={newRequests}
                     onSessionPress={onSessionPress}
-                    title="New Requests"
                 />
 
                 <SessionList
@@ -71,7 +70,7 @@ const PswSessionsTab = () => {
                 <SessionBookedList
 					sessions={confirmed}
 					onSessionPress={onSessionPress}
-					title="Confirmed"
+					title="Booked"
 				/>
 			</View>
         </SafeAreaView>

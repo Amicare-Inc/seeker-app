@@ -80,7 +80,7 @@ const PswHomeTab = () => {
 			}}
 		>
 			{/* Header row */}
-			<View className="flex-row items-center justify-between px-4 pb-2">
+			<View className="flex-row items-center justify-between px-4 pb-2 mb-2">
 				{/* Left side: Icon + Title */}
 				<View className="flex-row items-center">
 					<Ionicons
