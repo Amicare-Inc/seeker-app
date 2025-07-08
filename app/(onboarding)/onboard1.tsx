@@ -68,7 +68,7 @@ const CarePreferences: React.FC = () => {
 								<CustomButton
 									title="A Loved One"
 									handlePress={() => setLookingForSelf(false)}
-									containerStyles={`w-[174px] h-[44px] rounded-full mr-[10px] ${
+									containerStyles={`w-[174px] h-[44px] rounded-full mr-[10px] min-h-[44px] ${
 										lookingForSelf === false
 											? 'bg-brand-blue'
 											: 'bg-white'
@@ -82,7 +82,7 @@ const CarePreferences: React.FC = () => {
 								<CustomButton
 									title="Myself"
 									handlePress={() => setLookingForSelf(true)}
-									containerStyles={`w-[174px] h-[44px] rounded-full ${
+									containerStyles={`w-[174px] h-[44px] min-h-[44px] rounded-full ${
 										lookingForSelf === true
 											? 'bg-brand-blue'
 											: 'bg-white'
@@ -108,7 +108,7 @@ const CarePreferences: React.FC = () => {
 						key={option}
 						title={option}
 						handlePress={() => toggleCareType(option)}
-						containerStyles={`mb-[10px] mr-[10px] rounded-full w-[174px] h-[44px] ${
+						containerStyles={`mb-[10px] mr-[10px] rounded-full w-[174px] h-[44px] min-h-[44px] ${
 							selectedCareTypes.includes(option)
 							? 'bg-brand-blue'
 							: 'bg-white'

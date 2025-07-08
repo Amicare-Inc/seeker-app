@@ -35,7 +35,7 @@ const AvailabilityPage: React.FC = () => {
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
 					{/* Header */}
-					<View className="flex-row items-center mb-[53px]">
+					<View className="flex-row items-center mb-[39px]">
 						<TouchableOpacity className="absolute" onPress={() => router.back()}>
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
@@ -50,13 +50,13 @@ const AvailabilityPage: React.FC = () => {
 					</Text>
 
 					{/* Day Selection */}
-					<View className="flex-wrap flex-row justify-between mb-[40px]">
+					<View className="flex-wrap flex-row mb-[36px] justify-between">
 						{days.map((day) => (
 							<CustomButton
 								key={day}
 								title={day}
 								handlePress={() => toggleDay(day)}
-								containerStyles={`w-[13%] h-[44px] rounded-full mb-[10px] ${
+								containerStyles={`w-[82px] h-[44px] rounded-full mb-[10px] min-h-[44px] ${
 									selectedDays[day]?.length > 0
 										? 'bg-brand-blue'
 										: 'bg-white'
@@ -71,16 +71,30 @@ const AvailabilityPage: React.FC = () => {
 						<CustomButton
 							title="Reset"
 							handlePress={resetAvailability}
-							containerStyles="w-[13%] h-[44px] rounded-full mb-[10px] bg-white"
+							containerStyles="w-[82px] h-[44px] rounded-full min-h-[44px] bg-white"
 							textStyles="text-sm font-medium text-black"
 						/>
 					</View>
 
 					{/* Time Slot Selection */}
 					{activeDay && (
-						<View className="mb-[75px]">
-							<Text className="text-lg text-grey-80 mb-[34px]">
-								At roughly what times on {activeDay} do you need care? Select all that apply:
+						<View className="">
+							<Text className="text-lg text-grey-80 mb-[36px]">
+								At roughly what times on{' '}
+								<Text className="font-bold">
+									{
+										{
+											Mon: 'Monday',
+											Tues: 'Tuesday',
+											Wed: 'Wednesday',
+											Thurs: 'Thursday',
+											Fri: 'Friday',
+											Sat: 'Saturday',
+											Sun: 'Sunday'
+										}[activeDay]
+									}
+								</Text>{' '}
+								do you need care? Select all that apply:
 							</Text>
 							<View className="flex-wrap flex-row -mr-[10px]">
 								{timeslots.map((time) => (
@@ -88,7 +102,7 @@ const AvailabilityPage: React.FC = () => {
 										key={time}
 										title={time}
 										handlePress={() => toggleTime(time)}
-										containerStyles={`mb-[10px] mr-[10px] rounded-full w-[48%] h-[44px] ${
+										containerStyles={`mb-[10px] mr-[10px] rounded-full w-[174px] h-[44px] min-h-[44px] ${
 											(selectedDays[activeDay] || []).includes(time)
 												? 'bg-brand-blue'
 												: 'bg-white'
