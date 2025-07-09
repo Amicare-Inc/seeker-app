@@ -8,7 +8,7 @@ import helpOptions from '@/assets/helpOptions';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-const TaskSelection: React.FC = () => {
+const CareNeeds2: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector((state: RootState) => state.user.userData);
     const isPSW = userData?.isPsw;
@@ -37,7 +37,7 @@ const TaskSelection: React.FC = () => {
             );
             console.log('Tasks updated in Redux:', selectedTasks, userData);
         }
-        router.push('/availability'); // Move to the next page regardless
+        router.push('/care_schedule'); // Move to the next page regardless
     };
 
     return (
@@ -49,7 +49,7 @@ const TaskSelection: React.FC = () => {
                         <TouchableOpacity className="absolute" onPress={() => router.back()}>
                             <Ionicons name="chevron-back" size={24} color="#000" />
                         </TouchableOpacity>
-                        <Text className="text-xl font-medium mx-auto">
+                        <Text className="text-xl font-semibold mx-auto">
                             Care Needs 2/4
                         </Text>
                     </View>
@@ -111,4 +111,4 @@ const TaskSelection: React.FC = () => {
     );
 };
 
-export default TaskSelection;
+export default CareNeeds2;

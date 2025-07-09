@@ -66,7 +66,7 @@ export const useAvailability = () => {
 		);
 
 		console.log('Availability saved successfully.', userData);
-		router.push('/add_profile_photo');
+		router.push('/caregiver_preferences'); // Navigate to the next page
 	};
 
 	return {

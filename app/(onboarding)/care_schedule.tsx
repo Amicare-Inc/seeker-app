@@ -15,7 +15,7 @@ const timeslots = [
 	'6 pm - 8 pm',
 ];
 
-const AvailabilityPage: React.FC = () => {
+const CareSchedule: React.FC = () => {
 	const {
 		selectedDays,
 		activeDay,
@@ -24,11 +24,6 @@ const AvailabilityPage: React.FC = () => {
 		resetAvailability,
 		saveAvailability,
 	} = useAvailability();
-
-	// Check if at least one time slot is selected
-	const hasSelectedTimes = Object.values(selectedDays).some(
-		(times) => times.length > 0,
-	);
 
 	return (
 		<SafeAreaView className="flex-1 bg-grey-0">
@@ -39,7 +34,7 @@ const AvailabilityPage: React.FC = () => {
 						<TouchableOpacity className="absolute" onPress={() => router.back()}>
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
-						<Text className="text-xl font-medium mx-auto">
+						<Text className="text-xl font-semibold mx-auto">
 							3/4 Care Schedule
 						</Text>
 					</View>
@@ -146,4 +141,4 @@ const AvailabilityPage: React.FC = () => {
 	);
 };
 
-export default AvailabilityPage;
+export default CareSchedule;

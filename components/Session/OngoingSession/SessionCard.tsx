@@ -136,9 +136,14 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
 
         {/* Header (Touchable) */}
         <TouchableOpacity onPress={handleToggle} activeOpacity={1} className="flex-row items-center">
-          <View className="flex-col px-5 pb-2 pt-3 flex-1">
-            <Text className="text-white text-[19px] font-bold">
-              Session Confirmed: <Text className="font-normal">{enrichedSession.note}</Text>
+          <View className="flex-col px-5 pb-7 pt-3 flex-1">
+            <Text className="text-white text-lg font-bold">
+              Session Confirmed:{" "}
+              <Text className="font-normal">
+                {enrichedSession.note && enrichedSession.note.length > 12
+                  ? `${enrichedSession.note.slice(0, 12)}...`
+                  : enrichedSession.note}
+              </Text>
             </Text>
             {!expanded && (
                 <View className="flex-row items-center">
@@ -147,9 +152,9 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
                 </View>
             )}
           </View>
-          {!expanded && (
+
             <Ionicons name="calendar-outline" size={32} color="#fff" style={{ position: 'absolute', right: 25, top: 15 }} />
-          )}
+
         </TouchableOpacity>
 
         {/* Expanded Content */}
