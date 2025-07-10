@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
-import ForumField from '@/components/Global/ForumField';
-import CustomButton from '@/components/Global/CustomButton';
+import { ForumField } from '@/shared/components';
+import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { router } from 'expo-router';
-import DatePickerField from '@/components/Global/DatePickerField';
-import { Auth } from '@/services/node-express-backend/auth';
-import RegionValidatedAddressInput from '@/components/RegionValidatedAddressInput';
+import { DatePickerField } from '@/shared/components';
+import { AuthApi } from '@/features/auth/api/authApi';
+import { RegionValidatedAddressInput } from '@/shared/components';
 import { type AddressComponents } from '@/services/google/googlePlacesService';
 
 const PersonalDetails: React.FC = () => {
@@ -97,7 +97,7 @@ const PersonalDetails: React.FC = () => {
 					return;
 				}
 				dispatch(updateUserFields(form));
-				await Auth.addCriticalInfo(userId, {...form, isPsw: userData!.isPsw});			
+				await AuthApi.addCriticalInfo(userId, {...form, isPsw: userData!.isPsw});			
 				router.push('/onboard1');
 			} catch (error) {
 				console.error('Error saving user details:', error);

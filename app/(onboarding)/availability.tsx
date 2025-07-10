@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import CustomButton from '@/components/Global/CustomButton';
-import { useAvailability } from '@/hooks/useAvailability';
+import { CustomButton } from '@/shared/components';
+import { useAvailability } from '@/features/availability';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 

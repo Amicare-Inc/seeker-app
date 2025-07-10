@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, ScrollView, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import CustomButton from '@/components/Global/CustomButton';
+import { CustomButton } from '@/shared/components';
 
 export default function Index() {
 	return (

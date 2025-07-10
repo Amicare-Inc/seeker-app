@@ -1,3 +1,6 @@
+// Temporary bridge while code migrates to new shared path
+export * from '@/shared/constants/enums';
+
 export enum SessionStatus {
   Pending = 'pending',
   Confirmed = 'confirmed',

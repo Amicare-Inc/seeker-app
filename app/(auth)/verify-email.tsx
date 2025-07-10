@@ -6,7 +6,7 @@ import {
 	sendEmailVerification,
 } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import CustomButton from '@/components/Global/CustomButton';
+import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 
 const VerifyEmail = () => {

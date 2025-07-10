@@ -1,7 +1,7 @@
 import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import CustomButton from '@/components/Global/CustomButton';
+import { CustomButton } from '@/shared/components';
 import { router } from 'expo-router';
 
 const SeekerIntro2 = () => {

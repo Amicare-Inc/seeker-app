@@ -9,7 +9,7 @@ import { fetchAvailableUsers } from '@/redux/userListSlice';
 import { fetchUserSessionsFromBackend } from '@/redux/sessionSlice';
 import { router } from 'expo-router';
 import { selectCompletedSessions } from '@/redux/selectors';
-import { useSocketListeners } from '@/hooks/useSocketListeners';
+import { useSocketListeners } from '@/lib/socket/useSocketListeners';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const GlobalDataLoader = () => {

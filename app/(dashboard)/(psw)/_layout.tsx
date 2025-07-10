@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useLiveSession } from '@/hooks/useLiveSession';
-import LiveSessionCard from '@/components/Session/LiveSessionCard';
+import { useLiveSession } from '@/features/sessions';
+import { LiveSessionCard } from '@/features/sessions';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const PswDashboardLayout = () => {

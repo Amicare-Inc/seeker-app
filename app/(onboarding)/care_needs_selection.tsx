@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import CustomButton from '@/components/Global/CustomButton';
+import { CustomButton } from '@/shared/components';
 
 const careOptions = [
     { id: 'personal', title: 'Personal Care', selected: false },

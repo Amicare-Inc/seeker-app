@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Message } from '@/types/Message';
-import { getMessages } from '@/services/node-express-backend/session';
+import { getMessages } from '@/features/sessions/api/sessionApi';
 
 export const fetchMessagesBySessionId = createAsyncThunk<
   Message[], // Expected return type

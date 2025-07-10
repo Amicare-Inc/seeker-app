@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import ProfileScreen from '@/components/Profile/ProfileScreen';
+import { ProfileScreen } from '@/features/profile';
 
 const SeekerProfileScreen = () => {
 	const currentUser = useSelector((state: RootState) => state.user.userData);

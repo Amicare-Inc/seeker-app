@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { SafeAreaView, ScrollView, View, Text, Alert } from 'react-native';
-import CustomButton from '@/components/Global/CustomButton';
-import ForumField from '@/components/Global/ForumField'; // Reusing your ForumField component
+import { CustomButton } from '@/shared/components';
+import { ForumField } from '@/shared/components'; // Reusing your ForumField component
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { router } from 'expo-router';
-import { Auth } from '@/services/node-express-backend/auth';
+import { AuthApi } from '@/features/auth/api/authApi';
 
 const BioScreen: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -18,7 +18,7 @@ const BioScreen: React.FC = () => {
 			console.log('User Data in bio before if:', userData);
 			dispatch(updateUserFields({ bio }));
 			if (userData?.id) {
-				await Auth.addOptionalInfo(userData.id, { ...userData, onboardingComplete: true, bio: bio, idVerified: userData.idVerified });
+				await AuthApi.addOptionalInfo(userData.id, { ...userData, onboardingComplete: true, bio: bio, idVerified: userData.idVerified });
 				Alert.alert(
 					'Success',
 					'Your profile has been created successfully!',

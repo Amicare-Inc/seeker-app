@@ -2,17 +2,16 @@ import React, { useState, useRef } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, TouchableWithoutFeedback, Platform, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import useAvailableUsers from '@/hooks/useHomeTab';
+import { useHomeTab } from '@/features/user';
 import { router } from 'expo-router';
-import UserCard from '@/components/User/UserCard';
-import UserCardExpanded from '@/components/User/UserCardExpanded';
+import { UserCard, UserCardExpanded } from '@/features/user';
 import { User } from '@/types/User';
-import SessionFilterCard from '@/components/Session/SessionFilterCard';
+import { SessionFilterCard } from '@/features/sessions';
 
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
 	const [filteredUsers, setFilteredUsers] = useState<User[] | null>(null);
-	const { users: fetchedUsers, loading, error } = useAvailableUsers(false, true); // isPsw = false, withDistance = true
+	const { users: fetchedUsers, loading, error } = useHomeTab(false, true); // isPsw = false, withDistance = true
 	const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 	const [filterVisible, setFilterVisible] = useState(false);
 	const fadeAnim = useRef(new Animated.Value(0)).current;

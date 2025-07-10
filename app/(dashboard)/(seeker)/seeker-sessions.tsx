@@ -2,9 +2,8 @@ import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import SessionList from '@/components/Session/SessionList';
-import SessionBookedList from '@/components/Session/BookedSession/SessionBookedList';
-import { useSessionsTab } from '@/hooks/useSessionsTab';
+import { SessionList, SessionBookedList } from '@/features/sessions';
+import { useSessionsTab } from '@/features/sessions';
 import { EnrichedSession } from '@/types/EnrichedSession';
 
 const SeekerSessionsTab = () => {

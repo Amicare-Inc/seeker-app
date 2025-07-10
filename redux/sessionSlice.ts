@@ -4,7 +4,7 @@ import { FIREBASE_DB } from '@/firebase.config';
 import { Session } from '@/types/Sessions';
 import { AppDispatch, RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { acceptSession, bookSession, cancelSession, declineSession, getUserSessionTab, rejectSession } from '@/services/node-express-backend/session';
+import { acceptSession, bookSession, cancelSession, declineSession, getUserSessionTab, rejectSession } from '@/features/sessions/api/sessionApi';
 
 export const fetchUserSessionsFromBackend = createAsyncThunk<
 	EnrichedSession[], // Expected return type from the backend

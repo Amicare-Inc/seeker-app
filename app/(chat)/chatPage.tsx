@@ -3,15 +3,13 @@ import { KeyboardAvoidingView, Keyboard, Platform, View, StatusBar } from 'react
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
-import ChatHeader from '@/components/Chat/ChatHeader';
-import ChatMessageList from '@/components/Chat/ChatMessageList';
-import ChatInput from '@/components/Chat/ChatInput';
+import { ChatHeader, ChatMessageList, ChatInput } from '@/features/chat';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { AppDispatch, RootState } from '@/redux/store';
 import { LinearGradient } from 'expo-linear-gradient';
-import { sendMessage } from '@/services/node-express-backend/session';
+import { sendMessage } from '@/features/sessions/api/sessionApi';
 import { getSocket } from '@/services/node-express-backend/sockets';
-import { useMessages } from '@/hooks/useMessages';
+import { useMessages } from '@/features/chat';
 import { useQueryClient } from '@tanstack/react-query';
 
 const ChatPage = () => {

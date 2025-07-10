@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '@/types/User';
 import { AppDispatch, RootState } from './store';
-import { Auth } from '@/services/node-express-backend/auth';
+import { AuthApi } from '@/features/auth/api/authApi';
 
 type fetchUserFromLoginArgs = {
 	email: string;
@@ -19,7 +19,7 @@ export const fetchUserFromLoginThunk = createAsyncThunk<
 >(
 	'user/fetchUserFromLogin',
 	async ({email, password}) => {
-		const userDoc = await Auth.signIn(email, password);
+		const userDoc = await AuthApi.signIn(email, password);
 		if (!userDoc) {
 			throw new Error('User doc not found from backend');
 		}

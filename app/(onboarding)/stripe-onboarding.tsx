@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { StripeOnboardingService } from '@/services/stripe/onboarding-service';
-import CustomButton from '@/components/Global/CustomButton';
+import { CustomButton } from '@/shared/components';
 
 const StripeOnboarding: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();

@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import ForumField from '@/components/Global/ForumField';
-import CustomButton from '@/components/Global/CustomButton';
+import { ForumField } from '@/shared/components';
+import { CustomButton } from '@/shared/components';
 import { Link, router } from 'expo-router';
 import { fetchUserFromLoginThunk, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';

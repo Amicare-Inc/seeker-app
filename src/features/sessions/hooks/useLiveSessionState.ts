@@ -1,0 +1,88 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useSelector } from 'react-redux';
+import { router } from 'expo-router';
+import { EnrichedSession } from '@/types/EnrichedSession';
+import { LiveSessionStatus } from '@/types/LiveSession';
+import { RootState } from '@/redux/store';
+import { selectCompletedSessions } from '@/redux/selectors';
+import { mapFirebaseStatusToLiveStatus } from '../utils/sessionMappers';
+import { useLiveSessionSocket } from './useLiveSessionSocket';
+
+export const useLiveSessionState = (enrichedSession: EnrichedSession) => {
+  const currentUser = useSelector((state: RootState) => state.user.userData);
+  const completedSessions = useSelector(selectCompletedSessions);
+
+  // Local state
+  const [status, setStatus] = useState<LiveSessionStatus>(() =>
+    mapFirebaseStatusToLiveStatus(enrichedSession?.liveStatus || '')
+  );
+  const [userConfirmed, setUserConfirmed] = useState(false);
+  const [otherUserConfirmed, setOtherUserConfirmed] = useState(false);
+  const [userEndConfirmed, setUserEndConfirmed] = useState(false);
+  const [otherUserEndConfirmed, setOtherUserEndConfirmed] = useState(false);
+
+  // Socket handlers
+  const handleStatusUpdate = useCallback((data: { liveStatus: string }) => {
+    setStatus(mapFirebaseStatusToLiveStatus(data.liveStatus));
+  }, []);
+
+  const handleUserConfirmed = useCallback((data: { userId: string }) => {
+    if (data.userId === currentUser?.id) {
+      setUserConfirmed(true);
+    } else {
+      setOtherUserConfirmed(true);
+    }
+  }, [currentUser?.id]);
+
+  const handleUserEndConfirmed = useCallback((data: { userId: string }) => {
+    if (data.userId === currentUser?.id) {
+      setUserEndConfirmed(true);
+    } else {
+      setOtherUserEndConfirmed(true);
+    }
+  }, [currentUser?.id]);
+
+  // Socket connection
+  const { confirmSession, confirmEndSession } = useLiveSessionSocket({
+    sessionId: enrichedSession?.id || '',
+    userId: currentUser?.id || '',
+    onStatusUpdate: handleStatusUpdate,
+    onUserConfirmed: handleUserConfirmed,
+    onUserEndConfirmed: handleUserEndConfirmed,
+  });
+
+  // Update status from props
+  useEffect(() => {
+    if (enrichedSession?.liveStatus) {
+      setStatus(mapFirebaseStatusToLiveStatus(enrichedSession.liveStatus));
+    }
+  }, [enrichedSession?.liveStatus]);
+
+  // Handle completion navigation
+  useEffect(() => {
+    const isCompleted = completedSessions.some(s => s.id === enrichedSession?.id);
+    if (isCompleted && status !== 'completed') {
+      setStatus('completed');
+      router.push({
+        pathname: '/session-completed',
+        params: { sessionId: enrichedSession.id },
+      });
+    }
+  }, [completedSessions, enrichedSession?.id, status]);
+
+  return {
+    status,
+    userConfirmed,
+    otherUserConfirmed,
+    userEndConfirmed,
+    otherUserEndConfirmed,
+    confirmSession: () => {
+      setUserConfirmed(true);
+      confirmSession();
+    },
+    confirmEndSession: () => {
+      setUserEndConfirmed(true);
+      confirmEndSession();
+    },
+  };
+}; 

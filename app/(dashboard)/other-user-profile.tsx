@@ -1,10 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import ProfileScreen from '@/components/Profile/ProfileScreen';
+import { ProfileScreen, PendingSessionSlider } from '@/features/profile';
 import { User } from '@/types/User';
-import PendingSessionSlider from '@/components/Profile/PendingSessionSlider';
-import SessionCard from '@/components/Session/OngoingSession/SessionCard';
+import { SessionCard } from '@/features/sessions';
 
 const OtherUserProfileScreen = () => {
 	const activeProfileMoreInfo = useSelector(

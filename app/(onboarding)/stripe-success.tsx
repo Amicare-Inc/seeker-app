@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { Auth } from '@/services/node-express-backend/auth';
-import CustomButton from '@/components/Global/CustomButton';
+import { AuthApi } from '@/features/auth/api/authApi';
+import { CustomButton } from '@/shared/components';
 import { Ionicons } from '@expo/vector-icons';
 
 const StripeSuccess: React.FC = () => {
@@ -28,7 +28,7 @@ const StripeSuccess: React.FC = () => {
             }
 
             // Save Stripe account ID to Firebase
-            await Auth.updateStripeAccount(userData.id, accountId);
+            await AuthApi.updateStripeAccount(userData.id, accountId);
             console.log('Stripe account ID saved to Firebase successfully');
             
             setSuccess(true);

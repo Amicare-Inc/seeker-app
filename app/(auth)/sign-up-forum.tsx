@@ -1,14 +1,14 @@
 import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import ForumField from '@/components/Global/ForumField';
-import CustomButton from '@/components/Global/CustomButton';
+import { ForumField } from '@/shared/components';
+import { CustomButton } from '@/shared/components';
 import { Link, router } from 'expo-router';
-import { verifyEmail } from '@/services/firebase/auth';
+
 import { useDispatch } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { AppDispatch } from '@/redux/store';
-import { Auth } from '@/services/node-express-backend/auth';
+import { AuthApi } from '@/features/auth/api/authApi';
 import { Stack } from 'expo-router';
 
 const SignUpForum = () => {
@@ -30,11 +30,10 @@ const SignUpForum = () => {
             setPasswordError('Passwords do not match');
         } else {
             try {
-                const user = await Auth.signUp(
+                const user = await AuthApi.signUp(
                     form.email,
                     form.password,
                 );
-                verifyEmail(user);
                 dispatch(
                     updateUserFields({
                         id: user,
