@@ -9,7 +9,7 @@ import SessionLengthSelector from './SessionLengthSelector';
 import BillingCard from './BillingCard';
 import HelpOptionsDropdown from './HelpOptionsDropdown';
 import SessionChecklist from './SessionChecklist';
-import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from '@/scripts/datetimeHelpers';
+import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from '@/lib/datetimes/datetimeHelpers';
 import { RootState } from '@/redux/store';
 import { useSelector } from 'react-redux';
 import { requestSession, updateSession } from '@/features/sessions/api/sessionApi';

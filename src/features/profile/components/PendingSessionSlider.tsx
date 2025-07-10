@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
+import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { acceptSessionThunk, rejectSessionThunk } from '@/redux/sessionSlice';
 import { AppDispatch } from '@/redux/store';
 import { useDispatch } from 'react-redux';

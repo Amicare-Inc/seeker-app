@@ -5,7 +5,7 @@ import { LiveSessionCardProps } from '@/types/LiveSession';
 import LiveSessionHeader from './LiveSessionHeader';
 import { useSessionManager } from '@/features/sessions';
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
+import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveEnrichedSession } from '@/redux/sessionSlice';
@@ -14,8 +14,7 @@ import { RootState } from '@/redux/store';
 import { updateSessionChecklist, addSessionComment } from '@/features/sessions/api/sessionApi';
 import { ChecklistItem } from '@/types/Sessions';
 import { useElapsedTimer } from '@/features/sessions';
-import { LiveStatus } from '@/constants/enums';
-import { BTN_BASE, BTN_PRIMARY, BTN_OUTLINE_BLACK } from '@/shared/styles';
+import { LiveStatus } from '@/shared/constants/enums';
 
 const { width } = Dimensions.get('window');
 

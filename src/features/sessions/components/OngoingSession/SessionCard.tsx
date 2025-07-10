@@ -3,12 +3,12 @@ import { View, Text, TouchableOpacity, Dimensions, PanResponder, LayoutAnimation
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { formatTimeRange } from '@/scripts/datetimeHelpers';
+import { formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { router } from 'expo-router';
 import { acceptSessionThunk, rejectSessionThunk } from '@/redux/sessionSlice';
-import { formatDate } from '@/scripts/datetimeHelpers';
+import { formatDate } from '@/lib/datetimes/datetimeHelpers';
 import SessionChecklistBox from './SessionChecklistBox';
 
 const { width } = Dimensions.get('window');

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { LiveSessionTimerProps } from '@/types/LiveSession';
-import { formatTimeRange, getTimeUntilStart, formatDuration } from '@/scripts/datetimeHelpers';
+import { formatTimeRange, getTimeUntilStart, formatDuration } from '@/lib/datetimes/datetimeHelpers';
 
 const LiveSessionTimer: React.FC<LiveSessionTimerProps> = ({
   startTime,

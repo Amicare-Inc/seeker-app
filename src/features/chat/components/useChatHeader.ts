@@ -5,8 +5,8 @@ import { User } from '@/types/User';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { useSocketRoom } from '../hooks/useSocketRoom';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
-import { formatDate, formatTimeRange } from '@/scripts/datetimeHelpers';
-import { SessionStatus, LiveStatus } from '@/constants/enums';
+import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
+import { SessionStatus, LiveStatus } from '@/shared/constants/enums';
 
 interface UseChatHeaderProps {
   session: EnrichedSession;
