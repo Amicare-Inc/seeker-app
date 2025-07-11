@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, Animated, Easing } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import { fetchFilteredUsers } from '@/services/node-express-backend/user';
+import { fetchFilteredUsers } from '@/src/features/userDirectory';
 
 const { width } = Dimensions.get('window');
 

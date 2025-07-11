@@ -5,7 +5,7 @@ import { EnrichedSession } from '@/types/EnrichedSession';
 import { LiveSessionStatus } from '@/types/LiveSession';
 import { RootState } from '@/redux/store';
 import { selectCompletedSessions } from '@/redux/selectors';
-import { getSocket } from '@/services/node-express-backend/sockets';
+import { getSocket } from '@/src/features/socket';
 
 const mapFirebaseStatusToLiveStatus = (liveStatus: string): LiveSessionStatus => {
   console.log('Mapping Firebase status:', liveStatus);

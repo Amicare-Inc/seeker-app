@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchExploreUsers, fetchExploreUsersWithDistance } from '@/services/node-express-backend/user';
+import { fetchExploreUsers, fetchExploreUsersWithDistance } from '@/src/features/userDirectory';
 import { User } from '@/types/User';
 import { RootState } from './store';
 

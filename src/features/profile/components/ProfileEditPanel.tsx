@@ -12,7 +12,7 @@ import { updateUserFields } from '@/redux/userSlice';
 import { User } from '@/types/User';
 import OptionsDropdown from './OptionsDropdown';
 import helpOptions from '@/assets/helpOptions';
-import { updateUserProfile } from '@/services/node-express-backend/user';
+import { updateUserProfile } from '@/src/features/currentUser';
 
 interface ProfileEditPanelProps {
 	user: User;

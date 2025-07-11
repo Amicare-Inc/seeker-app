@@ -59,5 +59,4 @@ export const disconnectSocket = () => {
     socket = null;
     console.log('Socket disconnected manually.');
   }
-};
-
+}; 

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { getSocket } from '@/services/node-express-backend/sockets';
+import { getSocket } from '@/src/features/socket';
 import { SocketPayloads } from '@/shared/constants/socketEvents';
 
 interface UseLiveSessionSocketProps {

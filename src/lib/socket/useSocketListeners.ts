@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { connectSocket, getSocket } from '@/services/node-express-backend/sockets';
+import { connectSocket, getSocket } from '@/src/features/socket';
 import { AppDispatch, RootState } from '@/redux/store';
 import { useQueryClient } from '@tanstack/react-query';
 import { setSessions } from '@/redux/sessionSlice';

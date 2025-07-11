@@ -8,7 +8,7 @@ import { EnrichedSession } from '@/types/EnrichedSession';
 import { AppDispatch, RootState } from '@/redux/store';
 import { LinearGradient } from 'expo-linear-gradient';
 import { sendMessage } from '@/features/sessions/api/sessionApi';
-import { getSocket } from '@/services/node-express-backend/sockets';
+import { getSocket } from '@/src/features/socket';
 import { useMessages } from '@/features/chat';
 import { useQueryClient } from '@tanstack/react-query';
 

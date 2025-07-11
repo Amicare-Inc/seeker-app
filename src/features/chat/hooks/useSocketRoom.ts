@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { getSocket } from '@/services/node-express-backend/sockets';
+import { getSocket } from '@/src/features/socket';
 
 /**
  * Joins a socket.io room for the given session and cleans up on unmount.

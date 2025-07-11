@@ -7,7 +7,7 @@ import { Link, router } from 'expo-router';
 import { fetchUserFromLoginThunk, setNavigationComplete } from '@/redux/userSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { connectSocket } from '@/services/node-express-backend/sockets';
+import { connectSocket } from '@/src/features/socket';
 
 const SignIn = () => {
 	const dispatch = useDispatch<AppDispatch>();
