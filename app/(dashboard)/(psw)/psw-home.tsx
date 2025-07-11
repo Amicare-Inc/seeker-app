@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useAvailableUsers from '@/hooks/useHomeTab';
 import { router } from 'expo-router';
-import UserCard from '@/components/User/UserCard';
+import UserCardSeeker from '@/components/User/UserCardSeeker';
 import UserCardExpanded from '@/components/User/UserCardExpanded';
 import { User } from '@/types/User';
 import SessionFilterCard from '@/components/Session/SessionFilterCard';
@@ -33,7 +33,7 @@ const PswHomeTab = () => {
 					onClose={() => setExpandedUserId(null)}
 				/>
 			) : (
-				<UserCard
+				<UserCardSeeker
 					user={item}
 					onPress={() => handleCardPress(item.id!)}
 				/>
