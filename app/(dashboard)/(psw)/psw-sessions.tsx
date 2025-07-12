@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SessionList } from '@/features/sessions';
 import { useSessionsTab } from '@/features/sessions';
@@ -55,24 +55,27 @@ const PswSessionsTab = () => {
             </View>
 
             {/* Main Content */}
-            <View className="flex-1 px-3.5">
-                <SessionList
-                    sessions={newRequests}
-                    onSessionPress={onSessionPress}
-                />
+            <ScrollView>
+                <View className="flex-1 px-3.5 mb-[100px]">
+                    <SessionList
+                        sessions={newRequests}
+                        onSessionPress={onSessionPress}
+                        isNewRequestsSection={true}
+                    />
 
-                <SessionList
-                    sessions={pending}
-                    onSessionPress={onSessionPress}
-                    title="Pending"
-                />
+                    <SessionList
+                        sessions={pending}
+                        onSessionPress={onSessionPress}
+                        title="Pending"
+                    />
 
-                <SessionBookedList
-					sessions={confirmed}
-					onSessionPress={onSessionPress}
-					title="Booked"
-				/>
-			</View>
+                    <SessionBookedList
+                        sessions={confirmed}
+                        onSessionPress={onSessionPress}
+                        title="Booked"
+                    />
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }

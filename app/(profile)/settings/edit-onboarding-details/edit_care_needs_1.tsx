@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, SafeAreaView, ScrollView } from 'react-native';
-import { CustomButton } from '@/shared/components';
+import CustomButton from '@/components/Global/CustomButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
@@ -9,7 +9,7 @@ import careTypeOptions from '@/assets/careOptions';
 import { TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-const CarePreferences: React.FC = () => {
+const CareNeeds1: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const isPSW = userData?.isPsw;
@@ -44,7 +44,7 @@ const CarePreferences: React.FC = () => {
 			);
 		}
 
-		router.push('/tasks'); // Move to the next page regardless
+		router.push('/(profile)/settings/edit-onboarding-details/edit_care_needs_2'); // Move to the next page regardless
 	};
 
 	return (
@@ -57,7 +57,7 @@ const CarePreferences: React.FC = () => {
 							<TouchableOpacity className="absolute" onPress={() => router.back()}>
 								<Ionicons name="chevron-back" size={24} color="#000" />
 							</TouchableOpacity>
-							<Text className="text-xl font-medium mx-auto">
+							<Text className="text-xl font-semibold mx-auto">
 								Care Needs 1/4
 							</Text>
 						</View>
@@ -152,4 +152,4 @@ const CarePreferences: React.FC = () => {
 	);
 };
 
-export default CarePreferences;
+export default CareNeeds1;

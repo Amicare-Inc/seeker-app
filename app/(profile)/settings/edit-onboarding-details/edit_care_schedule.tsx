@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { CustomButton } from '@/shared/components';
-import { useAvailability } from '@/features/availability';
+import CustomButton from '@/components/Global/CustomButton';
+import { useAvailability } from '@/hooks/useAvailability';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -15,7 +15,7 @@ const timeslots = [
 	'6 pm - 8 pm',
 ];
 
-const AvailabilityPage: React.FC = () => {
+const CareSchedule: React.FC = () => {
 	const {
 		selectedDays,
 		activeDay,
@@ -24,11 +24,6 @@ const AvailabilityPage: React.FC = () => {
 		resetAvailability,
 		saveAvailability,
 	} = useAvailability();
-
-	// Check if at least one time slot is selected
-	const hasSelectedTimes = Object.values(selectedDays).some(
-		(times) => times.length > 0,
-	);
 
 	return (
 		<SafeAreaView className="flex-1 bg-grey-0">
@@ -39,7 +34,7 @@ const AvailabilityPage: React.FC = () => {
 						<TouchableOpacity className="absolute" onPress={() => router.back()}>
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
-						<Text className="text-xl font-medium mx-auto">
+						<Text className="text-xl font-semibold mx-auto">
 							3/4 Care Schedule
 						</Text>
 					</View>
@@ -51,23 +46,34 @@ const AvailabilityPage: React.FC = () => {
 
 					{/* Day Selection */}
 					<View className="flex-wrap flex-row mb-[36px] justify-between">
-						{days.map((day) => (
-							<CustomButton
-								key={day}
-								title={day}
-								handlePress={() => toggleDay(day)}
-								containerStyles={`w-[82px] h-[44px] rounded-full mb-[10px] min-h-[44px] ${
-									selectedDays[day]?.length > 0
-										? 'bg-brand-blue'
-										: 'bg-white'
-								}`}
-								textStyles={`text-sm font-medium ${
-									selectedDays[day]?.length > 0
-										? 'text-white'
-										: 'text-black'
-								}`}
-							/>
-						))}
+						{days.map((day) => {
+							const hasTimeSlots = selectedDays[day]?.length > 0;
+							const isActiveDay = activeDay === day;
+							
+							// Determine button styling based on state
+							let bgColor = 'bg-white';
+							let textColor = 'text-black';
+							
+							if (isActiveDay) {
+								// Currently selected day - full blue
+								bgColor = 'bg-brand-blue';
+								textColor = 'text-white';
+							} else if (hasTimeSlots) {
+								// Days with time slots but not currently active - lighter blue
+								bgColor = 'bg-[#72B2EE]';
+								textColor = 'text-white';
+							}
+							
+							return (
+								<CustomButton
+									key={day}
+									title={day}
+									handlePress={() => toggleDay(day)}
+									containerStyles={`w-[82px] h-[44px] rounded-full mb-[10px] min-h-[44px] ${bgColor}`}
+									textStyles={`text-sm font-medium ${textColor}`}
+								/>
+							);
+						})}
 						<CustomButton
 							title="Reset"
 							handlePress={resetAvailability}
@@ -146,4 +152,4 @@ const AvailabilityPage: React.FC = () => {
 	);
 };
 
-export default AvailabilityPage;
+export default CareSchedule;

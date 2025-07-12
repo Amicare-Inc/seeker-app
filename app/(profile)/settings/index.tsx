@@ -66,13 +66,13 @@ const SettingsScreen = () => {
           <SettingsListItem
             icon={<Ionicons name="list-circle" size={28} color="#303031" />}
             label="Care Needs"
-            onPress={() => console.log('Care Needs pressed')}
+            onPress={() => router.push('/(profile)/settings/edit-onboarding-details/edit_care_needs_1')}
           />
           {/* Care Schedule */}
           <SettingsListItem
             icon={<Ionicons name="time" size={28} color="#303031" />}
             label="Care Schedule"
-            onPress={() => console.log('Care Schedule pressed')}
+            onPress={() => router.push('/(profile)/settings/edit-onboarding-details/edit_care_schedule')}
           />
           {/* Notifications */}
           <SettingsListItem

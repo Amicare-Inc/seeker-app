@@ -8,14 +8,52 @@ interface ProfileAvailabilityTableProps {
 
 const ProfileAvailabilityTable: React.FC<ProfileAvailabilityTableProps> = ({ user }) => {
     const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    const timeSlots = ['8am - 12pm', '12pm - 5pm', '5pm - 10pm'];
-    
-    // Mock availability data - replace with actual user availability
-    const availability = [
-        [false, true, true, true, true, true, false], // 8am - 12pm
-        [false, false, true, false, false, false, false], // 12pm - 5pm
-        [false, false, false, false, false, false, false], // 5pm - 10pm
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const timeSlots = [
+        { label: '8am - 12pm', start: '08:00', end: '12:00' },
+        { label: '12pm - 5pm', start: '12:00', end: '17:00' },
+        { label: '5pm - 10pm', start: '17:00', end: '22:00' }
     ];
+    
+    // Check if user is available during a specific time slot on a specific day
+    const isAvailableAtTime = (dayName: string, slotStart: string, slotEnd: string): boolean => {
+        const availability = user.carePreferences?.availability;
+        if (!availability || !availability[dayName]) {
+            return false;
+        }
+
+        const daySlots = availability[dayName];
+        
+        // Check if any of the user's time slots overlap with our display slot
+        return daySlots.some(slot => {
+            const userStart = slot.start;
+            const userEnd = slot.end;
+            
+            // Convert time strings to minutes for easier comparison
+            const toMinutes = (time: string) => {
+                const [hours, minutes] = time.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
+            
+            const userStartMin = toMinutes(userStart);
+            const userEndMin = toMinutes(userEnd);
+            const slotStartMin = toMinutes(slotStart);
+            const slotEndMin = toMinutes(slotEnd);
+            
+            // Check for overlap: user slot overlaps with display slot
+            return userStartMin < slotEndMin && userEndMin > slotStartMin;
+        });
+    };
+
+    // If no availability data, show empty table
+    if (!user.carePreferences?.availability) {
+        return (
+            <View className="mb-4">
+                <Text className="font-bold text-black text-base mb-4">Availability</Text>
+                <Text className="text-grey-58 text-sm">No availability information provided</Text>
+            </View>
+        );
+    }
 
     return (
         <View className="mb-4">
@@ -36,15 +74,20 @@ const ProfileAvailabilityTable: React.FC<ProfileAvailabilityTableProps> = ({ use
                 {timeSlots.map((timeSlot, rowIndex) => (
                     <View key={rowIndex} className="flex-row items-center mb-2">
                         <View className="w-24">
-                            <Text className="text-sm text-grey-58 font-medium">{timeSlot}</Text>
+                            <Text className="text-sm text-grey-58 font-medium">{timeSlot.label}</Text>
                         </View>
-                        {availability[rowIndex].map((isAvailable, colIndex) => (
-                            <View key={colIndex} className="flex-1 items-center justify-center">
-                                <View 
-                                    className={`w-8 h-[18px] border border-grey-21 border-1 ${isAvailable ? 'bg-brand-blue' : 'bg-grey-9'}`}
-                                />
-                            </View>
-                        ))}
+                        {dayNames.map((dayName, colIndex) => {
+                            const isAvailable = isAvailableAtTime(dayName, timeSlot.start, timeSlot.end);
+                            return (
+                                <View key={colIndex} className="flex-1 items-center justify-center">
+                                    <View 
+                                        className={`w-8 h-[18px] border border-grey-21 ${
+                                            isAvailable ? 'bg-brand-blue' : 'bg-grey-9'
+                                        }`}
+                                    />
+                                </View>
+                            );
+                        })}
                     </View>
                 ))}
             </View>

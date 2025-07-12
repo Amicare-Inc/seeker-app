@@ -115,6 +115,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 							<ProfileListItem
 								label="Legal"
 								iconName="document-text"
+								onPress={() => router.push('/(profile)/legal')}
 								
 							/>
 						</View>

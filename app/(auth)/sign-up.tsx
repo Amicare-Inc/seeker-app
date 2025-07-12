@@ -39,7 +39,7 @@ const SignUp = () => {
 						email: form.email || '',
 					}),
 				);
-				router.push('/(onboarding)/personal_details');
+				router.push('/(onboarding)/care_needs_1');
 			} catch (error) {
 				setPasswordError((error as any).message);
 				console.log((error as any).message);

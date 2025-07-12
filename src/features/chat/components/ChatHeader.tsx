@@ -106,7 +106,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 					</View>
 
 					{/* Show book button */}
-					{currentSession.status !== 'inProgress' && !isConfirmed && (
+					{currentSession.status !== 'inProgress' && !isConfirmed && !isUserConfirmed && (
 						<View className="mb-4">
 							{!isDisabled && (
 								<TouchableOpacity
@@ -127,23 +127,28 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
 					<View className="flex-row items-center justify-between mb-[16px]">
 						<View className="flex-row items-center gap-1">
-							<Ionicons
-								name="checkmark-circle"
-								size={22}
-								color={
-									currentSession.status === 'inProgress'
-										? 'black'
-										: isConfirmed
-										? '#75D87F'
-										: '#0C7AE2'
-								}
-								style={{ marginLeft: 4 }}
-							/>
+							{/* Only show checkmark for confirmed sessions or when accepted but not yet booked */}
+							{(isConfirmed || (!isUserConfirmed && currentSession.status !== 'inProgress')) && (
+								<Ionicons
+									name="checkmark-circle"
+									size={22}
+									color={
+										currentSession.status === 'inProgress'
+											? 'black'
+											: isConfirmed
+											? '#75D87F'
+											: '#0C7AE2'
+									}
+									style={{ marginLeft: 4 }}
+								/>
+							)}
 							<Text className="text-sm font-medium text-[#797979]">
 								{currentSession.status === 'inProgress'
 									? 'Session in Progress'
 									: isConfirmed
-									? 'Awaiting Confirmation'
+									? 'Session Booked'
+									: isUserConfirmed
+									? 'Booking sent for approval'
 									: 'Request Accepted'}
 							</Text>
 						</View>
