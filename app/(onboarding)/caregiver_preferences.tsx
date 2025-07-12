@@ -77,7 +77,7 @@ const CaregiverPreferences: React.FC = () => {
 
         dispatch(updateUserFields({ carePreferences: updatedCarePreferences }));
         console.log('Caregiver preferences updated:', updatedCarePreferences);
-        router.push('/personal_details'); // Navigate to next page
+        router.push('/about_loved_one'); // Navigate to next page
     };
 
     return (
@@ -170,58 +170,62 @@ const CaregiverPreferences: React.FC = () => {
                     )}
 
                     {/* Caregiver Gender Preference */}
-                    <Text className="text-base mb-[8px] font-medium">
-                        Caregiver Gender Preference
-                    </Text>
-                    <TouchableOpacity 
-                        className={`bg-white rounded-lg px-3 py-2.5 mb-[12px] flex-row justify-between items-center ${
-                            showGenderDropdown ? 'border-2 border-brand-blue' : 'border border-grey-9'
-                        }`}
-                        onPress={() => {
-                            setShowGenderDropdown(!showGenderDropdown);
-                            setShowLanguageDropdown(false);
-                            setShowDrivingDropdown(false);
-                        }}
-                    >
-                        <Text className={`text-lg ${selectedGender ? 'text-black' : 'text-grey-35'}`}>
-                            {selectedGender || 'Male / Female / Unspecified'}
-                        </Text>
-                        <Ionicons 
-                            name={showGenderDropdown ? "chevron-up" : "chevron-down"} 
-                            size={20} 
-                            color="#BFBFC3" 
-                        />
-                    </TouchableOpacity>
+                    {!showLanguageDropdown && (
+                        <>
+                            <Text className="text-base mb-[8px] font-medium">
+                                Caregiver Gender Preference
+                            </Text>
+                            <TouchableOpacity 
+                                className={`bg-white rounded-lg px-3 py-2.5 mb-[12px] flex-row justify-between items-center ${
+                                    showGenderDropdown ? 'border-2 border-brand-blue' : 'border border-grey-9'
+                                }`}
+                                onPress={() => {
+                                    setShowGenderDropdown(!showGenderDropdown);
+                                    setShowLanguageDropdown(false);
+                                    setShowDrivingDropdown(false);
+                                }}
+                            >
+                                <Text className={`text-lg ${selectedGender ? 'text-black' : 'text-grey-35'}`}>
+                                    {selectedGender || 'Male / Female / Unspecified'}
+                                </Text>
+                                <Ionicons 
+                                    name={showGenderDropdown ? "chevron-up" : "chevron-down"} 
+                                    size={20} 
+                                    color="#BFBFC3" 
+                                />
+                            </TouchableOpacity>
 
-                    {/* Gender Dropdown */}
-                    {showGenderDropdown && (
-                        <View className="mb-[20px] overflow-hidden">
-                            {genderOptions.map((gender, index) => (
-                                <TouchableOpacity
-                                    key={gender}
-                                    className={`px-1 py-3 flex-row justify-between items-center ${
-                                        index === 0 ? 'rounded-t-lg' : ''
-                                    } ${
-                                        index === genderOptions.length - 1 ? 'rounded-b-lg' : ''
-                                    } ${
-                                        index < genderOptions.length - 1 ? 'border-b border-grey-9' : ''
-                                    }`}
-                                    onPress={() => {
-                                        setSelectedGender(gender);
-                                        setShowGenderDropdown(false);
-                                    }}
-                                >
-                                    <Text className={`text-base text-black ${
-                                        selectedGender === gender ? 'font-bold' : 'font-normal'
-                                    }`}>{gender}</Text>
-                                    {selectedGender === gender && (
-                                        <View className="w-5 h-5 bg-brand-blue rounded-full items-center justify-center">
-                                            <Ionicons name="checkmark" size={14} color="white" />
-                                        </View>
-                                    )}
-                                </TouchableOpacity>
-                            ))}
-                        </View>
+                            {/* Gender Dropdown */}
+                            {showGenderDropdown && (
+                                <View className="mb-[20px] overflow-hidden">
+                                    {genderOptions.map((gender, index) => (
+                                        <TouchableOpacity
+                                            key={gender}
+                                            className={`px-1 py-3 flex-row justify-between items-center ${
+                                                index === 0 ? 'rounded-t-lg' : ''
+                                            } ${
+                                                index === genderOptions.length - 1 ? 'rounded-b-lg' : ''
+                                            } ${
+                                                index < genderOptions.length - 1 ? 'border-b border-grey-9' : ''
+                                            }`}
+                                            onPress={() => {
+                                                setSelectedGender(gender);
+                                                setShowGenderDropdown(false);
+                                            }}
+                                        >
+                                            <Text className={`text-base text-black ${
+                                                selectedGender === gender ? 'font-bold' : 'font-normal'
+                                            }`}>{gender}</Text>
+                                            {selectedGender === gender && (
+                                                <View className="w-5 h-5 bg-brand-blue rounded-full items-center justify-center">
+                                                    <Ionicons name="checkmark" size={14} color="white" />
+                                                </View>
+                                            )}
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
+                        </>
                     )}
 
                     {/* Driving Preference */}

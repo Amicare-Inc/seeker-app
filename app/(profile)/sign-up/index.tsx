@@ -65,7 +65,7 @@ export default function Index() {
 					</Text>
 					<CustomButton
 						title="Sign Up with Phone"
-						handlePress={() => router.push('/sign-up-forum')}
+						handlePress={() => router.push('/care_schedule')}
 						containerStyles="w-full mb-4"
 						textStyles='font-medium'
 						iconName="call"

@@ -57,7 +57,7 @@ const LovedOneRelationship: React.FC = () => {
             // TODO: Add relationship field to User type or store in appropriate location
         }
 
-        router.push('/about_loved_one'); // Navigate to next page
+        router.push('/profile_details'); // Navigate to next page
     };
 
     const isValid = selectedRelationship || (showCustomInput && customRelationship.trim());
