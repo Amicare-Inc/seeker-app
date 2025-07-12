@@ -4,7 +4,7 @@ import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'expo-router';
 import { User } from '@/types/User';
-import { setActiveEnrichedSession } from '@/redux/sessionSlice';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 
 interface UserCardExpandedProps {
 	user: User;
@@ -17,6 +17,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 }) => {
 	const router = useRouter();
 	const dispatch = useDispatch();
+	const { setActiveEnrichedSession } = useActiveSession();
 
 	// Build strings for tasks and care type; if none, show an empty string.
 	const tasks = user.carePreferences?.tasks?.length
@@ -46,7 +47,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 	// Navigates to the profile page for this user; passes myProfile: false.
 	const handleMoreInfo = () => {
 		dispatch(setActiveProfile(user));
-		dispatch(setActiveEnrichedSession(null));
+		setActiveEnrichedSession(null);
 		router.push('/other-user-profile');
 	};
 

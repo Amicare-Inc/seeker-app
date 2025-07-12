@@ -4,14 +4,13 @@ import { RootState } from '@/redux/store';
 import { ProfileScreen, PendingSessionSlider } from '@/features/profile';
 import { User } from '@/types/User';
 import { SessionCard } from '@/features/sessions';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 
 const OtherUserProfileScreen = () => {
 	const activeProfileMoreInfo = useSelector(
 		(state: RootState) => state.activeProfile.activeUser,
 	);
-	const activeEnrichedProfile = useSelector(
-		(state: RootState) => state.sessions.activeEnrichedSession,
-	);
+	const { activeEnrichedSession: activeEnrichedProfile } = useActiveSession();
 	const activeProfile =
 		activeEnrichedProfile?.otherUser || activeProfileMoreInfo;
 

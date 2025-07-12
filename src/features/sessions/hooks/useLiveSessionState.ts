@@ -4,13 +4,14 @@ import { router } from 'expo-router';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { LiveSessionStatus } from '@/types/LiveSession';
 import { RootState } from '@/redux/store';
-import { selectCompletedSessions } from '@/redux/selectors';
+import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { mapFirebaseStatusToLiveStatus } from '../utils/sessionMappers';
 import { useLiveSessionSocket } from './useLiveSessionSocket';
 
 export const useLiveSessionState = (enrichedSession: EnrichedSession) => {
   const currentUser = useSelector((state: RootState) => state.user.userData);
-  const completedSessions = useSelector(selectCompletedSessions);
+  const { data: allSessions = [] } = useEnrichedSessions(currentUser?.id);
+  const completedSessions = allSessions.filter(session => session.status === 'completed');
 
   // Local state
   const [status, setStatus] = useState<LiveSessionStatus>(() =>
@@ -64,7 +65,7 @@ export const useLiveSessionState = (enrichedSession: EnrichedSession) => {
     if (isCompleted && status !== 'completed') {
       setStatus('completed');
       router.push({
-        pathname: '/session-completed',
+        pathname: '/(chat)/session-completed',
         params: { sessionId: enrichedSession.id },
       });
     }

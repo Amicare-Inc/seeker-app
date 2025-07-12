@@ -1,10 +1,8 @@
 import { Alert } from 'react-native';
-import { useStripe } from '@stripe/stripe-react-native';
 import { EnrichedSession } from '@/types/EnrichedSession';
 
 export class PaymentService {
     private static instance: PaymentService;
-    private stripe = useStripe();
     private apiBaseUrl = process.env.EXPO_PUBLIC_BACKEND_BASE_URL;
 
     private constructor() {}
@@ -16,7 +14,7 @@ export class PaymentService {
         return PaymentService.instance;
     }
 
-    async initiatePayment(session: EnrichedSession): Promise<boolean> {
+    async initiatePayment(session: EnrichedSession, stripe: any): Promise<boolean> {
         try {
             // 1. Create payment intent
             const response = await fetch(`${this.apiBaseUrl}/payments/create-intent`, {
@@ -41,7 +39,7 @@ export class PaymentService {
             }
 
             // 2. Initialize payment sheet
-            const { error: initError } = await this.stripe.initPaymentSheet({
+            const { error: initError } = await stripe.initPaymentSheet({
                 paymentIntentClientSecret: clientSecret,
                 merchantDisplayName: 'Amicare',
                 returnURL: 'amicare://stripe-redirect',
@@ -71,7 +69,7 @@ export class PaymentService {
             }
 
             // 3. Present payment sheet
-            const { error: presentError } = await this.stripe.presentPaymentSheet();
+            const { error: presentError } = await stripe.presentPaymentSheet();
 
             if (presentError) {
                 console.error('Payment error:', presentError);

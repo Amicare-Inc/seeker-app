@@ -37,12 +37,20 @@ interface SessionData {
 
 const RequestSession = () => {
 	const { otherUserId, sessionObj } = useLocalSearchParams();
-	const targetUserObj: User = useSelector(
+	
+	// Get target user from multiple sources with fallback hierarchy
+	const targetUserFromAllUsers = useSelector(
 		(state: RootState) =>
-			state.userList.users.find(
+			Object.values(state.user.allUsers).find(
 				(user) => user.id === otherUserId,
 			) as User,
 	);
+	const activeProfile = useSelector((state: RootState) => state.activeProfile.activeUser);
+	
+	// Use activeProfile if available (set when navigating to request session), 
+	// otherwise fall back to the user from allUsers
+	const targetUserObj: User = activeProfile || targetUserFromAllUsers;
+	
 	const existingSession: SessionData | null = sessionObj
 		? JSON.parse(sessionObj as string)
 		: null;
@@ -229,24 +237,31 @@ const RequestSession = () => {
 		alert('Session updated successfully!');
 		router.back();
 		} else {
-		const newSessionData = {
-			...sessionData,
-			senderId: currentUser.id,
-			receiverId: targetUserObj?.id,
-			billingDetails: {
-			...sessionData.billingDetails,
-			basePrice: sessionData.billingDetails.dynamicBasePrice,
-			},
-		} as SessionDTO;
-		
-		await requestSession(newSessionData);
-		
-		router.push({
-			pathname: '/sent-request',
-			params: {
-			otherUserId: targetUserObj?.id,
-			},
-		});
+			// Validate target user before creating session
+			const receiverId = targetUserObj?.id || otherUserId as string;
+			if (!receiverId) {
+				alert('Unable to find target user. Please try again.');
+				return;
+			}
+
+			const newSessionData = {
+				...sessionData,
+				senderId: currentUser.id,
+				receiverId: receiverId,
+				billingDetails: {
+					...sessionData.billingDetails,
+					basePrice: sessionData.billingDetails.dynamicBasePrice,
+				},
+			} as SessionDTO;
+			
+			await requestSession(newSessionData);
+			
+			router.push({
+				pathname: '/sent-request',
+				params: {
+					otherUserId: receiverId,
+				},
+			});
 		}
 	} catch (error) {
 		console.error('Error submitting session request:', error);

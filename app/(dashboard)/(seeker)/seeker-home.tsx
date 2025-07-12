@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity, Platform } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useHomeTab } from '@/features/user';
-import { UserCard, UserCardExpanded } from '@/features/user';
+import { useHomeTab } from '@/features/userDirectory';
+import { UserCard, UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
 
 const SeekerHomeTab = () => {

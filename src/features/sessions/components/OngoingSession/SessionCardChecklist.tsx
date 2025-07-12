@@ -46,7 +46,7 @@ const SessionCardChecklist = () => {
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const expandedRef = useRef(expanded);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<number | null>(null);
   const newItemInputRef = useRef<TextInput>(null);
 
   React.useEffect(() => {
@@ -72,10 +72,10 @@ const SessionCardChecklist = () => {
   // Timer effect
   useEffect(() => {
     if (timer < SESSION_DURATION_SECONDS) {
-      timerRef.current = setTimeout(() => setTimer(t => t + 1), 1000);
+      timerRef.current = setTimeout(() => setTimer(t => t + 1), 1000) as number;
     }
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+              if (timerRef.current) clearTimeout(timerRef.current as number);
     };
   }, [timer]);
 

@@ -4,10 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/redux/store';
 import { router } from 'expo-router';
-import { acceptSessionThunk, rejectSessionThunk } from '@/redux/sessionSlice';
+import { useAcceptSession, useRejectSession } from '@/features/sessions/api/queries';
 import { formatDate } from '@/lib/datetimes/datetimeHelpers';
 import SessionChecklistBox from './SessionChecklistBox';
 
@@ -20,6 +18,9 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const SessionCard = (enrichedSession: EnrichedSession) => {
     const [expanded, setExpanded] = React.useState(false);
     const expandedRef = useRef(expanded);
+
+    const acceptSessionMutation = useAcceptSession();
+    const rejectSessionMutation = useRejectSession();
 
     // Keep ref in sync with state
     React.useEffect(() => {
@@ -42,11 +43,9 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
     })
     ).current;
 
-      const dispatch = useDispatch<AppDispatch>();
-
     const handleAccept = async () => {
         try {
-            await dispatch(acceptSessionThunk(enrichedSession.id)).unwrap();
+            await acceptSessionMutation.mutateAsync(enrichedSession.id);
             router.back();
         } catch (err) {
             console.error('Error accepting session:', err);
@@ -55,12 +54,13 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
 
     const handleReject = async () => {
         try {
-            await dispatch(rejectSessionThunk(enrichedSession.id)).unwrap();
+            await rejectSessionMutation.mutateAsync(enrichedSession.id);
             router.back();
         } catch (err) {
             console.error('Error rejecting session:', err);
         }
     };
+
     const note = enrichedSession.note ?? 'Appointment';
     const totalCost = enrichedSession.billingDetails?.total?.toFixed(2) ?? 'N/A';
 
@@ -202,11 +202,23 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
 
             {/* Buttons */}
             <View className="flex-row gap-3 mb-2 px-5">
-              <TouchableOpacity onPress={handleAccept} className="flex-1 bg-white py-2 rounded-lg items-center">
-                <Text className="text-black text-base font-medium">Accept</Text>
+              <TouchableOpacity 
+                onPress={handleAccept} 
+                className="flex-1 bg-white py-2 rounded-lg items-center"
+                disabled={acceptSessionMutation.isPending}
+              >
+                <Text className="text-black text-base font-medium">
+                  {acceptSessionMutation.isPending ? 'Accepting...' : 'Accept'}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleReject} className="flex-1 bg-black py-2 rounded-lg items-center">
-                <Text className="text-white text-base font-medium">Reject</Text>
+              <TouchableOpacity 
+                onPress={handleReject} 
+                className="flex-1 bg-black py-2 rounded-lg items-center"
+                disabled={rejectSessionMutation.isPending}
+              >
+                <Text className="text-white text-base font-medium">
+                  {rejectSessionMutation.isPending ? 'Rejecting...' : 'Reject'}
+                </Text>
               </TouchableOpacity>
             </View>
             {/* <TouchableOpacity className="bg-black/30 py-1.5 rounded-full items-center mx-auto w-[35%] mt-3 mb-2">

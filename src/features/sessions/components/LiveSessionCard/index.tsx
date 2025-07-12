@@ -3,17 +3,17 @@ import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, T
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiveSessionCardProps } from '@/types/LiveSession';
 import LiveSessionHeader from './LiveSessionHeader';
-import { useSessionManager } from '@/features/sessions';
+import { useSessionManager } from '@/features/sessions/hooks';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { router } from 'expo-router';
-import { useDispatch, useSelector } from 'react-redux';
-import { setActiveEnrichedSession } from '@/redux/sessionSlice';
+import { useSelector } from 'react-redux';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import SessionChecklistBox from '../OngoingSession/SessionChecklistBox';
 import { RootState } from '@/redux/store';
 import { updateSessionChecklist, addSessionComment } from '@/features/sessions/api/sessionApi';
 import { ChecklistItem } from '@/types/Sessions';
-import { useElapsedTimer } from '@/features/sessions';
+import { useElapsedTimer } from '@/features/sessions/hooks';
 import { LiveStatus } from '@/shared/constants/enums';
 
 const { width } = Dimensions.get('window');
@@ -62,7 +62,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   const bottomOffset = useRef(new Animated.Value(Platform.OS === 'ios' ? 83 : 64)).current;
   const expandedRef = useRef(expanded);
   const timer = useElapsedTimer(session.liveStatus, session.liveStatusUpdatedAt);
-  const dispatch = useDispatch();
+  const { setActiveEnrichedSession } = useActiveSession();
   const currentUser = useSelector((state: RootState) => state.user.userData);
   
   const {
@@ -106,7 +106,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   }, [bottomOffset]);
 
   const handleMessagePress = () => {
-    dispatch(setActiveEnrichedSession(session));
+    setActiveEnrichedSession(session);
     router.push({
       pathname: '/(chat)/[sessionId]',
       params: { sessionId: session.id }

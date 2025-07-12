@@ -1,9 +1,11 @@
-import { selectAllSessions } from "@/redux/selectors";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useEnrichedSessions } from "@/features/sessions/api/queries";
 
 export const useLiveSession = () => {
-    const sessions = useSelector(selectAllSessions);
+    const userId = useSelector((state: RootState) => state.user.userData?.id);
+    const { data: sessions = [] } = useEnrichedSessions(userId);
     
     // Find single active session based on existing fields
     const activeLiveSession = useMemo(() => 

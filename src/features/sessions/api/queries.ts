@@ -4,10 +4,16 @@ import {
   acceptSession, 
   rejectSession,
   updateSession,
-  requestSession 
+  requestSession,
+  bookSession,
+  declineSession,
+  cancelSession,
+  getMessages,
+  sendMessage
 } from '@/features/sessions/api/sessionApi';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Session } from '@/types/Sessions';
+import { Message } from '@/types/Message';
 
 // Query keys
 export const sessionKeys = {
@@ -16,6 +22,8 @@ export const sessionKeys = {
   list: (userId: string) => [...sessionKeys.lists(), userId] as const,
   details: () => [...sessionKeys.all, 'detail'] as const,
   detail: (id: string) => [...sessionKeys.details(), id] as const,
+  messages: () => [...sessionKeys.all, 'messages'] as const,
+  messagesBySession: (sessionId: string) => [...sessionKeys.messages(), sessionId] as const,
 };
 
 // Fetch enriched sessions
@@ -24,6 +32,28 @@ export function useEnrichedSessions(userId: string | undefined) {
     queryKey: sessionKeys.list(userId || ''),
     queryFn: () => getUserSessionTab(userId!),
     enabled: !!userId,
+  });
+}
+
+// Fetch messages for a session
+export function useMessages(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: sessionKeys.messagesBySession(sessionId || ''),
+    queryFn: () => getMessages(sessionId!),
+    enabled: !!sessionId,
+  });
+}
+
+// Send message mutation
+export function useSendMessage() {
+  return useMutation({
+    mutationFn: ({ sessionId, userId, message }: { sessionId: string; userId: string; message: string }) => 
+      sendMessage(sessionId, userId, message),
+    // No optimistic updates - let socket handle real-time updates for clean UX
+    onError: (error) => {
+      console.error('Failed to send message:', error);
+      // Could show a toast or error message to user here
+    },
   });
 }
 
@@ -46,6 +76,46 @@ export function useRejectSession() {
   
   return useMutation({
     mutationFn: (sessionId: string) => rejectSession(sessionId),
+    onSuccess: () => {
+      // Invalidate sessions list to refetch
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    },
+  });
+}
+
+// Book session mutation
+export function useBookSession() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ sessionId, currentUserId }: { sessionId: string; currentUserId: string }) => 
+      bookSession(sessionId, currentUserId),
+    onSuccess: () => {
+      // Invalidate sessions list to refetch
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    },
+  });
+}
+
+// Decline session mutation
+export function useDeclineSession() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (sessionId: string) => declineSession(sessionId),
+    onSuccess: () => {
+      // Invalidate sessions list to refetch
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    },
+  });
+}
+
+// Cancel session mutation
+export function useCancelSession() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (sessionId: string) => cancelSession(sessionId),
     onSuccess: () => {
       // Invalidate sessions list to refetch
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });

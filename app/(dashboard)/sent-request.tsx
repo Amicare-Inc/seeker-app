@@ -14,15 +14,17 @@ import { RootState } from '@/redux/store';
 const SessionRequestSent = () => {
 	// Optional: if you want the other user's name or photo from Redux:
 	const { otherUserId } = useLocalSearchParams();
+	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const otherUser = useSelector((state: RootState) =>
-		state.userList.users.find((u) => u.id === otherUserId),
+		Object.values(state.user.allUsers).find((u) => u.id === otherUserId),
 	);
 
 	const handleBack = () => {
-		if (otherUser?.isPsw) {
-			router.replace('/(seeker)/seeker-home');
-		} else {
+		// Navigate based on current user's role, not other user's role
+		if (currentUser?.isPsw) {
 			router.replace('/(psw)/psw-home');
+		} else {
+			router.replace('/(seeker)/seeker-home');
 		}
 	};
 

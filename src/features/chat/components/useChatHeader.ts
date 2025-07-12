@@ -7,6 +7,7 @@ import { useSocketRoom } from '../hooks/useSocketRoom';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { SessionStatus, LiveStatus } from '@/shared/constants/enums';
+import { useEnrichedSessions } from '@/features/sessions/api/queries';
 
 interface UseChatHeaderProps {
   session: EnrichedSession;
@@ -16,10 +17,9 @@ interface UseChatHeaderProps {
 export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const currentUser = useSelector((state: RootState) => state.user.userData);
+  const { data: allSessions = [] } = useEnrichedSessions(currentUser?.id);
   const currentSession =
-    useSelector((state: RootState) =>
-      state.sessions.allSessions.find((s) => s.id === session.id),
-    ) || session;
+    allSessions.find((s) => s.id === session.id) || session;
 
   // Join / leave socket room.
   useSocketRoom(session.id);

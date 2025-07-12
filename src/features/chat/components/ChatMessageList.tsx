@@ -15,6 +15,18 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
     otherUser,
     currentUserId,
 }) => {
+    // Safety deduplication: filter out duplicate IDs
+    const uniqueMessages = React.useMemo(() => {
+        const seen = new Set<string>();
+        return messages.filter(message => {
+            if (seen.has(message.id)) {
+                return false; // Skip duplicate
+            }
+            seen.add(message.id);
+            return true;
+        });
+    }, [messages]);
+
     const renderItem = ({ item }: { item: Message }) => (
         <View
             className={`p-3 my-1 rounded-3xl max-w-3/4 ${item.userId === currentUserId ? 'self-end bg-[#0e7ae2]' : 'self-start bg-gray-200'}`}
@@ -35,7 +47,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
 
     return (
         <FlatList
-            data={messages}
+            data={uniqueMessages}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             ListHeaderComponent={renderHeader}

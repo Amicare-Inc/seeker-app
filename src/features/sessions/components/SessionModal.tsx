@@ -2,7 +2,7 @@
 import React from 'react';
 import { Modal, TouchableOpacity, View, Text } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { UserCardExpanded } from '@/features/user';
+import { UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
 
 interface SessionModalProps {

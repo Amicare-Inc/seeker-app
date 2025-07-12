@@ -2,9 +2,9 @@ import React, { useState, useRef } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, TouchableWithoutFeedback, Platform, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useHomeTab } from '@/features/user';
+import { useHomeTab } from '@/features/userDirectory';
 import { router } from 'expo-router';
-import { UserCard, UserCardExpanded } from '@/features/user';
+import { UserCard, UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
 import { SessionFilterCard } from '@/features/sessions';
 

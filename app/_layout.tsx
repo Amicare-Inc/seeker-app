@@ -1,76 +1,48 @@
 // app/_layout.tsx
 import React, { useEffect, useRef } from 'react';
 import { Stack } from 'expo-router';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StripeProvider } from '@stripe/stripe-react-native';
-import { store, RootState, AppDispatch } from '@/redux/store';
-import { fetchAvailableUsers } from '@/redux/userListSlice';
-import { fetchUserSessionsFromBackend } from '@/redux/sessionSlice';
+import { store, RootState } from '@/redux/store';
 import { router } from 'expo-router';
-import { selectCompletedSessions } from '@/redux/selectors';
 import { useSocketListeners } from '@/lib/socket/useSocketListeners';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEnrichedSessions } from '@/features/sessions/api/queries';
+import { userDirectoryKeys } from '@/features/userDirectory/api/queries';
+import { ActiveSessionProvider } from '@/lib/context/ActiveSessionContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 const GlobalDataLoader = () => {
-	const dispatch = useDispatch<AppDispatch>();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
-	const sessions = useSelector((state: RootState) => state.sessions.allSessions);
 	const prevSessionsRef = useRef<string>('');
+	const queryClient = useQueryClient();
 
 	// Global socket listeners (will lazily connect when userId available)
 	useSocketListeners(currentUser?.id);
 
-	// Initial data loading
-	useEffect(() => {
-		if (currentUser && currentUser.id) {
-			dispatch(fetchUserSessionsFromBackend(currentUser.id));
-			dispatch(fetchAvailableUsers({ isPsw: !currentUser.isPsw }));
-		}
-	}, [currentUser, dispatch]);
+	// Fetch sessions with React Query
+	const sessionsQuery = useEnrichedSessions(currentUser?.id);
 
 	// Refresh user list when sessions change (someone accepts/declines/etc)
 	useEffect(() => {
-		if (currentUser && sessions.length > 0) {
+		if (currentUser && sessionsQuery.data && sessionsQuery.data.length > 0) {
 			// Create a hash of session statuses to detect changes
-			const sessionHash = sessions.map(s => `${s.id}-${s.status}`).sort().join('|');
+			const sessionHash = sessionsQuery.data.map(s => `${s.id}-${s.status}`).sort().join('|');
 			
 			if (prevSessionsRef.current && prevSessionsRef.current !== sessionHash) {
-				// Sessions have changed, refresh user list
-				dispatch(fetchAvailableUsers({ isPsw: !currentUser.isPsw }));
+				// Sessions have changed, invalidate all user directory queries to refetch
+				queryClient.invalidateQueries({ queryKey: userDirectoryKeys.lists() });
 			}
 			
 			prevSessionsRef.current = sessionHash;
 		}
-	}, [sessions, currentUser, dispatch]);
+	}, [sessionsQuery.data, currentUser, queryClient]);
 
 	return null;
 };
 
-// Watches Redux for newly-completed sessions and navigates once per session
-const SessionCompletionWatcher = () => {
-	const completed = useSelector(selectCompletedSessions);
-	console.log('completed in GLOBAL', completed);
-	const routedIds = useRef<Set<string>>(new Set());
 
-	useEffect(() => {
-		const now = Date.now();
-		completed.forEach((s) => {
-			if (routedIds.current.has(s.id)) return;
-
-			// Only trigger if actualEndTime is within last 30 s (or missing for safety)
-			if (!s.actualEndTime) return;
-
-			const endTs = new Date(s.actualEndTime).getTime();
-			if (now - endTs <= 30_000) {
-				routedIds.current.add(s.id);
-				router.push({ pathname: '/(chat)/session-completed', params: { sessionId: s.id } });
-			}
-		});
-	}, [completed]);
-
-	return null;
-};
 
 const queryClient = new QueryClient();
 
@@ -78,15 +50,15 @@ const LayoutWithProviders = () => {
 	return (
 		<Provider store={store}>
 			<QueryClientProvider client={queryClient}>
-				<SafeAreaProvider>
-					<StripeProvider
-						publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
-						urlScheme="amicare"
-						merchantIdentifier="merchant.com.specul8tor.AmiCare"
-						>
-						{/* GlobalDataLoader preloads global slices; SessionCompletionWatcher handles completion navigation */}
-						<GlobalDataLoader />
-						<SessionCompletionWatcher />
+				<ActiveSessionProvider>
+					<SafeAreaProvider>
+						<StripeProvider
+							publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
+							urlScheme="amicare"
+							merchantIdentifier="merchant.com.specul8tor.AmiCare"
+							>
+							{/* GlobalDataLoader preloads global slices; navigation now handled directly in socket listener */}
+							<GlobalDataLoader />
 						<Stack>
 							<Stack.Screen
 								name="index"
@@ -119,9 +91,10 @@ const LayoutWithProviders = () => {
 						</Stack>
 					</StripeProvider>
 				</SafeAreaProvider>
-			</QueryClientProvider>
-		</Provider>
-	);
+			</ActiveSessionProvider>
+		</QueryClientProvider>
+	</Provider>
+);
 };
 
 export default function RootLayout() {

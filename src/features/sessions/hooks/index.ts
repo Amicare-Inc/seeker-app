@@ -1,7 +1,8 @@
 // Export all session hooks
 export * from './useElapsedTimer';
-export * from './useSessionsTab';
-export { useSessionManager } from './useSessionManager';
-export { useSessionManager as useSessionManagerRefactored } from './useSessionManagerRefactored';
+export * from './useLiveSession';
+export * from './useLiveSessionSocket';
 export * from './useLiveSessionState';
-export * from './useLiveSession'; 
+export * from './useSessionManagerRefactored';
+export * from './useSessionsTab';
+export * from './useSessionConfirmation'; 

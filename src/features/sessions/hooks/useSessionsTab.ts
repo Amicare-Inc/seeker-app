@@ -1,45 +1,59 @@
 // src/features/sessions/hooks/useSessionsTab.ts
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { router } from 'expo-router';
-import { AppDispatch, RootState } from '@/redux/store';
-import { setActiveEnrichedSession } from '@/redux/sessionSlice';
+import { RootState } from '@/redux/store';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
+import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import {
-	selectNewRequestSessions,
-	selectPendingSessions,
-	selectConfirmedSessions,
-	selectCancelledSessions,
-	selectInProgressSessions,
-	selectCompletedSessions,
-	selectFailedSessions,
-} from '@/redux/selectors';
 
 export function useSessionsTab(role: 'psw' | 'seeker') {
-	const dispatch = useDispatch<AppDispatch>();
+	const { setActiveEnrichedSession } = useActiveSession();
+	const userId = useSelector((state: RootState) => state.user.userData?.id);
 
 	// TODO: RENAME
 	const [expandedSession, setExpandedSession] =
 		useState<EnrichedSession | null>(null);
 
-	const newRequests = useSelector(selectNewRequestSessions);
-	const pending = useSelector(selectPendingSessions);
-	const confirmed = useSelector(selectConfirmedSessions);
-	const cancelled = useSelector(selectCancelledSessions);
-	const inProgress = useSelector(selectInProgressSessions);
-	const completed = useSelector(selectCompletedSessions);
-	const failed = useSelector(selectFailedSessions);
+	// Fetch sessions using React Query
+	const { data: allSessions = [], isLoading: loading, error } = useEnrichedSessions(userId);
 
-	// console.log('New in useSessionsTab (Selectors):', { newRequests });
+	// Filter sessions by status using useMemo for performance
+	const newRequests = useMemo(() => 
+		allSessions.filter((session) => 
+			session.status === 'newRequest' && session.receiverId === userId
+		), [allSessions, userId]
+	);
 
-	// Select loading and error directly from the slice
-	const loading = useSelector(
-		(state: RootState) => state.sessions,
-	).loading;
-	const error = useSelector(
-		(state: RootState) => state.sessions,
-	).error;
-	const userId = useSelector((state: RootState) => state.user.userData?.id);
+	const pending = useMemo(() => 
+		allSessions.filter((session) => session.status === 'pending'), 
+		[allSessions]
+	);
+
+	const confirmed = useMemo(() => 
+		allSessions.filter((session) => session.status === 'confirmed'), 
+		[allSessions]
+	);
+
+	const cancelled = useMemo(() => 
+		allSessions.filter((session) => session.status === 'cancelled'), 
+		[allSessions]
+	);
+
+	const inProgress = useMemo(() => 
+		allSessions.filter((session) => session.status === 'inProgress'), 
+		[allSessions]
+	);
+
+	const completed = useMemo(() => 
+		allSessions.filter((session) => session.status === 'completed'), 
+		[allSessions]
+	);
+
+	const failed = useMemo(() => 
+		allSessions.filter((session) => session.status === 'failed'), 
+		[allSessions]
+	);
 
 	/**
 	 * If a session is 'confirmed' or 'pending', navigate to chat.
@@ -47,7 +61,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	 * // TODO: RENAME THIS BETTER
 	 */
 	const handleExpandSession = (session: EnrichedSession) => {
-		dispatch(setActiveEnrichedSession(session));
+		setActiveEnrichedSession(session);
 		if (session.status === 'confirmed' || session.status === 'pending') {
 			router.push({
 				pathname: '/(chat)/[sessionId]',
@@ -69,7 +83,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		failed,
 		confirmed,
 		loading,
-		error,
+		error: error ? String(error) : null,
 		expandedSession,
 		handleExpandSession,
 	};

@@ -2,50 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { KeyboardAvoidingView, Keyboard, Platform, View, StatusBar } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ChatHeader, ChatMessageList, ChatInput } from '@/features/chat';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { AppDispatch, RootState } from '@/redux/store';
+import { RootState } from '@/redux/store';
 import { LinearGradient } from 'expo-linear-gradient';
-import { sendMessage } from '@/features/sessions/api/sessionApi';
+import { useMessages, useSendMessage, useEnrichedSessions } from '@/features/sessions/api/queries';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { getSocket } from '@/src/features/socket';
-import { useMessages } from '@/features/chat';
-import { useQueryClient } from '@tanstack/react-query';
 
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
     const insets = useSafeAreaInsets();
-    const dispatch = useDispatch<AppDispatch>();
     const currentUser = useSelector((state: RootState) => state.user.userData);
-    const activeSession = useSelector(
-        (state: RootState) =>
-            state.sessions.activeEnrichedSession ||
-            state.sessions.allSessions.find((s) => s.id === sessionId),
-    ) as EnrichedSession | undefined;
+    const { activeEnrichedSession } = useActiveSession();
+    const { data: allSessions = [] } = useEnrichedSessions(currentUser?.id);
+    const activeSession = activeEnrichedSession || allSessions.find((s) => s.id === sessionId);
     const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
 
     if (!sessionId || !activeSession || !currentUser) return null;
 
     const otherUser = activeSession.otherUser;
     const { data: messages = [] } = useMessages(sessionId as string);
-    const queryClient = useQueryClient();
+    const sendMessageMutation = useSendMessage();
     const [newMessage, setNewMessage] = useState('');
 
+    // Join chat room specifically for receiving messages (in addition to session room via useSocketRoom)
     useEffect(() => {
-        // Get the socket instance
         const socket = getSocket();
-
-        if (socket) {
-            // Emit 'chat:joinSession' when the component mounts for this sessionId
-            console.log(`Emitting 'chat:joinSession' for session: ${sessionId}`);
+        if (socket && sessionId) {
             socket.emit('chat:joinSession', sessionId);
             return () => {
-                console.log(`Emitting 'chat:leaveSession' for session: ${sessionId}`);
                 socket.emit('chat:leaveSession', sessionId);
             };
         }
-        return undefined;
-    }, [sessionId, dispatch]);
+    }, [sessionId]);
 
     const toggleHeaderExpanded = () => {
         setIsHeaderExpanded(!isHeaderExpanded);
@@ -60,9 +51,11 @@ const ChatPage = () => {
     const handleSendMessage = async () => {
         try {
             if (newMessage.trim()) {
-                await sendMessage(sessionId as string, currentUser.id!, newMessage.trim());
-                // Refresh messages list
-                queryClient.invalidateQueries({ queryKey: ['messages', sessionId] });
+                await sendMessageMutation.mutateAsync({
+                    sessionId: sessionId as string,
+                    userId: currentUser.id!,
+                    message: newMessage.trim()
+                });
                 setNewMessage('');
                 Keyboard.dismiss();
             }

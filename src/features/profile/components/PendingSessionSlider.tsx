@@ -4,9 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
-import { acceptSessionThunk, rejectSessionThunk } from '@/redux/sessionSlice';
-import { AppDispatch } from '@/redux/store';
-import { useDispatch } from 'react-redux';
+import { useAcceptSession, useRejectSession } from '@/features/sessions/api/queries';
 import { router } from 'expo-router';
 
 interface PendingSessionSliderProps {
@@ -18,11 +16,12 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 	session,
 	onRequestChange,
 }) => {
-	const dispatch = useDispatch<AppDispatch>();
+	const acceptSessionMutation = useAcceptSession();
+	const rejectSessionMutation = useRejectSession();
 
 	const handleAccept = async () => {
 		try {
-			await dispatch(acceptSessionThunk(session.id)).unwrap();
+			await acceptSessionMutation.mutateAsync(session.id);
 			router.back();
 		} catch (err) {
 			console.error('Error accepting session:', err);
@@ -31,12 +30,13 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 
 	const handleReject = async () => {
 		try {
-			await dispatch(rejectSessionThunk(session.id)).unwrap();
+			await rejectSessionMutation.mutateAsync(session.id);
 			router.back();
 		} catch (err) {
 			console.error('Error rejecting session:', err);
 		}
 	};
+
 	const note = session.note ?? 'Appointment';
 	const totalCost = session.billingDetails?.total?.toFixed(2) ?? 'N/A';
 
@@ -115,9 +115,10 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 						activeOpacity={0.8}
 						className="bg-white px-6 py-3 rounded-lg"
 						style={{ width: '48%' }}
+						disabled={acceptSessionMutation.isPending}
 					>
 						<Text className="text-black text-sm text-center">
-							Accept
+							{acceptSessionMutation.isPending ? 'Accepting...' : 'Accept'}
 						</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
@@ -125,9 +126,10 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 						activeOpacity={0.8}
 						className="bg-black px-6 py-3 rounded-lg"
 						style={{ width: '48%' }}
+						disabled={rejectSessionMutation.isPending}
 					>
 						<Text className="text-white text-sm text-center">
-							Reject
+							{rejectSessionMutation.isPending ? 'Rejecting...' : 'Reject'}
 						</Text>
 					</TouchableOpacity>
 				</View>

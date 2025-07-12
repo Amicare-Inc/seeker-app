@@ -13,7 +13,6 @@ import ProfileReviews from './ProfileReviews';
 // import ProfileReviews from './ProfileReviews';
 import { FIREBASE_AUTH } from '@/firebase.config';
 import { clearActiveProfile } from '@/redux/activeProfileSlice';
-import { clearSessions } from '@/redux/sessionSlice';
 import { clearUser } from '@/redux/userSlice';
 import { useDispatch } from 'react-redux';
 import ProfileScore from './ProfileScore';

@@ -4,9 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 import { FIREBASE_AUTH } from '@/firebase.config';
 import { clearActiveProfile } from '@/redux/activeProfileSlice';
-import { clearSessions } from '@/redux/sessionSlice';
 import { clearUser } from '@/redux/userSlice';
 
 const SettingsScreen = () => {
@@ -15,6 +15,7 @@ const SettingsScreen = () => {
   };
 
 	const dispatch = useDispatch();
+	const queryClient = useQueryClient();
 	const handleSignOut = async () => {
 		try {
 			// Sign out from Firebase
@@ -22,8 +23,10 @@ const SettingsScreen = () => {
 
 			// Clear Redux state
 			dispatch(clearUser());
-			dispatch(clearSessions());
 			dispatch(clearActiveProfile());
+			
+			// Clear React Query cache
+			queryClient.clear();
 
 			// Navigate to the sign-in screen (or your landing page)
 			router.replace('/sign-in');
