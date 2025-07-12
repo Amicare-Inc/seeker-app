@@ -11,7 +11,8 @@ import HelpOptionsDropdown from './HelpOptionsDropdown';
 import SessionChecklist from './SessionChecklist';
 import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from '@/lib/datetimes/datetimeHelpers';
 import { RootState } from '@/redux/store';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { requestSession, updateSession } from '@/features/sessions/api/sessionApi';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,6 +38,7 @@ interface SessionData {
 
 const RequestSession = () => {
 	const { otherUserId, sessionObj } = useLocalSearchParams();
+	const dispatch = useDispatch();
 	
 	// Get target user from multiple sources with fallback hierarchy
 	const targetUserFromAllUsers = useSelector(
@@ -47,9 +49,11 @@ const RequestSession = () => {
 	);
 	const activeProfile = useSelector((state: RootState) => state.activeProfile.activeUser);
 	
-	// Use activeProfile if available (set when navigating to request session), 
-	// otherwise fall back to the user from allUsers
-	const targetUserObj: User = activeProfile || targetUserFromAllUsers;
+	// Prioritize otherUserId parameter over activeProfile to ensure correct user is shown
+	// Only use activeProfile if it matches the otherUserId or if otherUserId is not found
+	const targetUserObj: User = targetUserFromAllUsers || 
+		(activeProfile?.id === otherUserId ? activeProfile : null) || 
+		activeProfile;
 	
 	const existingSession: SessionData | null = sessionObj
 		? JSON.parse(sessionObj as string)
@@ -107,6 +111,16 @@ const RequestSession = () => {
 			setEndDate(newEnd);
 		}
 	}, [sessionLength, startDate]);
+
+	// Clear activeProfile when component unmounts or otherUserId changes to prevent stale data
+	useEffect(() => {
+		return () => {
+			// Only clear if activeProfile doesn't match the current otherUserId
+			if (activeProfile && activeProfile.id !== otherUserId) {
+				dispatch(clearActiveProfile());
+			}
+		};
+	}, [otherUserId, activeProfile, dispatch]);
 
 	const formatSessionLength = (lengthHrs: number) => {
 		const hours = Math.floor(lengthHrs);

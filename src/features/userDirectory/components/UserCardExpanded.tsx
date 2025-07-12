@@ -38,6 +38,8 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 
 	const handleRequestSession = () => {
 		if (!user.id) return;
+		// Clear any existing active profile to ensure correct user is shown
+		dispatch(setActiveProfile(user));
 		router.push({
 			pathname: '/request-sessions',
 			params: { otherUserId: user.id },

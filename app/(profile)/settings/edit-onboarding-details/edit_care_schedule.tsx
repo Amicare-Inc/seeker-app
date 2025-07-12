@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import CustomButton from '@/components/Global/CustomButton';
-import { useAvailability } from '@/hooks/useAvailability';
+import { CustomButton } from '@/shared/components';
+import { useAvailability } from '@/features/availability/hooks/useAvailability';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -89,7 +89,7 @@ const CareSchedule: React.FC = () => {
 								At roughly what times on{' '}
 								<Text className="font-bold">
 									{
-										{
+										({
 											Mon: 'Monday',
 											Tues: 'Tuesday',
 											Wed: 'Wednesday',
@@ -97,7 +97,7 @@ const CareSchedule: React.FC = () => {
 											Fri: 'Friday',
 											Sat: 'Saturday',
 											Sun: 'Sunday'
-										}[activeDay]
+										} as Record<string, string>)[activeDay]
 									}
 								</Text>{' '}
 								do you need care? Select all that apply:
