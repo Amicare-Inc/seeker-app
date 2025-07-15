@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ForumField } from '@/shared/components';
@@ -14,7 +14,7 @@ const SignIn = () => {
 	const [form, setForm] = useState({
 		// email: "aisha.khan@example.com",
 		// password: "asdfgh",
-		email: 'martin.droruga666@example.com',
+		email: 'owen.lee@example.com',
 		password: 'asdfgh',
 	});
 	const userData = useSelector((state: RootState) => state.user.userData);
@@ -90,12 +90,11 @@ const SignIn = () => {
 							<Text className="text-xs text-gray-500 font-normal text-center">
 								Don't have an account?
 							</Text>
-							<Link
-								href="/sign-up"
-								className="text-xs font-normal text-blue-900"
-							>
-								Sign Up here
-							</Link>
+							<TouchableOpacity onPress={() => router.back()}>
+								<Text className="text-xs font-normal text-blue-900">
+									Sign Up here
+								</Text>
+							</TouchableOpacity>
 						</View>
 					</View>
 				</ScrollView>

@@ -90,6 +90,7 @@ const SessionChecklistBox: React.FC<SessionChecklistBoxProps> = ({
       task: newItem,
       time: '',
       checked: false,
+      completed: false,
     };
 
     const updatedItems = [...checklistItems, newChecklistItem];
@@ -123,7 +124,7 @@ const SessionChecklistBox: React.FC<SessionChecklistBoxProps> = ({
 
   // Format comments for display
   const formatCommentsForDisplay = () => {
-    return comments.map(comment => `${comment.time}: ${comment.text}`).join('\n');
+    return comments.map(comment => `${comment.timestamp}: ${comment.text}`).join('\n');
   };
 
   return (

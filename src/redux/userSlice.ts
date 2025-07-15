@@ -36,6 +36,7 @@ interface UserState {
 	initialNavigationComplete: boolean; // A mapping of all loaded users
 	loading: boolean;
 	error: string | null;
+	tempFamilyMember: any | null; // Temporary storage for family member data during onboarding
 }
 
 // Initialize with an empty mapping
@@ -45,6 +46,7 @@ const initialState: UserState = {
 	initialNavigationComplete: false,
 	loading: false,
 	error: null,
+	tempFamilyMember: null,
 };
 
 const userSlice = createSlice({
@@ -89,6 +91,12 @@ const userSlice = createSlice({
 		setNavigationComplete(state, action: PayloadAction<boolean>) {
 			state.initialNavigationComplete = action.payload;
 		},
+		setTempFamilyMember(state, action: PayloadAction<any>) {
+			state.tempFamilyMember = action.payload;
+		},
+		clearTempFamilyMember(state) {
+			state.tempFamilyMember = null;
+		},
 	},
 	extraReducers: (builder) => {
 		builder
@@ -122,5 +130,7 @@ export const {
 	updateUserFields,
 	upsertUser,
 	setNavigationComplete,
+	setTempFamilyMember,
+	clearTempFamilyMember,
 } = userSlice.actions;
 export default userSlice.reducer;

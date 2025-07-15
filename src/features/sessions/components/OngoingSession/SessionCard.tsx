@@ -8,6 +8,8 @@ import { router } from 'expo-router';
 import { useAcceptSession, useRejectSession } from '@/features/sessions/api/queries';
 import { formatDate } from '@/lib/datetimes/datetimeHelpers';
 import SessionChecklistBox from './SessionChecklistBox';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 const { width } = Dimensions.get('window');
 
@@ -21,6 +23,7 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
 
     const acceptSessionMutation = useAcceptSession();
     const rejectSessionMutation = useRejectSession();
+    const currentUser = useSelector((state: RootState) => state.user.userData);
 
     // Keep ref in sync with state
     React.useEffect(() => {
@@ -138,10 +141,10 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
         <TouchableOpacity onPress={handleToggle} activeOpacity={1} className="flex-row items-center">
           <View className="flex-col px-5 pb-7 pt-3 flex-1">
             <Text className="text-white text-lg font-bold">
-              Session Confirmed:{" "}
+              Care Type:{" "}
               <Text className="font-normal">
                 {enrichedSession.note && enrichedSession.note.length > 12
-                  ? `${enrichedSession.note.slice(0, 12)}...`
+                  ? `${enrichedSession.note.slice(0, 23)}...`
                   : enrichedSession.note}
               </Text>
             </Text>
@@ -149,6 +152,12 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
                 <View className="flex-row items-center">
                     <Text className="text-white text-base">{dateLabel}</Text>
                     <Text className="text-xs text-green-400 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
+                    {/* Show distance for PSWs */}
+                    {currentUser?.isPsw && enrichedSession.distanceInfo && (
+                        <Text className="text-white text-sm ml-4">
+                            • {enrichedSession.distanceInfo.distance}
+                        </Text>
+                    )}
                 </View>
             )}
           </View>
@@ -160,6 +169,15 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
         {/* Expanded Content */}
         {expanded && (
           <>
+            {/* Distance info for PSWs - shown under Care Type header */}
+            {currentUser?.isPsw && enrichedSession.distanceInfo && (
+              <View className="px-5 mb-3">
+                <Text className="text-white text-sm">
+                  Distance: {enrichedSession.distanceInfo.distance}
+                </Text>
+              </View>
+            )}
+            
             {/* Date & Time Row */}
             <View className="flex-row justify-between items-center bg-transparent rounded-full border border-white px-6 py-2.5 mb-4 mx-5 mt-2">
               <View className="flex-row items-center">
@@ -197,8 +215,7 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
 
             {/* Status & Total */}
             <View className="flex-row items-center mb-4 px-5">
-              <Ionicons name="checkmark-circle" size={20} color="#4ade80" />
-              <Text className="text-white ml-1.5 text-[14px] font-semibold">Session Booked</Text>
+              <Text className="text-white ml-1.5 text-[14px] font-semibold">Accept to unlock chat</Text>
               <View className="flex-1" />
               <Text className="text-white text-[14px] font-semibold">
                 Total Cost: <Text className="font-bold">${enrichedSession.billingDetails?.total.toFixed(2)}</Text>

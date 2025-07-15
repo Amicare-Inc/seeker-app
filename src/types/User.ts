@@ -32,6 +32,23 @@ export interface User {
 	onboardingComplete: boolean;
 	bio?: string;
 	stripeAccountId?: string;
+	// Family members (only for seekers when lookingForSelf is false)
+	familyMembers?: Array<{
+		id: string; // unique identifier for each family member
+		firstName: string;
+		lastName: string;
+		relationshipToUser: string;
+		address: {
+			fullAddress: string;
+			street: string;
+			city: string;
+			province: string;
+			country: string;
+			postalCode: string;
+		};
+		profilePhotoUrl?: string;
+		bio?: string;
+	}>;
 	// Distance information (populated when fetching with distance)
 	distanceInfo?: {
 		distance: string; // e.g., "5.2km away"

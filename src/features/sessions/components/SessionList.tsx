@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 
 interface SessionListProps {
 	sessions: EnrichedSession[];
@@ -10,7 +13,7 @@ interface SessionListProps {
 }
 
 /**
- * Displays a horizontal row of bigger circle avatars with the user’s first name below each.
+ * Displays a horizontal row of bigger circle avatars with the user's first name below each.
  * - New Requests: Gray (#ccc) border
  * - Pending: #1A8BF8 border
  */
@@ -20,6 +23,8 @@ const SessionList: React.FC<SessionListProps> = ({
 	title,
 	isNewRequestsSection = false,
 }) => {
+	const currentUser = useSelector((state: RootState) => state.user.userData);
+
 	// Decide border color based on the title
 	let borderColor = 'transparent';
 	if (!title) {
@@ -29,7 +34,9 @@ const SessionList: React.FC<SessionListProps> = ({
 	}
 
 	const renderItem = ({ item }: { item: EnrichedSession }) => {
-		if (!item.otherUser) return null;
+		if (!item.otherUser || !currentUser) return null;
+
+		const displayInfo = getSessionDisplayInfo(item, currentUser);
 
 		return (
 			<TouchableOpacity
@@ -38,16 +45,14 @@ const SessionList: React.FC<SessionListProps> = ({
 			>
 				<Image
 					source={{
-						uri:
-							item.otherUser.profilePhotoUrl ||
-							'https://via.placeholder.com/50',
+						uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
 					}}
 					// Add border-2 from Tailwind, and override the color inline
 					className="w-[78px] h-[78px] rounded-full border-4"
 					style={{ borderColor }}
 				/>
 				<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
-					{item.otherUser.firstName}
+					{displayInfo.primaryName.split(' ')[0]}
 				</Text>
 			</TouchableOpacity>
 		);
@@ -85,7 +90,10 @@ const SessionList: React.FC<SessionListProps> = ({
 				>
 					{sessions.length > 0 ? (
 						sessions.map((item) => {
-							if (!item.otherUser) return null;
+							if (!item.otherUser || !currentUser) return null;
+
+							const displayInfo = getSessionDisplayInfo(item, currentUser);
+
 							return (
 								<TouchableOpacity
 									key={item.id}
@@ -94,13 +102,13 @@ const SessionList: React.FC<SessionListProps> = ({
 								>
 									<Image
 										source={{
-											uri: item.otherUser.profilePhotoUrl || 'https://via.placeholder.com/50',
+											uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
 										}}
 										className="w-[78px] h-[78px] rounded-full border-4"
 										style={{ borderColor }}
 									/>
 									<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
-										{item.otherUser.firstName}
+										{displayInfo.primaryName.split(' ')[0]}
 									</Text>
 								</TouchableOpacity>
 							);

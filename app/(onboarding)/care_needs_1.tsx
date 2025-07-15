@@ -31,7 +31,7 @@ const CareNeeds1: React.FC = () => {
 
 	const handleNext = () => {
 		const carePreferences = {
-			lookingForSelf: isPSW ? false : (lookingForSelf ?? undefined),
+			lookingForSelf: isPSW ? true : (lookingForSelf ?? undefined), // PSWs are always looking for themselves (providing care)
 			careType: selectedCareTypes.length ? selectedCareTypes : undefined,
 		};
 
@@ -52,15 +52,18 @@ const CareNeeds1: React.FC = () => {
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
 
+					<View className="flex-row items-center mb-[53px]">
+						<TouchableOpacity className="absolute" onPress={() => router.back()}>
+							<Ionicons name="chevron-back" size={24} color="#000" />
+						</TouchableOpacity>
+						<Text className="text-xl font-semibold mx-auto">
+							Care Needs 1/4
+						</Text>
+					</View>
+
+					{/* Only show "A Loved One" vs "Myself" question for seekers (not PSWs) */}
+					{!isPSW && (
 						<>
-						<View className="flex-row items-center mb-[53px]">
-							<TouchableOpacity className="absolute" onPress={() => router.back()}>
-								<Ionicons name="chevron-back" size={24} color="#000" />
-							</TouchableOpacity>
-							<Text className="text-xl font-semibold mx-auto">
-								Care Needs 1/4
-							</Text>
-						</View>
 							<Text className="text-lg text-grey-80 mb-[36px]">
 								Are you seeking home support for a loved one or yourself?
 							</Text>
@@ -95,6 +98,7 @@ const CareNeeds1: React.FC = () => {
 								/>
 							</View>
 						</>
+					)}
 
 					<Text className="text-lg text-grey-80 mb-[36px]">
 						{isPSW

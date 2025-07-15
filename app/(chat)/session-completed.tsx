@@ -7,6 +7,7 @@ import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
+import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 
 const SessionCompleted = () => {
 	const { sessionId } = useLocalSearchParams();
@@ -91,6 +92,11 @@ const SessionCompleted = () => {
 	}
 
 	const otherUser = activeSession.otherUser;
+	const displayInfo = getSessionDisplayInfo(activeSession, currentUser);
+	const isForFamilyMember = activeSession.isForFamilyMember;
+	const careRecipient = activeSession.careRecipient;
+	const accountHolder = activeSession.otherUser;
+	
 	const onReportPress = () => {
 		// TODO: Implement reporting functionality
 		                    // Handle report functionality here
@@ -108,16 +114,27 @@ const SessionCompleted = () => {
 		<SafeAreaView className="flex-1 bg-white">
 			{/* Main Content */}
 			<View className="flex-1 justify-center items-center px-4">
-				{/* Other User's Profile Photo */}
-				<View className="mb-6">
-					{otherUser?.profilePhotoUrl ? (
-						<Image
-							source={{ uri: otherUser.profilePhotoUrl }}
-							className="w-36 h-36 rounded-full"
-						/>
+				{/* Profile Photo(s) */}
+				<View className="mb-6 relative">
+					{/* Show dual photos for PSWs viewing family member sessions */}
+					{currentUser.isPsw && isForFamilyMember && careRecipient && accountHolder ? (
+						<View className="relative">
+							{/* Core user photo (behind) */}
+							<Image
+								source={{ uri: accountHolder.profilePhotoUrl || 'https://via.placeholder.com/144' }}
+								className="w-36 h-36 rounded-full absolute"
+								style={{ right: -40 }}
+							/>
+							{/* Family member photo (in front) */}
+							<Image
+								source={{ uri: careRecipient.profilePhotoUrl || 'https://via.placeholder.com/144' }}
+								className="w-36 h-36 rounded-full border-4 border-white"
+							/>
+						</View>
 					) : (
+						/* Single photo for other cases */
 						<Image
-							source={{ uri: 'https://via.placeholder.com/144' }}
+							source={{ uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/144' }}
 							className="w-36 h-36 rounded-full"
 						/>
 					)}
@@ -137,7 +154,7 @@ const SessionCompleted = () => {
 
 				{/* Message */}
 				<Text className="text-base text-gray-600 text-center mb-8 px-4 leading-6">
-					Your session with {otherUser?.firstName || 'your caregiver'} has been completed successfully. 
+					Your session with {displayInfo.primaryName.split(' ')[0]} has been completed successfully. 
 					{currentUser.isPsw 
 						? ' Payment has been processed to your account.'
 						: ' Thank you for using Amicare.'
@@ -168,8 +185,14 @@ const SessionCompleted = () => {
 				{/* Session Details */}
 				<View className="mt-8 bg-gray-50 rounded-lg p-4 w-full max-w-sm">
 					<Text className="text-sm text-gray-500 text-center">
-						Session with {otherUser?.firstName || 'User'} {otherUser?.lastName || ''}
+						Session with {displayInfo.primaryName}
 					</Text>
+					{/* Show contact info for family member sessions */}
+					{currentUser.isPsw && isForFamilyMember && accountHolder && (
+						<Text className="text-xs text-gray-400 text-center mt-1">
+							Contact: {accountHolder.firstName} {accountHolder.lastName}
+						</Text>
+					)}
 					{activeSession.note && (
 						<Text className="text-sm text-gray-700 text-center mt-1">
 							{activeSession.note}

@@ -1,14 +1,22 @@
 export interface ChecklistItem {
 	id: string;
 	task: string;
+	completed: boolean;
 	checked: boolean;
 	time: string;
-	checkedBy?: string; // userId who checked the item
 }
 
 export interface SessionComment {
+	id: string;
+	userId: string;
 	text: string;
-	time: string; // Just the time in HH:MM format
+	timestamp: string;
+}
+
+export interface SessionDistanceInfo {
+	distance: string; // e.g., "5.2 km"
+	duration: string; // e.g., "12 min drive"
+	distanceValue: number; // raw distance in meters for sorting
 }
 
 export interface Session {
@@ -57,4 +65,23 @@ export interface Session {
     liveStatusUpdatedAt?: string;
 	checklist?: ChecklistItem[]; // Live checklist that both users can see and update
 	comments?: SessionComment[]; // Array of simple comment objects
+	// New fields for family member support
+	careRecipientId?: string; // ID of who receives care (senderId if lookingForSelf=true, familyMember.id if false)
+	careRecipientType?: 'self' | 'family'; // Indicates if care is for self or family member
+	careRecipientData?: {
+		firstName: string;
+		lastName: string;
+		address: {
+			fullAddress: string;
+			street: string;
+			city: string;
+			province: string;
+			country: string;
+			postalCode: string;
+		};
+		profilePhotoUrl?: string;
+		relationshipToUser?: string; // "Mother", "Father", etc.
+	};
+	// Distance information (calculated from PSW to care location)
+	distanceInfo?: SessionDistanceInfo;
 }
