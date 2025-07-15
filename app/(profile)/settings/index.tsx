@@ -78,7 +78,7 @@ const SettingsScreen = () => {
           <SettingsListItem
             icon={<Ionicons name="notifications" size={28} color="#303031" />}
             label="Notifications"
-            onPress={() => console.log('Notifications pressed')}
+            onPress={() => router.push('/(profile)/settings/notifications')}
           />
           {/* Log Out */}
           <SettingsListItem

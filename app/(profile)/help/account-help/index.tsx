@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-const HelpScreen = () => {
+const AccountHelpScreen = () => {
   const handleBackPress = () => {
     router.back();
   };
@@ -12,59 +12,37 @@ const HelpScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
       {/* Header */}
-      <View className="flex-row items-center px-4">
+      <View className="flex-row items-center px-4 mb-[24px]">
         <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4">
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-xl font-medium">Help</Text>
+          <Text className="text-xl font-medium">Account Help</Text>
         </View>
       </View>
 
       <ScrollView className="flex-1">
-        <View className="bg-white rounded-lg mx-4 mt-4">
+        <View className="bg-white rounded-lg mx-4">
           <ListItem
             icon={<Ionicons name="list-circle" size={28} color="#303031" />}
-            label="Help with a session"
-            onPress={() => {}}
+            label="Can't sign in or request a session"
+            onPress={() => router.push('/help/account-help/cant-sign-in')}
           />
           <ListItem
             icon={<Ionicons name="list-circle" size={28} color="#303031" />}
-            label="Account"
-            onPress={() => router.push('/help/account-help')}
+            label="Account settings"
+            onPress={() => router.push('/help/account-help/account-settings')}
           />
           <ListItem
             icon={<Ionicons name="list-circle" size={28} color="#303031" />}
-            label="A guide to Amicare"
-            onPress={() => router.push('/help/guide')}
+            label="Payment issues"
+            onPress={() => router.push('/help/account-help/payment-issues')}
           />
           <ListItem
             icon={<Ionicons name="list-circle" size={28} color="#303031" />}
-            label="Accessibility"
-            onPress={() => router.push('/help/accessibility')}
+            label="Other"
+            onPress={() => router.push('/help/account-help/other')}
           />
-        </View>
-
-        <View className="mx-4 mt-8">
-          <Text className="text-lg font-medium text-gray-80 mb-2">Need Help Now?</Text>
-            <View className="bg-white rounded-lg">
-            <ListItem
-              icon={<Ionicons name="call" size={28} color="#303031" />}
-              label="Call Support"
-              onPress={() => {}}
-            />
-            </View>
-        </View>
-
-        <View className="mx-4 mt-8 mb-6">
-          <Text className="text-lg font-medium text-gray-80 mb-2">Support Messages</Text>
-          <View className="bg-white rounded-lg">
-            <ListItem
-              icon={<Ionicons name="chatbubble-ellipses" size={28} color="#303031" />}
-              label="View all messages"
-              onPress={() => {}}
-            />
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -76,6 +54,7 @@ interface ListItemProps {
   label: string;
   onPress: () => void;
 }
+
 const ListItem: React.FC<ListItemProps> = ({ 
   icon, 
   label, 
@@ -92,4 +71,4 @@ const ListItem: React.FC<ListItemProps> = ({
   );
 };
 
-export default HelpScreen;
+export default AccountHelpScreen;

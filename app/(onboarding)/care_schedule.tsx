@@ -15,6 +15,10 @@ const timeslots = [
 	'6 pm - 8 pm',
 ];
 
+const handleNext = () => {
+	router.push('/caregiver_preferences'); // Navigate to the next page
+}
+
 const CareSchedule: React.FC = () => {
 	const {
 		selectedDays,
@@ -143,8 +147,11 @@ const CareSchedule: React.FC = () => {
 				</View>
 				<CustomButton
 					title="Update"
-					handlePress={saveAvailability}
-					containerStyles="bg-black py-4 rounded-lg"
+					handlePress={() => {
+						handleNext();
+						saveAvailability();
+					}}
+					containerStyles="bg-black py-4 rounded-lg mb-2"
 					textStyles="text-white text-xl font-medium"
 				/>
 			</View>

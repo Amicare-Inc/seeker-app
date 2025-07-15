@@ -15,6 +15,10 @@ const timeslots = [
 	'6 pm - 8 pm',
 ];
 
+const handleBack = () => {
+	router.back();
+}
+
 const CareSchedule: React.FC = () => {
 	const {
 		selectedDays,
@@ -35,7 +39,7 @@ const CareSchedule: React.FC = () => {
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
 						<Text className="text-xl font-semibold mx-auto">
-							3/4 Care Schedule
+							Care Schedule
 						</Text>
 					</View>
 
@@ -143,8 +147,11 @@ const CareSchedule: React.FC = () => {
 				</View>
 				<CustomButton
 					title="Update"
-					handlePress={saveAvailability}
-					containerStyles="bg-black py-4 rounded-lg"
+					handlePress={() => {
+						handleBack();
+						saveAvailability();
+					}}
+					containerStyles="bg-black py-4 rounded-lg mb-2"
 					textStyles="text-white text-xl font-medium"
 				/>
 			</View>

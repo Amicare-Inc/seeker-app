@@ -44,21 +44,21 @@ const CareNeeds1: React.FC = () => {
 			);
 		}
 
-		router.push('/(profile)/settings/edit-onboarding-details/edit_care_needs_2'); // Move to the next page regardless
+		router.replace('/(profile)/settings/edit-onboarding-details/edit_care_needs_2');
 	};
 
 	return (
 		<SafeAreaView className="flex-1 bg-grey-0">
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
-					{!isPSW && (
+
 						<>
 						<View className="flex-row items-center mb-[53px]">
 							<TouchableOpacity className="absolute" onPress={() => router.back()}>
 								<Ionicons name="chevron-back" size={24} color="#000" />
 							</TouchableOpacity>
 							<Text className="text-xl font-semibold mx-auto">
-								Care Needs 1/4
+								Care Needs 1/2
 							</Text>
 						</View>
 							<Text className="text-lg text-grey-80 mb-[36px]">
@@ -95,7 +95,6 @@ const CareNeeds1: React.FC = () => {
 								/>
 							</View>
 						</>
-					)}
 
 					<Text className="text-lg text-grey-80 mb-[36px]">
 						{isPSW

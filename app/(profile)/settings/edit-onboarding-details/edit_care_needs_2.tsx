@@ -37,7 +37,7 @@ const CareNeeds2: React.FC = () => {
             );
             console.log('Tasks updated in Redux:', selectedTasks, userData);
         }
-        router.push('/care_schedule'); // Move to the next page regardless
+        router.back();
     };
 
     return (
@@ -50,7 +50,7 @@ const CareNeeds2: React.FC = () => {
                             <Ionicons name="chevron-back" size={24} color="#000" />
                         </TouchableOpacity>
                         <Text className="text-xl font-semibold mx-auto">
-                            Care Needs 2/4
+                            Care Needs 2/2
                         </Text>
                     </View>
 
