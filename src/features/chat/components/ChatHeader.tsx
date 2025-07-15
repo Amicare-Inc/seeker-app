@@ -3,9 +3,12 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 import { User } from '@/types/User';
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { useChatHeader } from './useChatHeader';
 
 interface ChatHeaderProps {
@@ -21,6 +24,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	isExpanded,
 	toggleExpanded,
 }) => {
+	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const {
 		currentSession,
 		isConfirmed,
@@ -38,6 +42,18 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 		handleNavigateToUserProfile,
 	} = useChatHeader({ session, user });
 
+	// Get display info for the session
+	const displayInfo = currentUser ? getSessionDisplayInfo(session, currentUser) : null;
+	
+	// Check if we should show dual photos (family member case)
+	// Only show dual photos when PSW is viewing a session where seeker booked for family member
+	const isShowingFamilyMember = currentUser?.isPsw && session.careRecipient && session.careRecipientType === 'family' && session.otherUser;
+	
+	// Determine which photos and names to show
+	const primaryPhoto = displayInfo?.primaryPhoto || user.profilePhotoUrl;
+	const primaryName = displayInfo?.primaryName || `${user.firstName} ${user.lastName}`;
+	const secondaryPhoto = isShowingFamilyMember ? session.otherUser?.profilePhotoUrl : undefined;
+
 	return (
 		<View style={{ backgroundColor: '#fff' }}>
 			{/* Top row */}
@@ -45,17 +61,56 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 				<TouchableOpacity onPress={() => router.back()} className="mr-3">
 					<Feather name="chevron-left" size={24} color="#000" />
 				</TouchableOpacity>
-				<Image
-					source={{
-						uri: user.profilePhotoUrl || 'https://via.placeholder.com/50',
-					}}
-					className="w-[44px] h-[44px] rounded-full mr-[13px]"
-				/>
-				<TouchableOpacity onPress={toggleExpanded} className="flex-1">
+				
+				{/* Profile Photo Section */}
+				<View className="relative mr-[13px]" style={{ width: isShowingFamilyMember ? 64 : 44 }}>
+					{isShowingFamilyMember ? (
+						<>
+							{/* Family member photo (main position) */}
+							<Image
+								source={{ uri: primaryPhoto || 'https://via.placeholder.com/50' }}
+								className="w-[44px] h-[44px] rounded-full"
+								style={{ 
+									zIndex: 2,
+									shadowColor: '#000', 
+									shadowOffset: { width: 0, height: 2 }, 
+									shadowOpacity: 0.1, 
+									shadowRadius: 3 
+								}}
+							/>
+							{/* Core user photo (slight overlap to the right) */}
+							<Image
+								source={{ uri: secondaryPhoto || 'https://via.placeholder.com/50' }}
+								className="w-[44px] h-[44px] rounded-full absolute"
+								style={{ 
+									right: -20,
+									top: 0,
+									zIndex: 1,
+									shadowColor: '#000', 
+									shadowOffset: { width: 0, height: 2 }, 
+									shadowOpacity: 0.1, 
+									shadowRadius: 3 
+								}}
+							/>
+						</>
+					) : (
+						<Image
+							source={{
+								uri: primaryPhoto || 'https://via.placeholder.com/50',
+							}}
+							className="w-[44px] h-[44px] rounded-full"
+							style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
+						/>
+					)}
+				</View>
+				
+				<TouchableOpacity onPress={toggleExpanded} className="flex-1" style={{ marginLeft: isShowingFamilyMember ? 20 : 0 }}>
 					<Text className="font-semibold text-lg text-black">
-						{user.firstName} {user.lastName}
+						{primaryName}
 					</Text>
-					<Text className="text-xs mt-0.5 text-gray-500">{subTitle}</Text>
+					<Text className="text-xs mt-0.5 text-gray-500">
+						{isShowingFamilyMember && session.otherUser ? `Contact: ${session.otherUser.firstName}` : subTitle}
+					</Text>
 				</TouchableOpacity>
 				{isExpanded && (
 					<TouchableOpacity onPress={handleNavigateToUserProfile}>

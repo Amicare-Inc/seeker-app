@@ -9,6 +9,7 @@ import { User } from '@/types/User';
 import { SessionFilterCard } from '@/features/sessions';
 import { useDispatch } from 'react-redux';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
@@ -18,11 +19,14 @@ const PswHomeTab = () => {
 	const fadeAnim = useRef(new Animated.Value(0)).current;
 	const slideAnim = useRef(new Animated.Value(300)).current;
 	const dispatch = useDispatch();
+	const { setActiveEnrichedSession } = useActiveSession();
 
 	// Use filtered users if available, otherwise use fetched users
 	const users = filteredUsers ?? fetchedUsers;
 
 	const handleCardPress = (user: User) => {
+		// Clear any active session to prevent conflicts with home tab navigation
+		setActiveEnrichedSession(null);
 		// Navigate to other-user-profile instead of expanding
 		dispatch(setActiveProfile(user));
 		router.push('/other-user-profile');

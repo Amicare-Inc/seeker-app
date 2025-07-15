@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { useAcceptSession, useRejectSession } from '@/features/sessions/api/queries';
@@ -16,6 +18,7 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 	session,
 	onRequestChange,
 }) => {
+	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const acceptSessionMutation = useAcceptSession();
 	const rejectSessionMutation = useRejectSession();
 
@@ -56,6 +59,19 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 			? endDate.getDate() !== startDate.getDate()
 			: false;
 
+	// Determine the pending message based on user type
+	const getPendingMessage = () => {
+		if (currentUser?.isPsw) {
+			// PSW sees message about core seeker
+			const contactName = session.otherUser?.firstName || 'Client';
+			return `Awaiting final booking from ${contactName}. Feel free to message them if you need any changes`;
+		} else {
+			// Core seeker sees message about PSW
+			const pswName = session.otherUser?.firstName || 'PSW';
+			return `Awaiting final booking from ${pswName}. Feel free to message them if you need any changes`;
+		}
+	};
+
 	return (
 		<View
 			className="absolute bottom-0 left-0 right-0"
@@ -70,90 +86,108 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 				shadowRadius: 6,
 			}}
 		>
+			{/* Grey gradient for pending state */}
 			<LinearGradient
 				start={{ x: 0, y: 0.5 }}
 				end={{ x: 1, y: 0.5 }}
-				colors={['#008DF4', '#5CBAFF']}
+				colors={['#9CA3AF', '#D1D5DB']}
 				className="py-4 px-4 pb-8"
 			>
-				{/* Session Title */}
-				<Text className="text-base text-white mb-3">
-					Session Request: {note}
-				</Text>
+				{/* Response Status with Yellow Exclamation */}
+				<View className="flex-row items-center mb-3">
+					<Ionicons name="warning" size={20} color="#F59E0B" />
+					<Text className="text-base text-white ml-2 font-medium">
+						Response Sent: Awaiting final booking
+					</Text>
+				</View>
 
 				{/* Date/Time Card */}
 				<View
-					className="flex-row items-center justify-center rounded-lg py-2 mb-4 bg-transparent border"
-					style={{ borderColor: '#ffffff', width: '100%' }}
+					className="flex-row items-center justify-center rounded-lg py-2 mb-4 bg-white"
+					style={{ width: '100%' }}
 				>
 					<View className="flex-1 flex-row items-center justify-center">
-						<Ionicons name="calendar" size={18} color="#ffffff" />
-						<Text className="text-sm text-white ml-2">
+						<Ionicons name="calendar" size={18} color="#374151" />
+						<Text className="text-sm text-gray-700 ml-2">
 							{dateLabel}
 						</Text>
-						<Text className="text-xs text-green-400 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
+						<Text className="text-xs text-green-600 ml-2">{`${isNextDay ? '+1' : ''}`}</Text>
 					</View>
 					<View
 						style={{
 							width: 1,
 							height: 28,
-							backgroundColor: 'rgba(255,255,255,0.5)',
+							backgroundColor: '#E5E7EB',
 						}}
 					/>
 					<View className="flex-1 flex-row items-center justify-center">
-						<Ionicons name="time" size={18} color="#ffffff" />
-						<Text className="text-sm text-white ml-2">
+						<Ionicons name="time" size={18} color="#374151" />
+						<Text className="text-sm text-gray-700 ml-2">
 							{timeRange}
 						</Text>
 					</View>
 				</View>
 
-				{/* Accept / Reject Buttons */}
+				{/* Session Checklist */}
+				<View className="mb-4">
+					<Text className="text-white text-base font-medium mb-2">Session Checklist</Text>
+					{session.checklist?.map((item, index) => (
+						<Text key={index} className="text-white text-sm mb-1">
+							{index + 1}. {item.task}
+						</Text>
+					))}
+				</View>
+
+				{/* Chat Unlocked & Distance Info */}
 				<View className="flex-row items-center justify-between mb-4">
+					<View className="flex-row items-center">
+						<Ionicons name="checkmark-circle" size={20} color="#10B981" />
+						<Text className="text-white text-sm ml-2">Chat unlocked</Text>
+					</View>
+					<View className="flex-row items-center">
+						<Text className="text-white text-sm font-medium">
+							Total: ${totalCost}
+						</Text>
+						{/* Show distance for PSWs */}
+						{currentUser?.isPsw && session.distanceInfo && (
+							<Text className="text-white text-sm ml-4">
+								• {session.distanceInfo.distance}
+							</Text>
+						)}
+					</View>
+				</View>
+
+				{/* Pending Message */}
+				<View className="flex-row items-start mb-4 bg-yellow-100 rounded-lg p-3">
+					<Ionicons name="warning" size={20} color="#F59E0B" style={{ marginTop: 2 }} />
+					<Text className="text-yellow-800 text-sm ml-2 flex-1">
+						{getPendingMessage()}
+					</Text>
+				</View>
+
+				{/* Action Buttons */}
+				<View className="flex-row items-center justify-between">
 					<TouchableOpacity
-						onPress={handleAccept}
+						onPress={() => router.back()}
 						activeOpacity={0.8}
 						className="bg-white px-6 py-3 rounded-lg"
 						style={{ width: '48%' }}
-						disabled={acceptSessionMutation.isPending}
 					>
-						<Text className="text-black text-sm text-center">
-							{acceptSessionMutation.isPending ? 'Accepting...' : 'Accept'}
+						<Text className="text-black text-sm text-center font-medium">
+							Back
 						</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
-						onPress={handleReject}
+						onPress={onRequestChange}
 						activeOpacity={0.8}
 						className="bg-black px-6 py-3 rounded-lg"
 						style={{ width: '48%' }}
-						disabled={rejectSessionMutation.isPending}
 					>
-						<Text className="text-white text-sm text-center">
-							{rejectSessionMutation.isPending ? 'Rejecting...' : 'Reject'}
+						<Text className="text-white text-sm text-center font-medium">
+							Change/Cancel
 						</Text>
 					</TouchableOpacity>
 				</View>
-
-				{/* Status & Total Cost Row */}
-				<View className="flex-row items-center justify-between mb-3">
-					<Text className="text-xs text-white">
-						Awaiting confirmation
-					</Text>
-					<Text className="text-xs text-white">
-						Total: <Text className="font-medium">${totalCost}</Text>
-					</Text>
-				</View>
-
-				{/* Request Date/Time Change Button */}
-				<TouchableOpacity
-					onPress={onRequestChange}
-					activeOpacity={0.8}
-					className="border border-white px-5 py-2 items-center rounded-lg"
-				>
-					<Text className="text-white text-sm">
-						Request Date/Time Change
-					</Text>
-				</TouchableOpacity>
 			</LinearGradient>
 		</View>
 	);

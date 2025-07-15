@@ -9,6 +9,8 @@ import SessionLengthSelector from './SessionLengthSelector';
 import BillingCard from './BillingCard';
 import HelpOptionsDropdown from './HelpOptionsDropdown';
 import SessionChecklist from './SessionChecklist';
+import CareRecipientSelector from './CareRecipientSelector';
+import LocationDisplay from './LocationDisplay';
 import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from '@/lib/datetimes/datetimeHelpers';
 import { RootState } from '@/redux/store';
 import { useSelector, useDispatch } from 'react-redux';
@@ -34,6 +36,8 @@ interface SessionData {
 		serviceFee: number;
 		total: number;
 	};
+	careRecipientId?: string;
+	careRecipientType?: 'self' | 'family';
 }
 
 const RequestSession = () => {
@@ -78,6 +82,12 @@ const RequestSession = () => {
 
 	const [checklist, setChecklist] = useState<string[]>([]);
 
+	// New state for care recipient selection
+	const [selectedCareRecipient, setSelectedCareRecipient] = useState<string | null>(
+		existingSession?.careRecipientId || null
+	);
+	const [selectedCareRecipientData, setSelectedCareRecipientData] = useState<any>(null);
+
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const pswRate = currentUser?.isPsw
 		? currentUser.rate || 20
@@ -92,6 +102,33 @@ const RequestSession = () => {
 	const serviceFee = basePrice * 0.1;
 	const total = basePrice + taxes + serviceFee;
 	// ------------------------------------
+
+	// Check if user is looking for family member care
+	const isLookingForFamily = currentUser?.carePreferences?.lookingForSelf === false;
+	const hasFamilyMembers = currentUser?.familyMembers && currentUser.familyMembers.length > 0;
+
+	// Determine if location should be shown and what location to display
+	const shouldShowLocation = () => {
+		// Show location if user is looking for self (prefilled with their location)
+		if (currentUser?.carePreferences?.lookingForSelf === true) {
+			return true;
+		}
+		// Show location if user is looking for family member AND a recipient is selected
+		if (isLookingForFamily && selectedCareRecipientData) {
+			return true;
+		}
+		return false;
+	};
+
+	const getLocationToDisplay = () => {
+		if (currentUser?.carePreferences?.lookingForSelf === true) {
+			return currentUser?.address?.fullAddress || '';
+		}
+		if (isLookingForFamily && selectedCareRecipientData) {
+			return selectedCareRecipientData.address?.fullAddress || '';
+		}
+		return '';
+	};
 
 	// On mount, compute session length if startDate and endDate exist.
 	useEffect(() => {
@@ -121,6 +158,12 @@ const RequestSession = () => {
 			}
 		};
 	}, [otherUserId, activeProfile, dispatch]);
+
+	// Handle care recipient selection
+	const handleCareRecipientSelect = (recipientId: string | null, recipientData: any) => {
+		setSelectedCareRecipient(recipientId);
+		setSelectedCareRecipientData(recipientData);
+	};
 
 	const formatSessionLength = (lengthHrs: number) => {
 		const hours = Math.floor(lengthHrs);
@@ -200,91 +243,101 @@ const RequestSession = () => {
 	};
 
 	const handleSubmit = async () => {
-	Keyboard.dismiss();
-	if (!currentUser) {
-		alert('You must be signed in to send a request.');
-		return;
-	}
-	if (!helpText.trim()) {
-		alert('Please specify what you need help with.');
-		return;
-	}
-	if (!startDate || !endDate) {
-		alert('Please select both start and end times.');
-		return;
-	}
-
-	try {
-		const sessionData = {
-		note: helpText,
-		startTime: startDate.toISOString(),
-		endTime: endDate.toISOString(),
-		billingDetails: {
-			dynamicBasePrice: basePrice,
-			taxes,
-			serviceFee,
-			total,
-		},
-		checklist: checklist.map((task, index) => ({
-			id: index.toString(),
-			task,
-			completed: false
-		})),
-		};
-
-		if (existingSession) {
-		console.log('session id', existingSession.id);
-		await updateSession(existingSession.id, {
-			...sessionData,
-			billingDetails: {
-			...sessionData.billingDetails,
-			basePrice: sessionData.billingDetails.dynamicBasePrice,
-			},
-			checklist: checklist.map((task, index) => ({
-				id: index.toString(),
-				task,
-				completed: false,
-				checked: false,
-				time: ''
-			})),
-		});
-		alert('Session updated successfully!');
-		router.back();
-		} else {
-			// Validate target user before creating session
-			const receiverId = targetUserObj?.id || otherUserId as string;
-			if (!receiverId) {
-				alert('Unable to find target user. Please try again.');
-				return;
-			}
-
-			const newSessionData = {
-				...sessionData,
-				senderId: currentUser.id,
-				receiverId: receiverId,
-				billingDetails: {
-					...sessionData.billingDetails,
-					basePrice: sessionData.billingDetails.dynamicBasePrice,
-				},
-			} as SessionDTO;
-			
-			await requestSession(newSessionData);
-			
-			router.push({
-				pathname: '/sent-request',
-				params: {
-					otherUserId: receiverId,
-				},
-			});
+		Keyboard.dismiss();
+		if (!currentUser) {
+			alert('You must be signed in to send a request.');
+			return;
 		}
-	} catch (error) {
-		console.error('Error submitting session request:', error);
-		alert('An error occurred while sending your request.');
-	}
+		if (!helpText.trim()) {
+			alert('Please specify what you need help with.');
+			return;
+		}
+		if (!startDate || !endDate) {
+			alert('Please select both start and end times.');
+			return;
+		}
+
+		// Validate care recipient selection if looking for family member
+		if (isLookingForFamily && hasFamilyMembers && !selectedCareRecipient) {
+			alert('Please select who will receive care.');
+			return;
+		}
+
+		try {
+			const sessionData = {
+				note: helpText,
+				startTime: startDate.toISOString(),
+				endTime: endDate.toISOString(),
+				billingDetails: {
+					dynamicBasePrice: basePrice,
+					taxes,
+					serviceFee,
+					total,
+				},
+				checklist: checklist.map((task, index) => ({
+					id: index.toString(),
+					task,
+					completed: false
+				})),
+				// Add care recipient data
+				careRecipientId: selectedCareRecipient || currentUser.id,
+				careRecipientType: (isLookingForFamily && selectedCareRecipient) ? 'family' as const : 'self' as const,
+			};
+
+			if (existingSession) {
+				console.log('session id', existingSession.id);
+				await updateSession(existingSession.id, {
+					...sessionData,
+					billingDetails: {
+						...sessionData.billingDetails,
+						basePrice: sessionData.billingDetails.dynamicBasePrice,
+					},
+					checklist: checklist.map((task, index) => ({
+						id: index.toString(),
+						task,
+						completed: false,
+						checked: false,
+						time: ''
+					})),
+				});
+				alert('Session updated successfully!');
+				router.back();
+			} else {
+				// Validate target user before creating session
+				const receiverId = targetUserObj?.id || otherUserId as string;
+				if (!receiverId) {
+					alert('Unable to find target user. Please try again.');
+					return;
+				}
+
+				const newSessionData = {
+					...sessionData,
+					senderId: currentUser.id,
+					receiverId: receiverId,
+					billingDetails: {
+						...sessionData.billingDetails,
+						basePrice: sessionData.billingDetails.dynamicBasePrice,
+					},
+					// Embed PSW's distance info if available (seeker -> PSW session)
+					distanceInfo: targetUserObj?.distanceInfo,
+				} as SessionDTO;
+				
+				await requestSession(newSessionData);
+				
+				router.push({
+					pathname: '/sent-request',
+					params: {
+						otherUserId: receiverId,
+					},
+				});
+			}
+		} catch (error) {
+			console.error('Error submitting session request:', error);
+			alert('An error occurred while sending your request.');
+		}
 	};
 
 	return (
-
 		<SafeAreaView className="flex-1 bg-grey-0">
 			{/* Custom Header */}
 			<RequestSessionHeader
@@ -293,93 +346,108 @@ const RequestSession = () => {
 				firstName={targetUserObj?.firstName}
 			/>
 			<ScrollView>
-			{/* Main Content */}
-			<View className="flex-1 p-4">
-				{/* Help Options Dropdown */}
-
-				{/* TO DO update this so that when you add tasks it adds the bubble instead */}
-				<HelpOptionsDropdown
-					initialValue={helpText}
-					onChange={setHelpText}
-				/>
-
-				{/* Starts */}
-				<DateTimeRow
-					label="Starts"
-					dateLabel={formatDate(startDate)}
-					timeLabel={formatTime(startDate)}
-					onPressDate={() => showDatePicker('start', 'date')}
-					onPressTime={() => showDatePicker('start', 'time')}
-					disabled={false}
-				/>
-
-				{/* Session Length */}
-				<SessionLengthSelector
-					sessionLength={sessionLength}
-					formatSessionLength={formatSessionLength}
-					incrementBy30={() => incrementSessionLength(0.5)}
-					incrementBy60={() => incrementSessionLength(1)}
-					onReset={() => setSessionLength(0)}
-				/>
-
-				{/* Conditionally render Ends only if startDate is set and sessionLength > 0 */}
-				{startDate && sessionLength > 0 && (
-					<DateTimeRow
-						label="Ends"
-						dateLabel={formatDate(endDate)}
-						timeLabel={formatTime(endDate)}
-						onPressDate={() => {}}
-						onPressTime={() => {}}
-						disabled={true}
+				{/* Main Content */}
+				<View className="flex-1 p-4">
+					{/* Help Options Dropdown */}
+					<HelpOptionsDropdown
+						initialValue={helpText}
+						onChange={setHelpText}
 					/>
-				)}
-				
-				<SessionChecklist onChange={setChecklist} />
 
-				{/* Billing Info */}
-				<BillingCard
-					basePrice={basePrice}
-					taxes={taxes}
-					serviceFee={serviceFee}
-					total={total}
+					{/* Care Recipient Selection - Only show if looking for family member */}
+					{isLookingForFamily && hasFamilyMembers && (
+						<CareRecipientSelector
+							familyMembers={currentUser?.familyMembers}
+							selectedRecipientId={selectedCareRecipient}
+							onRecipientSelect={handleCareRecipientSelect}
+						/>
+					)}
+
+					{/* Location Display - Only show if conditions are met */}
+					{shouldShowLocation() && (
+						<LocationDisplay 
+							location={getLocationToDisplay()}
+							label="Location"
+						/>
+					)}
+
+					{/* Starts */}
+					<DateTimeRow
+						label="Starts"
+						dateLabel={formatDate(startDate)}
+						timeLabel={formatTime(startDate)}
+						onPressDate={() => showDatePicker('start', 'date')}
+						onPressTime={() => showDatePicker('start', 'time')}
+						disabled={false}
+					/>
+
+					{/* Session Length */}
+					<SessionLengthSelector
+						sessionLength={sessionLength}
+						formatSessionLength={formatSessionLength}
+						incrementBy30={() => incrementSessionLength(0.5)}
+						incrementBy60={() => incrementSessionLength(1)}
+						onReset={() => setSessionLength(0)}
+					/>
+
+					{/* Conditionally render Ends only if startDate is set and sessionLength > 0 */}
+					{startDate && sessionLength > 0 && (
+						<DateTimeRow
+							label="Ends"
+							dateLabel={formatDate(endDate)}
+							timeLabel={formatTime(endDate)}
+							onPressDate={() => {}}
+							onPressTime={() => {}}
+							disabled={true}
+						/>
+					)}
+					
+					<SessionChecklist onChange={setChecklist} />
+
+					{/* Billing Info */}
+					<BillingCard
+						basePrice={basePrice}
+						taxes={taxes}
+						serviceFee={serviceFee}
+						total={total}
+					/>
+
+					{/* Submit Button */}
+					<TouchableOpacity
+						onPress={handleSubmit}
+						className="bg-brand-blue rounded-xl p-4 items-center flex-row justify-center"
+					>
+						<Ionicons name="paper-plane" size={22} color="white"/>
+						<Text className="text-white text-lg font-medium ml-3">
+							{existingSession ? 'Update Session' : 'Send Request'}
+						</Text>
+					</TouchableOpacity>
+				</View>
+
+				{/* DateTimePickerModal */}
+				<DateTimePickerModal
+					isVisible={isDatePickerVisible}
+					mode={pickerMode}
+					onConfirm={handleConfirm}
+					onCancel={hideDatePicker}
+					minuteInterval={15}
+					minimumDate={
+						pickerTarget === 'start'
+							? startDate &&
+								startDate.toDateString() !==
+									new Date().toDateString()
+								? new Date(
+										startDate.getFullYear(),
+										startDate.getMonth(),
+										startDate.getDate(),
+										0,
+										0,
+										0,
+									)
+								: new Date(Date.now() + 2 * 60 * 60 * 1000)
+							: startDate || new Date()
+					}
 				/>
-
-				{/* Submit Button */}
-				<TouchableOpacity
-					onPress={handleSubmit}
-					className="bg-brand-blue rounded-xl p-4 items-center flex-row justify-center"
-				>
-					<Ionicons name="paper-plane" size={22} color="white"/>
-					<Text className="text-white text-lg font-medium ml-3">
-						{existingSession ? 'Update Session' : 'Send Request'}
-					</Text>
-				</TouchableOpacity>
-			</View>
-
-			{/* DateTimePickerModal */}
-			<DateTimePickerModal
-				isVisible={isDatePickerVisible}
-				mode={pickerMode}
-				onConfirm={handleConfirm}
-				onCancel={hideDatePicker}
-				minuteInterval={15}
-				minimumDate={
-					pickerTarget === 'start'
-						? startDate &&
-							startDate.toDateString() !==
-								new Date().toDateString()
-							? new Date(
-									startDate.getFullYear(),
-									startDate.getMonth(),
-									startDate.getDate(),
-									0,
-									0,
-									0,
-								)
-							: new Date(Date.now() + 2 * 60 * 60 * 1000)
-						: startDate || new Date()
-				}
-			/>
 			</ScrollView>
 		</SafeAreaView>
 	);

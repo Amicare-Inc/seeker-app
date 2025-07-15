@@ -3,6 +3,9 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 
 interface SessionBookedListProps {
 	sessions: EnrichedSession[];
@@ -19,8 +22,12 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 	onSessionPress,
 	title,
 }) => {
+	const currentUser = useSelector((state: RootState) => state.user.userData);
+
 	const renderItem = ({ item }: { item: EnrichedSession }) => {
-		if (!item.otherUser) return null;
+		if (!item.otherUser || !currentUser) return null;
+
+		const displayInfo = getSessionDisplayInfo(item, currentUser);
 
 		// Use item.note (only the first value before a comma) as the main label.
 		const mainLabel = item.note ? item.note.split(',')[0].trim() : '';
@@ -51,9 +58,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 						<View className="flex-row items-center">
 							<Image
 								source={{
-									uri:
-										item.otherUser.profilePhotoUrl ||
-										'https://via.placeholder.com/50',
+									uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
 								}}
 								className="w-[60px] h-[60px] rounded-full"
 							/>
@@ -71,7 +76,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 									className="text-sm font-medium"
 									style={{ color: 'rgba(255,255,255,0.85)' }}
 								>
-									with {otherName}
+									with {displayInfo.primaryName.split(' ')[0]}
 								</Text>
 							</View>
 						</View>
@@ -99,11 +104,12 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 				contentContainerStyle={{ paddingHorizontal: 4 }}
 			>
 				{sessions.map((item) => {
-					if (!item.otherUser) return null;
+					if (!item.otherUser || !currentUser) return null;
+
+					const displayInfo = getSessionDisplayInfo(item, currentUser);
 
 					// Use item.note (only the first value before a comma) as the main label.
 					const mainLabel = item.note ? item.note.split(',')[0].trim() : '';
-					const otherName = item.otherUser.firstName;
 
 					// Format the start time.
 					const formattedTime = item.startTime
@@ -131,9 +137,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 								<View className="flex-row items-center">
 									<Image
 										source={{
-											uri:
-												item.otherUser.profilePhotoUrl ||
-												'https://via.placeholder.com/50',
+											uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
 										}}
 										className="w-[60px] h-[60px] rounded-full"
 									/>
@@ -151,7 +155,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 											className="text-sm font-medium"
 											style={{ color: 'rgba(255,255,255,0.85)' }}
 										>
-											with {otherName}
+											with {displayInfo.primaryName.split(' ')[0]}
 										</Text>
 									</View>
 								</View>

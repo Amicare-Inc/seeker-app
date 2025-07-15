@@ -11,8 +11,9 @@ const OtherUserProfileScreen = () => {
 		(state: RootState) => state.activeProfile.activeUser,
 	);
 	const { activeEnrichedSession: activeEnrichedProfile } = useActiveSession();
+	// Fix: Prioritize actively selected user over session user to prevent stuck profiles
 	const activeProfile =
-		activeEnrichedProfile?.otherUser || activeProfileMoreInfo;
+		activeProfileMoreInfo || activeEnrichedProfile?.otherUser || null;
 
 	// Create a display user for family member cases
 	const getDisplayUser = (user: User): User => {
