@@ -3,18 +3,19 @@ import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert, T
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
+import { setTempFamilyMember, clearTempFamilyMember } from '@/redux/userSlice';
+import { FamilyApi } from '@/features/family/api/familyApi';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadPhotoToFirebase } from '@/services/firebase/storage';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { AuthApi } from '@/features/auth/api/authApi';
 
-const AddProfilePhoto: React.FC = () => {
+const FamilyProfileDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
+	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
 	const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
-	const [bio, setBio] = useState<string>(''); // Initialize empty, don't use userData.bio as it might contain family member data
+	const [bio, setBio] = useState<string>('');
 	const [isBioFocused, setIsBioFocused] = useState<boolean>(false);
 
 	const handlePhotoSelect = async () => {
@@ -36,63 +37,72 @@ const AddProfilePhoto: React.FC = () => {
 
 	const handleDone = async () => {
 		try {
-			let profilePhotoUrl = '';
+			let familyMemberPhotoUrl = '';
 			
 			// Upload photo if selected
 			if (localPhotoUri && userData?.id) {
-				const downloadURL = await uploadPhotoToFirebase(
-					userData.id,
+				familyMemberPhotoUrl = await uploadPhotoToFirebase(
+					`${userData.id}_family_${Date.now()}`,
 					localPhotoUri,
 				);
-				console.log('Download URL:', downloadURL);
-				profilePhotoUrl = downloadURL || '';
+				console.log('Family member photo uploaded:', familyMemberPhotoUrl);
 			}
-			
-			// Update local state
-			dispatch(updateUserFields({ 
-				profilePhotoUrl: profilePhotoUrl,
-				bio: bio
-			}));
-			
-			// Send optional info to backend
+
+			// Create complete family member data
+			const completeFamilyMemberData = {
+				firstName: tempFamilyMember?.firstName || '',
+				lastName: tempFamilyMember?.lastName || '',
+				relationshipToUser: tempFamilyMember?.relationshipToUser || '',
+				address: tempFamilyMember?.address || {
+					fullAddress: '',
+					street: '',
+					city: '',
+					province: '',
+					country: '',
+					postalCode: ''
+				},
+				profilePhotoUrl: familyMemberPhotoUrl || '',
+				bio: bio || '',
+			};
+
+			// Filter out undefined values to prevent JSON parsing errors
+			const cleanedData = Object.fromEntries(
+				Object.entries(completeFamilyMemberData).filter(([_, value]) => value !== undefined)
+			);
+
+			console.log('Sending family member data to backend:', cleanedData);
+
+			// Send family member data to backend
 			if (userData?.id) {
-				// Filter out undefined values
-				const optionalInfoData: any = {
-					profilePhotoUrl: profilePhotoUrl,
-					bio: bio,
-					onboardingComplete: true
-				};
-				
-				if (userData.carePreferences !== undefined) {
-					optionalInfoData.carePreferences = userData.carePreferences;
+				try {
+					const result = await FamilyApi.addFamilyMember(userData.id, cleanedData);
+					console.log('Family member saved to Firestore:', result);
+					
+					// Clear temporary family member data from Redux
+					dispatch(clearTempFamilyMember());
+					
+					Alert.alert(
+						'Success',
+						'Family member profile created successfully!',
+					);
+				} catch (error) {
+					console.error('Error saving family member to Firestore:', error);
+					Alert.alert(
+						'Error',
+						'Failed to save family member. Please try again.',
+					);
+					return;
 				}
-				if (userData.idVerified !== undefined) {
-					optionalInfoData.idVerified = userData.idVerified;
-				}
-				
-				await AuthApi.addOptionalInfo(userData.id, optionalInfoData);
-				
-				// Check if user is in family flow
-				const lookingForSelf = userData?.carePreferences?.lookingForSelf;
-				
-				// Always show success alert for profile completion
-				Alert.alert(
-					'Success',
-					'Your profile has been created successfully!',
-				);
-				
-				// Navigate to appropriate dashboard
-				const nextRoute = userData?.isPsw
-					? '/(psw)/psw-home'
-					: '/(seeker)/seeker-home';
-				console.log('Profile complete, navigating to:', nextRoute);
-				router.push(nextRoute);
 			}
+
+			console.log('Family member profile details saved');
+			// Navigate to personal details for the main user
+			router.push('/personal_details');
 		} catch (error) {
-			console.error('Error saving profile:', error);
+			console.error('Error saving family member profile details:', error);
 			Alert.alert(
 				'Error',
-				'There was an issue saving your profile. Please try again.',
+				'There was an issue saving the profile details. Please try again.',
 			);
 		}
 	};
@@ -107,7 +117,7 @@ const AddProfilePhoto: React.FC = () => {
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
 						<Text className="text-xl font-medium mx-auto">
-							Add a photo for yourself
+							Add a photo for your loved one
 						</Text>
 					</View>
 
@@ -133,7 +143,7 @@ const AddProfilePhoto: React.FC = () => {
 						</TouchableOpacity>
 
 						<Text className="text-sm text-grey-80 text-center font-normal px-8">
-							A photo will help careseekers recognize{'\n'}you. This is a requirement, but you can skip{'\n'}this for now and add one at a later time.
+							A photo will help caregivers recognize{'\n'}your loved one. This is optional, but you can{'\n'}add one now or later.
 						</Text>
 					</View>
 
@@ -141,7 +151,7 @@ const AddProfilePhoto: React.FC = () => {
 					<View className="mb-[32px]">
 						<View className="flex-row items-center mb-[14px] mx-auto">
 							<Text className="text-lg text-grey-80 font-bold">
-								Add bio (Optional)
+								Add bio for your loved one (Optional)
 							</Text>
 							<View className="ml-1">
 								<Ionicons name="information-circle-outline" size={22} color="#303031" />
@@ -152,7 +162,7 @@ const AddProfilePhoto: React.FC = () => {
 							className={`bg-white rounded-lg px-3 py-2 text-base font-medium text-black min-h-[158px] ${
 								isBioFocused ? 'border-2 border-brand-blue' : 'border border-gray-200'
 							}`}
-							placeholder="Briefly describe yourself and what kind of care you provide."
+							placeholder="Briefly describe your loved one, their personality, and any special care considerations."
 							placeholderTextColor="#9D9DA1"
 							value={bio}
 							onChangeText={setBio}
@@ -163,41 +173,20 @@ const AddProfilePhoto: React.FC = () => {
 						/>
 					</View>
 
-					{/* Checkbox Section */}
-					{/* <View className="flex-row items-start mb-[32px]">
-						<TouchableOpacity
-							className={`w-5 h-5 rounded border-2 mr-3 mt-0.5 items-center justify-center ${
-								isChecked ? 'bg-brand-blue border-brand-blue' : 'border-gray-300'
-							}`}
-							onPress={() => setIsChecked(!isChecked)}
-						>
-							{isChecked && (
-								<Ionicons name="checkmark" size={14} color="white" />
-							)}
-						</TouchableOpacity>
-						<Text className="text-xs text-grey-49 flex-1">
-							<Text className="font-medium">
-								TODO add something here
-							</Text>
-						</Text>
-					</View> */}
-
-
 				</View>
 			</ScrollView>
 
-			{/* Finish Button */}
+			{/* Continue Button */}
 			<View className="px-[16px]">
-									{/* Privacy Notice */}
-					<View className="flex flex-row mb-[20px] gap-[14px]">
-						<Ionicons name="information-circle" size={28} color="#BFBFC3" />
-						<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
-							By continuing, you agree to the public display of your profile (name, photo, bio, neighbourhood, availability, and language) to all users. You can control profile visibility in your profile settings. Learn more in our{' '}
-							<Text className="text-brand-blue">Privacy Policy</Text>.
-						</Text>
-					</View>
+				{/* Privacy Notice */}
+				<View className="flex flex-row mb-[20px] gap-[14px]">
+					<Ionicons name="information-circle" size={28} color="#BFBFC3" />
+					<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
+						This information helps caregivers provide better care for your loved one. You can update this information at any time in your profile settings.
+					</Text>
+				</View>
 				<CustomButton
-					title="Finish"
+					title="Continue"
 					handlePress={handleDone}
 					containerStyles="bg-black py-4 rounded-lg"
 					textStyles="text-white text-xl font-medium"
@@ -207,4 +196,4 @@ const AddProfilePhoto: React.FC = () => {
 	);
 };
 
-export default AddProfilePhoto;
+export default FamilyProfileDetails; 

@@ -21,29 +21,14 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
         ? `${user.address.city}, ${user.address.province}` 
         : 'Burlington, Toronto';
 
-    // Add fake +1 logic for certain users to match screenshot ; This is just for UI demonstration
-    const showPlusOne = user.firstName === 'Jane' || user.firstName === 'Richard' || user.firstName === 'Winston' || user.id?.includes('2') || user.id?.includes('4');
+    // Check if user has family members from the user's familyMembers array
+    const hasFamilyMembers = user.familyMembers && user.familyMembers.length > 0;
+    const firstFamilyMember = hasFamilyMembers ? user.familyMembers![0] : null;
 
-    // Cycle between placeholder images ; This is just for UI demonstration
-    const getPlaceholderImage = () => {
-        const images = [
-            require('@/assets/download.png'),
-            require('@/assets/emily.png'),
-            require('@/assets/richard.png')
-        ];
-        
-        // Use user ID or name to determine which image to show ; This is just for UI demonstration
-        const index = user.id ? 
-            parseInt(user.id.slice(-1)) % 3 : 
-            (user.firstName?.length || 0) % 3;
-        
-        return images[index];
-    };
-
-    // Alternating pattern: every other user has a placeholder (50% chance) ; This is just for UI demonstration
-    const showPlaceholder = user.id ? 
-        parseInt(user.id.slice(-1)) % 2 === 0 : 
-        (user.firstName?.length || 0) % 2 === 0;
+    // Show family member name if exists, otherwise show core user name
+    const displayName = firstFamilyMember 
+        ? `${firstFamilyMember.firstName} ${firstFamilyMember.lastName?.[0]}.`
+        : `${user.firstName} ${user.lastName?.[0]}.`;
 
     return (
         <TouchableOpacity
@@ -54,16 +39,16 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
                 <View className="flex-1">
                     <View className="flex-row items-center">
                         <Text className="font-bold text-lg text-black mr-1">
-                            {user.firstName} {user.lastName?.[0]}.
+                            {displayName}
                         </Text>
                         
                         <View className="w-[15px] h-[15px] bg-blue-500 rounded-full items-center justify-center mr-2">
                             <Ionicons name="checkmark" size={10} color="white" />
                         </View>
 
-                        {showPlusOne && (
+                        {hasFamilyMembers && (
                             <Text className="text-sm text-grey-58">
-                                +1
+                                +{user.familyMembers?.length || 0}
                             </Text>
                         )}
                     </View>
@@ -74,23 +59,27 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
                 </View>
 
                 <View className="relative">
-                    {showPlaceholder && (
-                        <Image 
-                            source={getPlaceholderImage()}
+                    {/* Core user photo (behind) */}
+                    {hasFamilyMembers && (
+                        <Image
+                            source={{
+                                uri: user.profilePhotoUrl || 'https://via.placeholder.com/58',
+                            }}
                             className="w-[58px] h-[58px] rounded-full absolute"
                             style={{
-                                right: -30,
+                                right: -35,
                             }}
                         />
                     )}
                     
+                    {/* Family member photo (in front) or core user photo if no family */}
                     <Image
                         source={{
-                            uri: user.profilePhotoUrl || 'https://via.placeholder.com/58',
+                            uri: firstFamilyMember?.profilePhotoUrl || user.profilePhotoUrl || 'https://via.placeholder.com/58',
                         }}
                         className="w-[58px] h-[58px] rounded-full border-2 border-brand-blue"
                         style={{
-                            transform: [{ translateX: showPlaceholder ? 0 : 30 }]
+                            transform: [{ translateX: hasFamilyMembers ? 0 : 30 }]
                         }}
                     />
                 </View>

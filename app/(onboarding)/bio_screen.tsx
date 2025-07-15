@@ -17,18 +17,52 @@ const BioScreen: React.FC = () => {
 		try {
 			console.log('User Data in bio before if:', userData);
 			dispatch(updateUserFields({ bio }));
-			if (userData?.id) {
-				await AuthApi.addOptionalInfo(userData.id, { ...userData, onboardingComplete: true, bio: bio, idVerified: userData.idVerified });
-				Alert.alert(
-					'Success',
-					'Your profile has been created successfully!',
-				);
+			
+			// Check if user is in family flow and has family member data
+			const lookingForSelf = userData?.carePreferences?.lookingForSelf;
+			let hasFamilyMemberData = false;
+			
+			try {
+				const tempData = JSON.parse(userData?.bio || '{}');
+				hasFamilyMemberData = tempData.type === 'tempFamilyMemberComplete';
+			} catch (error) {
+				// Not family member data, continue normally
 			}
-			const nextRoute = userData?.isPsw
-				? '/(psw)/psw-home'
-				: '/(seeker)/seeker-home';
-			console.log('Navigating to:', nextRoute);
-			router.push(nextRoute);
+			
+			if (userData?.id) {
+				await AuthApi.addOptionalInfo(userData.id, { 
+					profilePhotoUrl: userData.profilePhotoUrl,
+					carePreferences: userData.carePreferences,
+					idVerified: userData.idVerified,
+					bio: bio,
+					onboardingComplete: true
+				});
+				
+				// Only show success alert if completing the entire flow
+				if (lookingForSelf !== false || !hasFamilyMemberData) {
+					Alert.alert(
+						'Success',
+						'Your profile has been created successfully!',
+					);
+				}
+			}
+			
+			// Navigate based on flow
+			if (lookingForSelf === false && hasFamilyMemberData) {
+				// Family flow complete - go to dashboard
+				const nextRoute = userData?.isPsw
+					? '/(psw)/psw-home'
+					: '/(seeker)/seeker-home';
+				console.log('Family flow complete, navigating to:', nextRoute);
+				router.push(nextRoute);
+			} else {
+				// Regular flow - go to dashboard
+				const nextRoute = userData?.isPsw
+					? '/(psw)/psw-home'
+					: '/(seeker)/seeker-home';
+				console.log('Regular flow complete, navigating to:', nextRoute);
+				router.push(nextRoute);
+			}
 		} catch (error) {
 			console.error('Error saving bio:', error);
 			Alert.alert(

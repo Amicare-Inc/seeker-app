@@ -66,7 +66,17 @@ export const useAvailability = () => {
 		);
 
 		console.log('Availability saved successfully.', userData);
-		router.push('/caregiver_preferences'); // Navigate to the next page
+		
+		// Check if user is looking for self or loved one to determine next step
+		const lookingForSelf = userData?.carePreferences?.lookingForSelf;
+		
+		if (lookingForSelf === false) {
+			// A Loved One flow - start with family member details
+			router.push('/family_personal_details');
+		} else {
+			// Myself flow - go to personal details first
+			router.push('/personal_details');
+		}
 	};
 
 	return {

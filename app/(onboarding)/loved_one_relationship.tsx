@@ -3,7 +3,7 @@ import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Keyb
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
+import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -17,6 +17,7 @@ const relationshipOptions = [
 const LovedOneRelationship: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector((state: RootState) => state.user.userData);
+    const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
     const scrollViewRef = useRef<ScrollView>(null);
 
     const [selectedRelationship, setSelectedRelationship] = useState<string>('');
@@ -52,12 +53,16 @@ const LovedOneRelationship: React.FC = () => {
         const finalRelationship = showCustomInput ? customRelationship : selectedRelationship;
         
         if (finalRelationship) {
-            // Store relationship data - for now we'll just log it or handle it later
-            console.log('Selected relationship:', finalRelationship);
-            // TODO: Add relationship field to User type or store in appropriate location
+            // Update tempFamilyMember with relationship data
+            const updatedFamilyMember = {
+                ...tempFamilyMember,
+                relationshipToUser: finalRelationship,
+            };
+            dispatch(setTempFamilyMember(updatedFamilyMember));
+            console.log('Updated family member with relationship:', updatedFamilyMember);
         }
 
-        router.push('/profile_details'); // Navigate to next page
+        router.push('/family_profile_details'); // Navigate to family profile details
     };
 
     const isValid = selectedRelationship || (showCustomInput && customRelationship.trim());

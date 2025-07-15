@@ -7,37 +7,32 @@ import { router } from 'expo-router';
 import { UserCardSeeker, UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
 import { SessionFilterCard } from '@/features/sessions';
+import { useDispatch } from 'react-redux';
+import { setActiveProfile } from '@/redux/activeProfileSlice';
 
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
 	const [filteredUsers, setFilteredUsers] = useState<User[] | null>(null);
 	const { users: fetchedUsers, loading, error } = useHomeTab(false, true); // isPsw = false, withDistance = true
-	const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 	const [filterVisible, setFilterVisible] = useState(false);
 	const fadeAnim = useRef(new Animated.Value(0)).current;
 	const slideAnim = useRef(new Animated.Value(300)).current;
+	const dispatch = useDispatch();
 
 	// Use filtered users if available, otherwise use fetched users
 	const users = filteredUsers ?? fetchedUsers;
 
-	const handleCardPress = (userId: string) => {
-		setExpandedUserId((prev) => (prev === userId ? null : userId));
+	const handleCardPress = (user: User) => {
+		// Navigate to other-user-profile instead of expanding
+		dispatch(setActiveProfile(user));
+		router.push('/other-user-profile');
 	};
 
 	const renderItem = ({ item }: { item: User }) => (
-		<View>
-			{expandedUserId === item.id ? (
-				<UserCardExpanded
-					user={item}
-					onClose={() => setExpandedUserId(null)}
-				/>
-			) : (
-				<UserCardSeeker
-					user={item}
-					onPress={() => handleCardPress(item.id!)}
-				/>
-			)}
-		</View>
+		<UserCardSeeker
+			user={item}
+			onPress={() => handleCardPress(item)}
+		/>
 	);
 
 	const showFilterCard = () => {

@@ -16,11 +16,11 @@ const VerificationPrompt: React.FC = () => {
 
 	const handleSkip = () => {
 		dispatch(updateUserFields({ idVerified: false })); // Set idVerified to false in Redux
-		// Navigate based on rol
+		// Navigate based on role
 		if (userData?.isPsw) {
 			router.push('/stripe-onboarding');
 		} else {
-			router.push('/bio_screen');
+			router.push('/profile_details');
 		} // Replace with the actual next page route
 	};
 

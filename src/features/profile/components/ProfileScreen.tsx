@@ -21,9 +21,10 @@ import ProfileAvailabilityTable from './ProfileAvailabilityTable';
 interface ProfileScreenProps {
 	user: User;
 	isMyProfile: boolean;
+	originalUser?: User; // For family member cases, pass the original user
 }
 
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, originalUser }) => {
 	const {
 		firstName,
 		lastName,
@@ -63,6 +64,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile }) => {
 				isPsw={user.isPsw}
 				rate={user.rate}
 				onBackPress={handleBackPress}
+				originalUser={originalUser} // Pass originalUser for family member cases
 			/>
 			<ScrollView className="flex-1">
 				{/* Bio Label + Bio */}

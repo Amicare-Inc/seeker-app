@@ -5,32 +5,29 @@ import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
+import { setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
 import { DatePickerField } from '@/shared/components';
-import { AuthApi } from '@/features/auth/api/authApi';
 import { RegionValidatedAddressInput } from '@/shared/components';
 import { type AddressComponents } from '@/services/google/googlePlacesService';
 
-const PersonalDetails: React.FC = () => {
+const FamilyPersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 
 	const [form, setForm] = useState({
-		firstName: userData?.firstName || 'Martin',
-		lastName: userData?.lastName || 'Droruga',
-		dob: userData?.dob || '03/15/1990',
-		address: userData?.address || {
-			fullAddress: '159 Dundas St E',
+		firstName: '',
+		lastName: '',
+		dob: '',
+		address: {
+			fullAddress: '',
 			street: '',
 			city: '',
 			province: '',
 			country: '',
 			postalCode: '',
 		},
-		phone: userData?.phone || '5879730077',
-		email: userData?.email || '',
-		gender: userData?.gender || '',
+		gender: '',
 	});
 
 	const [errors, setErrors] = useState({
@@ -38,8 +35,6 @@ const PersonalDetails: React.FC = () => {
 		lastName: '',
 		dob: '',
 		address: '',
-		phone: '',
-		email: '',
 		gender: '',
 	});
 
@@ -78,8 +73,6 @@ const PersonalDetails: React.FC = () => {
 		if (!form.lastName) newErrors.lastName = 'Last name is required';
 		if (!form.dob) newErrors.dob = 'Date of birth is required';
 		if (!form.address.fullAddress) newErrors.address = 'Address is required';
-		if (!form.phone) newErrors.phone = 'Phone number is required';
-		if (!form.email) newErrors.email = 'Email is required';
 		if (!form.gender) newErrors.gender = 'Gender is required';
 
 		// Address validation is now handled by the RegionValidatedAddressInput component
@@ -94,26 +87,16 @@ const PersonalDetails: React.FC = () => {
 	const handleContinue = async () => {
 		if (await validateForm()) {
 			try {
-				const userId = userData?.id;
-				if (!userId) {
-					console.error('User ID is missing');
-					return;
-				}
-				dispatch(updateUserFields(form));
+				// Store family member data temporarily in Redux tempFamilyMember field
+				dispatch(setTempFamilyMember({
+					...form,
+					step: 'personal_details'
+				}));
 				
-				// Debug: Log the data being sent
-				const criticalInfoData = {...form, isPsw: userData!.isPsw};
-				console.log('Sending critical info to backend:', criticalInfoData);
-				console.log('User ID:', userId);
-				
-				await AuthApi.addCriticalInfo(userId, criticalInfoData);
-				console.log('Critical info sent successfully from personal_details');
-				
-				router.push('/verification_prompt');
+				console.log('Family member personal details saved:', form);
+				router.push('/loved_one_relationship');
 			} catch (error) {
-				console.error('Error saving user details:', error);
-				// Show alert to user about the error
-				alert('Failed to save personal details. Please try again.');
+				console.error('Error saving family member details:', error);
 			}
 		}
 	};
@@ -131,10 +114,10 @@ const PersonalDetails: React.FC = () => {
 				>
 					<View className="flex w-full h-full justify-center px-9">
 						<Text className="text-3xl text-black font-normal text-left mb-3">
-							Personal Details
+							Tell us about your loved one...
 						</Text>
 						<Text className="text-xs text-gray-500 font-normal text-left mb-4">
-							Please fill out the form below with your personal details
+							This information helps us find the right caregiver for your family member and ensures proper care coordination.
 						</Text>
 
 						<ForumField
@@ -187,32 +170,6 @@ const PersonalDetails: React.FC = () => {
 						) : null}
 
 						<ForumField
-							title="Phone"
-							value={form.phone}
-							handleChangeText={(e) => handleInputChange('phone', e)}
-							otherStyles="mb-4"
-							keyboardType="phone-pad"
-						/>
-						{errors.phone ? (
-							<Text className="text-red-500 text-xs">
-								{errors.phone}
-							</Text>
-						) : null}
-
-						<ForumField
-							title="Email"
-							value={form.email}
-							handleChangeText={(e) => handleInputChange('email', e)}
-							otherStyles="mb-4"
-							keyboardType="email-address"
-						/>
-						{errors.email ? (
-							<Text className="text-red-500 text-xs">
-								{errors.email}
-							</Text>
-						) : null}
-
-						<ForumField
 							title="Gender"
 							value={form.gender}
 							handleChangeText={(e) => handleInputChange('gender', e)}
@@ -241,4 +198,4 @@ const PersonalDetails: React.FC = () => {
 	);
 };
 
-export default PersonalDetails;
+export default FamilyPersonalDetails; 

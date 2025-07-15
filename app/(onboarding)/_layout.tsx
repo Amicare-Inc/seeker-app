@@ -35,7 +35,10 @@ const OnboardingLayout = () => {
 			<Stack.Screen name="caregiver_preferences" options={{ headerShown: false }} />
 			<Stack.Screen name="profile_details" options={{ headerShown: false }} />
 			<Stack.Screen name="about_loved_one" options={{ headerShown: false }} />\
+			<Stack.Screen name="family_personal_details" options={{ headerShown: false }} />
+			<Stack.Screen name="family_bio_photo" options={{ headerShown: false }} />
 			<Stack.Screen name="loved_one_relationship" options={{ headerShown: false }} />
+			<Stack.Screen name="family_profile_details" options={{ headerShown: false }} />
 			<Stack.Screen name="stripe-onboarding" options={{ headerShown: false }} />
 			<Stack.Screen name="stripe-success" options={{ headerShown: false }} />
 			<Stack.Screen name="(seeker)" options={{ headerShown: false }} />

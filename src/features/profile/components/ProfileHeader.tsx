@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { User } from '@/types/User';
 
 interface ProfileHeaderProps {
 	userName: string;
@@ -13,6 +14,7 @@ interface ProfileHeaderProps {
 	isPsw?: boolean; // Indicates if the user is a PSW
 	rate?: number; // The user's rate if PSW
 	onBackPress?: () => void; // Handler for back arrow
+	originalUser?: User; // For family member cases, pass the original user
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -21,84 +23,94 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	userRating,
 	userPhoto,
 	onMenuPress,
-	isMyProfile,
-	isPsw,
+	isMyProfile = false,
+	isPsw = false,
 	rate,
 	onBackPress,
+	originalUser,
 }) => {
+	const isShowingFamilyMember = originalUser && originalUser.familyMembers && originalUser.familyMembers.length > 0;
+	
 	return (
-		<View className="mb-4 flex-row items-center">
-			{/* Left side: Back arrow if not my profile */}
-			{!isMyProfile && onBackPress && (
+		<View className="flex-row items-center justify-between p-4">
+			{/* Left side: Back arrow (if not my profile) */}
+			{!isMyProfile && (
 				<TouchableOpacity onPress={onBackPress} className="mr-3">
-					<Ionicons name="chevron-back" size={24} color="#000" />
+					<Ionicons name="arrow-back" size={24} color="#333" />
 				</TouchableOpacity>
 			)}
 
-			{/* User Photo */}
-			{userPhoto ? (
-				<Image
-					source={{ uri: userPhoto }}
-					className="w-20 h-20 rounded-full mr-3"
-				/>
-			) : (
-				<View className="w-20 h-20 rounded-full bg-gray-300 mr-3" />
-			)}
-
-			{/* Middle Column: User info */}
-			<View className="flex-1">
-				<View className="flex-row items-center gap-1">
-					<Text className="text-lg font-bold text-black">
-						{userName}
-					</Text>
-					<Ionicons
-						name="checkmark-circle"
-						size={18}
-						color="#00BFFF"
+			{/* Profile Photo Section */}
+			<View className="relative" style={{ width: isShowingFamilyMember ? 100 : 80 }}>
+				{isShowingFamilyMember ? (
+					<>
+						{/* Family member photo (main position) */}
+						<Image
+							source={{ uri: userPhoto }}
+							className="w-20 h-20 rounded-full"
+							style={{ 
+								zIndex: 2,
+								shadowColor: '#000', 
+								shadowOffset: { width: 0, height: 2 }, 
+								shadowOpacity: 0.1, 
+								shadowRadius: 4 
+							}}
+						/>
+						{/* Core user photo (slight overlap to the right) */}
+						<Image
+							source={{ uri: originalUser.profilePhotoUrl }}
+							className="w-20 h-20 rounded-full absolute"
+							style={{ 
+								right: -30,
+								top: 0,
+								zIndex: 1,
+								shadowColor: '#000', 
+								shadowOffset: { width: 0, height: 2 }, 
+								shadowOpacity: 0.1, 
+								shadowRadius: 4 
+							}}
+						/>
+					</>
+				) : (
+					<Image
+						source={{ uri: userPhoto }}
+						className="w-20 h-20 rounded-full"
+						style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 }}
 					/>
-				</View>
-				{userLocation && (
-					<Text
-						className="text-base text-gray-500"
-						style={{ color: '#797979' }}>
-						{userLocation}
-					</Text>
 				)}
-				{userRating && (
-					<View className="flex-row items-center">
-						<Text
-							className="text-base"
-							style={{ color: '#797979' }}>
-							{userRating}
-						</Text>
-					</View>
-				)}
-
 			</View>
 
-			{/* Got rid of this for now since figma doesnt have it */}
+			{/* User Info - shifted slightly to accommodate photos */}
+			<View className="flex-1" style={{ marginLeft: isShowingFamilyMember ? 36 : 16 }}>
+				<Text className="text-xl font-semibold text-gray-800">{userName}</Text>
+				{userLocation && (
+					<Text className="text-sm text-gray-600 mt-1">{userLocation}</Text>
+				)}
+				{isShowingFamilyMember ? (
+					<Text className="text-sm text-gray-600 mt-1">
+						Contact: {originalUser.firstName}
+					</Text>
+				) : (
+					userRating && (
+						<Text className="text-sm text-gray-600 mt-1">{userRating}</Text>
+					)
+				)}
+			</View>
 
-			{/* Right side: If my profile, show menu icon; otherwise, if PSW, show rate */}
-
-			{/* {isMyProfile ? (
-				<TouchableOpacity onPress={onMenuPress} className="p-4">
-					<Ionicons
-						name="ellipsis-horizontal"
-						size={24}
-						color="#000"
-					/>
+			{/* Right side: Menu or Rate */}
+			{isMyProfile ? (
+				<TouchableOpacity onPress={onMenuPress}>
+					<Ionicons name="ellipsis-horizontal" size={24} color="#333" />
 				</TouchableOpacity>
 			) : (
-				isPsw &&
-				rate != null && (
-					<Text
-						className="ml-3 text-base font-bold"
-						style={{ color: '#797979' }}
-					>
-						${rate.toFixed()}/hr
-					</Text>
-				)
-			)} */}
+				<View className="items-center">
+					{isPsw && rate && (
+						<Text className="text-lg font-semibold text-green-600">
+							${rate}/hr
+						</Text>
+					)}
+				</View>
+			)}
 		</View>
 	);
 };

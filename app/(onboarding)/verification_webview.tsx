@@ -37,7 +37,7 @@ const PersonaVerification: React.FC = () => {
 			if (userData?.isPsw) {
 				router.push('/stripe-onboarding');
 			} else {
-				router.push('/bio_screen');
+				router.push('/profile_details');
 			}
 		}
 	};
