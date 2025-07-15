@@ -34,7 +34,7 @@ const SeekerHomeTab = () => {
 		<SafeAreaView
 			className="flex-1"
 			style={{
-				backgroundColor: '#f0f0f0',
+				backgroundColor: '#f2f2f7',
 			}}
 		>
 			<View className="flex-row items-center justify-between px-4 pb-2 mb-2">

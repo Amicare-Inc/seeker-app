@@ -18,7 +18,7 @@ const AddEmailScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-100">
+    <SafeAreaView className="flex-1 bg-grey-0">
       <View className="flex-row items-center px-4 mb-[30px]">
         <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4 -translate-y-[14px]">
           <Ionicons name="chevron-back" size={24} color="black" />

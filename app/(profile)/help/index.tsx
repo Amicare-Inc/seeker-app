@@ -10,7 +10,7 @@ const HelpScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-100">
+    <SafeAreaView className="flex-1 bg-grey-0">
       {/* Header */}
       <View className="flex-row items-center px-4">
         <TouchableOpacity onPress={handleBackPress} className="mr-4 absolute left-4">
