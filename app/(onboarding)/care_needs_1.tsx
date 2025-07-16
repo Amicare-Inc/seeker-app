@@ -45,7 +45,7 @@ const CareNeeds1: React.FC = () => {
 			);
 		}
 
-		router.push('/care_needs_2'); // Move to the next page regardless
+		router.push('/verification_prompt'); // Move to the next page regardless
 	};
 
 	return (
