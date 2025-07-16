@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
+import { SafeAreaView, View, Text, TouchableOpacity, Keyboard, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useLocalSearchParams, router } from 'expo-router';
 import { User } from '@/types/User';
@@ -345,7 +345,18 @@ const RequestSession = () => {
 				photoUrl={targetUserObj?.profilePhotoUrl || ''}
 				firstName={targetUserObj?.firstName}
 			/>
-			<ScrollView>
+			<KeyboardAvoidingView 
+				className="flex-1"
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+				enabled={true}
+			>
+				<ScrollView 
+					showsVerticalScrollIndicator={false}
+					keyboardShouldPersistTaps="handled"
+					automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+					bounces={false}
+				>
 				{/* Main Content */}
 				<View className="flex-1 p-4">
 					{/* Help Options Dropdown */}
@@ -412,16 +423,7 @@ const RequestSession = () => {
 						total={total}
 					/>
 
-					{/* Submit Button */}
-					<TouchableOpacity
-						onPress={handleSubmit}
-						className="bg-brand-blue rounded-xl p-4 items-center flex-row justify-center"
-					>
-						<Ionicons name="paper-plane" size={22} color="white"/>
-						<Text className="text-white text-lg font-medium ml-3">
-							{existingSession ? 'Update Session' : 'Send Request'}
-						</Text>
-					</TouchableOpacity>
+
 				</View>
 
 				{/* DateTimePickerModal */}
@@ -449,6 +451,18 @@ const RequestSession = () => {
 					}
 				/>
 			</ScrollView>
+			</KeyboardAvoidingView>
+			
+			{/* Submit Button - Fixed at bottom */}
+			<TouchableOpacity
+				onPress={handleSubmit}
+				className="bg-brand-blue rounded-xl p-4 mx-4 items-center flex-row justify-center mb-4"
+			>
+				<Ionicons name="paper-plane" size={22} color="white"/>
+				<Text className="text-white text-lg font-medium ml-3">
+					{existingSession ? 'Update Session' : 'Send Request'}
+				</Text>
+			</TouchableOpacity>
 		</SafeAreaView>
 	);
 };

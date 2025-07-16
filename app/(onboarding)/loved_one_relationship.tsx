@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -68,7 +69,9 @@ const LovedOneRelationship: React.FC = () => {
     const isValid = selectedRelationship || (showCustomInput && customRelationship.trim());
 
     return (
-        <SafeAreaView className="flex-1 bg-grey-0">
+        <SafeAreaView 
+            className="flex-1 bg-grey-0" 
+        >
             <KeyboardAvoidingView 
                 className="flex-1" 
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
