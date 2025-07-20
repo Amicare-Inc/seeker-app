@@ -41,6 +41,7 @@ const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
                     onChangeText={setInputValue}
                     onSubmitEditing={(event) => addTask(event.nativeEvent.text)}
                     style={{ paddingRight: 12 }}
+					returnKeyType="done" // or "go", "send", etc.
                 />
                 <TouchableOpacity onPress={() => {
                     if (inputValue.trim()) {

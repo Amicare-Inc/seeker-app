@@ -453,6 +453,16 @@ const RequestSession = () => {
 				/>
 			</ScrollView>
 			</KeyboardAvoidingView>
+
+			<View className="bg-transparent">
+
+			<View className="mx-4 bg-[#BBDAF7] flex-row py-3 px-4 items-center rounded-xl -translate-y-3">
+				<Ionicons name="information-circle" size={38} color="#55A2EB" />
+				<Text className="ml-4 text-[13px] text-grey-80 leading-[18px]">
+					By sending this request, you agree to share{"\n"}this information with the caregiver. Learn{"\n"}more in our{" "}
+					<Text className="text-[#05549E]">Privacy Policy</Text>.
+				</Text>
+			</View>
 			
 			{/* Submit Button - Fixed at bottom */}
 			<TouchableOpacity
@@ -464,6 +474,7 @@ const RequestSession = () => {
 					{existingSession ? 'Update Session' : 'Send Request'}
 				</Text>
 			</TouchableOpacity>
+			</View>
 		</SafeAreaView>
 	);
 };

@@ -38,6 +38,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 className="flex-1 p-2 ml-2 bg-transparent"
                 onFocus={handleFocus}
                 onBlur={handleBlur}
+                returnKeyType="send"
             />
             <TouchableOpacity
                 onPress={handleSendMessage}
