@@ -87,7 +87,7 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 
 	return (
 		<View className="p-4">
-			<Text className="text-base font-bold mb-3">Edit Profile</Text>
+			<Text className="text-base font-bold mb-1">Edit Profile</Text>
 
 			{/* Bio Edit Section */}
 			<View className="mb-4">
@@ -120,14 +120,18 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 
 			{/* Confirm Changes Button */}
 			{isAnyChanged && (
-				<TouchableOpacity
-					onPress={handleConfirmChanges}
-					className="mt-4 bg-blue-600 rounded-lg py-2 px-4 self-start"
-				>
-					<Text className="text-sm font-semibold text-white">
-						Confirm Changes
-					</Text>
-				</TouchableOpacity>
+				<View className="mt-2">
+					<Text className="text-xs mb-2">Any information provided here may be visible to other users.</Text>
+					<TouchableOpacity
+						onPress={handleConfirmChanges}
+						className=" bg-brand-blue rounded-lg py-2 px-4 self-start mt-2"
+					>
+									
+						<Text className="text-sm font-semibold text-white">
+							Confirm Changes
+						</Text>
+					</TouchableOpacity>
+				</View>
 			)}
 		</View>
 	);

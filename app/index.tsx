@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, ScrollView, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, ScrollView, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { CustomButton } from '@/shared/components';
@@ -10,10 +10,17 @@ import { updateUserFields } from '@/redux/userSlice';
 
 export default function Index() {
     const dispatch = useDispatch<AppDispatch>();
+    const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
+    const [showTermsPopup, setShowTermsPopup] = useState(false);
 
     const handleRoleSelection = async (isPsw: boolean) => {
+        if (!isTermsAccepted) {
+            setShowTermsPopup(true);
+            return;
+        }
         dispatch(updateUserFields({ isPsw }));
-        router.push('/sign-up');
+        router.push('/(onboarding)/verification_prompt');
     };
 
     return (
@@ -78,10 +85,27 @@ export default function Index() {
                     <CustomButton
                         title="I am a Care Giver"
                         handlePress={() => handleRoleSelection(true)}
-                        containerStyles="w-full bg-white border border-1 border-gray-200 mb-8"
+                        containerStyles="w-full bg-white border border-1 border-gray-200 mb-[30px]"
                         textStyles="font-medium text-black"
                     />
-                    <Text style={{ textAlign: 'center', marginBottom: 26 }}>
+                    <TouchableOpacity 
+                        className="flex-row items-start px-2 mb-[40px]"
+                        onPress={() => setIsTermsAccepted(!isTermsAccepted)}
+                    >
+                        <View className={`w-5 h-5 mr-3 mt-0.5 rounded-md bg-white border items-center justify-center ${
+                            isTermsAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
+                        }`}>
+                            {isTermsAccepted && (
+                                <Ionicons name="checkmark" size={14} color="white" />
+                            )}
+                        </View>
+                        <Text className="text-sm text-black flex-1 leading-5 font-medium">
+                            By continuing, you agree with Amicare's{' '}
+                            <Text className="text-brand-blue">Terms of use</Text> and{' '}
+                            <Text className="text-brand-blue">Privacy Policy</Text>
+                        </Text>
+                    </TouchableOpacity>
+                    <Text className="text-center">
                         Already have an account?{' '}
                         <Text
                             style={{ 
@@ -95,21 +119,19 @@ export default function Index() {
                             Log In!
                         </Text>
                     </Text>
-                    <View className="flex flex-row justify-center items-center gap-1">
-                        <Ionicons name="information-circle" size={24} color="#BFBFC3" />
-                        <Text style={{ textAlign: 'center', color: '#666', fontSize: 12 }}>
-                            By continuing, you agree with our{' '}
-                            <Text
-                                style={{
-                                    color: '#007AFF',
-                                    textDecorationLine: 'none'
-                                }}
-                                onPress={() => {}}
-                            >
-                                Privacy Policy.
-                            </Text>
+                        {/* <View className="absolute bottom-10 bg-[#FFC8C5] p-2 flex-row items-center justify-center">
+                        <Ionicons name="alert-circle" size={20} color="#FF766E" />
+                        <View>
+
+                        
+                        <Text className="text-sm text-grey-80 font-medium">
+                            Consent Required
                         </Text>
-                    </View>
+                        <Text className="text-sm text-grey-80 font-medium">
+                            You must agree to the Terms and Privacy Policy to continue.
+                        </Text>
+                        </View>
+                    </View> */}
                 </View>
             </ScrollView>
         </View>
