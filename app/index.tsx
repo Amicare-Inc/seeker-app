@@ -20,7 +20,7 @@ export default function Index() {
             return;
         }
         dispatch(updateUserFields({ isPsw }));
-        router.push('/(onboarding)/verification_prompt');
+        router.push('/sign-up');
     };
 
     return (
