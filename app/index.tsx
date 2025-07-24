@@ -7,11 +7,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/components/Privacy Policy/PrivacyPolicy';
 
 export default function Index() {
     const dispatch = useDispatch<AppDispatch>();
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const handleRoleSelection = async (isPsw: boolean) => {
         if (!isTermsAccepted) {
@@ -103,21 +105,32 @@ export default function Index() {
                         </View>
                     )}
                     <TouchableOpacity 
-                        className="flex-row items-start px-2 mb-[40px]"
+                        className="flex-row mb-[40px] w-full mx-auto justify-center"
                         onPress={handleTermsToggle}
                     >
-                        <View className={`w-5 h-5 mr-3 mt-0.5 rounded-md bg-white border items-center justify-center ${
-                            isTermsAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
-                        }`}>
+                        <View
+                            className={`w-5 h-5 mr-3 mt-1 rounded-md bg-white border items-center justify-center ${
+                                isTermsAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
+                            }`}
+                        >
                             {isTermsAccepted && (
                                 <Ionicons name="checkmark" size={14} color="white" />
                             )}
                         </View>
-                        <Text className="text-sm text-black flex-1 leading-5 font-medium">
-                            By continuing, you agree with Amicare's{' '}
-                            <Text className="text-brand-blue">Terms of use</Text> and{' '}
-                            <Text className="text-brand-blue">Privacy Policy</Text>
-                        </Text>
+
+                        <View className="flex-col flex-wrap">
+                            <Text className="text-sm text-black font-medium">
+                                By continuing, you agree with Amicare's{' '}
+                            </Text>
+                            <View className="flex-row items-center">
+                            <Text className="text-sm font-medium text-brand-blue">Terms of Use</Text>
+                            <Text className="text-sm text-black font-medium">{' and '}</Text>
+                            <PrivacyPolicyLink 
+                                textStyle={{ fontSize: 14, fontWeight: '500' }} 
+                                onPress={() => setShowPrivacyModal(true)}
+                            />
+                            </View>
+                        </View>
                     </TouchableOpacity>
                     <Text className="text-center">
                         Already have an account?{' '}
@@ -135,6 +148,11 @@ export default function Index() {
                     </Text>
                 </View>
             </ScrollView>
+            
+            <PrivacyPolicyModal 
+                visible={showPrivacyModal} 
+                onClose={() => setShowPrivacyModal(false)} 
+            />
         </View>
     );
 }

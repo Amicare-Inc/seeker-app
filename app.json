@@ -18,15 +18,16 @@
         "NSCameraUsageDescription": "This app requires access to the camera for identity verification purposes.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.specul8tor.AmiCare",
-      "merchantId": "merchant.com.specul8tor.AmiCare"
+      "bundleIdentifier": "com.amicare.app",
+      "teamId": "5284JKTY8S",
+      "merchantId": "merchant.com.amicare.app"
     },
     "android": {
       "permissions": [
         "CAMERA",
         "CAMERA"
       ],
-      "package": "com.specul8tor.AmiCare"
+      "package": "com.amicare.AmiCare"
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +39,7 @@
       [
         "@stripe/stripe-react-native",
         {
-          "merchantIdentifier": "merchant.com.specul8tor.AmiCare",
+          "merchantIdentifier": "merchant.com.amicare.app",
           "enableGooglePay": true
         }
       ]

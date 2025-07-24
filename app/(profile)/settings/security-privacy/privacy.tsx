@@ -3,10 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { PrivacyPolicyModal } from '@/components/Privacy Policy/PrivacyPolicy';
 
 const PrivacySettingsScreen = () => {
   const [displayProfile, setDisplayProfile] = useState(true);
   const [showHealthInfo, setShowHealthInfo] = useState(true);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const handleBackPress = () => {
     router.back();
@@ -17,7 +19,7 @@ const PrivacySettingsScreen = () => {
   };
 
   const handleViewPrivacyPolicy = () => {
-    console.log('Navigate to Privacy Policy');
+    setShowPrivacyModal(true);
   };
 
   const handleDataDownloadRequest = () => {
@@ -79,6 +81,11 @@ const PrivacySettingsScreen = () => {
           onPress={handleDataDownloadRequest}
         />
       </ScrollView>
+      
+      <PrivacyPolicyModal 
+        visible={showPrivacyModal} 
+        onClose={() => setShowPrivacyModal(false)} 
+      />
     </SafeAreaView>
   );
 };
