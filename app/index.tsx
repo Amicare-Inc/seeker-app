@@ -11,16 +11,23 @@ import { updateUserFields } from '@/redux/userSlice';
 export default function Index() {
     const dispatch = useDispatch<AppDispatch>();
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
-
-    const [showTermsPopup, setShowTermsPopup] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
 
     const handleRoleSelection = async (isPsw: boolean) => {
         if (!isTermsAccepted) {
-            setShowTermsPopup(true);
+            setShowErrorMessage(true);
             return;
         }
         dispatch(updateUserFields({ isPsw }));
         router.push('/sign-up');
+    };
+
+    const handleTermsToggle = () => {
+        setIsTermsAccepted(!isTermsAccepted);
+        // Hide error message when terms are accepted
+        if (!isTermsAccepted) {
+            setShowErrorMessage(false);
+        }
     };
 
     return (
@@ -88,9 +95,16 @@ export default function Index() {
                         containerStyles="w-full bg-white border border-1 border-gray-200 mb-[30px]"
                         textStyles="font-medium text-black"
                     />
+                    {showErrorMessage && (
+                        <View className="w-full mb-2">
+                            <Text className="text-red-500 text-xs text-center font-medium">
+                                Please confirm you agree by checking the box below.
+                            </Text>
+                        </View>
+                    )}
                     <TouchableOpacity 
                         className="flex-row items-start px-2 mb-[40px]"
-                        onPress={() => setIsTermsAccepted(!isTermsAccepted)}
+                        onPress={handleTermsToggle}
                     >
                         <View className={`w-5 h-5 mr-3 mt-0.5 rounded-md bg-white border items-center justify-center ${
                             isTermsAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
@@ -119,19 +133,6 @@ export default function Index() {
                             Log In!
                         </Text>
                     </Text>
-                        {/* <View className="absolute bottom-10 bg-[#FFC8C5] p-2 flex-row items-center justify-center">
-                        <Ionicons name="alert-circle" size={20} color="#FF766E" />
-                        <View>
-
-                        
-                        <Text className="text-sm text-grey-80 font-medium">
-                            Consent Required
-                        </Text>
-                        <Text className="text-sm text-grey-80 font-medium">
-                            You must agree to the Terms and Privacy Policy to continue.
-                        </Text>
-                        </View>
-                    </View> */}
                 </View>
             </ScrollView>
         </View>
