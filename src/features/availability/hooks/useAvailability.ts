@@ -72,7 +72,7 @@ export const useAvailability = () => {
 		
 		if (lookingForSelf === false) {
 			// A Loved One flow - start with family member details
-			router.push('/family_personal_details');
+			router.push('/caregiver_preferences');
 		} else {
 			// Myself flow - go to personal details first
 			router.push('/personal_details');
