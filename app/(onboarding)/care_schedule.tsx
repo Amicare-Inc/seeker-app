@@ -56,12 +56,17 @@ const CareSchedule: React.FC = () => {
 						{days.map((day) => {
 							const hasTimeSlots = selectedDays[day]?.length > 0;
 							const isActiveDay = activeDay === day;
+							const isWeekend = day === 'Sat' || day === 'Sun';
 							
 							// Determine button styling based on state
 							let bgColor = 'bg-white';
 							let textColor = 'text-black';
 							
-							if (isActiveDay) {
+							if (isWeekend) {
+								// Weekend days - disabled grey
+								bgColor = 'bg-grey-9';
+								textColor = 'text-black';
+							} else if (isActiveDay) {
 								// Currently selected day - full blue
 								bgColor = 'bg-brand-blue';
 								textColor = 'text-white';
@@ -75,7 +80,7 @@ const CareSchedule: React.FC = () => {
 								<CustomButton
 									key={day}
 									title={day}
-									handlePress={() => toggleDay(day)}
+									handlePress={isWeekend ? () => {} : () => toggleDay(day)}
 									containerStyles={`w-[82px] h-[44px] rounded-full mb-[10px] min-h-[44px] ${bgColor}`}
 									textStyles={`text-sm font-medium ${textColor}`}
 								/>

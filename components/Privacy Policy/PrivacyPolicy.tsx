@@ -61,8 +61,7 @@ personal information when you use our mobile app and website (collectively, our
 </Text>
 
 <Text style={styles.paragraph}>
-This Privacy Policy starts on [Effective Date] and was last updated on [Last Updated 
-Date]. We will notify you of any material changes to this Privacy Policy at least 30 days 
+This Privacy Policy starts on July 25, 2025 and was last updated on July 25, 2025. We will notify you of any material changes to this Privacy Policy at least 30 days 
 before they take effect through: 
 </Text>
 
