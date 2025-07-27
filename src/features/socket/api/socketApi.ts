@@ -61,17 +61,31 @@ export const connectSocket = async (userId: string) => {
       autoConnect: true,
     });
 
-    // ✅ Enhanced connection event handlers
-    socket.on('connect', () => {
-      socketLogger.info('Socket connected', { 
-        socketId: socket?.id, 
-        transport: socket?.io.engine.transport.name,
-        userId 
+          // ✅ Enhanced connection event handlers with production reliability
+      socket.on('connect', () => {
+        socketLogger.info('Socket connected', {
+          socketId: socket?.id,
+          transport: socket?.io.engine.transport.name,
+          userId
+        });
+
+        // Rejoin all active rooms after reconnection
+        rejoinActiveRooms();
+        
+        // ✅ Enhanced connection monitoring for production - send heartbeat to maintain connection
+        const heartbeatInterval = setInterval(() => {
+          if (socket?.connected) {
+            socket.emit('ping', Date.now());
+            socketLogger.debug('Heartbeat sent', { userId });
+          } else {
+            socketLogger.warn('Heartbeat stopped - socket disconnected', { userId });
+            clearInterval(heartbeatInterval);
+          }
+        }, 30000); // Every 30 seconds
+        
+        // Store interval reference for cleanup
+        (socket as any).heartbeatInterval = heartbeatInterval;
       });
-      
-      // Rejoin all active rooms after reconnection
-      rejoinActiveRooms();
-    });
 
     socket.on('disconnect', (reason) => {
       socketLogger.warn('Socket disconnected', { reason, userId });
@@ -255,7 +269,13 @@ export const getSocket = () => socket;
 export const disconnectSocket = () => {
   if (socket) {
     socketLogger.info('Disconnecting socket manually', { userId: currentUserId });
-    
+
+    // ✅ Clean up heartbeat interval
+    if ((socket as any).heartbeatInterval) {
+      clearInterval((socket as any).heartbeatInterval);
+      (socket as any).heartbeatInterval = null;
+    }
+
     // Clean up all listeners
     socket.off();
     socket.disconnect();

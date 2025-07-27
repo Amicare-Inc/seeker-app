@@ -217,6 +217,16 @@ export const getMessages = async (sessionId: string): Promise<Message[]> => {
 
 export const updateSessionChecklist = async (sessionId: string, checklist: ChecklistItem[]): Promise<Session> => {
   try {
+    // ✅ Optional: Emit immediate socket event for instant feedback while API call is in flight
+    const { getSocket } = await import('@/src/features/socket');
+    const socket = getSocket();
+    if (socket?.connected) {
+      socket.emit('checklist:update', {
+        sessionId,
+        checklist
+      });
+    }
+    
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/checklist`, {
       method: 'PUT',
       headers: {

@@ -153,12 +153,66 @@ export const useSocketListeners = (userId?: string) => {
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
     };
 
+    // ✅ CRITICAL: Add handlers for direct socket events (backup for Firebase listener failures)
+    const handleChecklistUpdated = (data: SocketPayloads['checklist:updated']) => {
+      socketLogger.info('Direct checklist update received', { sessionId: data.sessionId, updatedBy: data.updatedBy });
+      
+      // Update React Query cache immediately for all session lists
+      const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
+      allSessionsQueries.forEach(query => {
+        if (query.state.data) {
+          const sessions = query.state.data as EnrichedSession[];
+          const updatedSessions = sessions.map(session => {
+            if (session.id === data.sessionId) {
+              return {
+                ...session,
+                checklist: data.checklist
+              };
+            }
+            return session;
+          });
+          queryClient.setQueryData(query.queryKey, updatedSessions);
+        }
+      });
+      
+      // Also invalidate to trigger refetch as backup
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    };
+
+    const handleCommentAdded = (data: SocketPayloads['comment:added']) => {
+      socketLogger.info('Direct comment addition received', { sessionId: data.sessionId, addedBy: data.addedBy });
+      
+      // Update React Query cache immediately for all session lists
+      const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
+      allSessionsQueries.forEach(query => {
+        if (query.state.data) {
+          const sessions = query.state.data as EnrichedSession[];
+          const updatedSessions = sessions.map(session => {
+            if (session.id === data.sessionId) {
+              return {
+                ...session,
+                comments: [...(session.comments || []), data.comment]
+              };
+            }
+            return session;
+          });
+          queryClient.setQueryData(query.queryKey, updatedSessions);
+        }
+      });
+      
+      // Also invalidate to trigger refetch as backup
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    };
+
     /* --------------------------- SUBSCRIPTIONS ----------------------------- */
     socket.on('session:update', handleSessionUpdate);
     socket.on('chat:newMessage', handleChatNewMessage);
     socket.on('session:started', handleSessionStarted);
     socket.on('session:completed', handleSessionCompleted);
     socket.on('session:booked', handleSessionBooked);
+    // ✅ Add direct socket event subscriptions for production reliability
+    socket.on('checklist:updated', handleChecklistUpdated);
+    socket.on('comment:added', handleCommentAdded);
 
     // ✅ Enhanced connection event logging
     socket.on('connect', () => {
@@ -175,6 +229,9 @@ export const useSocketListeners = (userId?: string) => {
       socket.off('session:started', handleSessionStarted);
       socket.off('session:completed', handleSessionCompleted);
       socket.off('session:booked', handleSessionBooked);
+      // ✅ Clean up direct socket event listeners
+      socket.off('checklist:updated', handleChecklistUpdated);
+      socket.off('comment:added', handleCommentAdded);
       socket.off('connect');
       socket.off('disconnect');
     };
