@@ -8,6 +8,27 @@
 			"ios": {
 				"simulator": false
 			}
+		},
+		"production": {
+			"distribution": "store",
+			"android": {
+				"buildType": "app-bundle"
+			},
+			"ios": {
+				"simulator": false,
+				"autoIncrement": true
+			}
+		}
+	},
+	"submit": {
+		"production": {
+			"android": {
+			},
+			"ios": {
+				"ascApiKeyPath": "./keys/asc-key.p8",
+				"ascApiKeyId": "V7J6B9PMJK",
+				"ascApiKeyIssuerId": "e39fcf4a-acd5-47f0-8816-cfd24eb99258"
+			}
 		}
 	}
 }
