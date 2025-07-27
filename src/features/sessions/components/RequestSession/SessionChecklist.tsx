@@ -41,8 +41,15 @@ const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
                     onChangeText={setInputValue}
                     onSubmitEditing={(event) => addTask(event.nativeEvent.text)}
                     style={{ paddingRight: 12 }}
+					returnKeyType="done" // or "go", "send", etc.
                 />
-                <Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />
+                <TouchableOpacity onPress={() => {
+                    if (inputValue.trim()) {
+                        addTask(inputValue);
+                    }
+                }}>
+                    <Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />
+                </TouchableOpacity>
             </View>
 			<View className="flex-wrap flex-row mt-3">
 				{tasks.map((task) => (

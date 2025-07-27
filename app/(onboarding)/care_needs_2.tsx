@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
@@ -41,7 +42,9 @@ const CareNeeds2: React.FC = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-grey-0">
+        <SafeAreaView 
+            className="flex-1 bg-grey-0" 
+        >
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
                 <View className="px-[16px]">
                     {/* Header */}
@@ -50,7 +53,8 @@ const CareNeeds2: React.FC = () => {
                             <Ionicons name="chevron-back" size={24} color="#000" />
                         </TouchableOpacity>
                         <Text className="text-xl font-semibold mx-auto">
-                            Care Needs 2/4
+                            Care Needs 2/3
+                            {/* should be 2/4 in future */}
                         </Text>
                     </View>
 
@@ -62,7 +66,7 @@ const CareNeeds2: React.FC = () => {
                     </Text>
 
                     {/* Task Options */}
-                    <View className="flex-wrap flex-row -mr-[10px] mb-[75px]">
+                    <View className="flex-wrap flex-row mb-[75px]">
                         {helpOptions.map((task) => (
                             <CustomButton
                                 key={task}

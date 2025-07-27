@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SessionList, SessionBookedList } from '@/features/sessions';
 import { useSessionsTab } from '@/features/sessions';
@@ -37,38 +37,41 @@ const SeekerSessionsTab = () => {
 	};
 
 	return (
-		<SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
-			{/* Header Row */}
-			<View className="flex-row items-center px-3.5 pb-2">
+		<SafeAreaView
+			className="flex-1"
+			style={{ backgroundColor: '#F2F2F7' }}
+		>
+			<View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
 				<Ionicons
 					name="time"
-					size={24}
+					size={26}
 					color="black"
 					style={{ marginRight: 8 }}
 				/>
-				<Text className="text-2xl text-black">Sessions</Text>
+				<Text className="text-xl text-black font-medium">My Sessions</Text>
 			</View>
 
-			{/* Main Content */}
-			<View className="flex-1 px-3.5">
-				<SessionList
-					sessions={newRequests}
-					onSessionPress={onSessionPress}
-					title="New Requests"
-				/>
+			<ScrollView>
+				<View className="flex-1 px-3.5 mb-[100px]">
+					<SessionList
+						sessions={newRequests}
+						onSessionPress={onSessionPress}
+						isNewRequestsSection={true}
+					/>
 
-				<SessionList
-					sessions={pending}
-					onSessionPress={onSessionPress}
-					title="Pending"
-				/>
+					<SessionList
+						sessions={pending}
+						onSessionPress={onSessionPress}
+						title="Pending"
+					/>
 
-				<SessionBookedList
-					sessions={confirmed}
-					onSessionPress={onSessionPress}
-					title="Confirmed"
-				/>
-			</View>
+					<SessionBookedList
+						sessions={confirmed}
+						onSessionPress={onSessionPress}
+						title="Booked"
+					/>
+				</View>
+			</ScrollView>
 		</SafeAreaView>
 	);
 };

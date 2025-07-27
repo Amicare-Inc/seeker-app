@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Image, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, Image, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -48,7 +49,9 @@ const CareNeeds1: React.FC = () => {
 	};
 
 	return (
-		<SafeAreaView className="flex-1 bg-grey-0">
+		<SafeAreaView 
+			className="flex-1 bg-grey-0" 
+		>
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
 
@@ -57,7 +60,8 @@ const CareNeeds1: React.FC = () => {
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
 						<Text className="text-xl font-semibold mx-auto">
-							Care Needs 1/4
+							Care Needs 1/3 
+							{/* should be 1/4 in future */}
 						</Text>
 					</View>
 
@@ -105,24 +109,56 @@ const CareNeeds1: React.FC = () => {
 							? 'What types of care do you provide?'
 							: 'What types of care are you interested in?'}
 					</Text>
-					<View className="flex-wrap flex-row -mr-[10px] mb-[75px]">
-					{careTypeOptions.map((option) => (
-						<CustomButton
-						key={option}
-						title={option}
-						handlePress={() => toggleCareType(option)}
-						containerStyles={`mb-[10px] mr-[10px] rounded-full w-[174px] h-[44px] min-h-[44px] ${
-							selectedCareTypes.includes(option)
-							? 'bg-brand-blue'
-							: 'bg-white'
-						}`}
-						textStyles={`text-sm font-medium ${
-							selectedCareTypes.includes(option)
-							? 'text-white'
-							: 'text-black'
-						}`}
-						/>
-					))}
+					<View className="flex-row flex-wrap mb-[10px]">
+					{(() => {
+						const leftColumn: string[] = [];
+						const rightColumn: string[] = [];
+						careTypeOptions.forEach((option, idx) => {
+							(idx % 2 === 0 ? leftColumn : rightColumn).push(option);
+						});
+						return (
+							<View className="flex-row w-full">
+								<View className="flex-1 mr-[5px]">
+									{leftColumn.map((option) => (
+										<CustomButton
+											key={option}
+											title={option}
+											handlePress={() => toggleCareType(option)}
+											containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
+												selectedCareTypes.includes(option)
+													? 'bg-brand-blue'
+													: 'bg-white'
+											}`}
+											textStyles={`text-sm font-medium ${
+												selectedCareTypes.includes(option)
+													? 'text-white'
+													: 'text-black'
+											}`}
+										/>
+									))}
+								</View>
+								<View className="flex-1 ml-[5px]">
+									{rightColumn.map((option) => (
+										<CustomButton
+											key={option}
+											title={option}
+											handlePress={() => toggleCareType(option)}
+											containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
+												selectedCareTypes.includes(option)
+													? 'bg-brand-blue'
+													: 'bg-white'
+											}`}
+											textStyles={`text-sm font-medium ${
+												selectedCareTypes.includes(option)
+													? 'text-white'
+													: 'text-black'
+											}`}
+										/>
+									))}
+								</View>
+							</View>
+						);
+					})()}
 					</View>
 
 				</View>

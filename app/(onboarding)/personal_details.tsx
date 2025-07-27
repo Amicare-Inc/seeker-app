@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput } from 'react-native';
 import { ForumField } from '@/shared/components';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
@@ -11,6 +11,7 @@ import { DatePickerField } from '@/shared/components';
 import { AuthApi } from '@/features/auth/api/authApi';
 import { RegionValidatedAddressInput } from '@/shared/components';
 import { type AddressComponents } from '@/services/google/googlePlacesService';
+import { Ionicons } from '@expo/vector-icons';
 
 const PersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -44,10 +45,32 @@ const PersonalDetails: React.FC = () => {
 	});
 
 	const [isAddressValid, setIsAddressValid] = useState(false);
+	const [focusedFields, setFocusedFields] = useState({
+		firstName: false,
+		lastName: false,
+		phone: false,
+		email: false,
+		gender: false,
+	});
 
 	const handleInputChange = (field: string, value: string) => {
 		setForm({ ...form, [field]: value });
 		setErrors({ ...errors, [field]: '' });
+	};
+
+	const handleFocus = (field: string) => {
+		setFocusedFields({
+			firstName: false,
+			lastName: false,
+			phone: false,
+			email: false,
+			gender: false,
+			[field]: true
+		});
+	};
+
+	const handleBlur = (field: string) => {
+		setFocusedFields({ ...focusedFields, [field]: false });
 	};
 
 	const handleAddressSelected = (addressData: AddressComponents) => {
@@ -119,53 +142,69 @@ const PersonalDetails: React.FC = () => {
 	};
 
 	return (
-		<SafeAreaView className="h-full bg-white">
+		<SafeAreaView className="h-full bg-grey-0">
 			<KeyboardAvoidingView
-				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				style={{ flex: 1 }}
-				keyboardVerticalOffset={0}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
 			>
 				<ScrollView
 					contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}
 					keyboardShouldPersistTaps="handled"
 				>
-					<View className="flex w-full h-full justify-center px-9">
-						<Text className="text-3xl text-black font-normal text-left mb-3">
-							Personal Details
+					<View className="px-[16px]">
+					<View className="flex-row items-center mb-[22px]">
+						<TouchableOpacity className="absolute" onPress={() => router.back()}>
+							<Ionicons name="chevron-back" size={24} color="#000" />
+						</TouchableOpacity>
+						<Text className="text-xl font-medium mx-auto text-center">
+							Your Details
 						</Text>
-						<Text className="text-xs text-gray-500 font-normal text-left mb-4">
-							Please fill out the form below with your personal details
-						</Text>
-
-						<ForumField
-							title="First Name"
-							value={form.firstName}
-							handleChangeText={(e) => handleInputChange('firstName', e)}
-							otherStyles="mb-4"
-						/>
-						{errors.firstName ? (
-							<Text className="text-red-500 text-xs">
-								{errors.firstName}
-							</Text>
-						) : null}
-
-						<ForumField
-							title="Last Name"
-							value={form.lastName}
-							handleChangeText={(e) => handleInputChange('lastName', e)}
-							otherStyles="mb-4"
-						/>
-						{errors.lastName ? (
-							<Text className="text-red-500 text-xs">
-								{errors.lastName}
-							</Text>
-						) : null}
+					</View>
+						<View className="flex-row gap-[14px] mb-4">
+							<View className="flex-1 min-w-0">
+								<TextInput
+								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+									focusedFields.firstName ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="First Name"
+								placeholderTextColor="#9D9DA1"
+								value={form.firstName}
+								onChangeText={(value) => handleInputChange('firstName', value)}
+								onFocus={() => handleFocus('firstName')}
+								onBlur={() => handleBlur('firstName')}
+								/>
+								{errors.firstName ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.firstName}
+								</Text>
+								) : null}
+							</View>
+							<View className="flex-1 min-w-0">
+								<TextInput
+								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+									focusedFields.lastName ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="Last Name"
+								placeholderTextColor="#9D9DA1"
+								value={form.lastName}
+								onChangeText={(value) => handleInputChange('lastName', value)}
+								onFocus={() => handleFocus('lastName')}
+								onBlur={() => handleBlur('lastName')}
+								/>
+								{errors.lastName ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.lastName}
+								</Text>
+								) : null}
+							</View>
+						</View>
 
 						<DatePickerField
 							title="Date of Birth"
 							value={form.dob}
 							onDateChange={(date) => handleInputChange('dob', date)}
-							otherStyles="mb-4"
+							otherStyles="mb-4 bg-white rounded-lg border border-gray-200"
 						/>
 						{errors.dob ? (
 							<Text className="text-red-500 text-xs">
@@ -178,7 +217,7 @@ const PersonalDetails: React.FC = () => {
 							initialValue={form.address.fullAddress}
 							onAddressSelected={handleAddressSelected}
 							onValidationResult={handleAddressValidation}
-							otherStyles="mb-4"
+							otherStyles="mb-4 border border-gray-200 bg-white rounded-lg"
 						/>
 						{errors.address ? (
 							<Text className="text-red-500 text-xs">
@@ -186,57 +225,84 @@ const PersonalDetails: React.FC = () => {
 							</Text>
 						) : null}
 
-						<ForumField
-							title="Phone"
-							value={form.phone}
-							handleChangeText={(e) => handleInputChange('phone', e)}
-							otherStyles="mb-4"
-							keyboardType="phone-pad"
-						/>
-						{errors.phone ? (
-							<Text className="text-red-500 text-xs">
-								{errors.phone}
-							</Text>
-						) : null}
+						<View className="mb-4">
+							<TextInput
+								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+									focusedFields.phone ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="Phone"
+								placeholderTextColor="#9D9DA1"
+								value={form.phone}
+								onChangeText={(value) => handleInputChange('phone', value)}
+								onFocus={() => handleFocus('phone')}
+								onBlur={() => handleBlur('phone')}
+								keyboardType="phone-pad"
+							/>
+							{errors.phone ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.phone}
+								</Text>
+							) : null}
+						</View>
 
-						<ForumField
-							title="Email"
-							value={form.email}
-							handleChangeText={(e) => handleInputChange('email', e)}
-							otherStyles="mb-4"
-							keyboardType="email-address"
-						/>
-						{errors.email ? (
-							<Text className="text-red-500 text-xs">
-								{errors.email}
-							</Text>
-						) : null}
+						<View className="mb-4">
+							<TextInput
+								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+									focusedFields.email ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="Email"
+								placeholderTextColor="#9D9DA1"
+								value={form.email}
+								onChangeText={(value) => handleInputChange('email', value)}
+								onFocus={() => handleFocus('email')}
+								onBlur={() => handleBlur('email')}
+								keyboardType="email-address"
+							/>
+							{errors.email ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.email}
+								</Text>
+							) : null}
+						</View>
 
-						<ForumField
-							title="Gender"
-							value={form.gender}
-							handleChangeText={(e) => handleInputChange('gender', e)}
-							otherStyles="mb-4"
-						/>
-						{errors.gender ? (
-							<Text className="text-red-500 text-xs">
-								{errors.gender}
-							</Text>
-						) : null}
+						<View className="mb-4">
+							<TextInput
+								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+									focusedFields.gender ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="Gender"
+								placeholderTextColor="#9D9DA1"
+								value={form.gender}
+								onChangeText={(value) => handleInputChange('gender', value)}
+								onFocus={() => handleFocus('gender')}
+								onBlur={() => handleBlur('gender')}
+							/>
+							{errors.gender ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.gender}
+								</Text>
+							) : null}
+						</View>
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
 			
-			{/* Fixed Continue Button - stays at bottom */}
-			<View className="px-9 pb-0">
+			<View className="px-[16px]">
+				{/* Privacy Notice */}
+				<View className="flex flex-row mb-[20px] gap-[14px]">
+					<Ionicons name="information-circle" size={28} color="#BFBFC3" />
+					<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
+						We’ll use this to personalize matches and support. This info is confidential and only shared with your consent. By continuing, you agree to our Privacy Policy and Terms of Use.
+					</Text>
+				</View>
 				<CustomButton
 					title="Continue"
 					handlePress={handleContinue}
-					containerStyles="bg-black py-4 rounded-full"
-					textStyles="text-white text-lg"
+					containerStyles="bg-black py-4 rounded-lg"
+					textStyles="text-white text-xl font-medium"
 				/>
 			</View>
-			<StatusBar backgroundColor="#FFFFFF" style="dark" />
+
 		</SafeAreaView>
 	);
 };

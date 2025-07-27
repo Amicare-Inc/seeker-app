@@ -37,9 +37,12 @@ const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 		<View className="mb-4 border-b pb-3 border-grey-9">
 			<TouchableOpacity
 				onPress={() => setIsOpen((prev) => !prev)}
-				className="p-2 pl-5 bg-grey-9 rounded-full flex-row items-center justify-between"
+				className="p-2 pl-5 bg-grey-9 flex-row items-center"
+				style={{
+					borderRadius: Math.max(8, 24 - (selectedOptions.length * 3))
+				}}
 			>
-				<Text className="text-base text-grey-49 font-medium">
+				<Text className="text-base text-grey-49 font-medium flex-1 pr-3">
 					{selectedOptions.length > 0
 						? selectedOptions.join(', ')
 						: 'I need help with...'}

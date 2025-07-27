@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, ScrollView, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, ScrollView, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { CustomButton } from '@/shared/components';
@@ -7,13 +7,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/components/Privacy Policy/PrivacyPolicy';
 
 export default function Index() {
     const dispatch = useDispatch<AppDispatch>();
+    const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const handleRoleSelection = async (isPsw: boolean) => {
+        if (!isTermsAccepted) {
+            setShowErrorMessage(true);
+            return;
+        }
         dispatch(updateUserFields({ isPsw }));
         router.push('/sign-up');
+    };
+
+    const handleTermsToggle = () => {
+        setIsTermsAccepted(!isTermsAccepted);
+        // Hide error message when terms are accepted
+        if (!isTermsAccepted) {
+            setShowErrorMessage(false);
+        }
     };
 
     return (
@@ -78,10 +94,45 @@ export default function Index() {
                     <CustomButton
                         title="I am a Care Giver"
                         handlePress={() => handleRoleSelection(true)}
-                        containerStyles="w-full bg-white border border-1 border-gray-200 mb-8"
+                        containerStyles="w-full bg-white border border-1 border-gray-200 mb-[30px]"
                         textStyles="font-medium text-black"
                     />
-                    <Text style={{ textAlign: 'center', marginBottom: 26 }}>
+                    {showErrorMessage && (
+                        <View className="w-full mb-2">
+                            <Text className="text-red-500 text-xs text-center font-medium">
+                                Please confirm you agree by checking the box below.
+                            </Text>
+                        </View>
+                    )}
+                    <TouchableOpacity 
+                        className="flex-row mb-[40px] w-full mx-auto justify-center"
+                        onPress={handleTermsToggle}
+                    >
+                        <View
+                            className={`w-5 h-5 mr-3 mt-1 rounded-md bg-white border items-center justify-center ${
+                                isTermsAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
+                            }`}
+                        >
+                            {isTermsAccepted && (
+                                <Ionicons name="checkmark" size={14} color="white" />
+                            )}
+                        </View>
+
+                        <View className="flex-col flex-wrap">
+                            <Text className="text-sm text-black font-medium">
+                                By continuing, you agree with Amicare's{' '}
+                            </Text>
+                            <View className="flex-row items-center">
+                            <Text className="text-sm font-medium text-brand-blue">Terms of Use</Text>
+                            <Text className="text-sm text-black font-medium">{' and '}</Text>
+                            <PrivacyPolicyLink 
+                                textStyle={{ fontSize: 14, fontWeight: '500' }} 
+                                onPress={() => setShowPrivacyModal(true)}
+                            />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                    <Text className="text-center">
                         Already have an account?{' '}
                         <Text
                             style={{ 
@@ -95,23 +146,13 @@ export default function Index() {
                             Log In!
                         </Text>
                     </Text>
-                    <View className="flex flex-row justify-center items-center gap-1">
-                        <Ionicons name="information-circle" size={24} color="#BFBFC3" />
-                        <Text style={{ textAlign: 'center', color: '#666', fontSize: 12 }}>
-                            By continuing, you agree with our{' '}
-                            <Text
-                                style={{
-                                    color: '#007AFF',
-                                    textDecorationLine: 'none'
-                                }}
-                                onPress={() => {}}
-                            >
-                                Privacy Policy.
-                            </Text>
-                        </Text>
-                    </View>
                 </View>
             </ScrollView>
+            
+            <PrivacyPolicyModal 
+                visible={showPrivacyModal} 
+                onClose={() => setShowPrivacyModal(false)} 
+            />
         </View>
     );
 }

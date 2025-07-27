@@ -46,7 +46,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 	return (
 		<SafeAreaView
 			className="flex-1 px-4 pb-16"
-			style={{ backgroundColor: '#f0f0f0' }}
+			style={{ backgroundColor: '#f2f2f7' }}
 		>
 			<ProfileHeader
 				userName={`${firstName} ${lastName}`}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ForumField } from '@/shared/components';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
@@ -102,11 +103,11 @@ const FamilyPersonalDetails: React.FC = () => {
 	};
 
 	return (
-		<SafeAreaView className="h-full bg-white">
+		<SafeAreaView className="flex-1 bg-grey-0">
 			<KeyboardAvoidingView
-				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				style={{ flex: 1 }}
-				keyboardVerticalOffset={0}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
 			>
 				<ScrollView
 					contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}
@@ -185,15 +186,15 @@ const FamilyPersonalDetails: React.FC = () => {
 			</KeyboardAvoidingView>
 			
 			{/* Fixed Continue Button - stays at bottom */}
-			<View className="px-9 pb-0">
+			<View className="px-9 pb-4">
 				<CustomButton
 					title="Continue"
 					handlePress={handleContinue}
-					containerStyles="bg-black py-4 rounded-full"
+					containerStyles="bg-black py-4 rounded-lg"
 					textStyles="text-white text-lg"
 				/>
 			</View>
-			<StatusBar backgroundColor="#FFFFFF" style="dark" />
+			<StatusBar backgroundColor="#F5F5F5" style="dark" />
 		</SafeAreaView>
 	);
 };

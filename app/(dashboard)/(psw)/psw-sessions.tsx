@@ -2,10 +2,9 @@ import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { SessionList } from '@/features/sessions';
+import { SessionList, SessionBookedList } from '@/features/sessions';
 import { useSessionsTab } from '@/features/sessions';
 import { EnrichedSession } from '@/types/EnrichedSession';
-import { SessionBookedList } from '@/features/sessions';
 
 const PswSessionsTab = () => {
 	const {
@@ -16,7 +15,6 @@ const PswSessionsTab = () => {
 		error,
 		handleExpandSession,
 	} = useSessionsTab('psw');
-
 
     if (loading) {
         return (
@@ -43,7 +41,6 @@ const PswSessionsTab = () => {
             className="flex-1"
             style={{ backgroundColor: '#F2F2F7' }}
         >
-            {/* Header Row */}
             <View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
                 <Ionicons
                     name="time"
@@ -54,7 +51,6 @@ const PswSessionsTab = () => {
                 <Text className="text-xl text-black font-medium">My Sessions</Text>
             </View>
 
-            {/* Main Content */}
             <ScrollView>
                 <View className="flex-1 px-3.5 mb-[100px]">
                     <SessionList
@@ -78,5 +74,6 @@ const PswSessionsTab = () => {
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
+
 export default PswSessionsTab;

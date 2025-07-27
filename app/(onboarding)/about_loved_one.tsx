@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
+import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { DatePickerField } from '@/shared/components';
+import { RegionValidatedAddressInput } from '@/shared/components';
+import { type AddressComponents } from '@/services/google/googlePlacesService';
 
 const genderOptions = ['Male', 'Female', 'Other'];
 
@@ -24,7 +27,26 @@ const AboutLovedOne: React.FC = () => {
         dob: '',
         gender: '',
         hasPermission: false,
+        address: {
+            fullAddress: '',
+            street: '',
+            city: '',
+            province: '',
+            country: '',
+            postalCode: '',
+        },
     });
+
+    const [errors, setErrors] = useState({
+        firstName: '',
+        lastName: '',
+        dob: '',
+        address: '',
+        gender: '',
+        hasPermission: '',
+    });
+
+    const [isAddressValid, setIsAddressValid] = useState(false);
 
     const [showGenderDropdown, setShowGenderDropdown] = useState(false);
     const [focusedFields, setFocusedFields] = useState({
@@ -38,6 +60,48 @@ const AboutLovedOne: React.FC = () => {
 
     const handleInputChange = (field: string, value: string | boolean) => {
         setForm({ ...form, [field]: value });
+        setErrors({ ...errors, [field]: '' });
+    };
+
+    const handleAddressSelected = (addressData: AddressComponents) => {
+        setForm({
+            ...form,
+            placeOfService: addressData.fullAddress, // Store in original placeOfService field too
+            address: {
+                fullAddress: addressData.fullAddress,
+                street: addressData.street,
+                city: addressData.city,
+                province: addressData.province,
+                country: addressData.country,
+                postalCode: addressData.postalCode,
+            }
+        });
+        setErrors({ ...errors, address: '' });
+    };
+
+    const handleAddressValidation = (isValid: boolean, error?: string) => {
+        setIsAddressValid(isValid);
+        if (!isValid && error) {
+            setErrors({ ...errors, address: error });
+        }
+    };
+
+    const validateForm = async () => {
+        const newErrors: any = {};
+        if (!form.firstName) newErrors.firstName = 'First name is required';
+        if (!form.lastName) newErrors.lastName = 'Last name is required';
+        if (!form.dob) newErrors.dob = 'Date of birth is required';
+        if (!form.address.fullAddress && !form.placeOfService) newErrors.address = 'Address is required';
+        if (!form.gender) newErrors.gender = 'Gender is required';
+        if (!form.hasPermission) newErrors.hasPermission = 'You must confirm permission to continue';
+
+        // Address validation is now handled by the RegionValidatedAddressInput component
+        if (!isAddressValid && !form.placeOfService) {
+            newErrors.address = 'Please select a valid address from the suggestions';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleFocus = (field: string) => {
@@ -58,14 +122,31 @@ const AboutLovedOne: React.FC = () => {
     };
 
     const handleContinue = async () => {
-        // For now, just navigate to next page
-        router.push('/loved_one_relationship');
+        if (await validateForm()) {
+            try {
+                // Store family member data temporarily in Redux tempFamilyMember field
+                dispatch(setTempFamilyMember({
+                    ...form,
+                    step: 'personal_details'
+                }));
+                
+                console.log('Family member personal details saved:', form);
+                router.push('/loved_one_relationship');
+            } catch (error) {
+                console.error('Error saving family member details:', error);
+            }
+        }
     };
 
     return (
         <SafeAreaView className="flex-1 bg-grey-0">
-            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-                <View className="px-[16px]">
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+                keyboardVerticalOffset={0}
+            >
+                <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                    <View className="px-[16px]">
                     {/* Header */}
                     <View className="flex-row items-center mb-[17px]">
                         <TouchableOpacity className="absolute" onPress={() => router.back()}>
@@ -96,6 +177,11 @@ const AboutLovedOne: React.FC = () => {
                                 onFocus={() => handleFocus('firstName')}
                                 onBlur={() => handleBlur('firstName')}
                             />
+                            {errors.firstName ? (
+                                <Text className="text-red-500 text-xs mt-1">
+                                    {errors.firstName}
+                                </Text>
+                            ) : null}
                         </View>
                         <View className="flex-1 ml-2">
                             <Text className="text-base font-medium text-black mb-[8px]">Last Name</Text>
@@ -110,6 +196,11 @@ const AboutLovedOne: React.FC = () => {
                                 onFocus={() => handleFocus('lastName')}
                                 onBlur={() => handleBlur('lastName')}
                             />
+                            {errors.lastName ? (
+                                <Text className="text-red-500 text-xs mt-1">
+                                    {errors.lastName}
+                                </Text>
+                            ) : null}
                         </View>
                     </View>
 
@@ -132,17 +223,18 @@ const AboutLovedOne: React.FC = () => {
                     {/* Place of Service */}
                     <View className="mb-[15px]">
                         <Text className="text-base font-medium text-black mb-[8px]">Place of Service (Where they will receive care)</Text>
-                        <TextInput
-                            className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
-                                focusedFields.placeOfService ? 'border-2 border-brand-blue' : 'border border-gray-200'
-                            }`}
-                            placeholder="e.g 24 Willow Street, A1B 2C3"
-                            placeholderTextColor="#9D9DA1"
-                            value={form.placeOfService}
-                            onChangeText={(value) => handleInputChange('placeOfService', value)}
-                            onFocus={() => handleFocus('placeOfService')}
-                            onBlur={() => handleBlur('placeOfService')}
+                        <RegionValidatedAddressInput
+                            placeholder="e.g. 24 Willow Street, A1B 2C3"
+                            initialValue={form.address.fullAddress}
+                            onAddressSelected={handleAddressSelected}
+                            onValidationResult={handleAddressValidation}
+                            otherStyles="bg-white rounded-lg border border-gray-200"
                         />
+                        {errors.address ? (
+                            <Text className="text-red-500 text-xs mt-1">
+                                {errors.address}
+                            </Text>
+                        ) : null}
                     </View>
 
                     {/* Apt/Suite No and Save Address Row */}
@@ -184,10 +276,17 @@ const AboutLovedOne: React.FC = () => {
                                 <Text className="text-base font-medium text-black">Date of Birth</Text>
                                 <Ionicons name="information-circle-outline" size={20} color="#303031" style={{ marginLeft: 4 }} />
                             </View>
-                            <TouchableOpacity className="bg-white rounded-lg px-4 py-2.5 flex-row justify-between items-center border border-gray-200">
-                                <Text className="text-lg font-medium text-grey-35">...</Text>
-                                <Ionicons name="chevron-down" size={20} color="#BFBFC3" />
-                            </TouchableOpacity>
+                            <DatePickerField
+                                title=""
+                                value={form.dob}
+                                onDateChange={(date) => handleInputChange('dob', date)}
+                                otherStyles="bg-white border border-gray-200 rounded-lg"
+                            />
+                            {errors.dob ? (
+                                <Text className="text-red-500 text-xs mt-1">
+                                    {errors.dob}
+                                </Text>
+                            ) : null}
                         </View>
                         <View className="flex-1 ml-2">
                             <View className="flex-row items-center mb-[8px]">
@@ -209,6 +308,11 @@ const AboutLovedOne: React.FC = () => {
                                     color="#BFBFC3" 
                                 />
                             </TouchableOpacity>
+                            {errors.gender ? (
+                                <Text className="text-red-500 text-xs mt-1">
+                                    {errors.gender}
+                                </Text>
+                            ) : null}
                         </View>
                     </View>
 
@@ -261,8 +365,14 @@ const AboutLovedOne: React.FC = () => {
                             I confirm I have permission from the care recipient to share this information.
                         </Text>
                     </TouchableOpacity>
+                    {errors.hasPermission ? (
+                        <Text className="text-red-500 text-xs mb-4 -mt-4">
+                            {errors.hasPermission}
+                        </Text>
+                    ) : null}
                 </View>
             </ScrollView>
+            </KeyboardAvoidingView>
 
             {/* Continue Button */}
             <View className="px-[16px] pb-[21px]">

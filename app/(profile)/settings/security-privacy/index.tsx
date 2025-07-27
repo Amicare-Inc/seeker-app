@@ -72,9 +72,9 @@ const SecurityPrivaryScreen = () => {
             onPress={() => console.log('Biometric Data pressed')}
           />
           <SettingsListItem
-            label="Privacy Policy"
+            label="Privacy Settings + Policy"
             description="Learn how we protect and use your personal information"
-            onPress={() => console.log('Privacy Policy pressed')}
+            onPress={() => router.push('/(profile)/settings/security-privacy/privacy')}
           />
         </View>
         <View className="bg-white rounded-lg mx-4 mt-8">

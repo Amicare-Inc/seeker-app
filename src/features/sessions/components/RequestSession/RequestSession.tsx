@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Keyboard, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useLocalSearchParams, router } from 'expo-router';
 import { User } from '@/types/User';
@@ -18,6 +19,7 @@ import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { requestSession, updateSession } from '@/features/sessions/api/sessionApi';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/components/Privacy Policy/PrivacyPolicy';
 
 interface SessionData {
 	id: string;
@@ -87,6 +89,9 @@ const RequestSession = () => {
 		existingSession?.careRecipientId || null
 	);
 	const [selectedCareRecipientData, setSelectedCareRecipientData] = useState<any>(null);
+	
+	// State for privacy policy modal
+	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const pswRate = currentUser?.isPsw
@@ -345,7 +350,18 @@ const RequestSession = () => {
 				photoUrl={targetUserObj?.profilePhotoUrl || ''}
 				firstName={targetUserObj?.firstName}
 			/>
-			<ScrollView>
+			<KeyboardAvoidingView 
+				className="flex-1"
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+				enabled={true}
+			>
+				<ScrollView 
+					showsVerticalScrollIndicator={false}
+					keyboardShouldPersistTaps="handled"
+					automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+					bounces={false}
+				>
 				{/* Main Content */}
 				<View className="flex-1 p-4">
 					{/* Help Options Dropdown */}
@@ -412,16 +428,7 @@ const RequestSession = () => {
 						total={total}
 					/>
 
-					{/* Submit Button */}
-					<TouchableOpacity
-						onPress={handleSubmit}
-						className="bg-brand-blue rounded-xl p-4 items-center flex-row justify-center"
-					>
-						<Ionicons name="paper-plane" size={22} color="white"/>
-						<Text className="text-white text-lg font-medium ml-3">
-							{existingSession ? 'Update Session' : 'Send Request'}
-						</Text>
-					</TouchableOpacity>
+
 				</View>
 
 				{/* DateTimePickerModal */}
@@ -449,6 +456,37 @@ const RequestSession = () => {
 					}
 				/>
 			</ScrollView>
+			</KeyboardAvoidingView>
+
+			<View className="bg-transparent">
+
+			<View className="mx-4 bg-[#BBDAF7] flex-row py-3 px-4 items-start rounded-xl -translate-y-3">
+				<Ionicons name="information-circle" size={38} color="#55A2EB" />
+				<Text className="flex-1 text-[13px] text-grey-80 leading-[18px]">
+					By sending this request, you agree to share this information with the caregiver. Learn more in our{' '}
+					<PrivacyPolicyLink 
+						textStyle={{ fontSize: 13, color: '#0c7ae2' }} 
+						onPress={() => setShowPrivacyModal(true)}
+					/>
+				</Text>
+			</View>
+			
+			{/* Submit Button - Fixed at bottom */}
+			<TouchableOpacity
+				onPress={handleSubmit}
+				className="bg-brand-blue rounded-xl p-4 mx-4 items-center flex-row justify-center mb-4"
+			>
+				<Ionicons name="paper-plane" size={22} color="white"/>
+				<Text className="text-white text-lg font-medium ml-3">
+					{existingSession ? 'Update Session' : 'Send Request'}
+				</Text>
+			</TouchableOpacity>
+			</View>
+			
+			<PrivacyPolicyModal 
+				visible={showPrivacyModal} 
+				onClose={() => setShowPrivacyModal(false)} 
+			/>
 		</SafeAreaView>
 	);
 };

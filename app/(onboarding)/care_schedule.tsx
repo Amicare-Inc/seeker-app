@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useAvailability } from '@/features/availability';
 import { router } from 'expo-router';
@@ -15,6 +16,10 @@ const timeslots = [
 	'6 pm - 8 pm',
 ];
 
+const handleNext = () => {
+	router.push('/caregiver_preferences'); // Navigate to the next page
+}
+
 const CareSchedule: React.FC = () => {
 	const {
 		selectedDays,
@@ -26,7 +31,9 @@ const CareSchedule: React.FC = () => {
 	} = useAvailability();
 
 	return (
-		<SafeAreaView className="flex-1 bg-grey-0">
+		<SafeAreaView 
+			className="flex-1 bg-grey-0" 
+		>
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
 					{/* Header */}
@@ -35,7 +42,8 @@ const CareSchedule: React.FC = () => {
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
 						<Text className="text-xl font-semibold mx-auto">
-							3/4 Care Schedule
+							3/3 Care Schedule
+							{/* should be 3/4 in future */}
 						</Text>
 					</View>
 
@@ -49,12 +57,17 @@ const CareSchedule: React.FC = () => {
 						{days.map((day) => {
 							const hasTimeSlots = selectedDays[day]?.length > 0;
 							const isActiveDay = activeDay === day;
+							const isWeekend = day === 'Sat' || day === 'Sun';
 							
 							// Determine button styling based on state
 							let bgColor = 'bg-white';
 							let textColor = 'text-black';
 							
-							if (isActiveDay) {
+							if (isWeekend) {
+								// Weekend days - disabled grey
+								bgColor = 'bg-grey-9';
+								textColor = 'text-black';
+							} else if (isActiveDay) {
 								// Currently selected day - full blue
 								bgColor = 'bg-brand-blue';
 								textColor = 'text-white';
@@ -68,7 +81,7 @@ const CareSchedule: React.FC = () => {
 								<CustomButton
 									key={day}
 									title={day}
-									handlePress={() => toggleDay(day)}
+									handlePress={isWeekend ? () => {} : () => toggleDay(day)}
 									containerStyles={`w-[82px] h-[44px] rounded-full mb-[10px] min-h-[44px] ${bgColor}`}
 									textStyles={`text-sm font-medium ${textColor}`}
 								/>
@@ -143,8 +156,11 @@ const CareSchedule: React.FC = () => {
 				</View>
 				<CustomButton
 					title="Update"
-					handlePress={saveAvailability}
-					containerStyles="bg-black py-4 rounded-lg"
+					handlePress={() => {
+						handleNext();
+						saveAvailability();
+					}}
+					containerStyles="bg-black py-4 rounded-lg mb-2"
 					textStyles="text-white text-xl font-medium"
 				/>
 			</View>

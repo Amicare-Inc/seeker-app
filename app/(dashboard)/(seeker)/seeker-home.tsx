@@ -1,6 +1,6 @@
-// @/screens/SeekerHomeTab.tsx
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, ActivityIndicator, FlatList, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useHomeTab } from '@/features/userDirectory';
 import { UserCard, UserCardExpanded } from '@/features/userDirectory';
@@ -31,9 +31,13 @@ const SeekerHomeTab = () => {
 	);
 
 	return (
-		<SafeAreaView className="flex-1" style={{ backgroundColor: '#f0f0f0' }}>
-			{/* Header row */}
-			<View className="flex-row items-center justify-between px-4 pb-2">
+		<SafeAreaView
+			className="flex-1"
+			style={{
+				backgroundColor: '#f2f2f7',
+			}}
+		>
+			<View className="flex-row items-center justify-between px-4 pb-2 mb-2">
 				{/* Left side: Icon + Title */}
 				<View className="flex-row items-center">
 					<Ionicons
@@ -73,7 +77,7 @@ const SeekerHomeTab = () => {
 					renderItem={renderItem}
 					contentContainerStyle={{
 						paddingBottom: Platform.OS === 'ios' ? 83 : 64,
-						paddingHorizontal: 10,
+						paddingHorizontal: 20,
 					}}
 				/>
 			)}

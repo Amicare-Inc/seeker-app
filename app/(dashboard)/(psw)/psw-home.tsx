@@ -74,7 +74,7 @@ const PswHomeTab = () => {
 		<SafeAreaView
 			className="flex-1"
 			style={{
-				backgroundColor: '#f0f0f0',
+				backgroundColor: '#f2f2f7',
 			}}
 		>
 			{/* Header row */}
