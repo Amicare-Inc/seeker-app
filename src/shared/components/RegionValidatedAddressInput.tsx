@@ -109,10 +109,10 @@ const RegionValidatedAddressInput: React.FC<RegionValidatedAddressInputProps> = 
   };
 
   return (
-    <View className={otherStyles}>
+    <View>
       {/* Main Input Container */}
       <TouchableOpacity
-        className="w-full h-12 px-4 bg-gray-100 rounded-lg flex flex-row items-center"
+        className={`w-full h-12 px-4 bg-gray-100 rounded-lg flex flex-row items-center ${otherStyles}`}
         activeOpacity={1}
       >
         <TextInput

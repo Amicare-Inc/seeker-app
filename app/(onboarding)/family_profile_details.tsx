@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert, TextInput } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -109,9 +108,11 @@ const FamilyProfileDetails: React.FC = () => {
 	};
 
 	return (
-		<SafeAreaView 
-			className="flex-1 bg-grey-0" 
-		>
+		<SafeAreaView className="flex-1 bg-grey-0">
+			<KeyboardAvoidingView
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				style={{ flex: 1 }}
+			>
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
 					{/* Header */}
@@ -119,8 +120,8 @@ const FamilyProfileDetails: React.FC = () => {
 						<TouchableOpacity className="absolute" onPress={() => router.back()}>
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
-						<Text className="text-xl font-medium mx-auto">
-							Add a photo for your loved one
+						<Text className="text-xl font-medium mx-auto text-center">
+							Consider adding a photo{"\n"}for your loved one
 						</Text>
 					</View>
 
@@ -137,8 +138,8 @@ const FamilyProfileDetails: React.FC = () => {
 								/>
 							) : (
 								<View className="items-center">
-									<Ionicons name="camera" size={32} color="#303031" />
-									<Text className="text-[#303031] text-sm font-medium mt-2">
+									<Ionicons name="camera" size={32} color="#797979" />
+									<Text className="text-[#797979] text-sm font-medium mt-2">
 										Add Photo
 									</Text>
 								</View>
@@ -154,7 +155,7 @@ const FamilyProfileDetails: React.FC = () => {
 					<View className="mb-[32px]">
 						<View className="flex-row items-center mb-[14px] mx-auto">
 							<Text className="text-lg text-grey-80 font-bold">
-								Add bio for your loved one (Optional)
+								Add bio (Optional)
 							</Text>
 							<View className="ml-1">
 								<Ionicons name="information-circle-outline" size={22} color="#303031" />
@@ -162,23 +163,24 @@ const FamilyProfileDetails: React.FC = () => {
 						</View>
 
 						<TextInput
-							className={`bg-white rounded-lg px-3 py-2 text-base font-medium text-black min-h-[158px] ${
+							className={`bg-white rounded-lg px-3 py-2 text-base font-medium text-black min-h-[180px] ${
 								isBioFocused ? 'border-2 border-brand-blue' : 'border border-gray-200'
 							}`}
-							placeholder="Briefly describe your loved one, their personality, and any special care considerations."
+							placeholder="Briefly describe your relationship with your loved one and what kind of caregiver you are seeking on your loved one's behalf. Avoid listing medical history or other private data."
 							placeholderTextColor="#9D9DA1"
 							value={bio}
 							onChangeText={setBio}
 							onFocus={() => setIsBioFocused(true)}
 							onBlur={() => setIsBioFocused(false)}
 							multiline
+							numberOfLines={4}
 							textAlignVertical="top"
 						/>
 					</View>
 
 				</View>
 			</ScrollView>
-
+			</KeyboardAvoidingView>
 			{/* Continue Button */}
 			<View className="px-[16px]">
 				{/* Privacy Notice */}
@@ -195,6 +197,7 @@ const FamilyProfileDetails: React.FC = () => {
 					textStyles="text-white text-xl font-medium"
 				/>
 			</View>
+
 		</SafeAreaView>
 	);
 };
