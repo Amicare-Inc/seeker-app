@@ -35,7 +35,8 @@ const CareSchedule: React.FC = () => {
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
 						<Text className="text-xl font-semibold mx-auto">
-							3/4 Care Schedule
+							3/3 Care Schedule
+							{/* should be 3/4 in future */}
 						</Text>
 					</View>
 

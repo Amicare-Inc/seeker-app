@@ -57,7 +57,8 @@ const CareNeeds1: React.FC = () => {
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
 						<Text className="text-xl font-semibold mx-auto">
-							Care Needs 1/4
+							Care Needs 1/3 
+							{/* should be 1/4 in future */}
 						</Text>
 					</View>
 
