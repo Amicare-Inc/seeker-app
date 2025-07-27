@@ -1,5 +1,6 @@
 // Export all session hooks
 export * from './useElapsedTimer';
+export * from './useCountdownTimer';
 export * from './useLiveSession';
 export * from './useLiveSessionSocket';
 export * from './useLiveSessionState';

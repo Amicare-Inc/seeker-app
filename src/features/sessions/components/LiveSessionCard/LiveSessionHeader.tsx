@@ -9,7 +9,7 @@ const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
   enrichedSession,
   expanded,
   onToggle,
-  formatTimeUntilSession
+  countdown = '' // ✅ Use countdown prop directly
 }) => {
   const currentUser = useSelector((state: RootState) => state.user.userData);
 
@@ -19,7 +19,6 @@ const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
   
   // Use first value before comma as main label, like SessionBookedList
   const mainLabel = enrichedSession.note ? enrichedSession.note.split(',')[0].trim() : '';
-  const countdown = formatTimeUntilSession ? formatTimeUntilSession(enrichedSession.startTime) : '';
 
   return (
     <TouchableOpacity onPress={onToggle} activeOpacity={1}>

@@ -22,7 +22,7 @@ export interface LiveSessionHeaderProps {
   enrichedSession: EnrichedSession;
   expanded: boolean;
   onToggle: () => void;
-  formatTimeUntilSession?: (startTime: string | undefined | null) => string;
+  countdown?: string; // ✅ Changed from function to string
 }
 
 export interface LiveSessionTimerProps {
@@ -31,6 +31,7 @@ export interface LiveSessionTimerProps {
   note: string;
   status: LiveSessionStatus;
   elapsedTime?: number;
+  countdown?: string; // ✅ Add countdown prop for consistency
 }
 
 export interface LiveSessionActionsProps {

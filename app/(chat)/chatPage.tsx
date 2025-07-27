@@ -9,7 +9,7 @@ import { RootState } from '@/redux/store';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMessages, useSendMessage, useEnrichedSessions } from '@/features/sessions/api/queries';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
-import { getSocket } from '@/src/features/socket';
+import { joinChatSession, leaveChatSession } from '@/src/features/socket';
 
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
@@ -29,11 +29,10 @@ const ChatPage = () => {
 
     // Join chat room specifically for receiving messages (in addition to session room via useSocketRoom)
     useEffect(() => {
-        const socket = getSocket();
-        if (socket && sessionId) {
-            socket.emit('chat:joinSession', sessionId);
+        if (sessionId) {
+            joinChatSession(sessionId as string);
             return () => {
-                socket.emit('chat:leaveSession', sessionId);
+                leaveChatSession(sessionId as string);
             };
         }
     }, [sessionId]);

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { getSocket } from '@/src/features/socket';
+import { joinSessionRoom, leaveSessionRoom, getSocket } from '@/src/features/socket';
 
 /**
  * Joins a socket.io room for the given session and cleans up on unmount.
@@ -18,10 +18,11 @@ export const useSocketRoom = (sessionId?: string | null) => {
       return;
     }
 
-    socket.emit('session:join', sessionId);
+    // Use the new room management functions
+    joinSessionRoom(sessionId);
 
     return () => {
-      socket.emit('session:leave', sessionId);
+      leaveSessionRoom(sessionId);
     };
   }, [sessionId]);
 }; 

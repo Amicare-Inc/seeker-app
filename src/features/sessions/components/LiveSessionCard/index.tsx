@@ -3,7 +3,7 @@ import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, T
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiveSessionCardProps } from '@/types/LiveSession';
 import LiveSessionHeader from './LiveSessionHeader';
-import { useSessionManager } from '@/features/sessions/hooks';
+import { useSessionManager, useCountdownTimer } from '@/features/sessions/hooks';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { formatDate, formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { router } from 'expo-router';
@@ -29,33 +29,11 @@ function formatTime(secs: number) {
   return [h, m, s].map(n => n.toString().padStart(2, '0')).join(':');
 }
 
-function formatSessionDuration(startTime: string, endTime: string): string {
-  const start = new Date(startTime);
-  const end = new Date(endTime);
-  const durationMs = end.getTime() - start.getTime();
-  const hours = Math.floor(durationMs / (1000 * 60 * 60));
-  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-  
-  if (hours > 0) {
-    return `${hours} hr, ${minutes} min`;
-  }
-  return `${minutes} min`;
+function formatSessionDuration(startTime: string, endTime: string) {
+  return formatTimeRange(startTime, endTime);
 }
 
-const formatTimeUntilSession = (startTime: string | undefined | null): string => {
-  if (!startTime) return '';
-  const now = new Date();
-  const start = new Date(startTime);
-  const diff = start.getTime() - now.getTime();
-  
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-};
+// ✅ Remove the static formatTimeUntilSession function - replaced with useCountdownTimer hook
 
 const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, onCollapse }) => {
   const [expanded, setExpanded] = useState(false);
@@ -64,6 +42,9 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   const timer = useElapsedTimer(session.liveStatus, session.liveStatusUpdatedAt);
   const { setActiveEnrichedSession } = useActiveSession();
   const currentUser = useSelector((state: RootState) => state.user.userData);
+  
+  // ✅ Add real-time countdown timer
+  const { countdown } = useCountdownTimer(session.startTime, session.liveStatus);
   
   const {
     status,
@@ -242,7 +223,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
                     onCollapse?.();
                   }
                 }}
-                formatTimeUntilSession={formatTimeUntilSession}
+                countdown={countdown}
               />
             </View>
             
@@ -304,7 +285,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
                   onCollapse?.();
                 }
               }}
-              formatTimeUntilSession={formatTimeUntilSession}
+                             countdown={countdown}
             />
 
             {/* Date & Time Row */}

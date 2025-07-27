@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { getSocket } from '@/src/features/socket';
+import { joinSessionRoom, leaveSessionRoom, getSocket } from '@/src/features/socket';
 import { SocketPayloads } from '@/shared/constants/socketEvents';
 
 interface UseLiveSessionSocketProps {
-  sessionId: string;
-  userId: string;
+  sessionId?: string;
+  userId?: string;
   onStatusUpdate?: (data: SocketPayloads['session:liveStatusUpdate']) => void;
   onUserConfirmed?: (data: SocketPayloads['session:userConfirmed']) => void;
   onUserEndConfirmed?: (data: SocketPayloads['session:userEndConfirmed']) => void;
@@ -21,8 +21,8 @@ export const useLiveSessionSocket = ({
     const socket = getSocket();
     if (!socket || !sessionId || !userId) return;
 
-    // Join session room
-    socket.emit('session:join', sessionId);
+    // Join session room using the new function
+    joinSessionRoom(sessionId);
 
     // Setup listeners
     const handleStatusUpdate = (data: SocketPayloads['session:liveStatusUpdate']) => {
@@ -51,7 +51,7 @@ export const useLiveSessionSocket = ({
       socket.off('session:liveStatusUpdate', handleStatusUpdate);
       socket.off('session:userConfirmed', handleUserConfirmed);
       socket.off('session:userEndConfirmed', handleUserEndConfirmed);
-      socket.emit('session:leave', sessionId);
+      leaveSessionRoom(sessionId);
     };
   }, [sessionId, userId, onStatusUpdate, onUserConfirmed, onUserEndConfirmed]);
 

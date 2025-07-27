@@ -1,16 +1,16 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { LiveSessionTimerProps } from '@/types/LiveSession';
-import { formatTimeRange, getTimeUntilStart, formatDuration } from '@/lib/datetimes/datetimeHelpers';
+import { formatTimeRange, formatDuration } from '@/lib/datetimes/datetimeHelpers';
 
 const LiveSessionTimer: React.FC<LiveSessionTimerProps> = ({
   startTime,
   endTime,
   note,
   status,
-  elapsedTime
+  elapsedTime,
+  countdown = '' // ✅ Use countdown prop instead of calculating statically
 }) => {
-  const timeUntilStart = getTimeUntilStart(startTime);
   const sessionDuration = formatTimeRange(startTime, endTime);
 
   const renderTimerContent = () => {
@@ -19,7 +19,7 @@ const LiveSessionTimer: React.FC<LiveSessionTimerProps> = ({
         return (
           <View className="flex-row justify-between items-center">
             <Text className="text-white text-base">
-              {note} in {timeUntilStart}
+              {note} {countdown ? `in ${countdown}` : ''}
             </Text>
             <Text className="text-white/80 text-sm">
               {sessionDuration}
@@ -55,7 +55,7 @@ const LiveSessionTimer: React.FC<LiveSessionTimerProps> = ({
         return (
           <View className="flex-row justify-between items-center">
             <Text className="text-white text-base">
-              {note} in {timeUntilStart}
+              {note} {countdown ? `in ${countdown}` : ''}
             </Text>
             <Text className="text-white/80 text-sm">
               {sessionDuration}
@@ -66,7 +66,7 @@ const LiveSessionTimer: React.FC<LiveSessionTimerProps> = ({
   };
 
   return (
-    <View className="w-full">
+    <View className="px-5 py-3">
       {renderTimerContent()}
     </View>
   );

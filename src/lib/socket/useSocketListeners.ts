@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { connectSocket, getSocket } from '@/src/features/socket';
+import { connectSocket, getSocket, isSocketConnected } from '@/src/features/socket';
 import { useQueryClient } from '@tanstack/react-query';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { Message } from '@/types/Message';
@@ -15,13 +15,29 @@ export const useSocketListeners = (userId?: string) => {
   const queryClient = useQueryClient();
   const { setActiveEnrichedSession } = useActiveSession();
 
-  // lazily ensure connection
+  // lazily ensure connection with enhanced reliability
   const socket = getSocket();
   useEffect(() => {
     if (!socket && userId) {
+      socketLogger.info('Initializing socket connection', { userId });
       connectSocket(userId);
     }
   }, [socket, userId]);
+
+  // Monitor connection health and attempt reconnection if needed
+  useEffect(() => {
+    if (!userId) return;
+
+    const healthCheck = setInterval(() => {
+      const connected = isSocketConnected();
+      if (!connected) {
+        socketLogger.warn('Socket health check failed - attempting reconnection', { userId });
+        connectSocket(userId);
+      }
+    }, 15000); // Check every 15 seconds
+
+    return () => clearInterval(healthCheck);
+  }, [userId]);
 
   useEffect(() => {
     if (!socket) return; // wait until connected
@@ -144,12 +160,23 @@ export const useSocketListeners = (userId?: string) => {
     socket.on('session:completed', handleSessionCompleted);
     socket.on('session:booked', handleSessionBooked);
 
+    // ✅ Enhanced connection event logging
+    socket.on('connect', () => {
+      socketLogger.info('Socket reconnected in listeners');
+    });
+
+    socket.on('disconnect', (reason) => {
+      socketLogger.warn('Socket disconnected in listeners', { reason });
+    });
+
     return () => {
       socket.off('session:update', handleSessionUpdate);
       socket.off('chat:newMessage', handleChatNewMessage);
       socket.off('session:started', handleSessionStarted);
       socket.off('session:completed', handleSessionCompleted);
       socket.off('session:booked', handleSessionBooked);
+      socket.off('connect');
+      socket.off('disconnect');
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, userId, setActiveEnrichedSession]);
 }; 
