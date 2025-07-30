@@ -1,12 +1,14 @@
+import { getAuthHeaders } from '@/lib/auth';
+
 export const fetchExploreUsers = async (userType: 'psw' | 'seeker', currentUserId: string) => {
   try {
+    const headers = await getAuthHeaders();
+    
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/users/explore-filtered?userType=${userType}&currentUserId=${currentUserId}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       }
     );
 
@@ -25,13 +27,13 @@ export const fetchExploreUsers = async (userType: 'psw' | 'seeker', currentUserI
 
 export const fetchExploreUsersWithDistance = async (userType: 'psw' | 'seeker', currentUserId: string) => {
   try {
+    const headers = await getAuthHeaders();
+    
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/users/explore-with-distance?userType=${userType}&currentUserId=${currentUserId}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       }
     );
 
@@ -50,14 +52,14 @@ export const fetchExploreUsersWithDistance = async (userType: 'psw' | 'seeker', 
 
 export const fetchFilteredUsers = async (selectedDays: string[]) => {
   try {
+    const headers = await getAuthHeaders();
     const daysQuery = selectedDays.join(',');
+    
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/users/filter-availability?days=${daysQuery}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       }
     );
 

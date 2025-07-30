@@ -1,12 +1,13 @@
+import { getAuthHeaders } from '@/lib/auth';
+
 // Family API service
 export const FamilyApi = {
   async addFamilyMember(userId: string, familyMemberData: any): Promise<any> {
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/family/${userId}/members`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(familyMemberData),
       });
 
@@ -25,11 +26,10 @@ export const FamilyApi = {
 
   async updateFamilyMember(userId: string, memberId: string, updateData: any): Promise<any> {
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/family/${userId}/members/${memberId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(updateData),
       });
 
@@ -48,11 +48,10 @@ export const FamilyApi = {
 
   async deleteFamilyMember(userId: string, memberId: string): Promise<void> {
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/family/${userId}/members/${memberId}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {
@@ -67,11 +66,10 @@ export const FamilyApi = {
 
   async getFamilyMembers(userId: string): Promise<any> {
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/family/${userId}/members`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {
@@ -89,11 +87,10 @@ export const FamilyApi = {
 
   async getFamilyMember(userId: string, memberId: string): Promise<any> {
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/family/${userId}/members/${memberId}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {

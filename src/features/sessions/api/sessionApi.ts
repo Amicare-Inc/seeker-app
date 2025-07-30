@@ -3,10 +3,15 @@ import { EnrichedSession } from '@/types/EnrichedSession';
 import { Message } from '@/types/Message';
 import { Session } from '@/types/Sessions';
 import { ChecklistItem } from '@/types/Sessions';
+import { getAuthHeaders } from '@/lib/auth';
 
 export const getUserSessionTab = async (userId: string): Promise<EnrichedSession[]> => {
   try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/tab?userId=${userId}`);
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/tab?userId=${userId}`, {
+      method: 'GET',
+      headers,
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -22,14 +27,11 @@ export const getUserSessionTab = async (userId: string): Promise<EnrichedSession
 };
 
 export const requestSession = async (session: SessionDTO): Promise<void> => {
-
 	try {
+		const headers = await getAuthHeaders();
 		const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				// Add any necessary authentication headers here (e.g., 'Authorization': `Bearer ${token}`)
-			},
+			headers,
 			body: JSON.stringify(session)
 		})
 
@@ -41,20 +43,18 @@ export const requestSession = async (session: SessionDTO): Promise<void> => {
 		console.error('Error requesting session:', error);
 		throw error;
     }
-
 }
 
 export const updateSession = async (sessionId: string, session: Partial<Session>): Promise<string> => {
   try {
+	const headers = await getAuthHeaders();
 	const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}`, {
 	  method: 'PATCH',
-	  headers: {
-		'Content-Type': 'application/json',
-	  },
+	  headers,
 	  body: JSON.stringify(session),
 	});
 	if (!response.ok) {
-	  const errorData = await response.text
+	  const errorData = await response.text();
 	  throw new Error(errorData.toString() || `HTTP error! status: ${response.status}`);
 	}
 	const successString = await response.text();
@@ -68,12 +68,10 @@ export const updateSession = async (sessionId: string, session: Partial<Session>
 export const acceptSession = async (sessionId: string): Promise<Session> => {
   console.log('acceptSession called with:', sessionId);
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/accept`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any necessary authentication headers here (e.g., 'Authorization': `Bearer ${token}`)
-      },
+      headers,
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -89,11 +87,10 @@ export const acceptSession = async (sessionId: string): Promise<Session> => {
 
 export const rejectSession = async (sessionId: string): Promise<Session> => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/reject`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -110,11 +107,10 @@ export const rejectSession = async (sessionId: string): Promise<Session> => {
 
 export const bookSession = async (sessionId: string, currentUserId: string): Promise<Session> => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/book`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ userId: currentUserId }),
     });
     if (!response.ok) {
@@ -132,11 +128,10 @@ export const bookSession = async (sessionId: string, currentUserId: string): Pro
 
 export const declineSession = async (sessionId: string): Promise<Session> => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/decline`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -153,11 +148,10 @@ export const declineSession = async (sessionId: string): Promise<Session> => {
 
 export const cancelSession = async (sessionId: string): Promise<Session> => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/cancel`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -173,13 +167,11 @@ export const cancelSession = async (sessionId: string): Promise<Session> => {
 };
 
 export const sendMessage = async (sessionId: string, userId: string, message: string): Promise<Message> => {
-
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/messages`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ userId, message }),
     });
     if (!response.ok) {
@@ -187,28 +179,26 @@ export const sendMessage = async (sessionId: string, userId: string, message: st
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 	const newMessage: Message = await response.json();
-	return newMessage
+	return newMessage;
   } catch (error: any) {
     console.error(`Error sending message in session ${sessionId}:`, error);
     throw error;
   }
-
 }
 
 export const getMessages = async (sessionId: string): Promise<Message[]> => {
   try {
+	const headers = await getAuthHeaders();
 	const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/messages`, {
 	  method: 'GET',
-	  headers: {
-		'Content-Type': 'application/json',
-	  },
+	  headers,
 	});
 	if (!response.ok) {
 	  const errorData = await response.json();
 	  throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
 	}
 	const messages: Message[] = await response.json();
-	return messages
+	return messages;
   } catch (error: any) {
 	console.error(`Error getting messages in session ${sessionId}:`, error);
 	throw error;
@@ -227,11 +217,10 @@ export const updateSessionChecklist = async (sessionId: string, checklist: Check
       });
     }
     
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/checklist`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ checklist }),
     });
 
@@ -248,11 +237,10 @@ export const updateSessionChecklist = async (sessionId: string, checklist: Check
 
 export const addSessionComment = async (sessionId: string, text: string, userId: string): Promise<Session> => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/comments`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ text, userId }),
     });
 

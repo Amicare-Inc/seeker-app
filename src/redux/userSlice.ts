@@ -18,12 +18,46 @@ export const fetchUserFromLoginThunk = createAsyncThunk<
 	}
 >(
 	'user/fetchUserFromLogin',
-	async ({email, password}) => {
-		const userDoc = await AuthApi.signIn(email, password);
-		if (!userDoc) {
-			throw new Error('User doc not found from backend');
+	async ({email, password}, { rejectWithValue }) => {
+		try {
+			// Import Firebase auth here to avoid circular dependencies
+			const { signInWithEmailAndPassword } = await import('firebase/auth');
+			const { FIREBASE_AUTH } = await import('@/firebase.config');
+			
+			console.log('Attempting Firebase authentication...');
+			
+			// Authenticate with Firebase Auth (this verifies the password)
+			const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+			const user = userCredential.user;
+			
+			console.log('Firebase authentication successful:', user.uid);
+			
+			// Now get the user profile from our backend using the verified user
+			const userDoc = await AuthApi.signIn(email, password);
+			if (!userDoc) {
+				throw new Error('Failed to load user profile from backend');
+			}
+			
+			console.log('User profile loaded successfully');
+			return { ...userDoc } as User;
+		} catch (error: any) {
+			console.error('Login error:', error);
+			
+			// Handle Firebase Auth errors
+			if (error.code === 'auth/user-not-found') {
+				return rejectWithValue('No account found with this email address. Please sign up first.');
+			} else if (error.code === 'auth/wrong-password') {
+				return rejectWithValue('Incorrect password. Please try again.');
+			} else if (error.code === 'auth/invalid-email') {
+				return rejectWithValue('Invalid email address format.');
+			} else if (error.code === 'auth/too-many-requests') {
+				return rejectWithValue('Too many failed attempts. Please try again later.');
+			} else if (error.message) {
+				return rejectWithValue(error.message);
+			} else {
+				return rejectWithValue('Sign-in failed. Please check your credentials and try again.');
+			}
 		}
-		return { ...userDoc } as User;
 	},
 );
 
@@ -105,6 +139,9 @@ const userSlice = createSlice({
 		clearTempAvailability(state) {
 			state.tempAvailability = null;
 		},
+		clearError(state) {
+			state.error = null;
+		},
 	},
 	extraReducers: (builder) => {
 		builder
@@ -127,7 +164,7 @@ const userSlice = createSlice({
 			})
 			.addCase(fetchUserFromLoginThunk.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.error.message || 'Error fetching user';
+				state.error = action.payload || action.error.message || 'Error fetching user';
 			});
 	},
 });
@@ -142,5 +179,6 @@ export const {
 	clearTempFamilyMember,
 	setTempAvailability,
 	clearTempAvailability,
+	clearError,
 } = userSlice.actions;
 export default userSlice.reducer;

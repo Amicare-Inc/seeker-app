@@ -1,10 +1,11 @@
+import { getAuthHeaders } from '@/lib/auth';
+
 export const updateUserProfile = async (userId: string, updatedFields: any) => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/users/update-profile`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         uid: userId,
         ...updatedFields,
