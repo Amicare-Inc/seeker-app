@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
-import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/components/Privacy Policy/PrivacyPolicy';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 
 export default function Index() {
     const dispatch = useDispatch<AppDispatch>();

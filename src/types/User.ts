@@ -21,20 +21,23 @@ export interface User {
 	emailVerified?: boolean;
 	phoneVerified?: boolean;
 	hasProfilePhoto?: boolean;
+	// Indicates if NON-PSW user is seeking care for themselves (true) or family members (false)
+	// PSWs should have this as undefined since they provide care, not seek it
+	lookingForSelf?: boolean;
+	// For PSWs (services they provide) & self-care seekers (care they need)
 	carePreferences?: {
-		lookingForSelf?: boolean;
 		careType?: string[];
 		tasks?: string[];
 		availability?: {
-			[days: string]: { start: string; end: string }[]; // Example: { "Monday": [{ start: "09:00", end: "17:00" }, { start: "19:00", end: "21:00" }]
+			[days: string]: { start: string; end: string }[];
 		};
 	};
 	onboardingComplete: boolean;
 	bio?: string;
 	stripeAccountId?: string;
-	// Family members (only for seekers when lookingForSelf is false)
+	// For family-care seekers (each family member's care needs)
 	familyMembers?: Array<{
-		id: string; // unique identifier for each family member
+		id: string;
 		firstName: string;
 		lastName: string;
 		relationshipToUser: string;
@@ -48,11 +51,67 @@ export interface User {
 		};
 		profilePhotoUrl?: string;
 		bio?: string;
+		// Each family member has their own care preferences
+		carePreferences: {
+			careType: string[];
+			tasks: string[];
+			availability: {
+				[days: string]: { start: string; end: string }[];
+			};
+		};
 	}>;
-	// Distance information (populated when fetching with distance)
+	// Distance information (added dynamically by backend)
 	distanceInfo?: {
-		distance: string; // e.g., "5.2km away"
-		duration: string; // e.g., "12 min drive"
-		distanceValue: number; // raw distance in meters for sorting
+		distance: string;
+		duration: string;
+		distanceValue: number;
+	};
+	// Family member card marker (added by frontend transformation)
+	isFamilyMemberCard?: boolean;
+	familyMemberInfo?: {
+		id: string;
+		firstName: string;
+		lastName: string;
+		profilePhotoUrl?: string;
+		address: {
+			fullAddress: string;
+			street: string;
+			city: string;
+			province: string;
+			country: string;
+			postalCode: string;
+		};
+		carePreferences: {
+			careType: string[];
+			tasks: string[];
+			availability: {
+				[days: string]: { start: string; end: string }[];
+			};
+		};
 	};
 }
+
+// Utility functions for consistent user type checking
+export const getUserType = (user: User | null | undefined): 'PSW' | 'SELF_CARE_SEEKER' | 'FAMILY_CARE_SEEKER' | 'UNKNOWN' => {
+	if (!user) return 'UNKNOWN';
+	if (user.isPsw) return 'PSW';
+	if (user.lookingForSelf === true) return 'SELF_CARE_SEEKER';
+	if (user.lookingForSelf === false) return 'FAMILY_CARE_SEEKER';
+	return 'UNKNOWN';
+};
+
+export const isPswUser = (user: User | null | undefined): boolean => {
+	return user?.isPsw === true;
+};
+
+export const isSelfCareSeeker = (user: User | null | undefined): boolean => {
+	return !user?.isPsw && user?.lookingForSelf === true;
+};
+
+export const isFamilyCareSeeker = (user: User | null | undefined): boolean => {
+	return !user?.isPsw && user?.lookingForSelf === false;
+};
+
+export const isCareSeekerUser = (user: User | null | undefined): boolean => {
+	return !user?.isPsw && user?.lookingForSelf !== undefined;
+};

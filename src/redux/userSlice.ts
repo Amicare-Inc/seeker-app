@@ -37,6 +37,7 @@ interface UserState {
 	loading: boolean;
 	error: string | null;
 	tempFamilyMember: any | null; // Temporary storage for family member data during onboarding
+	tempAvailability: { [day: string]: { start: string; end: string }[] } | null; // Temporary availability during onboarding
 }
 
 // Initialize with an empty mapping
@@ -47,6 +48,7 @@ const initialState: UserState = {
 	loading: false,
 	error: null,
 	tempFamilyMember: null,
+	tempAvailability: null,
 };
 
 const userSlice = createSlice({
@@ -97,6 +99,12 @@ const userSlice = createSlice({
 		clearTempFamilyMember(state) {
 			state.tempFamilyMember = null;
 		},
+		setTempAvailability(state, action: PayloadAction<{ [day: string]: { start: string; end: string }[] }>) {
+			state.tempAvailability = action.payload;
+		},
+		clearTempAvailability(state) {
+			state.tempAvailability = null;
+		},
 	},
 	extraReducers: (builder) => {
 		builder
@@ -132,5 +140,7 @@ export const {
 	setNavigationComplete,
 	setTempFamilyMember,
 	clearTempFamilyMember,
+	setTempAvailability,
+	clearTempAvailability,
 } = userSlice.actions;
 export default userSlice.reducer;

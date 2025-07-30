@@ -16,14 +16,18 @@ const genderOptions = ['Male', 'Female', 'Other'];
 const AboutLovedOne: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector((state: RootState) => state.user.userData);
+    const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
+    const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+    const [focusedFields, setFocusedFields] = useState({
+        firstName: false,
+        lastName: false,
+        placeOfService: false,
+    });
 
     const [form, setForm] = useState({
         firstName: '',
         lastName: '',
-        cityLiveIn: '',
         placeOfService: '',
-        aptSuiteNo: '',
-        saveAddressAs: '',
         dob: '',
         gender: '',
         hasPermission: false,
@@ -47,16 +51,6 @@ const AboutLovedOne: React.FC = () => {
     });
 
     const [isAddressValid, setIsAddressValid] = useState(false);
-
-    const [showGenderDropdown, setShowGenderDropdown] = useState(false);
-    const [focusedFields, setFocusedFields] = useState({
-        firstName: false,
-        lastName: false,
-        cityLiveIn: false,
-        placeOfService: false,
-        aptSuiteNo: false,
-        saveAddressAs: false,
-    });
 
     const handleInputChange = (field: string, value: string | boolean) => {
         setForm({ ...form, [field]: value });
@@ -109,10 +103,7 @@ const AboutLovedOne: React.FC = () => {
         setFocusedFields({
             firstName: false,
             lastName: false,
-            cityLiveIn: false,
             placeOfService: false,
-            aptSuiteNo: false,
-            saveAddressAs: false,
             [field]: true
         });
     };
@@ -125,10 +116,20 @@ const AboutLovedOne: React.FC = () => {
         if (await validateForm()) {
             try {
                 // Store family member data temporarily in Redux tempFamilyMember field
-                dispatch(setTempFamilyMember({
-                    ...form,
+                // IMPORTANT: Preserve existing carePreferences if they exist
+                const updatedFamilyMember = {
+                    ...tempFamilyMember, // Preserve existing data (including carePreferences)
+                    ...form, // Add new personal details
                     step: 'personal_details'
-                }));
+                };
+                
+                console.log('🔍 ABOUT_LOVED_ONE DEBUG - Before update:', {
+                    existingTempFamilyMember: tempFamilyMember,
+                    formData: form,
+                    updatedFamilyMember
+                });
+                
+                dispatch(setTempFamilyMember(updatedFamilyMember));
                 
                 console.log('Family member personal details saved:', form);
                 router.push('/loved_one_relationship');
@@ -204,21 +205,7 @@ const AboutLovedOne: React.FC = () => {
                         </View>
                     </View>
 
-                    {/* City they live in */}
-                    <View className="mb-[15px]">
-                        <Text className="text-base font-medium text-black mb[8px]2">City they live in</Text>
-                        <TextInput
-                            className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
-                                focusedFields.cityLiveIn ? 'border-2 border-brand-blue' : 'border border-gray-200'
-                            }`}
-                            placeholder="e.g Toronto, ON"
-                            placeholderTextColor="#9D9DA1"
-                            value={form.cityLiveIn}
-                            onChangeText={(value) => handleInputChange('cityLiveIn', value)}
-                            onFocus={() => handleFocus('cityLiveIn')}
-                            onBlur={() => handleBlur('cityLiveIn')}
-                        />
-                    </View>
+
 
                     {/* Place of Service */}
                     <View className="mb-[15px]">
@@ -237,37 +224,7 @@ const AboutLovedOne: React.FC = () => {
                         ) : null}
                     </View>
 
-                    {/* Apt/Suite No and Save Address Row */}
-                    <View className="flex-row mb-[15px]">
-                        <View className="flex-1 mr-2">
-                            <Text className="text-base font-medium text-black mb-[8px]">Apt/Suite No</Text>
-                            <TextInput
-                                className={`bg-white rounded-lg px-4 py-2.5 text-lg text-black font-medium ${
-                                    focusedFields.aptSuiteNo ? 'border-2 border-brand-blue' : 'border border-gray-200'
-                                }`}
-                                placeholder="..."
-                                placeholderTextColor="#9D9DA1"
-                                value={form.aptSuiteNo}
-                                onChangeText={(value) => handleInputChange('aptSuiteNo', value)}
-                                onFocus={() => handleFocus('aptSuiteNo')}
-                                onBlur={() => handleBlur('aptSuiteNo')}
-                            />
-                        </View>
-                        <View className="flex-1 ml-2">
-                            <Text className="text-base font-medium text-black mb-[8px]">Save this address as:</Text>
-                            <TextInput
-                                className={`bg-white rounded-lg px-4 py-2.5 text-lg text-black font-medium ${
-                                    focusedFields.saveAddressAs ? 'border-2 border-brand-blue' : 'border border-gray-200'
-                                }`}
-                                placeholder="..."
-                                placeholderTextColor="#9D9DA1"
-                                value={form.saveAddressAs}
-                                onChangeText={(value) => handleInputChange('saveAddressAs', value)}
-                                onFocus={() => handleFocus('saveAddressAs')}
-                                onBlur={() => handleBlur('saveAddressAs')}
-                            />
-                        </View>
-                    </View>
+
 
                     {/* Date of Birth and Gender Row */}
                     <View className="flex-row mb-[26px]">

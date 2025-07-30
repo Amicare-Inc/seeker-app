@@ -1,15 +1,17 @@
 // src/features/sessions/hooks/useSessionsTab.ts
 import { useState, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { router } from 'expo-router';
 import { RootState } from '@/redux/store';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { setActiveProfile, clearActiveProfile } from '@/redux/activeProfileSlice';
 
 export function useSessionsTab(role: 'psw' | 'seeker') {
 	const { setActiveEnrichedSession } = useActiveSession();
 	const userId = useSelector((state: RootState) => state.user.userData?.id);
+	const dispatch = useDispatch();
 
 	// TODO: RENAME
 	const [expandedSession, setExpandedSession] =
@@ -62,12 +64,19 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 	 */
 	const handleExpandSession = (session: EnrichedSession) => {
 		setActiveEnrichedSession(session);
+		
 		if (session.status === 'confirmed' || session.status === 'pending') {
 			router.push({
 				pathname: '/(chat)/[sessionId]',
 				params: { sessionId: session.id },
 			});
 		} else if (session.status === 'newRequest') {
+			// Clear any stale profile and set the correct session user
+			if (session.otherUser) {
+				dispatch(setActiveProfile(session.otherUser));
+			} else {
+				dispatch(clearActiveProfile());
+			}
 			router.push('/other-user-profile');
 		} else { //TODO REMOVE THIS
 			setExpandedSession(session);

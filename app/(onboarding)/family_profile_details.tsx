@@ -37,6 +37,9 @@ const FamilyProfileDetails: React.FC = () => {
 
 	const handleDone = async () => {
 		try {
+			console.log('🔍 FAMILY_PROFILE_DETAILS DEBUG - tempFamilyMember at start:', tempFamilyMember);
+			console.log('🔍 FAMILY_PROFILE_DETAILS DEBUG - userData:', userData);
+			
 			let familyMemberPhotoUrl = '';
 			
 			// Upload photo if selected
@@ -63,6 +66,8 @@ const FamilyProfileDetails: React.FC = () => {
 				},
 				profilePhotoUrl: familyMemberPhotoUrl || '',
 				bio: bio || '',
+				// Include care preferences (availability, care types, tasks) from tempFamilyMember
+				...(tempFamilyMember?.carePreferences && { carePreferences: tempFamilyMember.carePreferences }),
 			};
 
 			// Filter out undefined values to prevent JSON parsing errors
@@ -71,6 +76,14 @@ const FamilyProfileDetails: React.FC = () => {
 			);
 
 			console.log('Sending family member data to backend:', cleanedData);
+			
+			// Log specifically if carePreferences are present
+			if (tempFamilyMember?.carePreferences) {
+				console.log('Care preferences in tempFamilyMember:', tempFamilyMember.carePreferences);
+				console.log('Care preferences in cleanedData:', cleanedData.carePreferences);
+			} else {
+				console.warn('No care preferences found in tempFamilyMember');
+			}
 
 			// Send family member data to backend
 			if (userData?.id) {

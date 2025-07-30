@@ -90,7 +90,7 @@ const SignIn = () => {
 							<Text className="text-xs text-gray-500 font-normal text-center">
 								Don't have an account?
 							</Text>
-							<TouchableOpacity onPress={() => router.push('/sign-up')}>
+							<TouchableOpacity onPress={() => router.replace('/')}>
 								<Text className="text-xs font-normal text-blue-900">
 									Sign Up here
 								</Text>

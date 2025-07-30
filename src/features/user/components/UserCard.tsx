@@ -9,7 +9,7 @@ interface UserCardProps {
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
-	// Only show city/province, not distance info
+	// Show distance if available, otherwise show city/province
 	const locationText = user.address?.city && user.address?.province 
 		? `${user.address.city}, ${user.address.province}` 
 		: 'Toronto, ON';
@@ -35,9 +35,21 @@ const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
 					<Text className="font-bold text-lg text-black">
 						{user.firstName} {user.lastName}
 					</Text>
-					<Text className="text-sm font-semibold text-gray-500">
-						{locationText}
-					</Text>
+					{/* Show distance if available, otherwise show location */}
+					{user.distanceInfo ? (
+						<View>
+							<Text className="text-sm font-medium text-blue-600">
+								{user.distanceInfo.distance}
+							</Text>
+							<Text className="text-xs text-gray-500">
+								{user.distanceInfo.duration}
+							</Text>
+						</View>
+					) : (
+						<Text className="text-sm font-semibold text-gray-500">
+							{locationText}
+						</Text>
+					)}
 				</View>
 				<Text className="font-semibold text-xl text-grey-58 pl-6">
 					${rate}/hr

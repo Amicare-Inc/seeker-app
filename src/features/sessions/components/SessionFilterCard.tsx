@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Dimensions, Animated, Easing } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { fetchFilteredUsers } from '@/features/userDirectory';
+import { User } from '@/types/User';
 
 const { width } = Dimensions.get('window');
 
@@ -19,7 +20,7 @@ const dayMapping: { [key: string]: string } = {
 
 interface SessionFilterCardProps {
   onClose: () => void;
-  setFilteredUsers: (users: any[] | null) => void;
+  setFilteredUsers: (users: User[] | null) => void;
 }
 
 const SessionFilterCard = ({ onClose, setFilteredUsers }: SessionFilterCardProps) => {
@@ -66,6 +67,7 @@ const SessionFilterCard = ({ onClose, setFilteredUsers }: SessionFilterCardProps
         const users = await fetchFilteredUsers(selectedDays);
         console.log('Filtered users:', users);
 
+        // Return users directly - useHomeTab will handle the transformation
         setFilteredUsers(users);
 
       } else {

@@ -5,13 +5,14 @@ import { ForumField } from '@/shared/components';
 import { CustomButton } from '@/shared/components';
 import { Link, router } from 'expo-router';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
-import { AppDispatch } from '@/redux/store';
+import { AppDispatch, RootState } from '@/redux/store';
 import { AuthApi } from '@/features/auth/api/authApi';
 
 const SignUp = () => {
 	const dispatch = useDispatch<AppDispatch>();
+	const userData = useSelector((state: RootState) => state.user.userData);
 	const [form, setForm] = useState({
 		email: "martin.droruga@example.com",
 		password: "asdfgh",
@@ -32,6 +33,7 @@ const SignUp = () => {
 				const user = await AuthApi.signUp(
 					form.email,
 					form.password,
+					userData?.isPsw
 				);
 				dispatch(
 					updateUserFields({

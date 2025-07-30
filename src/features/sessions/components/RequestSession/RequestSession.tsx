@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Keyboard, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useLocalSearchParams, router } from 'expo-router';
-import { User } from '@/types/User';
+import { User, isFamilyCareSeeker } from '@/types/User';
 import RequestSessionHeader from './RequestSessionHeader';
 import DateTimeRow from './DateTimeRow';
 import SessionLengthSelector from './SessionLengthSelector';
@@ -19,7 +19,7 @@ import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { requestSession, updateSession } from '@/features/sessions/api/sessionApi';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
-import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/components/Privacy Policy/PrivacyPolicy';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 
 interface SessionData {
 	id: string;
@@ -55,11 +55,19 @@ const RequestSession = () => {
 	);
 	const activeProfile = useSelector((state: RootState) => state.activeProfile.activeUser);
 	
-	// Prioritize otherUserId parameter over activeProfile to ensure correct user is shown
-	// Only use activeProfile if it matches the otherUserId or if otherUserId is not found
-	const targetUserObj: User = targetUserFromAllUsers || 
-		(activeProfile?.id === otherUserId ? activeProfile : null) || 
-		activeProfile;
+	// For family member cards, prioritize activeProfile since otherUserId is synthetic
+	// and won't be found in allUsers
+	const targetUserObj: User = (() => {
+		// If activeProfile is a family member card, use it directly
+		if (activeProfile?.isFamilyMemberCard) {
+			return activeProfile;
+		}
+		
+		// Otherwise, try to find by otherUserId first, then fall back to activeProfile
+		return targetUserFromAllUsers || 
+			(activeProfile?.id === otherUserId ? activeProfile : null) || 
+			activeProfile;
+	})();
 	
 	const existingSession: SessionData | null = sessionObj
 		? JSON.parse(sessionObj as string)
@@ -108,14 +116,17 @@ const RequestSession = () => {
 	const total = basePrice + taxes + serviceFee;
 	// ------------------------------------
 
-	// Check if user is looking for family member care
-	const isLookingForFamily = currentUser?.carePreferences?.lookingForSelf === false;
-	const hasFamilyMembers = currentUser?.familyMembers && currentUser.familyMembers.length > 0;
-
+	// Get current user's care recipient type and data - check isPsw first
+	const isLookingForFamily = isFamilyCareSeeker(currentUser);
+	
 	// Determine if location should be shown and what location to display
 	const shouldShowLocation = () => {
+		// PSWs always show their location
+		if (currentUser?.isPsw) {
+			return true;
+		}
 		// Show location if user is looking for self (prefilled with their location)
-		if (currentUser?.carePreferences?.lookingForSelf === true) {
+		if (currentUser?.lookingForSelf === true) {
 			return true;
 		}
 		// Show location if user is looking for family member AND a recipient is selected
@@ -126,7 +137,11 @@ const RequestSession = () => {
 	};
 
 	const getLocationToDisplay = () => {
-		if (currentUser?.carePreferences?.lookingForSelf === true) {
+		// PSWs show their own location
+		if (currentUser?.isPsw) {
+			return currentUser?.address?.fullAddress || '';
+		}
+		if (currentUser?.lookingForSelf === true) {
 			return currentUser?.address?.fullAddress || '';
 		}
 		if (isLookingForFamily && selectedCareRecipientData) {
@@ -159,7 +174,7 @@ const RequestSession = () => {
 		return () => {
 			// Only clear if activeProfile doesn't match the current otherUserId
 			if (activeProfile && activeProfile.id !== otherUserId) {
-				dispatch(clearActiveProfile());
+				dispatch(clearActiveProfile()); // Changed from clearActiveProfile to setActiveProfile(null)
 			}
 		};
 	}, [otherUserId, activeProfile, dispatch]);
@@ -263,7 +278,7 @@ const RequestSession = () => {
 		}
 
 		// Validate care recipient selection if looking for family member
-		if (isLookingForFamily && hasFamilyMembers && !selectedCareRecipient) {
+		if (isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && !selectedCareRecipient) {
 			alert('Please select who will receive care.');
 			return;
 		}
@@ -308,8 +323,16 @@ const RequestSession = () => {
 				alert('Session updated successfully!');
 				router.back();
 			} else {
-				// Validate target user before creating session
-				const receiverId = targetUserObj?.id || otherUserId as string;
+				// For family member cards, use the original core user ID (without -family- suffix)
+				const receiverId = (() => {
+					if (targetUserObj?.isFamilyMemberCard && targetUserObj?.id) {
+						// Extract original user ID from synthetic family member ID
+						const originalUserId = targetUserObj.id.split('-family-')[0];
+						return originalUserId;
+					}
+					return targetUserObj?.id || otherUserId as string;
+				})();
+
 				if (!receiverId) {
 					alert('Unable to find target user. Please try again.');
 					return;
@@ -324,8 +347,10 @@ const RequestSession = () => {
 						basePrice: sessionData.billingDetails.dynamicBasePrice,
 					},
 					// Embed PSW's distance info if available (seeker -> PSW session)
-					distanceInfo: targetUserObj?.distanceInfo,
+					...(targetUserObj?.distanceInfo && { distanceInfo: targetUserObj.distanceInfo }),
 				} as SessionDTO;
+
+				console.log('📝 Creating session with distance info:', !!newSessionData.distanceInfo);
 				
 				await requestSession(newSessionData);
 				
@@ -371,9 +396,9 @@ const RequestSession = () => {
 					/>
 
 					{/* Care Recipient Selection - Only show if looking for family member */}
-					{isLookingForFamily && hasFamilyMembers && (
+					{isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && (
 						<CareRecipientSelector
-							familyMembers={currentUser?.familyMembers}
+							familyMembers={currentUser.familyMembers}
 							selectedRecipientId={selectedCareRecipient}
 							onRecipientSelect={handleCareRecipientSelect}
 						/>

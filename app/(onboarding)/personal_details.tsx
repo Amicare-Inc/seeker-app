@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput } from 'react-native';
-import { ForumField } from '@/shared/components';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
@@ -12,6 +11,8 @@ import { AuthApi } from '@/features/auth/api/authApi';
 import { RegionValidatedAddressInput } from '@/shared/components';
 import { type AddressComponents } from '@/services/google/googlePlacesService';
 import { Ionicons } from '@expo/vector-icons';
+
+const genderOptions = ['Male', 'Female', 'Other'];
 
 const PersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -32,6 +33,7 @@ const PersonalDetails: React.FC = () => {
 		phone: userData?.phone || '5879730077',
 		email: userData?.email || '',
 		gender: userData?.gender || '',
+
 	});
 
 	const [errors, setErrors] = useState({
@@ -45,12 +47,12 @@ const PersonalDetails: React.FC = () => {
 	});
 
 	const [isAddressValid, setIsAddressValid] = useState(false);
+	const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 	const [focusedFields, setFocusedFields] = useState({
 		firstName: false,
 		lastName: false,
 		phone: false,
 		email: false,
-		gender: false,
 	});
 
 	const handleInputChange = (field: string, value: string) => {
@@ -64,7 +66,6 @@ const PersonalDetails: React.FC = () => {
 			lastName: false,
 			phone: false,
 			email: false,
-			gender: false,
 			[field]: true
 		});
 	};
@@ -105,7 +106,6 @@ const PersonalDetails: React.FC = () => {
 		if (!form.email) newErrors.email = 'Email is required';
 		if (!form.gender) newErrors.gender = 'Gender is required';
 
-		// Address validation is now handled by the RegionValidatedAddressInput component
 		if (!isAddressValid) {
 			newErrors.address = 'Please select a valid address from the suggestions';
 		}
@@ -124,10 +124,8 @@ const PersonalDetails: React.FC = () => {
 				}
 				dispatch(updateUserFields(form));
 				
-				// Debug: Log the data being sent
 				const criticalInfoData = {...form, isPsw: userData!.isPsw};
 				console.log('Sending critical info to backend:', criticalInfoData);
-				console.log('User ID:', userId);
 				
 				await AuthApi.addCriticalInfo(userId, criticalInfoData);
 				console.log('Critical info sent successfully from personal_details');
@@ -135,97 +133,179 @@ const PersonalDetails: React.FC = () => {
 				router.push('/verification_prompt');
 			} catch (error) {
 				console.error('Error saving user details:', error);
-				// Show alert to user about the error
 				alert('Failed to save personal details. Please try again.');
 			}
 		}
 	};
 
 	return (
-		<SafeAreaView className="h-full bg-grey-0">
+		<SafeAreaView className="flex-1 bg-grey-0">
 			<KeyboardAvoidingView
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
 				style={{ flex: 1 }}
-				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+				keyboardVerticalOffset={0}
 			>
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}
-					keyboardShouldPersistTaps="handled"
-				>
+				<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 					<View className="px-[16px]">
-					<View className="flex-row items-center mb-[22px]">
-						<TouchableOpacity className="absolute" onPress={() => router.back()}>
-							<Ionicons name="chevron-back" size={24} color="#000" />
-						</TouchableOpacity>
-						<Text className="text-xl font-medium mx-auto text-center">
-							Your Details
+						{/* Header */}
+						<View className="flex-row items-center justify-center mb-[17px] relative">
+							<TouchableOpacity className="absolute left-0" onPress={() => router.back()}>
+								<Ionicons name="chevron-back" size={24} color="#000" />
+							</TouchableOpacity>
+							<Text className="text-lg font-bold text-center">
+								Tell us about yourself
+							</Text>
+						</View>
+
+						{/* Subtitle */}
+						<Text className="text-sm text-grey-80 mb-[21px] leading-5 text-center mx-auto">
+							We use this information to create your profile and{"\n"}verify your identity. This info is stored securely{"\n"}and only shared with your consent.
 						</Text>
-					</View>
-						<View className="flex-row gap-[14px] mb-4">
-							<View className="flex-1 min-w-0">
+
+						{/* First Name and Last Name Row */}
+						<View className="flex-row mb-[15px]">
+							<View className="flex-1 mr-2">
+								<Text className="text-base font-medium text-black mb-[8px]">First Name</Text>
 								<TextInput
-								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
-									focusedFields.firstName ? 'border-2 border-brand-blue' : 'border border-gray-200'
-								}`}
-								placeholder="First Name"
-								placeholderTextColor="#9D9DA1"
-								value={form.firstName}
-								onChangeText={(value) => handleInputChange('firstName', value)}
-								onFocus={() => handleFocus('firstName')}
-								onBlur={() => handleBlur('firstName')}
+									className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+										focusedFields.firstName ? 'border-2 border-brand-blue' : 'border border-gray-200'
+									}`}
+									placeholder="First Name"
+									placeholderTextColor="#9D9DA1"
+									value={form.firstName}
+									onChangeText={(value) => handleInputChange('firstName', value)}
+									onFocus={() => handleFocus('firstName')}
+									onBlur={() => handleBlur('firstName')}
 								/>
 								{errors.firstName ? (
-								<Text className="text-red-500 text-xs mt-1">
-									{errors.firstName}
-								</Text>
+									<Text className="text-red-500 text-xs mt-1">
+										{errors.firstName}
+									</Text>
 								) : null}
 							</View>
-							<View className="flex-1 min-w-0">
+							<View className="flex-1 ml-2">
+								<Text className="text-base font-medium text-black mb-[8px]">Last Name</Text>
 								<TextInput
-								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
-									focusedFields.lastName ? 'border-2 border-brand-blue' : 'border border-gray-200'
-								}`}
-								placeholder="Last Name"
-								placeholderTextColor="#9D9DA1"
-								value={form.lastName}
-								onChangeText={(value) => handleInputChange('lastName', value)}
-								onFocus={() => handleFocus('lastName')}
-								onBlur={() => handleBlur('lastName')}
+									className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+										focusedFields.lastName ? 'border-2 border-brand-blue' : 'border border-gray-200'
+									}`}
+									placeholder="Last Name"
+									placeholderTextColor="#9D9DA1"
+									value={form.lastName}
+									onChangeText={(value) => handleInputChange('lastName', value)}
+									onFocus={() => handleFocus('lastName')}
+									onBlur={() => handleBlur('lastName')}
 								/>
 								{errors.lastName ? (
-								<Text className="text-red-500 text-xs mt-1">
-									{errors.lastName}
-								</Text>
+									<Text className="text-red-500 text-xs mt-1">
+										{errors.lastName}
+									</Text>
 								) : null}
 							</View>
 						</View>
 
-						<DatePickerField
-							title="Date of Birth"
-							value={form.dob}
-							onDateChange={(date) => handleInputChange('dob', date)}
-							otherStyles="mb-4 bg-white rounded-lg border border-gray-200"
-						/>
-						{errors.dob ? (
-							<Text className="text-red-500 text-xs">
-								{errors.dob}
-							</Text>
-						) : null}
+						{/* Address */}
+						<View className="mb-[15px]">
+							<Text className="text-base font-medium text-black mb-[8px]">Address</Text>
+							<RegionValidatedAddressInput
+								placeholder="e.g. 24 Willow Street, A1B 2C3"
+								initialValue={form.address.fullAddress}
+								onAddressSelected={handleAddressSelected}
+								onValidationResult={handleAddressValidation}
+								otherStyles="bg-white rounded-lg border border-gray-200"
+							/>
+							{errors.address ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.address}
+								</Text>
+							) : null}
+						</View>
 
-						<RegionValidatedAddressInput
-							placeholder="Address"
-							initialValue={form.address.fullAddress}
-							onAddressSelected={handleAddressSelected}
-							onValidationResult={handleAddressValidation}
-							otherStyles="mb-4 border border-gray-200 bg-white rounded-lg"
-						/>
-						{errors.address ? (
-							<Text className="text-red-500 text-xs">
-								{errors.address}
-							</Text>
-						) : null}
 
-						<View className="mb-4">
+
+						{/* Date of Birth and Gender Row */}
+						<View className="flex-row mb-[15px]">
+							<View className="flex-1 mr-2">
+								<View className="flex-row items-center mb-[8px]">
+									<Text className="text-base font-medium text-black">Date of Birth</Text>
+									<Ionicons name="information-circle-outline" size={20} color="#303031" style={{ marginLeft: 4 }} />
+								</View>
+								<DatePickerField
+									title=""
+									value={form.dob}
+									onDateChange={(date) => handleInputChange('dob', date)}
+									otherStyles="bg-white border border-gray-200 rounded-lg"
+								/>
+								{errors.dob ? (
+									<Text className="text-red-500 text-xs mt-1">
+										{errors.dob}
+									</Text>
+								) : null}
+							</View>
+							<View className="flex-1 ml-2">
+								<View className="flex-row items-center mb-[8px]">
+									<Text className="text-base font-medium text-black">Gender</Text>
+									<Ionicons name="information-circle-outline" size={20} color="#303031" style={{ marginLeft: 4 }} />
+								</View>
+								<TouchableOpacity 
+									className={`bg-white rounded-lg px-4 py-2.5 flex-row justify-between items-center ${
+										showGenderDropdown ? 'border-2 border-brand-blue' : 'border border-gray-200'
+									}`}
+									onPress={() => setShowGenderDropdown(!showGenderDropdown)}
+								>
+									<Text className={`text-lg font-medium ${form.gender ? 'text-black' : 'text-grey-35'}`}>
+										{form.gender || '...'}
+									</Text>
+									<Ionicons 
+										name={showGenderDropdown ? "chevron-up" : "chevron-down"} 
+										size={20} 
+										color="#BFBFC3" 
+									/>
+								</TouchableOpacity>
+								{errors.gender ? (
+									<Text className="text-red-500 text-xs mt-1">
+										{errors.gender}
+									</Text>
+								) : null}
+							</View>
+						</View>
+
+						{/* Gender Dropdown Options */}
+						{showGenderDropdown && (
+							<View className="mb-[20px] overflow-hidden">
+								{genderOptions.map((gender, index) => (
+									<TouchableOpacity
+										key={gender}
+										className={`bg-white px-4 py-4 flex-row justify-between items-center ${
+											index === 0 ? 'rounded-t-lg' : ''
+										} ${
+											index === genderOptions.length - 1 ? 'rounded-b-lg' : ''
+										} ${
+											index < genderOptions.length - 1 ? 'border-b border-gray-200' : ''
+										}`}
+										onPress={() => {
+											handleInputChange('gender', gender);
+											setShowGenderDropdown(false);
+										}}
+									>
+										<Text className={`text-base text-black ${
+											form.gender === gender ? 'font-bold' : 'font-normal'
+										}`}>
+											{gender}
+										</Text>
+										{form.gender === gender && (
+											<View className="w-5 h-5 bg-brand-blue rounded-full items-center justify-center">
+												<Ionicons name="checkmark" size={14} color="white" />
+											</View>
+										)}
+									</TouchableOpacity>
+								))}
+							</View>
+						)}
+
+						{/* Phone */}
+						<View className="mb-[15px]">
+							<Text className="text-base font-medium text-black mb-[8px]">Phone</Text>
 							<TextInput
 								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
 									focusedFields.phone ? 'border-2 border-brand-blue' : 'border border-gray-200'
@@ -245,7 +325,9 @@ const PersonalDetails: React.FC = () => {
 							) : null}
 						</View>
 
-						<View className="mb-4">
+						{/* Email */}
+						<View className="mb-[26px]">
+							<Text className="text-base font-medium text-black mb-[8px]">Email</Text>
 							<TextInput
 								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
 									focusedFields.email ? 'border-2 border-brand-blue' : 'border border-gray-200'
@@ -257,6 +339,8 @@ const PersonalDetails: React.FC = () => {
 								onFocus={() => handleFocus('email')}
 								onBlur={() => handleBlur('email')}
 								keyboardType="email-address"
+								editable={false} // Email is already set from registration
+								style={{ opacity: 0.6 }}
 							/>
 							{errors.email ? (
 								<Text className="text-red-500 text-xs mt-1">
@@ -264,37 +348,12 @@ const PersonalDetails: React.FC = () => {
 								</Text>
 							) : null}
 						</View>
-
-						<View className="mb-4">
-							<TextInput
-								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
-									focusedFields.gender ? 'border-2 border-brand-blue' : 'border border-gray-200'
-								}`}
-								placeholder="Gender"
-								placeholderTextColor="#9D9DA1"
-								value={form.gender}
-								onChangeText={(value) => handleInputChange('gender', value)}
-								onFocus={() => handleFocus('gender')}
-								onBlur={() => handleBlur('gender')}
-							/>
-							{errors.gender ? (
-								<Text className="text-red-500 text-xs mt-1">
-									{errors.gender}
-								</Text>
-							) : null}
-						</View>
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-			
-			<View className="px-[16px]">
-				{/* Privacy Notice */}
-				<View className="flex flex-row mb-[20px] gap-[14px]">
-					<Ionicons name="information-circle" size={28} color="#BFBFC3" />
-					<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
-						We’ll use this to personalize matches and support. This info is confidential and only shared with your consent. By continuing, you agree to our Privacy Policy and Terms of Use.
-					</Text>
-				</View>
+
+			{/* Continue Button */}
+			<View className="px-[16px] pb-[21px]">
 				<CustomButton
 					title="Continue"
 					handlePress={handleContinue}
@@ -302,7 +361,7 @@ const PersonalDetails: React.FC = () => {
 					textStyles="text-white text-xl font-medium"
 				/>
 			</View>
-
+			<StatusBar backgroundColor="#FFFFFF" style="dark" />
 		</SafeAreaView>
 	);
 };

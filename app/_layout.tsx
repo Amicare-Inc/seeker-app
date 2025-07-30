@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { userDirectoryKeys } from '@/features/userDirectory/api/queries';
 import { ActiveSessionProvider } from '@/lib/context/ActiveSessionContext';
+import { SessionCompletionProvider } from '@/lib/context/SessionCompletionContext';
 import { useQueryClient } from '@tanstack/react-query';
 
 const GlobalDataLoader = () => {
@@ -50,48 +51,50 @@ const LayoutWithProviders = () => {
 	return (
 		<Provider store={store}>
 			<QueryClientProvider client={queryClient}>
-				<ActiveSessionProvider>
-					<SafeAreaProvider>
-						<StripeProvider
-							publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
-							urlScheme="amicare"
-							merchantIdentifier="merchant.com.specul8tor.AmiCare"
-							>
-							{/* GlobalDataLoader preloads global slices; navigation now handled directly in socket listener */}
-							<GlobalDataLoader />
-						<Stack>
-							<Stack.Screen
-								name="index"
-								options={{ headerShown: false }}
-							/>
-							<Stack.Screen
-								name="lock"
-								options={{ headerShown: false, gestureEnabled: false }}
-							/>
-							<Stack.Screen
-								name="(auth)"
-								options={{ headerShown: false }}
-							/>
-							<Stack.Screen
-								name="(dashboard)"
-								options={{ headerShown: false }}
-							/>
-							<Stack.Screen
-								name="(onboarding)"
-								options={{ headerShown: false, gestureEnabled: false }}
-							/>
-							<Stack.Screen
-								name="(chat)"
-								options={{ headerShown: false }}
-							/>
-							<Stack.Screen
-								name="(profile)"
-								options={{ headerShown: false }}
-							/>
-						</Stack>
-					</StripeProvider>
-				</SafeAreaProvider>
-			</ActiveSessionProvider>
+				<SessionCompletionProvider>
+					<ActiveSessionProvider>
+						<SafeAreaProvider>
+							<StripeProvider
+								publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
+								urlScheme="amicare"
+								merchantIdentifier="merchant.com.specul8tor.AmiCare"
+								>
+								{/* GlobalDataLoader preloads global slices; navigation now handled directly in socket listener */}
+								<GlobalDataLoader />
+							<Stack>
+								<Stack.Screen
+									name="index"
+									options={{ headerShown: false }}
+								/>
+								<Stack.Screen
+									name="lock"
+									options={{ headerShown: false, gestureEnabled: false }}
+								/>
+								<Stack.Screen
+									name="(auth)"
+									options={{ headerShown: false }}
+								/>
+								<Stack.Screen
+									name="(dashboard)"
+									options={{ headerShown: false }}
+								/>
+								<Stack.Screen
+									name="(onboarding)"
+									options={{ headerShown: false, gestureEnabled: false }}
+								/>
+								<Stack.Screen
+									name="(chat)"
+									options={{ headerShown: false }}
+								/>
+								<Stack.Screen
+									name="(profile)"
+									options={{ headerShown: false }}
+								/>
+							</Stack>
+						</StripeProvider>
+					</SafeAreaProvider>
+				</ActiveSessionProvider>
+			</SessionCompletionProvider>
 		</QueryClientProvider>
 	</Provider>
 );

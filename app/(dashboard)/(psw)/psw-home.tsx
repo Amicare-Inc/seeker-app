@@ -14,7 +14,7 @@ import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
 	const [filteredUsers, setFilteredUsers] = useState<User[] | null>(null);
-	const { users: fetchedUsers, loading, error } = useHomeTab(false, true); // isPsw = false, withDistance = true
+	const { users: fetchedUsers, isLoading, error } = useHomeTab(false, true); // isPsw = false, withDistance = true
 	const [filterVisible, setFilterVisible] = useState(false);
 	const fadeAnim = useRef(new Animated.Value(0)).current;
 	const slideAnim = useRef(new Animated.Value(300)).current;
@@ -25,19 +25,52 @@ const PswHomeTab = () => {
 	const users = filteredUsers ?? fetchedUsers;
 
 	const handleCardPress = (user: User) => {
+		// Debug: Log what family member is being clicked
+		if (user.isFamilyMemberCard && user.familyMemberInfo) {
+			console.log('🔍 Family member card clicked:', {
+				coreUserId: user.id,
+				familyMemberId: user.familyMemberInfo.id,
+				familyMemberName: `${user.familyMemberInfo.firstName} ${user.familyMemberInfo.lastName}`,
+				coreUserName: `${user.firstName} ${user.lastName}`
+			});
+		} else {
+			console.log('🔍 Regular user card clicked:', {
+				userId: user.id,
+				userName: `${user.firstName} ${user.lastName}`,
+				isPsw: user.isPsw
+			});
+		}
+
 		// Clear any active session to prevent conflicts with home tab navigation
 		setActiveEnrichedSession(null);
-		// Navigate to other-user-profile instead of expanding
+		// Navigate to other-user-profile
 		dispatch(setActiveProfile(user));
 		router.push('/other-user-profile');
 	};
 
-	const renderItem = ({ item }: { item: User }) => (
-		<UserCardSeeker
-			user={item}
-			onPress={() => handleCardPress(item)}
-		/>
-	);
+	const renderItem = ({ item }: { item: User }) => {
+		// Check if this is a family member card or user card
+		if (item.isFamilyMemberCard && item.familyMemberInfo) {
+			// Family member card
+			return (
+				<UserCardSeeker
+					user={item} // Pass the core user
+					familyMember={item.familyMemberInfo} // Pass the family member data
+					distanceInfo={item.distanceInfo}
+					onPress={() => handleCardPress(item)}
+				/>
+			);
+		} else {
+			// PSW or self-care seeker card
+			return (
+				<UserCardSeeker
+					user={item} // Pass the user directly
+					distanceInfo={item.distanceInfo}
+					onPress={() => handleCardPress(item)}
+				/>
+			);
+		}
+	};
 
 	const showFilterCard = () => {
 		setFilterVisible(true);
@@ -99,18 +132,21 @@ const PswHomeTab = () => {
 			</View>
 
 			{/* Main content */}
-			{loading ? (
+			{isLoading ? (
 				<View className="flex-1 items-center justify-center">
 					<ActivityIndicator size="large" color="#000" />
 				</View>
 			) : error ? (
 				<View className="flex-1 items-center justify-center">
-					<Text className="text-black">Error: {error}</Text>
+					<Text className="text-black">Error: {error.message || 'Something went wrong'}</Text>
 				</View>
 			) : (
 				<FlatList
 					data={users}
-					keyExtractor={(item) => item.id!}
+					keyExtractor={(item) => item.isFamilyMemberCard 
+						? `${item.id}-${item.familyMemberInfo?.id}` 
+						: item.id!
+					}
 					renderItem={renderItem}
 					contentContainerStyle={{
 						paddingBottom: Platform.OS === 'ios' ? 83 : 64,

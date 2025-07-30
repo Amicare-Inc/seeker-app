@@ -5,30 +5,77 @@ import { User } from '@/types/User';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 interface UserCardSeekerProps {
-    user: User;
+    user: User; // Main user (can be PSW, self-care seeker, or family manager)
+    familyMember?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        profilePhotoUrl?: string;
+        address: {
+            fullAddress: string;
+            street: string;
+            city: string;
+            province: string;
+            country: string;
+            postalCode: string;
+        };
+        carePreferences: {
+            careType: string[];
+            tasks: string[];
+            availability: {
+                [days: string]: { start: string; end: string }[];
+            };
+        };
+    }; // Optional family member (for family-care seekers)
+    distanceInfo?: {
+        distance: string;
+        duration: string;
+        distanceValue: number;
+    };
     onPress: () => void;
-    familyMembers?: User[]; // Additional family members for multiple profile pics
-    additionalMembersCount?: number; // For showing +1
 }
 
 const UserCardSeeker: React.FC<UserCardSeekerProps> = ({ 
     user, 
-    onPress, 
-    familyMembers = [], 
-    additionalMembersCount = 0 
+    familyMember, 
+    distanceInfo, 
+    onPress 
 }) => {
-    const locationText = user.address?.city && user.address?.province 
-        ? `${user.address.city}, ${user.address.province}` 
+    // Determine if this is a family member card or user card
+    const isForFamilyMember = !!familyMember;
+    
+    // Get the relevant data based on card type
+    const displayName = isForFamilyMember 
+        ? `${familyMember.firstName} ${familyMember.lastName}`
+        : `${user.firstName} ${user.lastName}`;
+        
+    const profilePhoto = isForFamilyMember 
+        ? familyMember.profilePhotoUrl 
+        : user.profilePhotoUrl;
+        
+    const address = isForFamilyMember 
+        ? familyMember.address 
+        : user.address;
+    
+    const locationText = address?.city && address?.province 
+        ? `${address.city}, ${address.province}` 
         : 'Burlington, Toronto';
 
-    // Check if user has family members from the user's familyMembers array
-    const hasFamilyMembers = user.familyMembers && user.familyMembers.length > 0;
-    const firstFamilyMember = hasFamilyMembers ? user.familyMembers![0] : null;
-
-    // Show family member name if exists, otherwise show core user name
-    const displayName = firstFamilyMember 
-        ? `${firstFamilyMember.firstName} ${firstFamilyMember.lastName?.[0]}.`
-        : `${user.firstName} ${user.lastName?.[0]}.`;
+    // Show distance info if available, otherwise show care type info
+    const rightSideContent = distanceInfo ? (
+        <View className="items-end">
+            <Text className="text-sm font-medium text-gray-900">
+                {distanceInfo.distance}
+            </Text>
+            <Text className="text-xs text-gray-500">
+                {distanceInfo.duration}
+            </Text>
+        </View>
+    ) : (
+        <View className="w-[15px] h-[15px] bg-blue-500 rounded-full items-center justify-center">
+            <Ionicons name="checkmark" size={10} color="white" />
+        </View>
+    );
 
     return (
         <TouchableOpacity
@@ -46,11 +93,7 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
                             <Ionicons name="checkmark" size={10} color="white" />
                         </View>
 
-                        {hasFamilyMembers && (
-                            <Text className="text-sm text-grey-58">
-                                +{user.familyMembers?.length || 0}
-                            </Text>
-                        )}
+
                     </View>
                     
                     <Text className="text-sm font-medium text-gray-500">
@@ -59,8 +102,8 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
                 </View>
 
                 <View className="relative">
-                    {/* Core user photo (behind) */}
-                    {hasFamilyMembers && (
+                    {/* Core user photo (behind) - always show for family member cards */}
+                    {isForFamilyMember && (
                         <Image
                             source={{
                                 uri: user.profilePhotoUrl || 'https://via.placeholder.com/58',
@@ -68,18 +111,20 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
                             className="w-[58px] h-[58px] rounded-full absolute"
                             style={{
                                 right: -35,
+                                zIndex: 1
                             }}
                         />
                     )}
                     
-                    {/* Family member photo (in front) or core user photo if no family */}
+                    {/* Family member or self photo (in front) */}
                     <Image
                         source={{
-                            uri: firstFamilyMember?.profilePhotoUrl || user.profilePhotoUrl || 'https://via.placeholder.com/58',
+                            uri: profilePhoto || 'https://via.placeholder.com/58',
                         }}
                         className="w-[58px] h-[58px] rounded-full border-2 border-brand-blue"
                         style={{
-                            transform: [{ translateX: hasFamilyMembers ? 0 : 30 }]
+                            transform: [{ translateX: isForFamilyMember ? 0 : 30 }],
+                            zIndex: 2
                         }}
                     />
                 </View>

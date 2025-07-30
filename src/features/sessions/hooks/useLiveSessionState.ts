@@ -5,12 +5,14 @@ import { EnrichedSession } from '@/types/EnrichedSession';
 import { LiveSessionStatus } from '@/types/LiveSession';
 import { RootState } from '@/redux/store';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
+import { useSessionCompletion } from '@/lib/context/SessionCompletionContext';
 import { mapFirebaseStatusToLiveStatus } from '../utils/sessionMappers';
 import { useLiveSessionSocket } from './useLiveSessionSocket';
 
 export const useLiveSessionState = (enrichedSession: EnrichedSession) => {
   const currentUser = useSelector((state: RootState) => state.user.userData);
   const { data: allSessions = [] } = useEnrichedSessions(currentUser?.id);
+  const { setCompletedSession } = useSessionCompletion();
   const completedSessions = allSessions.filter(session => session.status === 'completed');
 
   // Local state
@@ -64,12 +66,16 @@ export const useLiveSessionState = (enrichedSession: EnrichedSession) => {
     const isCompleted = completedSessions.some(s => s.id === enrichedSession?.id);
     if (isCompleted && status !== 'completed') {
       setStatus('completed');
+      
+      // Store session data in context for reliable access on completion page
+      setCompletedSession(enrichedSession);
+      
       router.push({
         pathname: '/(chat)/session-completed',
         params: { sessionId: enrichedSession.id },
       });
     }
-  }, [completedSessions, enrichedSession?.id, status]);
+  }, [completedSessions, enrichedSession?.id, enrichedSession, status, setCompletedSession]);
 
   return {
     status,

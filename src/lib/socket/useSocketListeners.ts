@@ -8,12 +8,14 @@ import { logger } from '@/lib/logger';
 import { sessionKeys } from '@/features/sessions/api/queries';
 import { router } from 'expo-router';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
+// Removed SessionCompletionContext import
 
 const socketLogger = logger.child('[Socket]');
 
 export const useSocketListeners = (userId?: string) => {
   const queryClient = useQueryClient();
   const { setActiveEnrichedSession } = useActiveSession();
+  // Removed SessionCompletionContext usage
 
   // lazily ensure connection with enhanced reliability
   const socket = getSocket();
@@ -132,6 +134,7 @@ export const useSocketListeners = (userId?: string) => {
       }
       if (completedSession) {
         setActiveEnrichedSession(completedSession);
+        // Removed setCompletedSession call
       }
 
       // Navigate directly to session completed page

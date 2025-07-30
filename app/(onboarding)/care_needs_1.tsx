@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
+import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
 import careTypeOptions from '@/assets/careOptions';
 import { TouchableOpacity } from 'react-native';
@@ -13,10 +13,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 const CareNeeds1: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
+	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
 	const isPSW = userData?.isPsw;
 
 	const [lookingForSelf, setLookingForSelf] = useState<boolean | null>(
-		userData?.carePreferences?.lookingForSelf || null,
+		userData?.lookingForSelf || null,
 	);
 	const [selectedCareTypes, setSelectedCareTypes] = useState<string[]>(
 		userData?.carePreferences?.careType || [],
@@ -31,21 +32,53 @@ const CareNeeds1: React.FC = () => {
 	};
 
 	const handleNext = () => {
-		const carePreferences = {
-			lookingForSelf: isPSW ? true : (lookingForSelf ?? undefined), // PSWs are always looking for themselves (providing care)
-			careType: selectedCareTypes.length ? selectedCareTypes : undefined,
-		};
-
-		if (selectedCareTypes.length > 0 || lookingForSelf !== null) {
-			dispatch(updateUserFields({ carePreferences }));
-			console.log(
-				'Care preferences updated in Redux:',
-				carePreferences,
-				userData,
-			);
+		// Update lookingForSelf at top level and carePreferences separately
+		const updates: any = {};
+		
+		// Only set lookingForSelf for non-PSW users (seekers)
+		if (!isPSW && lookingForSelf !== null) {
+			updates.lookingForSelf = lookingForSelf;
+		}
+		
+		// Check if this is family care
+		const isFamily = lookingForSelf === false;
+		
+		console.log('🔍 CARE_NEEDS_1 DEBUG:', {
+			lookingForSelf,
+			isFamily,
+			isPSW,
+			selectedCareTypes,
+			userData,
+			tempFamilyMember
+		});
+		
+		if (selectedCareTypes.length > 0) {
+			if (isFamily) {
+				// Save care types to family member
+				const updatedFamilyMember = {
+					...tempFamilyMember,
+					carePreferences: {
+						...tempFamilyMember?.carePreferences,
+						careType: selectedCareTypes,
+					}
+				};
+				console.log('Saving care types to tempFamilyMember (family care):', updatedFamilyMember);
+				dispatch(setTempFamilyMember(updatedFamilyMember));
+			} else {
+				// Save care types to core user (self care)
+				updates.carePreferences = {
+					...userData?.carePreferences,
+					careType: selectedCareTypes,
+				};
+			}
 		}
 
-		router.push('/care_needs_2'); // Move to the next page regardless
+		if (Object.keys(updates).length > 0) {
+			dispatch(updateUserFields(updates));
+			console.log('User data updated in Redux:', updates, userData);
+		}
+
+		router.push('/care_needs_2');
 	};
 
 	return (

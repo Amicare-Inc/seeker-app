@@ -1,69 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { EnrichedSession } from '@/types/EnrichedSession';
-import { useActiveSession } from '@/lib/context/ActiveSessionContext';
-import { useEnrichedSessions } from '@/features/sessions/api/queries';
+import { useSessionCompletion } from '@/lib/context/SessionCompletionContext';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
+import { useEnrichedSessions } from '@/features/sessions/api/queries';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 
 const SessionCompleted = () => {
 	const { sessionId } = useLocalSearchParams();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
+
+	// Context data
+	const { completedSession, clearCompletedSession } = useSessionCompletion();
+	// Active session context (may still hold the session)
 	const { activeEnrichedSession } = useActiveSession();
-	const { data: allSessions = [], refetch } = useEnrichedSessions(currentUser?.id);
-	const activeSession = activeEnrichedSession || allSessions.find((s) => s.id === sessionId);
-	const [retryCount, setRetryCount] = useState(0);
+	// React Query cache / network fallback
+	const { data: allSessions = [], isFetching } = useEnrichedSessions(currentUser?.id);
 
-	// Brief retry if session data not immediately available (should be rare now)
+	// Determine session data using priority order
+	const sessionData = completedSession || activeEnrichedSession || allSessions.find(s => s.id === sessionId);
+
+	// Clean up context when component unmounts (user navigates away)
 	useEffect(() => {
-		if (!activeSession && currentUser && sessionId && retryCount < 3) {
-			            // Session data not found, retrying...
-			const timer = setTimeout(() => {
-				refetch();
-				setRetryCount(prev => prev + 1);
-			}, 500); // Shorter retry interval
-			return () => clearTimeout(timer);
-		}
-	}, [activeSession, currentUser, sessionId, retryCount, refetch]);
+		return () => {
+			clearCompletedSession();
+		};
+	}, [clearCompletedSession]);
 
-	// Show loading briefly if no session data (should resolve quickly)
-	if (!activeSession || !currentUser) {
+	// Loading state if we still don't have session and query is fetching
+	if (!sessionData && isFetching) {
 		return (
-			<SafeAreaView className="flex-1 justify-center items-center bg-white px-4">
-				<Ionicons name="hourglass-outline" size={48} color="#6B7280" />
-				<Text className="text-lg font-semibold text-gray-800 mt-4 text-center">
-					Loading Session Details...
-				</Text>
-				{retryCount >= 3 && (
-					<>
-						<Text className="text-sm text-gray-500 mt-2 text-center">
-							Unable to load session details
-						</Text>
-						<TouchableOpacity
-							onPress={() => {
-								if (currentUser?.isPsw) {
-									router.push('/(dashboard)/(psw)/psw-home');
-								} else {
-									router.push('/(dashboard)/(seeker)/seeker-home');
-								}
-							}}
-							className="bg-blue-500 rounded-lg px-6 py-3 mt-4"
-						>
-							<Text className="text-white font-semibold text-center">
-								Go to Dashboard
-							</Text>
-						</TouchableOpacity>
-					</>
-				)}
+			<SafeAreaView className="flex-1 justify-center items-center bg-white">
+				<ActivityIndicator size="large" color="#6B7280" />
+				<Text className="text-sm text-gray-600 mt-4">Loading session details...</Text>
 			</SafeAreaView>
 		);
 	}
 
+	// Error fallback component
+	const ErrorFallback = ({ message = "Session data not available" }: { message?: string }) => (
+		<SafeAreaView className="flex-1 justify-center items-center bg-white px-4">
+			<Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+			<Text className="text-lg font-semibold text-gray-800 mt-4 text-center">
+				{message}
+			</Text>
+			<TouchableOpacity
+				onPress={() => {
+					clearCompletedSession();
+					if (currentUser?.isPsw) {
+						router.replace('/(dashboard)/(psw)/psw-home');
+					} else {
+						router.replace('/(dashboard)/(seeker)/seeker-home');
+					}
+				}}
+				className="bg-blue-500 rounded-lg px-6 py-3 mt-4"
+			>
+				<Text className="text-white font-semibold text-center">
+					Go to Dashboard
+				</Text>
+			</TouchableOpacity>
+		</SafeAreaView>
+	);
+
+	// Validate required data
+	if (!sessionData || !currentUser) {
+		console.warn('Session completion page: Missing session data or user data', {
+			hasSessionData: !!sessionData,
+			hasCurrentUser: !!currentUser,
+			sessionId,
+		});
+		return <ErrorFallback message="Session completion data not available" />;
+	}
+
+	// Validate session ID matches (extra safety check)
+	if (sessionData.id !== sessionId) {
+		console.warn('Session completion page: Session ID mismatch', {
+			contextSessionId: sessionData.id,
+			paramsSessionId: sessionId,
+		});
+		return <ErrorFallback message="Session data mismatch" />;
+	}
+
 	// If we have session but no otherUser, show completion without user details
-	if (!activeSession.otherUser) {
+	if (!sessionData.otherUser) {
 		return (
 			<SafeAreaView className="flex-1 justify-center items-center bg-white px-4">
 				<Ionicons name="checkmark-circle" size={48} color="#22C55E" />
@@ -75,10 +97,11 @@ const SessionCompleted = () => {
 				</Text>
 				<TouchableOpacity
 					onPress={() => {
+						clearCompletedSession();
 						if (currentUser?.isPsw) {
-							router.push('/(dashboard)/(psw)/psw-home');
+							router.replace('/(dashboard)/(psw)/psw-home');
 						} else {
-							router.push('/(dashboard)/(seeker)/seeker-home');
+							router.replace('/(dashboard)/(seeker)/seeker-home');
 						}
 					}}
 					className="bg-blue-500 rounded-lg px-6 py-3 mt-6"
@@ -91,11 +114,11 @@ const SessionCompleted = () => {
 		);
 	}
 
-	const otherUser = activeSession.otherUser;
-	const displayInfo = getSessionDisplayInfo(activeSession, currentUser);
-	const isForFamilyMember = activeSession.isForFamilyMember;
-	const careRecipient = activeSession.careRecipient;
-	const accountHolder = activeSession.otherUser;
+	const otherUser = sessionData.otherUser;
+	const displayInfo = getSessionDisplayInfo(sessionData, currentUser);
+	const isForFamilyMember = sessionData.isForFamilyMember;
+	const careRecipient = sessionData.careRecipient;
+	const accountHolder = sessionData.otherUser;
 	
 	const onReportPress = () => {
 		// TODO: Implement reporting functionality
@@ -103,10 +126,11 @@ const SessionCompleted = () => {
 	};
 
 	const goToDashboard = () => {
+		clearCompletedSession(); // Clean up context
 		if (currentUser.isPsw) {
-			router.push('/(dashboard)/(psw)/psw-home');
+			router.replace('/(dashboard)/(psw)/psw-home');
 		} else {
-			router.push('/(dashboard)/(seeker)/seeker-home');
+			router.replace('/(dashboard)/(seeker)/seeker-home');
 		}
 	};
 
@@ -162,47 +186,28 @@ const SessionCompleted = () => {
 				</Text>
 
 				{/* Action Buttons */}
-				<View className="w-full max-w-sm space-y-4">
+				<View className="w-full px-4 space-y-3">
+					{/* Dashboard Button */}
 					<TouchableOpacity
 						onPress={goToDashboard}
-						className="bg-blue-500 rounded-lg px-6 py-4"
+						className="bg-brand-blue rounded-xl p-4 items-center flex-row justify-center"
 					>
-						<Text className="text-white font-semibold text-lg text-center">
+						<Ionicons name="home" size={22} color="white" />
+						<Text className="text-white text-lg font-medium ml-3">
 							Go to Dashboard
 						</Text>
 					</TouchableOpacity>
-					
+
+					{/* Report Issue Button */}
 					<TouchableOpacity
 						onPress={onReportPress}
-						className="bg-gray-200 rounded-lg px-6 py-4"
+						className="bg-gray-100 rounded-xl p-4 items-center flex-row justify-center"
 					>
-						<Text className="text-gray-700 font-medium text-lg text-center">
+						<Ionicons name="flag" size={22} color="#6B7280" />
+						<Text className="text-gray-700 text-lg font-medium ml-3">
 							Report an Issue
 						</Text>
 					</TouchableOpacity>
-				</View>
-
-				{/* Session Details */}
-				<View className="mt-8 bg-gray-50 rounded-lg p-4 w-full max-w-sm">
-					<Text className="text-sm text-gray-500 text-center">
-						Session with {displayInfo.primaryName}
-					</Text>
-					{/* Show contact info for family member sessions */}
-					{currentUser.isPsw && isForFamilyMember && accountHolder && (
-						<Text className="text-xs text-gray-400 text-center mt-1">
-							Contact: {accountHolder.firstName} {accountHolder.lastName}
-						</Text>
-					)}
-					{activeSession.note && (
-						<Text className="text-sm text-gray-700 text-center mt-1">
-							{activeSession.note}
-						</Text>
-					)}
-					{activeSession.actualEndTime && (
-						<Text className="text-xs text-gray-400 text-center mt-2">
-							Completed at {new Date(activeSession.actualEndTime).toLocaleString()}
-						</Text>
-					)}
 				</View>
 			</View>
 		</SafeAreaView>

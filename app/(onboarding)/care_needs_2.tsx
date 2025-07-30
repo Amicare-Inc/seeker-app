@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
+import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import helpOptions from '@/assets/helpOptions';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -12,6 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 const CareNeeds2: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector((state: RootState) => state.user.userData);
+    const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
     const isPSW = userData?.isPsw;
 
     const [selectedTasks, setSelectedTasks] = useState<string[]>(
@@ -28,15 +29,40 @@ const CareNeeds2: React.FC = () => {
 
     const handleNext = () => {
         if (selectedTasks.length > 0) {
-            dispatch(
-                updateUserFields({
+            // Check if this is family care
+            const isFamily = userData?.lookingForSelf === false;
+            
+            console.log('🔍 CARE_NEEDS_2 DEBUG:', {
+                lookingForSelf: userData?.lookingForSelf,
+                isFamily,
+                selectedTasks,
+                userData,
+                tempFamilyMember
+            });
+            
+            if (isFamily) {
+                // Save tasks to family member
+                const updatedFamilyMember = {
+                    ...tempFamilyMember,
                     carePreferences: {
-                        ...userData?.carePreferences,
+                        ...tempFamilyMember?.carePreferences,
                         tasks: selectedTasks,
-                    },
-                }),
-            );
-            console.log('Tasks updated in Redux:', selectedTasks, userData);
+                    }
+                };
+                console.log('Saving tasks to tempFamilyMember (family care):', updatedFamilyMember);
+                dispatch(setTempFamilyMember(updatedFamilyMember));
+            } else {
+                // Save tasks to core user (self care)
+                dispatch(
+                    updateUserFields({
+                        carePreferences: {
+                            ...userData?.carePreferences,
+                            tasks: selectedTasks,
+                        },
+                    }),
+                );
+                console.log('Tasks updated in Redux:', selectedTasks, userData);
+            }
         }
         router.push('/care_schedule'); // Move to the next page regardless
     };

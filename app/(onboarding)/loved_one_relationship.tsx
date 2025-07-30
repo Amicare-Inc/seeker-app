@@ -59,6 +59,13 @@ const LovedOneRelationship: React.FC = () => {
                 ...tempFamilyMember,
                 relationshipToUser: finalRelationship,
             };
+            
+            console.log('🔍 LOVED_ONE_RELATIONSHIP DEBUG - Before update:', {
+                existingTempFamilyMember: tempFamilyMember,
+                finalRelationship,
+                updatedFamilyMember
+            });
+            
             dispatch(setTempFamilyMember(updatedFamilyMember));
             console.log('Updated family member with relationship:', updatedFamilyMember);
         }
@@ -104,24 +111,56 @@ const LovedOneRelationship: React.FC = () => {
 
                     {/* Relationship Options Grid - Hide when custom input is active */}
                     {!showCustomInput && (
-                        <View className="flex-wrap flex-row justify-between mb-[20px]">
-                            {relationshipOptions.map((option) => (
-                                <CustomButton
-                                    key={option}
-                                    title={option}
-                                    handlePress={() => handleRelationshipSelect(option)}
-                                    containerStyles={`mb-[12px] rounded-full w-[174px] h-[44px] min-h-[44px] ${
-                                        selectedRelationship === option
-                                            ? 'bg-brand-blue'
-                                            : 'bg-white'
-                                    }`}
-                                    textStyles={`text-sm font-medium ${
-                                        selectedRelationship === option
-                                            ? 'text-white'
-                                            : 'text-black'
-                                    }`}
-                                />
-                            ))}
+                        <View className="flex-row justify-between mb-[20px]">
+                            {(() => {
+                                const leftColumn: string[] = [];
+                                const rightColumn: string[] = [];
+                                relationshipOptions.forEach((option, idx) => {
+                                    (idx % 2 === 0 ? leftColumn : rightColumn).push(option);
+                                });
+                                return (
+                                    <>
+                                        <View className="flex-1 mr-[5px]">
+                                            {leftColumn.map((option) => (
+                                                <CustomButton
+                                                    key={option}
+                                                    title={option}
+                                                    handlePress={() => handleRelationshipSelect(option)}
+                                                    containerStyles={`mb-[12px] rounded-full w-full h-[44px] min-h-[44px] ${
+                                                        selectedRelationship === option
+                                                            ? 'bg-brand-blue'
+                                                            : 'bg-white'
+                                                    }`}
+                                                    textStyles={`text-sm font-medium ${
+                                                        selectedRelationship === option
+                                                            ? 'text-white'
+                                                            : 'text-black'
+                                                    }`}
+                                                />
+                                            ))}
+                                        </View>
+                                        <View className="flex-1 ml-[5px]">
+                                            {rightColumn.map((option) => (
+                                                <CustomButton
+                                                    key={option}
+                                                    title={option}
+                                                    handlePress={() => handleRelationshipSelect(option)}
+                                                    containerStyles={`mb-[12px] rounded-full w-full h-[44px] min-h-[44px] ${
+                                                        selectedRelationship === option
+                                                            ? 'bg-brand-blue'
+                                                            : 'bg-white'
+                                                    }`}
+                                                    textStyles={`text-sm font-medium ${
+                                                        selectedRelationship === option
+                                                            ? 'text-white'
+                                                            : 'text-black'
+                                                    }`}
+                                                />
+                                            ))}
+                                        </View>
+                                    </>
+                                );
+                            })()}
                         </View>
                     )}
 

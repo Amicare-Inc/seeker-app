@@ -7,7 +7,7 @@ import { UserCard, UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
 
 const SeekerHomeTab = () => {
-	const { users, loading, error } = useHomeTab(true);
+	const { users, isLoading, error } = useHomeTab(true, true); // isPsw = true, withDistance = true
 	const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
 	const handleCardPress = (userId: string) => {
@@ -62,13 +62,13 @@ const SeekerHomeTab = () => {
 			</View>
 
 			{/* Main content */}
-			{loading ? (
+			{isLoading ? (
 				<View className="flex-1 items-center justify-center">
 					<ActivityIndicator size="large" color="#000" />
 				</View>
 			) : error ? (
 				<View className="flex-1 items-center justify-center">
-					<Text className="text-black">Error: {error}</Text>
+					<Text className="text-black">Error: {error.message}</Text>
 				</View>
 			) : (
 				<FlatList

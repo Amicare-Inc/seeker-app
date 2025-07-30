@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ForumField } from '@/shared/components';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
@@ -9,8 +8,7 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
 import { DatePickerField } from '@/shared/components';
-import { RegionValidatedAddressInput } from '@/shared/components';
-import { type AddressComponents } from '@/services/google/googlePlacesService';
+import { Ionicons } from '@expo/vector-icons';
 
 const FamilyPersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -20,14 +18,6 @@ const FamilyPersonalDetails: React.FC = () => {
 		firstName: '',
 		lastName: '',
 		dob: '',
-		address: {
-			fullAddress: '',
-			street: '',
-			city: '',
-			province: '',
-			country: '',
-			postalCode: '',
-		},
 		gender: '',
 	});
 
@@ -35,37 +25,37 @@ const FamilyPersonalDetails: React.FC = () => {
 		firstName: '',
 		lastName: '',
 		dob: '',
-		address: '',
 		gender: '',
 	});
 
-	const [isAddressValid, setIsAddressValid] = useState(false);
+	const [showGenderModal, setShowGenderModal] = useState(false);
+	const [focusedFields, setFocusedFields] = useState({
+		firstName: false,
+		lastName: false,
+	});
+
+	const genderOptions = ['Male', 'Female'];
 
 	const handleInputChange = (field: string, value: string) => {
 		setForm({ ...form, [field]: value });
 		setErrors({ ...errors, [field]: '' });
 	};
 
-	const handleAddressSelected = (addressData: AddressComponents) => {
-		setForm({
-			...form,
-			address: {
-				fullAddress: addressData.fullAddress,
-				street: addressData.street,
-				city: addressData.city,
-				province: addressData.province,
-				country: addressData.country,
-				postalCode: addressData.postalCode,
-			}
+	const handleFocus = (field: string) => {
+		setFocusedFields({
+			firstName: false,
+			lastName: false,
+			[field]: true
 		});
-		setErrors({ ...errors, address: '' });
 	};
 
-	const handleAddressValidation = (isValid: boolean, error?: string) => {
-		setIsAddressValid(isValid);
-		if (!isValid && error) {
-			setErrors({ ...errors, address: error });
-		}
+	const handleBlur = (field: string) => {
+		setFocusedFields({ ...focusedFields, [field]: false });
+	};
+
+	const handleGenderSelect = (gender: string) => {
+		handleInputChange('gender', gender);
+		setShowGenderModal(false);
 	};
 
 	const validateForm = async () => {
@@ -73,13 +63,7 @@ const FamilyPersonalDetails: React.FC = () => {
 		if (!form.firstName) newErrors.firstName = 'First name is required';
 		if (!form.lastName) newErrors.lastName = 'Last name is required';
 		if (!form.dob) newErrors.dob = 'Date of birth is required';
-		if (!form.address.fullAddress) newErrors.address = 'Address is required';
 		if (!form.gender) newErrors.gender = 'Gender is required';
-
-		// Address validation is now handled by the RegionValidatedAddressInput component
-		if (!isAddressValid) {
-			newErrors.address = 'Please select a valid address from the suggestions';
-		}
 
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
@@ -113,80 +97,102 @@ const FamilyPersonalDetails: React.FC = () => {
 					contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}
 					keyboardShouldPersistTaps="handled"
 				>
-					<View className="flex w-full h-full justify-center px-9">
-						<Text className="text-3xl text-black font-normal text-left mb-3">
-							Tell us about your loved one...
-						</Text>
+					<View className="px-[16px]">
+						<View className="flex-row items-center mb-[22px]">
+							<TouchableOpacity className="absolute" onPress={() => router.back()}>
+								<Ionicons name="chevron-back" size={24} color="#000" />
+							</TouchableOpacity>
+							<Text className="text-xl font-medium mx-auto text-center">
+								Tell us about your loved one...
+							</Text>
+						</View>
+
 						<Text className="text-xs text-gray-500 font-normal text-left mb-4">
 							This information helps us find the right caregiver for your family member and ensures proper care coordination.
 						</Text>
 
-						<ForumField
-							title="First Name"
-							value={form.firstName}
-							handleChangeText={(e) => handleInputChange('firstName', e)}
-							otherStyles="mb-4"
-						/>
-						{errors.firstName ? (
-							<Text className="text-red-500 text-xs">
-								{errors.firstName}
-							</Text>
-						) : null}
+						{/* First Name */}
+						<View className="mb-4">
+							<Text className="text-sm font-medium text-grey-80 mb-2">First Name</Text>
+							<TextInput
+								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+									focusedFields.firstName ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="First Name"
+								placeholderTextColor="#9D9DA1"
+								value={form.firstName}
+								onChangeText={(value) => handleInputChange('firstName', value)}
+								onFocus={() => handleFocus('firstName')}
+								onBlur={() => handleBlur('firstName')}
+							/>
+							{errors.firstName ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.firstName}
+								</Text>
+							) : null}
+						</View>
 
-						<ForumField
-							title="Last Name"
-							value={form.lastName}
-							handleChangeText={(e) => handleInputChange('lastName', e)}
-							otherStyles="mb-4"
-						/>
-						{errors.lastName ? (
-							<Text className="text-red-500 text-xs">
-								{errors.lastName}
-							</Text>
-						) : null}
+						{/* Last Name */}
+						<View className="mb-4">
+							<Text className="text-sm font-medium text-grey-80 mb-2">Last Name</Text>
+							<TextInput
+								className={`bg-white rounded-lg px-3 py-2.5 text-lg text-black font-medium ${
+									focusedFields.lastName ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="Last Name"
+								placeholderTextColor="#9D9DA1"
+								value={form.lastName}
+								onChangeText={(value) => handleInputChange('lastName', value)}
+								onFocus={() => handleFocus('lastName')}
+								onBlur={() => handleBlur('lastName')}
+							/>
+							{errors.lastName ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.lastName}
+								</Text>
+							) : null}
+						</View>
 
-						<DatePickerField
-							title="Date of Birth"
-							value={form.dob}
-							onDateChange={(date) => handleInputChange('dob', date)}
-							otherStyles="mb-4"
-						/>
-						{errors.dob ? (
-							<Text className="text-red-500 text-xs">
-								{errors.dob}
-							</Text>
-						) : null}
+						{/* Date of Birth */}
+						<View className="mb-4">
+							<Text className="text-sm font-medium text-grey-80 mb-2">Date of Birth</Text>
+							<DatePickerField
+								title=""
+								value={form.dob}
+								onDateChange={(date) => handleInputChange('dob', date)}
+								otherStyles="bg-white rounded-lg border border-gray-200"
+							/>
+							{errors.dob ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.dob}
+								</Text>
+							) : null}
+						</View>
 
-						<RegionValidatedAddressInput
-							placeholder="Address"
-							initialValue={form.address.fullAddress}
-							onAddressSelected={handleAddressSelected}
-							onValidationResult={handleAddressValidation}
-							otherStyles="mb-4"
-						/>
-						{errors.address ? (
-							<Text className="text-red-500 text-xs">
-								{errors.address}
-							</Text>
-						) : null}
-
-						<ForumField
-							title="Gender"
-							value={form.gender}
-							handleChangeText={(e) => handleInputChange('gender', e)}
-							otherStyles="mb-4"
-						/>
-						{errors.gender ? (
-							<Text className="text-red-500 text-xs">
-								{errors.gender}
-							</Text>
-						) : null}
+						{/* Gender Dropdown */}
+						<View className="mb-4">
+							<Text className="text-sm font-medium text-grey-80 mb-2">Gender</Text>
+							<TouchableOpacity
+								className={`bg-white rounded-lg px-3 py-2.5 border border-gray-200 flex-row justify-between items-center`}
+								onPress={() => setShowGenderModal(true)}
+							>
+								<Text className={`text-lg font-medium ${form.gender ? 'text-black' : 'text-[#9D9DA1]'}`}>
+									{form.gender || 'Select Gender'}
+								</Text>
+								<Ionicons name="chevron-down" size={20} color="#9D9DA1" />
+							</TouchableOpacity>
+							{errors.gender ? (
+								<Text className="text-red-500 text-xs mt-1">
+									{errors.gender}
+								</Text>
+							) : null}
+						</View>
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
 			
-			{/* Fixed Continue Button - stays at bottom */}
-			<View className="px-9 pb-4">
+			{/* Continue Button */}
+			<View className="px-[16px] pb-4">
 				<CustomButton
 					title="Continue"
 					handlePress={handleContinue}
@@ -194,6 +200,35 @@ const FamilyPersonalDetails: React.FC = () => {
 					textStyles="text-white text-lg"
 				/>
 			</View>
+
+			{/* Gender Selection Modal */}
+			<Modal
+				visible={showGenderModal}
+				transparent={true}
+				animationType="slide"
+				onRequestClose={() => setShowGenderModal(false)}
+			>
+				<View className="flex-1 justify-end bg-black/50">
+					<View className="bg-white rounded-t-xl p-6">
+						<View className="flex-row justify-between items-center mb-4">
+							<Text className="text-lg font-semibold">Select Gender</Text>
+							<TouchableOpacity onPress={() => setShowGenderModal(false)}>
+								<Ionicons name="close" size={24} color="#000" />
+							</TouchableOpacity>
+						</View>
+						{genderOptions.map((option) => (
+							<TouchableOpacity
+								key={option}
+								className="py-4 border-b border-gray-100"
+								onPress={() => handleGenderSelect(option)}
+							>
+								<Text className="text-lg font-medium text-black">{option}</Text>
+							</TouchableOpacity>
+						))}
+					</View>
+				</View>
+			</Modal>
+
 			<StatusBar backgroundColor="#F5F5F5" style="dark" />
 		</SafeAreaView>
 	);

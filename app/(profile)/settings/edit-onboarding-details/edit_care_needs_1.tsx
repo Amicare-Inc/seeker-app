@@ -16,7 +16,7 @@ const CareNeeds1: React.FC = () => {
 	const isPSW = userData?.isPsw;
 
 	const [lookingForSelf, setLookingForSelf] = useState<boolean | null>(
-		userData?.carePreferences?.lookingForSelf || null,
+		userData?.lookingForSelf || null,
 	);
 	const [selectedCareTypes, setSelectedCareTypes] = useState<string[]>(
 		userData?.carePreferences?.careType || [],
@@ -31,21 +31,27 @@ const CareNeeds1: React.FC = () => {
 	};
 
 	const handleNext = () => {
-		const carePreferences = {
-			lookingForSelf: isPSW ? false : (lookingForSelf ?? undefined),
-			careType: selectedCareTypes.length ? selectedCareTypes : undefined,
-		};
-
-		if (selectedCareTypes.length > 0 || lookingForSelf !== null) {
-			dispatch(updateUserFields({ carePreferences }));
-			console.log(
-				'Care preferences updated in Redux:',
-				carePreferences,
-				userData,
-			);
+		// Update lookingForSelf at top level and carePreferences separately
+		const updates: any = {};
+		
+		// Only set lookingForSelf for non-PSW users (seekers)
+		if (!isPSW && lookingForSelf !== null) {
+			updates.lookingForSelf = lookingForSelf;
+		}
+		
+		if (selectedCareTypes.length > 0) {
+			updates.carePreferences = {
+				...userData?.carePreferences,
+				careType: selectedCareTypes,
+			};
 		}
 
-		router.replace('/(profile)/settings/edit-onboarding-details/edit_care_needs_2');
+		if (Object.keys(updates).length > 0) {
+			dispatch(updateUserFields(updates));
+			console.log('Care preferences updated in Redux:', updates, userData);
+		}
+
+		router.push('/care_needs_2'); // Move to the next page regardless
 	};
 
 	return (

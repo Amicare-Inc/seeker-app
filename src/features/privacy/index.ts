@@ -1,0 +1,1 @@
+export { PrivacyPolicyLink, PrivacyPolicyModal } from './components/PrivacyPolicyModal'; 

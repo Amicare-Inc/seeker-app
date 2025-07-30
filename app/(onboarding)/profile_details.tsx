@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
+import { updateUserFields, clearTempAvailability } from '@/redux/userSlice';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadPhotoToFirebase } from '@/services/firebase/storage';
 import { router } from 'expo-router';
@@ -14,9 +14,13 @@ import { AuthApi } from '@/features/auth/api/authApi';
 const AddProfilePhoto: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
+	const tempAvailability = useSelector((state: RootState) => state.user.tempAvailability);
 	const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
 	const [bio, setBio] = useState<string>(''); // Initialize empty, don't use userData.bio as it might contain family member data
 	const [isBioFocused, setIsBioFocused] = useState<boolean>(false);
+
+	// Determine if bio should be shown - Updated to check isPsw first
+	const shouldShowBio = userData?.isPsw || userData?.lookingForSelf === true;
 
 	const handlePhotoSelect = async () => {
 		const result = await ImagePicker.launchImageLibraryAsync({
@@ -50,31 +54,60 @@ const AddProfilePhoto: React.FC = () => {
 			}
 			
 			// Update local state
-			dispatch(updateUserFields({ 
+			const updateData: any = { 
 				profilePhotoUrl: profilePhotoUrl,
-				bio: bio
-			}));
-			
+				onboardingComplete: true
+			};
+
+			// Only include bio if it should be shown
+			if (shouldShowBio) {
+				updateData.bio = bio;
+			}
+
+			dispatch(updateUserFields(updateData));
+
 			// Send optional info to backend
 			if (userData?.id) {
 				// Filter out undefined values
 				const optionalInfoData: any = {
 					profilePhotoUrl: profilePhotoUrl,
-					bio: bio,
-					onboardingComplete: true
+					lookingForSelf: userData.lookingForSelf, // Add lookingForSelf as separate parameter
 				};
-				
-				if (userData.carePreferences !== undefined) {
-					optionalInfoData.carePreferences = userData.carePreferences;
+
+				// Only include bio if it should be shown
+				if (shouldShowBio) {
+					optionalInfoData.bio = bio;
 				}
+				
+				// Only save care preferences for self care, not family care
+				console.log('tempAvailability from Redux:', tempAvailability);
+				console.log('existing carePreferences:', userData.carePreferences);
+				
+				// Check if this is self care or family care
+				const isFamily = userData.lookingForSelf === false;
+				console.log('Is family care:', isFamily);
+				
+				// Only include care preferences if this is self care
+				if (!isFamily && (userData.carePreferences !== undefined || tempAvailability)) {
+					optionalInfoData.carePreferences = {
+						...userData.carePreferences,
+						...(tempAvailability && { availability: tempAvailability })
+					};
+					console.log('final carePreferences being sent (self care):', optionalInfoData.carePreferences);
+				} else if (isFamily) {
+					console.log('Skipping care preferences for family care - they are saved with family member');
+				}
+				
 				if (userData.idVerified !== undefined) {
 					optionalInfoData.idVerified = userData.idVerified;
 				}
 				
 				await AuthApi.addOptionalInfo(userData.id, optionalInfoData);
 				
-				// Check if user is in family flow
-				const lookingForSelf = userData?.carePreferences?.lookingForSelf;
+				// Clear temp availability after successful save (only for self care)
+				if (!isFamily && tempAvailability) {
+					dispatch(clearTempAvailability());
+				}
 				
 				// Always show success alert for profile completion
 				Alert.alert(
@@ -140,65 +173,47 @@ const AddProfilePhoto: React.FC = () => {
 						</Text>
 					</View>
 
-					{/* Bio Section */}
-					<View className="mb-[32px]">
-						<View className="flex-row items-center mb-[14px] mx-auto">
-							<Text className="text-lg text-grey-80 font-bold">
-								Add bio (Optional)
-							</Text>
-							<View className="ml-1">
-								<Ionicons name="information-circle-outline" size={22} color="#303031" />
+					{/* Bio Section - Conditional */}
+					{shouldShowBio && (
+						<View className="mb-[32px]">
+							<View className="flex-row items-center mb-[14px] mx-auto">
+								<Text className="text-lg text-grey-80 font-bold">
+									Add bio (Optional)
+								</Text>
+								<View className="ml-1">
+									<Ionicons name="information-circle-outline" size={22} color="#303031" />
+								</View>
 							</View>
+
+							<TextInput
+								className={`bg-white rounded-lg px-3 py-2 text-base font-medium text-black min-h-[158px] ${
+									isBioFocused ? 'border-2 border-brand-blue' : 'border border-gray-200'
+								}`}
+								placeholder="Briefly describe yourself and what kind of care you provide."
+								placeholderTextColor="#9D9DA1"
+								value={bio}
+								onChangeText={setBio}
+								onFocus={() => setIsBioFocused(true)}
+								onBlur={() => setIsBioFocused(false)}
+								multiline
+								textAlignVertical="top"
+							/>
 						</View>
-
-						<TextInput
-							className={`bg-white rounded-lg px-3 py-2 text-base font-medium text-black min-h-[158px] ${
-								isBioFocused ? 'border-2 border-brand-blue' : 'border border-gray-200'
-							}`}
-							placeholder="Briefly describe yourself and what kind of care you provide."
-							placeholderTextColor="#9D9DA1"
-							value={bio}
-							onChangeText={setBio}
-							onFocus={() => setIsBioFocused(true)}
-							onBlur={() => setIsBioFocused(false)}
-							multiline
-							textAlignVertical="top"
-						/>
-					</View>
-
-					{/* Checkbox Section */}
-					{/* <View className="flex-row items-start mb-[32px]">
-						<TouchableOpacity
-							className={`w-5 h-5 rounded border-2 mr-3 mt-0.5 items-center justify-center ${
-								isChecked ? 'bg-brand-blue border-brand-blue' : 'border-gray-300'
-							}`}
-							onPress={() => setIsChecked(!isChecked)}
-						>
-							{isChecked && (
-								<Ionicons name="checkmark" size={14} color="white" />
-							)}
-						</TouchableOpacity>
-						<Text className="text-xs text-grey-49 flex-1">
-							<Text className="font-medium">
-								TODO add something here
-							</Text>
-						</Text>
-					</View> */}
-
+					)}
 
 				</View>
 			</ScrollView>
 
 			{/* Finish Button */}
 			<View className="px-[16px]">
-									{/* Privacy Notice */}
-					<View className="flex flex-row mb-[20px] gap-[14px]">
-						<Ionicons name="information-circle" size={28} color="#BFBFC3" />
-						<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
-							By continuing, you agree to the public display of your profile (name, photo, bio, neighbourhood, availability, and language) to all users. You can control profile visibility in your profile settings. Learn more in our{' '}
-							<Text className="text-brand-blue">Privacy Policy</Text>.
-						</Text>
-					</View>
+				{/* Privacy Notice */}
+				<View className="flex flex-row mb-[20px] gap-[14px]">
+					<Ionicons name="information-circle" size={28} color="#BFBFC3" />
+					<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
+						By continuing, you agree to the public display of your profile (name, photo, bio, neighbourhood, availability, and language) to all users. You can control profile visibility in your profile settings. Learn more in our{' '}
+						<Text className="text-brand-blue">Privacy Policy</Text>.
+					</Text>
+				</View>
 				<CustomButton
 					title="Finish"
 					handlePress={handleDone}
