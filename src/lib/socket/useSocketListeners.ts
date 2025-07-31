@@ -26,7 +26,7 @@ export const useSocketListeners = (userId?: string) => {
     }
   }, [socket, userId]);
 
-  // Monitor connection health and attempt reconnection if needed
+  // Monitor connection health and attempt reconnection if needed - enhanced for iOS
   useEffect(() => {
     if (!userId) return;
 
@@ -36,7 +36,7 @@ export const useSocketListeners = (userId?: string) => {
         socketLogger.warn('Socket health check failed - attempting reconnection', { userId });
         connectSocket(userId);
       }
-    }, 15000); // Check every 15 seconds
+    }, 10000); // Reduced from 15000 to 10000 for better iOS reliability
 
     return () => clearInterval(healthCheck);
   }, [userId]);

@@ -36,7 +36,7 @@ export const connectSocket = async (userId: string) => {
   try {
     socketLogger.info('Connecting socket', { userId });
 
-    // ✅ Production-ready socket configuration
+    // ✅ Production-ready socket configuration with iOS enhancements
     socket = io(process.env.EXPO_PUBLIC_BACKEND_BASE_URL, {
       query: { userId },
       
@@ -44,21 +44,25 @@ export const connectSocket = async (userId: string) => {
       transports: ['websocket', 'polling'], // Allow fallback to long-polling
       upgrade: true, // Allow transport upgrades
       
-      // ✅ Reconnection settings
+      // ✅ Reconnection settings - more aggressive for iOS
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10, // Increased from 5 for iOS
+      reconnectionDelay: 500, // Reduced from 1000 for faster iOS reconnection
+      reconnectionDelayMax: 3000, // Reduced from 5000 for iOS
       
-      // ✅ Connection timeout
-      timeout: 10000,
+      // ✅ Connection timeout - reduced for faster iOS failover
+      timeout: 5000, // Reduced from 10000
       
       // ✅ Force new connection
       forceNew: true,
       
-      // ✅ Additional production settings
-      randomizationFactor: 0.5,
+      // ✅ Additional production settings with iOS optimizations
+      randomizationFactor: 0.3, // Reduced for more predictable iOS reconnection
       autoConnect: true,
+      
+      // ✅ Enhanced for iOS WebSocket reliability
+      rememberUpgrade: false, // Don't remember transport upgrades for iOS consistency
+      forceBase64: false, // Allow binary for better iOS performance
     });
 
           // ✅ Enhanced connection event handlers with production reliability
@@ -81,7 +85,7 @@ export const connectSocket = async (userId: string) => {
             socketLogger.warn('Heartbeat stopped - socket disconnected', { userId });
             clearInterval(heartbeatInterval);
           }
-        }, 30000); // Every 30 seconds
+        }, 15000); // Reduced from 30000 to 15000 for better iOS reliability
         
         // Store interval reference for cleanup
         (socket as any).heartbeatInterval = heartbeatInterval;
@@ -212,7 +216,7 @@ const rejoinActiveRooms = () => {
   });
 };
 
-// ✅ App state handling for production reliability
+// ✅ App state handling for production reliability with iOS enhancements
 const setupAppStateHandling = (userId: string) => {
   // Remove existing subscription
   if (appStateSubscription) {
@@ -223,14 +227,21 @@ const setupAppStateHandling = (userId: string) => {
     socketLogger.debug('App state changed', { nextAppState, userId });
 
     if (nextAppState === 'active') {
-      // App became active - check socket connection
+      // App became active - check socket connection more aggressively on iOS
       if (!socket || !socket.connected) {
         socketLogger.info('App became active - reconnecting socket', { userId });
         connectSocket(userId);
       }
+      // Force rejoin rooms on iOS app activation
+      setTimeout(() => {
+        rejoinActiveRooms();
+      }, 100);
     } else if (nextAppState === 'background') {
       // App went to background - socket will handle this automatically
       socketLogger.debug('App went to background', { userId });
+    } else if (nextAppState === 'inactive') {
+      // iOS-specific: App became inactive (during call, control center, etc.)
+      socketLogger.debug('App became inactive', { userId });
     }
   });
 };
