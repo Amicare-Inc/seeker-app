@@ -68,7 +68,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 						<>
 							{/* Family member photo (main position) */}
 							<Image
-								source={{ uri: primaryPhoto || 'https://via.placeholder.com/50' }}
+								source={
+									primaryPhoto
+										? { uri: primaryPhoto }
+										: require('@/assets/default-profile.png')
+								}
 								className="w-[44px] h-[44px] rounded-full"
 								style={{ 
 									zIndex: 2,
@@ -80,7 +84,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 							/>
 							{/* Core user photo (slight overlap to the right) */}
 							<Image
-								source={{ uri: secondaryPhoto || 'https://via.placeholder.com/50' }}
+								source={
+									secondaryPhoto
+										? { uri: secondaryPhoto }
+										: require('@/assets/default-profile.png')
+								}
 								className="w-[44px] h-[44px] rounded-full absolute"
 								style={{ 
 									right: -20,
@@ -95,9 +103,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 						</>
 					) : (
 						<Image
-							source={{
-								uri: primaryPhoto || 'https://via.placeholder.com/50',
-							}}
+							source={
+								primaryPhoto
+									? { uri: primaryPhoto }
+									: require('@/assets/default-profile.png')
+							}
 							className="w-[44px] h-[44px] rounded-full"
 							style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
 						/>

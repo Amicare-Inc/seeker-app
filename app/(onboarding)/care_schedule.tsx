@@ -209,33 +209,24 @@ const CareSchedule: React.FC = () => {
 		// Check if this is family care or self care
 		const isFamily = userData?.lookingForSelf === false;
 		
-		console.log('🔍 CARE_SCHEDULE DEBUG:', {
-			lookingForSelf: userData?.lookingForSelf,
-			isFamily,
-			convertedAvailability,
-			userData,
-			tempFamilyMember
-		});
-		
 		if (isFamily) {
 			// Save availability to family member
 			const updatedFamilyMember = {
 				...tempFamilyMember,
 				carePreferences: {
 					...tempFamilyMember?.carePreferences,
-					availability: convertedAvailability
+					availability: convertedAvailability,
 				}
 			};
-			console.log('Saving availability to tempFamilyMember (family care):', updatedFamilyMember);
+			console.log('Saving availability to tempFamilyMember (family care):', convertedAvailability);
 			dispatch(setTempFamilyMember(updatedFamilyMember));
 		} else {
-			// Save availability to core user (self care)
-			console.log('Saving availability to tempAvailability (self care):', convertedAvailability);
+			// Save availability to core user (self care) 
 			dispatch(setTempAvailability(convertedAvailability));
+			console.log('Saving availability to tempAvailability (self care):', convertedAvailability);
 		}
-		
-		// Navigate to next page
-		handleNext();
+
+		router.push('/caregiver_preferences');
 	};
 
 	return (

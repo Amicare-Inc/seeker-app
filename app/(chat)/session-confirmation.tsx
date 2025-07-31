@@ -40,19 +40,14 @@ const SessionConfirmation = () => {
 			{/* Main Content */}
 			<View className="flex-1 justify-center items-center px-4">
 				{/* Profile Photo */}
-				<View className="mb-4">
-					{otherUser.profilePhotoUrl ? (
-						<Image
-							source={{ uri: otherUser.profilePhotoUrl }}
-							className="w-36 h-36 rounded-full"
-						/>
-					) : (
-						<Image
-							source={{ uri: 'https://via.placeholder.com/100' }}
-							className="w-24 h-24 rounded-full"
-						/>
-					)}
-				</View>
+				<Image
+					source={
+						otherUser.profilePhotoUrl
+							? { uri: otherUser.profilePhotoUrl }
+							: require('@/assets/default-profile.png')
+					}
+					className="w-20 h-20 rounded-full mb-4"
+				/>
 
 				{/* Header */}
 				<View className="flex-row items-center mb-2">

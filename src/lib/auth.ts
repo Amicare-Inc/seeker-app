@@ -42,4 +42,24 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
  */
 export const isAuthenticated = (): boolean => {
   return !!FIREBASE_AUTH.currentUser;
+};
+
+/**
+ * Get the current user's Firebase UID
+ */
+export const getCurrentUserUid = (): string | null => {
+  const user = FIREBASE_AUTH.currentUser;
+  return user?.uid || null;
+};
+
+/**
+ * Wait for auth state to be ready
+ */
+export const waitForAuth = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const unsubscribe = FIREBASE_AUTH.onAuthStateChanged((user) => {
+      unsubscribe();
+      resolve(!!user);
+    });
+  });
 }; 

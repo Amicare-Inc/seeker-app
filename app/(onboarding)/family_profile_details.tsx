@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { uploadPhotoToFirebase } from '@/services/firebase/storage';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { getCurrentUserUid } from '@/lib/auth';
 
 const FamilyProfileDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -40,12 +41,13 @@ const FamilyProfileDetails: React.FC = () => {
 			console.log('🔍 FAMILY_PROFILE_DETAILS DEBUG - tempFamilyMember at start:', tempFamilyMember);
 			console.log('🔍 FAMILY_PROFILE_DETAILS DEBUG - userData:', userData);
 			
+			const currentUserUid = getCurrentUserUid();
 			let familyMemberPhotoUrl = '';
 			
 			// Upload photo if selected
-			if (localPhotoUri && userData?.id) {
+			if (localPhotoUri && currentUserUid) {
 				familyMemberPhotoUrl = await uploadPhotoToFirebase(
-					`${userData.id}_family_${Date.now()}`,
+					`${currentUserUid}_family_${Date.now()}`,
 					localPhotoUri,
 				);
 				console.log('Family member photo uploaded:', familyMemberPhotoUrl);
@@ -86,9 +88,10 @@ const FamilyProfileDetails: React.FC = () => {
 			}
 
 			// Send family member data to backend
-			if (userData?.id) {
+			if (currentUserUid) {
 				try {
-					const result = await FamilyApi.addFamilyMember(userData.id, cleanedData);
+					console.log('🔍 FAMILY_PROFILE_DETAILS DEBUG - Using UID:', currentUserUid);
+					const result = await FamilyApi.addFamilyMember(currentUserUid, cleanedData);
 					console.log('Family member saved to Firestore:', result);
 					
 					// Clear temporary family member data from Redux
@@ -102,10 +105,17 @@ const FamilyProfileDetails: React.FC = () => {
 					console.error('Error saving family member to Firestore:', error);
 					Alert.alert(
 						'Error',
-						'Failed to save family member. Please try again.',
+						`Failed to save family member: ${error instanceof Error ? error.message : 'Unknown error'}`,
 					);
 					return;
 				}
+			} else {
+				console.error('No authenticated user UID found');
+				Alert.alert(
+					'Error',
+					'Authentication error. Please sign in again.',
+				);
+				return;
 			}
 
 			console.log('Family member profile details saved');

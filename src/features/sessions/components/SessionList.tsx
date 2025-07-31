@@ -44,10 +44,11 @@ const SessionList: React.FC<SessionListProps> = ({
 				className="items-center mr-6"
 			>
 				<Image
-					source={{
-						uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
-					}}
-					// Add border-2 from Tailwind, and override the color inline
+					source={
+						displayInfo.primaryPhoto
+							? { uri: displayInfo.primaryPhoto }
+							: require('@/assets/default-profile.png')
+					}
 					className="w-[78px] h-[78px] rounded-full border-4"
 					style={{ borderColor }}
 				/>
@@ -101,9 +102,11 @@ const SessionList: React.FC<SessionListProps> = ({
 									className="items-center mr-6"
 								>
 									<Image
-										source={{
-											uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
-										}}
+										source={
+											displayInfo.primaryPhoto
+												? { uri: displayInfo.primaryPhoto }
+												: require('@/assets/default-profile.png')
+										}
 										className="w-[78px] h-[78px] rounded-full border-4"
 										style={{ borderColor }}
 									/>

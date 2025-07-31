@@ -19,9 +19,11 @@ export default function Index() {
         if (!isTermsAccepted) {
             setShowErrorMessage(true);
             return;
+        } else {
+            console.log('GOING TO SIGN UP', isPsw);
+            await dispatch(updateUserFields({ isPsw }));
+            router.push('/sign-up-method');
         }
-        dispatch(updateUserFields({ isPsw }));
-        router.push('/sign-up');
     };
 
     const handleTermsToggle = () => {
@@ -105,11 +107,11 @@ export default function Index() {
                         </View>
                     )}
                     <TouchableOpacity 
-                        className="flex-row mb-[40px] w-full mx-auto justify-center"
+                        className="flex-row mb-[40px] w-full items-start"
                         onPress={handleTermsToggle}
                     >
                         <View
-                            className={`w-5 h-5 mr-3 mt-1 rounded-md bg-white border items-center justify-center ${
+                            className={`w-5 h-5 mr-3 mt-1 rounded-md bg-white border items-center justify-center flex-shrink-0 ${
                                 isTermsAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
                             }`}
                         >
@@ -118,18 +120,16 @@ export default function Index() {
                             )}
                         </View>
 
-                        <View className="flex-col flex-wrap">
+                        <View className="flex-1">
                             <Text className="text-sm text-black font-medium">
                                 By continuing, you agree with Amicare's{' '}
+                                <Text className="text-sm font-medium text-brand-blue">Terms of Use</Text>
+                                {' and '}
+                                <PrivacyPolicyLink 
+                                    textStyle={{ fontSize: 14, fontWeight: '500' }} 
+                                    onPress={() => setShowPrivacyModal(true)}
+                                />
                             </Text>
-                            <View className="flex-row items-center">
-                            <Text className="text-sm font-medium text-brand-blue">Terms of Use</Text>
-                            <Text className="text-sm text-black font-medium">{' and '}</Text>
-                            <PrivacyPolicyLink 
-                                textStyle={{ fontSize: 14, fontWeight: '500' }} 
-                                onPress={() => setShowPrivacyModal(true)}
-                            />
-                            </View>
                         </View>
                     </TouchableOpacity>
                     <Text className="text-center">

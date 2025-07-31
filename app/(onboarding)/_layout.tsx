@@ -9,16 +9,6 @@ const OnboardingLayout = () => {
 				name="personal_details"
 				options={{ headerShown: false }}
 			/>
-			<Stack.Screen name="onboard1" options={{ headerShown: false }} />
-			<Stack.Screen name="tasks" options={{ headerShown: false }} />
-			<Stack.Screen
-				name="availability"
-				options={{ headerShown: false }}
-			/>
-			<Stack.Screen
-				name="add_profile_photo"
-				options={{ headerShown: false }}
-			/>
 			<Stack.Screen
 				name="verification_prompt"
 				options={{ headerShown: false }}
@@ -34,9 +24,8 @@ const OnboardingLayout = () => {
 			<Stack.Screen name="care_schedule" options={{ headerShown: false }} />
 			<Stack.Screen name="caregiver_preferences" options={{ headerShown: false }} />
 			<Stack.Screen name="profile_details" options={{ headerShown: false }} />
-			<Stack.Screen name="about_loved_one" options={{ headerShown: false }} />\
+			<Stack.Screen name="about_loved_one" options={{ headerShown: false }} />
 			<Stack.Screen name="family_personal_details" options={{ headerShown: false }} />
-			<Stack.Screen name="family_bio_photo" options={{ headerShown: false }} />
 			<Stack.Screen name="loved_one_relationship" options={{ headerShown: false }} />
 			<Stack.Screen name="family_profile_details" options={{ headerShown: false }} />
 			<Stack.Screen name="stripe-onboarding" options={{ headerShown: false }} />

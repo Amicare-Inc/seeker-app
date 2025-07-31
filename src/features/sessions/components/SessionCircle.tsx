@@ -16,9 +16,11 @@ const SessionCircle: React.FC<SessionCircleProps> = ({
 		<TouchableOpacity onPress={onPress}>
 			<View className="flex items-center justify-center mb-0 ml-2">
 				<Image
-					source={{
-						uri: photoURL || 'https://via.placeholder.com/50',
-					}}
+					source={
+						photoURL
+							? { uri: photoURL }
+							: require('@/assets/default-profile.png')
+					}
 					className="w-16 h-16 rounded-full border-2 border-blue-500"
 				/>
 				<Text className="text-black mt-2">{firstName}</Text>

@@ -17,6 +17,7 @@ const genderOptions = ['Male', 'Female', 'Other'];
 const PersonalDetails: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
+	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
 
 	const [form, setForm] = useState({
 		firstName: userData?.firstName || 'Martin',
@@ -118,18 +119,34 @@ const PersonalDetails: React.FC = () => {
 		if (await validateForm()) {
 			try {
 				const userId = userData?.id;
+				
 				if (!userId) {
-					console.error('User ID is missing');
-					return;
+					throw new Error('User ID not found in Redux state');
 				}
-				dispatch(updateUserFields(form));
-				
-				const criticalInfoData = {...form, isPsw: userData!.isPsw};
-				console.log('Sending critical info to backend:', criticalInfoData);
-				
+
+				const criticalInfoData = {
+					isPsw: userData?.isPsw || false,
+					firstName: form.firstName,
+					lastName: form.lastName,
+					dob: form.dob,
+					address: form.address,
+					phone: form.phone,
+					email: form.email,
+					gender: form.gender,
+				};
+
 				await AuthApi.addCriticalInfo(userId, criticalInfoData);
-				console.log('Critical info sent successfully from personal_details');
-				
+
+				// Update Redux with the personal details
+				dispatch(updateUserFields({
+					firstName: form.firstName,
+					lastName: form.lastName,
+					dob: form.dob,
+					address: form.address,
+					phone: form.phone,
+					gender: form.gender,
+				}));
+
 				router.push('/verification_prompt');
 			} catch (error) {
 				console.error('Error saving user details:', error);
@@ -233,7 +250,7 @@ const PersonalDetails: React.FC = () => {
 								<DatePickerField
 									title=""
 									value={form.dob}
-									onDateChange={(date) => handleInputChange('dob', date)}
+									onDateChange={(date: string) => handleInputChange('dob', date)}
 									otherStyles="bg-white border border-gray-200 rounded-lg"
 								/>
 								{errors.dob ? (

@@ -18,11 +18,11 @@ const SessionDetailsCard: React.FC<Props> = ({ user, sessionId }) => {
 				}}
 			>
 				<Image
-					source={{
-						uri:
-							user.profilePhotoUrl ||
-							'https://via.placeholder.com/50',
-					}}
+					source={
+						user.profilePhotoUrl
+							? { uri: user.profilePhotoUrl }
+							: require('@/assets/default-profile.png')
+					}
 					style={{
 						width: 50,
 						height: 50,

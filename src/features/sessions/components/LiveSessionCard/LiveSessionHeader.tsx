@@ -24,8 +24,12 @@ const LiveSessionHeader: React.FC<LiveSessionHeaderProps> = ({
     <TouchableOpacity onPress={onToggle} activeOpacity={1}>
       <View className="flex-row items-start px-5 py-2">
         <Image
-          source={{ uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50' }}
-          className="w-12 h-12 rounded-full mr-3"
+          source={
+            displayInfo.primaryPhoto
+              ? { uri: displayInfo.primaryPhoto }
+              : require('@/assets/default-profile.png')
+          }
+          className="w-[42px] h-[42px] rounded-full mr-3"
         />
         
         <View className="flex-1">

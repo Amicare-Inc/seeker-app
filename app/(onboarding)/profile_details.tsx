@@ -110,15 +110,15 @@ const AddProfilePhoto: React.FC = () => {
 				}
 				
 				// Always show success alert for profile completion
-				Alert.alert(
-					'Success',
-					'Your profile has been created successfully!',
-				);
+				// Alert.alert(
+				// 	'Success',
+				// 	'Your profile has been created successfully!',
+				// );
 				
 				// Navigate to appropriate dashboard
 				const nextRoute = userData?.isPsw
-					? '/(psw)/psw-home'
-					: '/(seeker)/seeker-home';
+					? '/(dashboard)/(psw)/psw-home'
+					: '/(dashboard)/(seeker)/seeker-home';
 				console.log('Profile complete, navigating to:', nextRoute);
 				router.push(nextRoute);
 			}

@@ -46,7 +46,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 					<>
 						{/* Family member photo (main position) */}
 						<Image
-							source={{ uri: userPhoto }}
+							source={
+								userPhoto
+									? { uri: userPhoto }
+									: require('@/assets/default-profile.png')
+							}
 							className="w-20 h-20 rounded-full"
 							style={{ 
 								zIndex: 2,
@@ -58,7 +62,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						/>
 						{/* Core user photo (slight overlap to the right) */}
 						<Image
-							source={{ uri: originalUser.profilePhotoUrl }}
+							source={
+								originalUser.profilePhotoUrl
+									? { uri: originalUser.profilePhotoUrl }
+									: require('@/assets/default-profile.png')
+							}
 							className="w-20 h-20 rounded-full absolute"
 							style={{ 
 								right: -30,
@@ -73,7 +81,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 					</>
 				) : (
 					<Image
-						source={{ uri: userPhoto }}
+						source={
+							userPhoto
+								? { uri: userPhoto }
+								: require('@/assets/default-profile.png')
+						}
 						className="w-20 h-20 rounded-full"
 						style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 }}
 					/>

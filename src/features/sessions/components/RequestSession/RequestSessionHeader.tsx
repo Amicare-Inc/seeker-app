@@ -19,7 +19,11 @@ const RequestSessionHeader: React.FC<RequestSessionHeaderProps> = ({
 				<Ionicons name="chevron-back" size={24} color="#000" />
 			</TouchableOpacity>
 			<Image
-				source={{ uri: photoUrl || 'https://via.placeholder.com/50' }}
+				source={
+					photoUrl
+						? { uri: photoUrl }
+						: require('@/assets/default-profile.png')
+				}
 				className="w-10 h-10 rounded-lg mr-3"
 			/>
 			<View className="flex-1">

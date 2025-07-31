@@ -23,11 +23,11 @@ const UserCard: React.FC<UserCardProps> = ({ user, onPress }) => {
 		>
 			<View className="flex-row items-center">
 				<Image
-					source={{
-						uri:
-							user.profilePhotoUrl ||
-							'https://via.placeholder.com/50',
-					}}
+					source={
+						user.profilePhotoUrl 
+							? { uri: user.profilePhotoUrl }
+							: require('@/assets/default-profile.png')
+					}
 					// Increase profile image to 20x20 and use rounded corners.
 					className="w-[58px] h-[58px] rounded-[5px] mr-4"
 				/>

@@ -19,7 +19,7 @@ const BioScreen: React.FC = () => {
 			dispatch(updateUserFields({ bio }));
 			
 			// Check if user is in family flow and has family member data
-			const lookingForSelf = userData?.carePreferences?.lookingForSelf;
+			const lookingForSelf = userData?.lookingForSelf;
 			let hasFamilyMemberData = false;
 			
 			try {
@@ -51,15 +51,15 @@ const BioScreen: React.FC = () => {
 			if (lookingForSelf === false && hasFamilyMemberData) {
 				// Family flow complete - go to dashboard
 				const nextRoute = userData?.isPsw
-					? '/(psw)/psw-home'
-					: '/(seeker)/seeker-home';
+					? '/(dashboard)/(psw)/psw-home'
+					: '/(dashboard)/(seeker)/seeker-home';
 				console.log('Family flow complete, navigating to:', nextRoute);
 				router.push(nextRoute);
 			} else {
 				// Regular flow - go to dashboard
 				const nextRoute = userData?.isPsw
-					? '/(psw)/psw-home'
-					: '/(seeker)/seeker-home';
+					? '/(dashboard)/(psw)/psw-home'
+					: '/(dashboard)/(seeker)/seeker-home';
 				console.log('Regular flow complete, navigating to:', nextRoute);
 				router.push(nextRoute);
 			}

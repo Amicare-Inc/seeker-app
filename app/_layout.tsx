@@ -1,5 +1,5 @@
 // app/_layout.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Stack } from 'expo-router';
 import { Provider, useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,17 +13,35 @@ import { userDirectoryKeys } from '@/features/userDirectory/api/queries';
 import { ActiveSessionProvider } from '@/lib/context/ActiveSessionContext';
 import { SessionCompletionProvider } from '@/lib/context/SessionCompletionContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { FIREBASE_AUTH } from '@/firebase.config';
 
 const GlobalDataLoader = () => {
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const prevSessionsRef = useRef<string>('');
 	const queryClient = useQueryClient();
+	const [isAuthReady, setIsAuthReady] = useState(false);
+	const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
 
-	// Global socket listeners (will lazily connect when userId available)
-	useSocketListeners(currentUser?.id);
+	// Listen to Firebase auth state changes
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
+			console.log('Firebase auth state changed:', user ? user.uid : 'No user');
+			setFirebaseUser(user);
+			setIsAuthReady(true); // Auth state is now determined
+		});
 
-	// Fetch sessions with React Query
-	const sessionsQuery = useEnrichedSessions(currentUser?.id);
+		return unsubscribe;
+	}, []);
+
+	// Only proceed with API calls when both Redux user data and Firebase auth are ready
+	const shouldMakeApiCalls = isAuthReady && currentUser?.id && firebaseUser;
+
+	// Global socket listeners (will lazily connect when userId available and auth is ready)
+	useSocketListeners(shouldMakeApiCalls ? currentUser?.id : undefined);
+
+	// Fetch sessions with React Query - only when everything is ready
+	const sessionsQuery = useEnrichedSessions(shouldMakeApiCalls ? currentUser?.id : undefined);
 
 	// Refresh user list when sessions change (someone accepts/declines/etc)
 	useEffect(() => {

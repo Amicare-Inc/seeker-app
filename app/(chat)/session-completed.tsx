@@ -145,20 +145,32 @@ const SessionCompleted = () => {
 						<View className="relative">
 							{/* Core user photo (behind) */}
 							<Image
-								source={{ uri: accountHolder.profilePhotoUrl || 'https://via.placeholder.com/144' }}
+								source={
+									accountHolder.profilePhotoUrl
+										? { uri: accountHolder.profilePhotoUrl }
+										: require('@/assets/default-profile.png')
+								}
 								className="w-36 h-36 rounded-full absolute"
 								style={{ right: -40 }}
 							/>
 							{/* Family member photo (in front) */}
 							<Image
-								source={{ uri: careRecipient.profilePhotoUrl || 'https://via.placeholder.com/144' }}
+								source={
+									careRecipient.profilePhotoUrl
+										? { uri: careRecipient.profilePhotoUrl }
+										: require('@/assets/default-profile.png')
+								}
 								className="w-36 h-36 rounded-full border-4 border-white"
 							/>
 						</View>
 					) : (
-						/* Single photo for other cases */
+						/* Single profile photo */
 						<Image
-							source={{ uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/144' }}
+							source={
+								displayInfo.primaryPhoto
+									? { uri: displayInfo.primaryPhoto }
+									: require('@/assets/default-profile.png')
+							}
 							className="w-36 h-36 rounded-full"
 						/>
 					)}

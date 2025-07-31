@@ -65,11 +65,11 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 				<View className="flex-row items-center justify-between mb-4">
 					<View className="flex-row items-center">
 						<Image
-							source={{
-								uri:
-									user.profilePhotoUrl ||
-									'https://via.placeholder.com/50',
-							}}
+							source={
+								user.profilePhotoUrl
+									? { uri: user.profilePhotoUrl }
+									: require('@/assets/default-profile.png')
+							}
 							className="w-[58px] h-[58px] rounded-lg mr-3"
 						/>
 						<View>

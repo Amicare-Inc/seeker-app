@@ -19,7 +19,7 @@ const SessionBooked: React.FC<SessionBookedProps> = ({ user }) => {
 	return (
 		<View className="bg-blue-500 rounded-lg p-4 mb-2 flex-row items-center">
 			<Image
-				source={{ uri: 'https://via.placeholder.com/50' }}
+				source={require('@/assets/default-profile.png')}
 				className="w-12 h-12 rounded-full mr-4"
 			/>
 			<View>

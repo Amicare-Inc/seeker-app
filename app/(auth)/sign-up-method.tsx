@@ -4,14 +4,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { CustomButton } from '@/shared/components';
 
-export default function Index() {
+export default function SignUpMethod() {
 	return (
 		<View style={{ flex: 1, backgroundColor: '#F2F2F7' }}>
-			{/* Hide status bar so the image fills the top */}
 			<StatusBar hidden />
 
 			<ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-				{/* Top image container (covers top 60% of screen) */}
 				<View
 					style={{
 						position: 'absolute',
@@ -29,7 +27,6 @@ export default function Index() {
 							resizeMode: 'cover',
 						}}
 					/>
-					{/* Gradient overlay for a faded effect */}
 					<LinearGradient
 						colors={['rgba(242,242,247,0)', 'rgba(242,242,247,1)']}
 						style={{
@@ -42,7 +39,6 @@ export default function Index() {
 					/>
 				</View>
 
-				{/* Content container pushed down to the bottom third */}
 				<View
 					style={{
 						flex: 1,
@@ -59,20 +55,19 @@ export default function Index() {
 							textAlign: 'center',
 							marginBottom: 30,
 						}}
-						className=""
 					>
 						Connect with {'\n'} Trusted Personal {'\n'} Care Support
 					</Text>
 					<CustomButton
 						title="Sign Up with Phone"
-						handlePress={() => router.push('/sign-up-forum')}
+						handlePress={() => router.push('/sign-up')}
 						containerStyles="w-full mb-4"
 						textStyles='font-medium'
 						iconName="call"
 					/>
 					<CustomButton
 						title="Sign Up with Email"
-						handlePress={() => router.push('/sign-up-forum')}
+						handlePress={() => router.push('/sign-up')}
 						containerStyles="w-full bg-white border border-1 border-grey-9 mb-12"
 						textStyles='font-medium text-black'
 						iconName="mail"
@@ -96,4 +91,4 @@ export default function Index() {
 			</ScrollView>
 		</View>
 	);
-}
+} 

@@ -18,6 +18,10 @@ export const AuthApi = {
 
       if (!response.ok) {
         const errorData = await response.json();
+        // Check for specific error messages
+        if (response.status === 409 || (errorData.message && errorData.message.includes('already exists'))) {
+          throw new Error('User with this email already exists');
+        }
         throw new Error(errorData.message || 'Sign up failed');
       }
 
@@ -31,10 +35,12 @@ export const AuthApi = {
 
   async addCriticalInfo(uid: string, criticalInfoData: any): Promise<void> {
     try {
-      const headers = await getAuthHeaders();
+      // Don't use auth headers for signup flow
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup/${uid}/critical-info`, {
         method: 'PATCH',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(criticalInfoData),
       });
       if (!response.ok) {
@@ -52,10 +58,12 @@ export const AuthApi = {
 
   async addOptionalInfo(uid: string, optionalInfoData: any): Promise<void> {
     try {
-      const headers = await getAuthHeaders();
+      // Don't use auth headers for signup flow
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup/${uid}/optional-info`, {
         method: 'PATCH',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(optionalInfoData),
       });
       if (!response.ok) {
@@ -71,16 +79,16 @@ export const AuthApi = {
   async updateStripeAccount(uid: string, stripeAccountId: string): Promise<void> {
     try {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/stripe/${uid}`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}/stripe-account`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ stripeAccountId }),
       });
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || 'Failed to update Stripe account');
       }
-      console.log('Stripe account ID updated successfully');
     } catch (error: any) {
       console.error('Backend updateStripeAccount Error:', error);
       throw new Error(`Failed to update Stripe account: ${error.message}`);

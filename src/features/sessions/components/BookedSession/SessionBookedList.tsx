@@ -57,9 +57,11 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 				<View className="rounded-full w-[360px] h-[84px] flex-row items-center justify-between bg-[#0e7ae2] pl-4 pr-12">
 						<View className="flex-row items-center">
 							<Image
-								source={{
-									uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
-								}}
+								source={
+									displayInfo.primaryPhoto
+										? { uri: displayInfo.primaryPhoto }
+										: require('@/assets/default-profile.png')
+								}
 								className="w-[60px] h-[60px] rounded-full"
 							/>
 							<View className="ml-3">
@@ -136,10 +138,12 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 							<View className="rounded-full w-[360px] h-[84px] flex-row items-center justify-between bg-[#0e7ae2] pl-4 pr-12">
 								<View className="flex-row items-center">
 									<Image
-										source={{
-											uri: displayInfo.primaryPhoto || 'https://via.placeholder.com/50',
-										}}
-										className="w-[60px] h-[60px] rounded-full"
+										source={
+											displayInfo.primaryPhoto
+												? { uri: displayInfo.primaryPhoto }
+												: require('@/assets/default-profile.png')
+										}
+										className="w-[58px] h-[58px] rounded-full mr-4"
 									/>
 									<View className="ml-3">
 										<Text

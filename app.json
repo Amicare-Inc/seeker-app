@@ -13,7 +13,7 @@
       "backgroundColor": "#1A8BF8"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "infoPlist": {
         "NSCameraUsageDescription": "This app requires access to the camera for identity verification purposes.",
         "ITSAppUsesNonExemptEncryption": false
@@ -28,7 +28,8 @@
         "CAMERA",
         "CAMERA"
       ],
-      "package": "com.amicare.AmiCare"
+      "package": "com.amicare.AmiCare",
+      "supportsTablet": false
     },
     "web": {
       "bundler": "metro",

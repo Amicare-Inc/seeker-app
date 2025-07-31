@@ -105,9 +105,11 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
                     {/* Core user photo (behind) - always show for family member cards */}
                     {isForFamilyMember && (
                         <Image
-                            source={{
-                                uri: user.profilePhotoUrl || 'https://via.placeholder.com/58',
-                            }}
+                            source={
+                                user.profilePhotoUrl
+                                    ? { uri: user.profilePhotoUrl }
+                                    : require('@/assets/default-profile.png')
+                            }
                             className="w-[58px] h-[58px] rounded-full absolute"
                             style={{
                                 right: -35,
@@ -118,9 +120,11 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
                     
                     {/* Family member or self photo (in front) */}
                     <Image
-                        source={{
-                            uri: profilePhoto || 'https://via.placeholder.com/58',
-                        }}
+                        source={
+                            profilePhoto
+                                ? { uri: profilePhoto }
+                                : require('@/assets/default-profile.png')
+                        }
                         className="w-[58px] h-[58px] rounded-full border-2 border-brand-blue"
                         style={{
                             transform: [{ translateX: isForFamilyMember ? 0 : 30 }],
