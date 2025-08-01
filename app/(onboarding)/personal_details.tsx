@@ -11,10 +11,12 @@ import { AuthApi } from '@/features/auth/api/authApi';
 import { RegionValidatedAddressInput } from '@/shared/components';
 import { type AddressComponents } from '@/services/google/googlePlacesService';
 import { Ionicons } from '@expo/vector-icons';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 
 const genderOptions = ['Male', 'Female', 'Other'];
 
 const PersonalDetails: React.FC = () => {
+   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
@@ -49,7 +51,7 @@ const PersonalDetails: React.FC = () => {
 
 	const [isAddressValid, setIsAddressValid] = useState(false);
 	const [showGenderDropdown, setShowGenderDropdown] = useState(false);
-	const [focusedFields, setFocusedFields] = useState({
+   const [focusedFields, setFocusedFields] = useState({
 		firstName: false,
 		lastName: false,
 		phone: false,
@@ -155,8 +157,8 @@ const PersonalDetails: React.FC = () => {
 		}
 	};
 
-	return (
-		<SafeAreaView className="flex-1 bg-grey-0">
+   return (
+	  <SafeAreaView className="flex-1 bg-grey-0">
 			<KeyboardAvoidingView
 				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
 				style={{ flex: 1 }}
@@ -369,15 +371,41 @@ const PersonalDetails: React.FC = () => {
 				</ScrollView>
 			</KeyboardAvoidingView>
 
-			{/* Continue Button */}
-			<View className="px-[16px] pb-[21px]">
-				<CustomButton
-					title="Continue"
-					handlePress={handleContinue}
-					containerStyles="bg-black py-4 rounded-lg"
-					textStyles="text-white text-xl font-medium"
+		 {/* Privacy Notice with Modal (matches loved_one_relationship style) */}
+		 <View className="px-[16px] pb-[21px]">
+			<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 21 }}>
+				<Ionicons
+					name="information-circle"
+					size={30}
+					color="#BFBFC3"
+					style={{ marginRight: 8 }}
 				/>
+				<Text style={{ 
+					flex: 1, 
+					fontSize: 12, 
+					color: '#7B7B7E', 
+					lineHeight: 16, 
+					fontWeight: '500' 
+				}}>
+					We’ll use this to personalize matches and support. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
+					<PrivacyPolicyLink 
+						onPress={() => setShowPrivacyModal(true)}
+						textStyle={{ color: '#0c7ae2'}}
+					/>
+					<Text className="text-brand-blue">.</Text>
+				</Text>
 			</View>
+			<CustomButton
+			   title="Continue"
+			   handlePress={handleContinue}
+			   containerStyles="bg-black py-4 rounded-lg"
+			   textStyles="text-white text-xl font-medium"
+			/>
+			<PrivacyPolicyModal 
+				visible={showPrivacyModal}
+				onClose={() => setShowPrivacyModal(false)}
+			/>
+		 </View>
 			<StatusBar backgroundColor="#FFFFFF" style="dark" />
 		</SafeAreaView>
 	);

@@ -29,14 +29,13 @@ const FamilyScreen = () => {
 
           {/* Add New Member Button */}
           <FamilyListItem
-            icon={"add" as keyof typeof Ionicons.glyphMap} // Use the Ionicons "add" icon
+            icon={"add" as keyof typeof Ionicons.glyphMap}
             name="Add New Member"
             number=""
             relationship=""
-            onPress={() => {
-              router.push('/(profile)/family/add');
-            }}
-            isPrimary={false} // Not styled as primary
+            onPress={() => {}}
+            isPrimary={false}
+            disabled
           />
         </View>
       </ScrollView>
@@ -50,7 +49,8 @@ interface FamilyListItemProps {
   number: string;
   relationship: string;
   onPress: () => void;
-  isPrimary?: boolean; // New optional prop
+  isPrimary?: boolean;
+  disabled?: boolean;
 }
 
 const FamilyListItem: React.FC<FamilyListItemProps> = ({
@@ -59,12 +59,15 @@ const FamilyListItem: React.FC<FamilyListItemProps> = ({
   number,
   relationship,
   onPress,
-  isPrimary = false, // Default to false
+  isPrimary = false,
+  disabled = false,
 }) => {
   return (
-    <TouchableOpacity 
-      onPress={onPress} 
+    <TouchableOpacity
+      onPress={disabled ? undefined : onPress}
       className={`flex-row items-center p-4 gap-3`}
+      disabled={disabled}
+      style={disabled ? { opacity: 0.5 } : undefined}
     >
       <View className="h-[70px] w-[70px] bg-[#f2f2f7] rounded-full items-center justify-center">
         <Ionicons name={icon} size={20} color="#aeaeb2" />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
-import { CustomButton } from '@/shared/components';
+import { CustomButton} from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { setTempFamilyMember, clearTempFamilyMember } from '@/redux/userSlice';
@@ -10,14 +10,16 @@ import { uploadPhotoToFirebase } from '@/services/firebase/storage';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getCurrentUserUid } from '@/lib/auth';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 
 const FamilyProfileDetails: React.FC = () => {
-	const dispatch = useDispatch<AppDispatch>();
-	const userData = useSelector((state: RootState) => state.user.userData);
-	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
-	const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
-	const [bio, setBio] = useState<string>('');
-	const [isBioFocused, setIsBioFocused] = useState<boolean>(false);
+   const dispatch = useDispatch<AppDispatch>();
+   const userData = useSelector((state: RootState) => state.user.userData);
+   const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
+   const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
+   const [bio, setBio] = useState<string>('');
+   const [isBioFocused, setIsBioFocused] = useState<boolean>(false);
+   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
 	const handlePhotoSelect = async () => {
 		const result = await ImagePicker.launchImageLibraryAsync({
@@ -206,13 +208,33 @@ const FamilyProfileDetails: React.FC = () => {
 			</KeyboardAvoidingView>
 			{/* Continue Button */}
 			<View className="px-[16px]">
-				{/* Privacy Notice */}
-				<View className="flex flex-row mb-[20px] gap-[14px]">
-					<Ionicons name="information-circle" size={28} color="#BFBFC3" />
-					<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
-						This information helps caregivers provide better care for your loved one. You can update this information at any time in your profile settings.
-					</Text>
-				</View>
+			{/* Privacy Notice with Modal (matches loved_one_relationship style) */}
+			<View style={{ flexDirection: 'row', marginBottom: 21 }}>
+				<Ionicons
+					name="information-circle"
+					size={30}
+					color="#BFBFC3"
+					style={{ marginRight: 8 }}
+				/>
+				<Text style={{ 
+					flex: 1, 
+					fontSize: 12, 
+					color: '#7B7B7E', 
+					lineHeight: 16, 
+					fontWeight: '500' 
+				}}>
+					By continuing, you agree to the public display of your profile (name, photo, bio, neighbourhood, availability, and language) to care givers. You can control your visibility in your profile settings. Learn more in our{' '}
+					<PrivacyPolicyLink 
+						onPress={() => setShowPrivacyModal(true)}
+						textStyle={{ color: '#0c7ae2'}}
+					/>
+					<Text className="text-brand-blue">.</Text>
+				</Text>
+			</View>
+			<PrivacyPolicyModal 
+				visible={showPrivacyModal}
+				onClose={() => setShowPrivacyModal(false)}
+			/>
 				<CustomButton
 					title="Continue"
 					handlePress={handleDone}

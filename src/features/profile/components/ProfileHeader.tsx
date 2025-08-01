@@ -112,7 +112,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 			{/* Right side: Menu or Rate */}
 			{isMyProfile ? (
 				<TouchableOpacity onPress={onMenuPress}>
-					<Ionicons name="ellipsis-horizontal" size={24} color="#333" />
+					{/* <Ionicons name="ellipsis-horizontal" size={24} color="#333" /> */}
 				</TouchableOpacity>
 			) : (
 				<View className="items-center">
