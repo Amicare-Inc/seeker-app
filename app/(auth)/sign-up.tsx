@@ -10,6 +10,8 @@ import { AppDispatch } from '@/redux/store';
 import { FIREBASE_AUTH } from '@/firebase.config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { AuthApi } from '@/features/auth/api/authApi';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { TouchableOpacity } from 'react-native';
 
 const SignUp = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -64,7 +66,7 @@ const SignUp = () => {
     return (
         <SafeAreaView className="h-full bg-white">
             <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-                <ScrollView contentContainerStyle={{ height: '100%' }}>
+                <View>
                     <View className="flex w-full h-full justify-center px-9">
                         <Text className="text-3xl text-black font-normal text-left mb-3">
                             Create an account
@@ -119,7 +121,7 @@ const SignUp = () => {
                             </Link>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </KeyboardAvoidingView>
             <StatusBar backgroundColor="#FFFFFF" style="dark" />
         </SafeAreaView>

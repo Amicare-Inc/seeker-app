@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
@@ -20,6 +21,7 @@ const timeslots = [
 ];
 
 const CareSchedule: React.FC = () => {
+	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
@@ -225,8 +227,6 @@ const CareSchedule: React.FC = () => {
 			dispatch(setTempAvailability(convertedAvailability));
 			console.log('Saving availability to tempAvailability (self care):', convertedAvailability);
 		}
-
-		router.push('/caregiver_preferences');
 	};
 
 	return (
@@ -252,7 +252,7 @@ const CareSchedule: React.FC = () => {
 					</Text>
 
 					{/* Day Selection */}
-					<View className="flex-wrap flex-row mb-[36px] justify-between">
+					<View className="flex-wrap flex-row mb-[14px] justify-between">
 						{days.map((day) => {
 							const hasTimeSlots = getSelectedTimeSlotsForDay(day).length > 0;
 							const isActiveDay = activeDay === day;
@@ -264,8 +264,8 @@ const CareSchedule: React.FC = () => {
 							
 							if (isWeekend) {
 								// Weekend days - disabled grey
-								bgColor = 'bg-grey-9';
-								textColor = 'text-black';
+								bgColor = 'bg-white';
+								textColor = 'text-grey-35';
 							} else if (isActiveDay) {
 								// Currently selected day - full blue
 								bgColor = 'bg-brand-blue';
@@ -293,6 +293,8 @@ const CareSchedule: React.FC = () => {
 							textStyles="text-sm font-medium text-black"
 						/>
 					</View>
+
+					<Text className="mb-[24px] text-grey-49 text-xs px-1">Care on weekends (Sat/Sun) is currently unavailable during our beta phase.</Text>
 
 					{/* Time Slot Selection */}
 					{activeDay && (
@@ -363,16 +365,16 @@ const CareSchedule: React.FC = () => {
 
 			{/* Update Button */}
 			<View className="px-[16px]">
-				{/* Privacy Notice */}
-				<View className="flex-row justify-center mx-auto px-[16px]">
+				<View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 21 }}>
 					<Ionicons
 						name="information-circle"
 						size={30}
 						color="#BFBFC3"
+						style={{ marginRight: 8, marginTop: 2 }}
 					/>
-					<Text className="text-xs text-grey-49 mb-[21px] ml-[16px] font-medium">
+					<Text style={{ flex: 1, fontSize: 12, color: '#7B7B7E', lineHeight: 16, fontWeight: '500' }}>
 						We use your care preferences to personalize your match. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
-						<Text className="text-brand-blue">Privacy Policy</Text> and <Text className="text-brand-blue">Terms of Use</Text>.
+						<PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} /> and <Text style={{ color: '#0c7ae2' }}>Terms of Use</Text>.
 					</Text>
 				</View>
 				<CustomButton
@@ -383,6 +385,10 @@ const CareSchedule: React.FC = () => {
 					}}
 					containerStyles="bg-black py-4 rounded-lg mb-2"
 					textStyles="text-white text-xl font-medium"
+				/>
+				<PrivacyPolicyModal
+					visible={showPrivacyModal}
+					onClose={() => setShowPrivacyModal(false)}
 				/>
 			</View>
 		</SafeAreaView>

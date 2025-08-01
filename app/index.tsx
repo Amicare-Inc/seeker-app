@@ -37,8 +37,7 @@ export default function Index() {
     return (
         <View style={{ flex: 1, backgroundColor: '#F2F2F7' }}>
             <StatusBar hidden />
-
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <View style={{ flex: 1 }}>
                 <View
                     style={{
                         position: 'absolute',
@@ -147,7 +146,7 @@ export default function Index() {
                         </Text>
                     </Text>
                 </View>
-            </ScrollView>
+            </View>
             
             <PrivacyPolicyModal 
                 visible={showPrivacyModal} 

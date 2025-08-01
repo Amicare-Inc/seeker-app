@@ -54,30 +54,22 @@ const LegalScreen = () => {
           {/* Copyright */}
           <LegalListItem
             label="Copyright"
-            onPress={() => {
-              // Navigate to copyright page or open web view
-              console.log('Copyright pressed');
-            }}
+            onPress={() => {}}
             containerStyles='rounded-t-lg'
+            disabled
           />
-          
           {/* Data Providers */}
           <LegalListItem
             label="Data Providers"
-            onPress={() => {
-              // Navigate to data providers page or open web view
-              console.log('Data Providers pressed');
-            }}
+            onPress={() => {}}
+            disabled
           />
-          
           {/* Location Information */}
           <LegalListItem
             label="Location information"
-            onPress={() => {
-              // Navigate to location information page or open web view
-              console.log('Location information pressed');
-            }}
+            onPress={() => {}}
             containerStyles='rounded-b-lg'
+            disabled
           />
         </View>
       </ScrollView>
@@ -89,28 +81,30 @@ interface LegalListItemProps {
   label: string;
   subtitle?: string;
   onPress: () => void;
-
   containerStyles?: string;
+  disabled?: boolean;
 }
 
 const LegalListItem: React.FC<LegalListItemProps> = ({ 
   label, 
   subtitle, 
   onPress, 
-
-  containerStyles = ""
+  containerStyles = "",
+  disabled
 }) => {
   return (
     <TouchableOpacity 
-      onPress={onPress} 
-      className={`flex-row items-center justify-between p-[12px] px-[16px] bg-white mx-4 border-b border-gray-100 ${containerStyles}`}>
+      onPress={disabled ? undefined : onPress}
+      className={`flex-row items-center justify-between p-[12px] px-[16px] bg-white mx-4 border-b border-gray-100 ${containerStyles}`}
+      disabled={disabled}
+      style={disabled ? { opacity: 0.5 } : undefined}
+    >
       <View className="flex-1">
-        <Text className="text-base text-black font-medium">
+        <Text className="text-base font-medium" style={{ color: disabled ? '#BFBFC3' : '#303031' }}>
           {label}
         </Text>
-
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#bfbfc3" />
+      <Ionicons name="chevron-forward" size={20} color={disabled ? '#BFBFC3' : '#bfbfc3'} />
     </TouchableOpacity>
   );
 };

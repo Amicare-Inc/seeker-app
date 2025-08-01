@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 import { View, Text, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
@@ -11,6 +12,8 @@ import { TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 const CareNeeds1: React.FC = () => {
+	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+	const handlePrivacyPolicyPress = () => setShowPrivacyModal(true);
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
@@ -198,17 +201,18 @@ const CareNeeds1: React.FC = () => {
 			</ScrollView>
 
 			<View className="px-[16px]">
-					<View className="flex-row justify-center mx-auto px-[16px]">
-						<Ionicons
-							name="information-circle"
-							size={30}
-							color="#BFBFC3"
-						/>
-						<Text className="text-xs text-grey-49 mb-[21px] ml-[16px] font-medium">
-							We use your care preferences to personalize your matches. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
-							<Text className="text-brand-blue">Privacy Policy</Text> and <Text className="text-brand-blue">Terms of Use</Text>.
-						</Text>
-					</View>
+				<View style={{ flexDirection: 'row', marginBottom: 21, marginTop: 0 }}>
+					<Ionicons
+						name="information-circle"
+						size={30}
+						color="#BFBFC3"
+						style={{ marginRight: 8 }}
+					/>
+					<Text style={{ flex: 1, fontSize: 12, color: '#7B7B7E', lineHeight: 16, fontWeight: '500' }}>
+						We use your care preferences to personalize your matches. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
+						<PrivacyPolicyLink onPress={handlePrivacyPolicyPress} textStyle={{ color: '#0c7ae2' }} /> and <Text style={{ color: '#0c7ae2' }}>Terms of Use</Text>.
+					</Text>
+				</View>
 				<CustomButton
 					title={
 						selectedCareTypes.length > 0 || lookingForSelf !== null
@@ -218,6 +222,10 @@ const CareNeeds1: React.FC = () => {
 					handlePress={handleNext}
 					containerStyles="bg-black py-4 rounded-lg"
 					textStyles="text-white text-xl font-medium"
+				/>
+				<PrivacyPolicyModal
+					visible={showPrivacyModal}
+					onClose={() => setShowPrivacyModal(false)}
 				/>
 			</View>
 		</SafeAreaView>

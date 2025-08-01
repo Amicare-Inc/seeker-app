@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 
 const relationshipOptions = [
     'Mom', 'Dad', 'Grandma', 'Grandpa',
@@ -25,6 +26,8 @@ const LovedOneRelationship: React.FC = () => {
     const [customRelationship, setCustomRelationship] = useState<string>('');
     const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
     const [customInputFocused, setCustomInputFocused] = useState<boolean>(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+
 
     const handleRelationshipSelect = (relationship: string) => {
         if (relationship === 'Something Else') {
@@ -48,6 +51,10 @@ const LovedOneRelationship: React.FC = () => {
     const handleCustomInputSubmit = () => {
         setCustomInputFocused(false);
         // Keep the input visible with the entered text
+    };
+
+    const handlePrivacyPolicyPress = () => {
+        setShowPrivacyModal(true);
     };
 
     const handleNext = () => {
@@ -96,11 +103,9 @@ const LovedOneRelationship: React.FC = () => {
                     <View className="px-[16px]">
                     {/* Header */}
                     <View className="flex-row items-center mb-[18px]">
-                        <TouchableOpacity className="absolute" onPress={() => router.back()}>
-                            <Ionicons name="chevron-back" size={24} color="#000" />
-                        </TouchableOpacity>
+
                         <Text className="text-lg font-bold mx-auto">
-                            Who is {userData?.firstName || '{Insert Name}'} to you?
+                            Who is {tempFamilyMember?.firstName || 'your loved one'} to you?
                         </Text>
                     </View>
 
@@ -234,15 +239,26 @@ const LovedOneRelationship: React.FC = () => {
 
                 {/* Bottom Section */}
                 <View className="px-[16px] bg-grey-0 pb-[20px]">
-                <View className="flex-row mb-[21px] items-center">
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 21}}>
                     <Ionicons
                         name="information-circle"
                         size={30}
                         color="#BFBFC3"
+                        style={{ marginRight: 8 }}
                     />
-                    <Text className="text-xs text-grey-49 ml-[8px] font-medium">
+                    <Text style={{ 
+                        flex: 1, 
+                        fontSize: 12, 
+                        color: '#7B7B7E', 
+                        lineHeight: 16, 
+                        fontWeight: '500' 
+                    }}>
                         By continuing, you agree with our{' '}
-                        <Text className="text-brand-blue">Privacy Policy</Text>.
+                        <PrivacyPolicyLink 
+                            onPress={handlePrivacyPolicyPress}
+                            textStyle={{ color: '#0c7ae2'}}
+                        />
+                        <Text className="text-brand-blue">.</Text>
                     </Text>
                 </View>
                 <CustomButton
@@ -253,6 +269,11 @@ const LovedOneRelationship: React.FC = () => {
                 />
                 </View>
             </KeyboardAvoidingView>
+
+            <PrivacyPolicyModal 
+                visible={showPrivacyModal}
+                onClose={() => setShowPrivacyModal(false)}
+            />
         </SafeAreaView>
     );
 };
