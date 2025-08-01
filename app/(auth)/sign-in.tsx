@@ -8,6 +8,7 @@ import { fetchUserFromLoginThunk, setNavigationComplete, clearError } from '@/re
 import { AppDispatch, RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { connectSocket } from '@/src/features/socket';
+import { Ionicons } from '@expo/vector-icons';
 
 const SignIn = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -88,7 +89,7 @@ const SignIn = () => {
 		<SafeAreaView className="h-full bg-white">
 			{/* Loading Overlay */}
 			{loading && (
-				<View className="absolute top-0 left-0 right-0 bottom-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+				<View className="absolute top-0 left-0 right-0 bottom-0 bg-grey-0 z-50 flex items-center justify-center">
 					<View className="bg-white rounded-lg p-6 flex items-center">
 						<ActivityIndicator size="large" color="#000" />
 						<Text className="text-black text-lg font-medium mt-3">Signing In...</Text>
@@ -96,7 +97,7 @@ const SignIn = () => {
 					</View>
 				</View>
 			)}
-			
+
 			<KeyboardAvoidingView behavior="padding">
 				<ScrollView contentContainerStyle={{ height: '100%' }}>
 					<View className="flex w-full h-full justify-center px-9">
@@ -141,7 +142,7 @@ const SignIn = () => {
 								Don't have an account?
 							</Text>
 							<TouchableOpacity 
-								onPress={() => router.replace('/')}
+								onPress={() => router.replace('/sign-up')}
 								disabled={loading}
 							>
 								<Text className={`text-xs font-normal ${loading ? 'text-gray-400' : 'text-blue-900'}`}>

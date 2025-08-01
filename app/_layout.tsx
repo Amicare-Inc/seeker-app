@@ -1,5 +1,6 @@
 // app/_layout.tsx
 import React, { useEffect, useRef, useState } from 'react';
+import { BackHandler, Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { Provider, useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -65,57 +66,45 @@ const GlobalDataLoader = () => {
 
 const queryClient = new QueryClient();
 
+
 const LayoutWithProviders = () => {
-	return (
-		<Provider store={store}>
-			<QueryClientProvider client={queryClient}>
-				<SessionCompletionProvider>
-					<ActiveSessionProvider>
-						<SafeAreaProvider>
-							<StripeProvider
-								publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
-								urlScheme="amicare"
-								merchantIdentifier="merchant.com.specul8tor.AmiCare"
-								>
-								{/* GlobalDataLoader preloads global slices; navigation now handled directly in socket listener */}
-								<GlobalDataLoader />
-							<Stack>
-								<Stack.Screen
-									name="index"
-									options={{ headerShown: false }}
-								/>
-								<Stack.Screen
-									name="lock"
-									options={{ headerShown: false, gestureEnabled: false }}
-								/>
-								<Stack.Screen
-									name="(auth)"
-									options={{ headerShown: false }}
-								/>
-								<Stack.Screen
-									name="(dashboard)"
-									options={{ headerShown: false }}
-								/>
-								<Stack.Screen
-									name="(onboarding)"
-									options={{ headerShown: false, gestureEnabled: false }}
-								/>
-								<Stack.Screen
-									name="(chat)"
-									options={{ headerShown: false }}
-								/>
-								<Stack.Screen
-									name="(profile)"
-									options={{ headerShown: false }}
-								/>
-							</Stack>
-						</StripeProvider>
-					</SafeAreaProvider>
-				</ActiveSessionProvider>
-			</SessionCompletionProvider>
-		</QueryClientProvider>
+  // Block hardware back button on Android
+  useEffect(() => {
+	if (Platform.OS === 'android') {
+	  const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
+	  return () => backHandler.remove();
+	}
+  }, []);
+
+  return (
+	<Provider store={store}>
+	  <QueryClientProvider client={queryClient}>
+		<SessionCompletionProvider>
+		  <ActiveSessionProvider>
+			<SafeAreaProvider>
+			  <StripeProvider
+				publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
+				urlScheme="amicare"
+				merchantIdentifier="merchant.com.specul8tor.AmiCare"
+			  >
+				{/* GlobalDataLoader preloads global slices; navigation now handled directly in socket listener */}
+				<GlobalDataLoader />
+				<Stack screenOptions={{ gestureEnabled: false }}>
+				  <Stack.Screen name="index" options={{ headerShown: false }} />
+				  <Stack.Screen name="lock" options={{ headerShown: false }} />
+				  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+				  <Stack.Screen name="(dashboard)" options={{ headerShown: false }} />
+				  <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+				  <Stack.Screen name="(chat)" options={{ headerShown: false }} />
+				  <Stack.Screen name="(profile)" options={{ headerShown: false }} />
+				</Stack>
+			  </StripeProvider>
+			</SafeAreaProvider>
+		  </ActiveSessionProvider>
+		</SessionCompletionProvider>
+	  </QueryClientProvider>
 	</Provider>
-);
+  );
 };
 
 export default function RootLayout() {

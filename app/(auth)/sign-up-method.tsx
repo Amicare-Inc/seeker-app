@@ -3,13 +3,14 @@ import { View, Text, Image, ScrollView, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { CustomButton } from '@/shared/components';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { TouchableOpacity } from 'react-native';
 
 export default function SignUpMethod() {
 	return (
 		<View style={{ flex: 1, backgroundColor: '#F2F2F7' }}>
 			<StatusBar hidden />
-
-			<ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+			<View style={{ flex: 1 }}>
 				<View
 					style={{
 						position: 'absolute',
@@ -89,7 +90,7 @@ export default function SignUpMethod() {
 						</Text>
 					</Text>
 				</View>
-			</ScrollView>
+			</View>
 		</View>
 	);
 } 
