@@ -8,12 +8,14 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
+import { TermsOfUseLink, TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
 
 export default function Index() {
     const dispatch = useDispatch<AppDispatch>();
     const [isTermsAccepted, setIsTermsAccepted] = useState(false);
     const [showErrorMessage, setShowErrorMessage] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
 
     const handleRoleSelection = async (isPsw: boolean) => {
         if (!isTermsAccepted) {
@@ -122,12 +124,15 @@ export default function Index() {
                         <View className="flex-1">
                             <Text className="text-sm text-black font-medium">
                                 By continuing, you agree with Amicare's{' '}
-                                <Text className="text-sm font-medium text-brand-blue">Terms of Use</Text>
-                                {' and '}
-                                <PrivacyPolicyLink 
-                                    textStyle={{ fontSize: 14, fontWeight: '500' }} 
-                                    onPress={() => setShowPrivacyModal(true)}
-                                />
+                            <TermsOfUseLink
+                                textStyle={{ fontSize: 14, fontWeight: '500' }}
+                                onPress={() => setShowTermsModal(true)}
+                            />
+                            {' and '}
+                            <PrivacyPolicyLink 
+                                textStyle={{ fontSize: 14, fontWeight: '500' }} 
+                                onPress={() => setShowPrivacyModal(true)}
+                            />
                             </Text>
                         </View>
                     </TouchableOpacity>
@@ -148,6 +153,10 @@ export default function Index() {
                 </View>
             </View>
             
+            <TermsOfUseModal
+                visible={showTermsModal}
+                onClose={() => setShowTermsModal(false)}
+            />
             <PrivacyPolicyModal 
                 visible={showPrivacyModal} 
                 onClose={() => setShowPrivacyModal(false)} 
