@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
+import { PrivacyPolicyModal } from '@/features/privacy';
 
 const LegalScreen = () => {
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+
   const handleBackPress = () => {
     router.back();
   };
@@ -22,15 +27,11 @@ const LegalScreen = () => {
       </View>
 
       <ScrollView className="flex-1">
-
         <View>
           <LegalListItem
             label="Terms & Conditions"
             subtitle="View terms & conditions"
-            onPress={() => {
-              // Navigate to terms & conditions page or open web view
-              console.log('Terms & Conditions pressed');
-            }}
+            onPress={() => setShowTermsModal(true)}
             containerStyles='rounded-lg mb-[6px]'
           />
           <Text className="mx-8 mb-[38px]">View terms & conditions</Text>
@@ -41,10 +42,7 @@ const LegalScreen = () => {
           <LegalListItem
             label="Privacy Policy"
             subtitle="View privacy policy"
-            onPress={() => {
-              // Navigate to privacy policy page or open web view
-              console.log('Privacy Policy pressed');
-            }}
+            onPress={() => setShowPrivacyModal(true)}
             containerStyles='rounded-lg mb-[6px]'
           />
           <Text className="mx-8 mb-[38px]">View privacy policy</Text>
@@ -73,6 +71,14 @@ const LegalScreen = () => {
           />
         </View>
       </ScrollView>
+      <TermsOfUseModal
+        visible={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
+      <PrivacyPolicyModal
+        visible={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
     </SafeAreaView>
   );
 };
