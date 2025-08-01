@@ -57,19 +57,22 @@ const SecurityPrivaryScreen = () => {
           <SettingsListItem
             label="Face ID"
             description="Require Face ID for login, transactions and after 5 minutes of inactivity"
-            onPress={handleFaceIDPress} // Show Face ID modal
+            onPress={() => {}}
+            disabled
           />
           <SettingsListItem
             label="Recovery Phone"
             description="Add a backup phone number to access your account"
-            onPress={() => router.push('/(profile)/settings/security-privacy/recovery-phone')}
+            onPress={() => {}}
+            disabled
           />
         </View>
         <View className="bg-white rounded-lg mx-4 mt-8">
           <SettingsListItem
             label="Biometric Data"
             description="Allow Amicare to store and use your selfie and ID for automated verification"
-            onPress={() => console.log('Biometric Data pressed')}
+            onPress={() => {}}
+            disabled
           />
           <SettingsListItem
             label="Privacy Settings + Policy"
@@ -182,17 +185,23 @@ const SecurityPrivaryScreen = () => {
 
 interface SettingsListItemProps {
   label: string;
-  description?: string; // Optional description prop
+  description?: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 
-const SettingsListItem: React.FC<SettingsListItemProps> = ({ label, description, onPress }) => {
+const SettingsListItem: React.FC<SettingsListItemProps> = ({ label, description, onPress, disabled }) => {
   return (
-    <TouchableOpacity onPress={onPress} className="flex-row items-start p-4 gap-3">
+    <TouchableOpacity
+      onPress={disabled ? undefined : onPress}
+      className="flex-row items-start p-4 gap-3"
+      disabled={disabled}
+      style={disabled ? { opacity: 0.5 } : undefined}
+    >
       <View className="flex-1">
-        <Text className="text-base text-grey-80 font-semibold w-2/3">{label}</Text>
+        <Text className="text-base font-semibold w-2/3" style={{ color: disabled ? '#BFBFC3' : '#303031' }}>{label}</Text>
         {description && (
-          <Text className="text-base text-grey-49 mt-1 w-[90%]">{description}</Text>
+          <Text className="text-base mt-1 w-[90%]" style={{ color: disabled ? '#BFBFC3' : '#7B7B7E' }}>{description}</Text>
         )}
       </View>
       <View className="absolute justify-center items-center right-4 top-1/2">

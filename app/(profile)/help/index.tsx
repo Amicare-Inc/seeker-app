@@ -3,10 +3,18 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { Linking, Alert } from 'react-native';
 
 const HelpScreen = () => {
   const handleBackPress = () => {
     router.back();
+  };
+
+  const handleCallSupport = () => {
+    const phoneNumber = 'tel:+8889949114';
+    Linking.openURL(phoneNumber).catch(() => {
+      Alert.alert('Error', 'Your device does not support calling.');
+    });
   };
 
   return (
@@ -24,24 +32,28 @@ const HelpScreen = () => {
       <ScrollView className="flex-1">
         <View className="bg-white rounded-lg mx-4 mt-4">
           <ListItem
-            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
+            icon={<Ionicons name="list-circle" size={28} color="#BFBFC3" />}
             label="Help with a session"
             onPress={() => {}}
+            disabled
           />
           <ListItem
-            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
+            icon={<Ionicons name="list-circle" size={28} color="#BFBFC3" />}
             label="Account"
-            onPress={() => router.push('/help/account-help')}
+            onPress={() => {}}
+            disabled
           />
           <ListItem
-            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
+            icon={<Ionicons name="list-circle" size={28} color="#BFBFC3" />}
             label="A guide to Amicare"
-            onPress={() => router.push('/help/guide')}
+            onPress={() => {}}
+            disabled
           />
           <ListItem
-            icon={<Ionicons name="list-circle" size={28} color="#303031" />}
+            icon={<Ionicons name="list-circle" size={28} color="#BFBFC3" />}
             label="Accessibility"
-            onPress={() => router.push('/help/accessibility')}
+            onPress={() => {}}
+            disabled
           />
         </View>
 
@@ -51,7 +63,7 @@ const HelpScreen = () => {
             <ListItem
               icon={<Ionicons name="call" size={28} color="#303031" />}
               label="Call Support"
-              onPress={() => {}}
+              onPress={handleCallSupport}
             />
             </View>
         </View>
@@ -60,9 +72,10 @@ const HelpScreen = () => {
           <Text className="text-lg font-medium text-gray-80 mb-2">Support Messages</Text>
           <View className="bg-white rounded-lg">
             <ListItem
-              icon={<Ionicons name="chatbubble-ellipses" size={28} color="#303031" />}
+              icon={<Ionicons name="chatbubble-ellipses" size={28} color="#BFBFC3" />}
               label="View all messages"
               onPress={() => {}}
+              disabled
             />
           </View>
         </View>
@@ -72,21 +85,28 @@ const HelpScreen = () => {
 };
 
 interface ListItemProps {
-  icon: React.ReactNode; // Accept any React node as the icon
+  icon: React.ReactNode;
   label: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 const ListItem: React.FC<ListItemProps> = ({ 
   icon, 
   label, 
   onPress, 
+  disabled
 }) => {
   return (
-    <TouchableOpacity onPress={onPress} className="flex-row items-center p-4 gap-3">
+    <TouchableOpacity
+      onPress={disabled ? undefined : onPress}
+      className="flex-row items-center p-4 gap-3"
+      disabled={disabled}
+      style={disabled ? { opacity: 0.5 } : undefined}
+    >
       <View className="w-7 h-7 rounded-lg bg-white items-center justify-center">
         {icon}
       </View>
-      <Text className="flex-1 text-base text-grey-80 font-medium">{label}</Text>
+      <Text className="flex-1 text-base font-medium" style={{ color: disabled ? '#BFBFC3' : '#303031' }}>{label}</Text>
       <Ionicons name="chevron-forward" size={20} color="#bfbfc3" />
     </TouchableOpacity>
   );

@@ -9,28 +9,7 @@ const FamilyScreen = () => {
     router.back();
   };
 
-  const familyMembers = [
-    {
-      icon: "person" as keyof typeof Ionicons.glyphMap,
-      name: "John Doe",
-      number: "(234) 567-890",
-      relationship: "Primary Contact",
-      country: "USA",
-      city: "New York",
-      email: "john.doe@example.com",
-      isPrimary: true,
-    },
-    {
-      icon: "person" as keyof typeof Ionicons.glyphMap,
-      name: "Susan Doe",
-      number: "(987) 654-321",
-      relationship: "Other",
-      country: "Canada",
-      city: "Toronto",
-      email: "susan.doe@example.com",
-      isPrimary: false,
-    },
-  ];
+  const familyMembers: any[] = [];
 
   return (
     <SafeAreaView className="flex-1 bg-grey-0">
@@ -46,22 +25,7 @@ const FamilyScreen = () => {
 
       <ScrollView className="flex-1">
         <View className="bg-white rounded-lg mx-4 mt-6">
-          {familyMembers.map((member, index) => (
-            <FamilyListItem
-              key={index}
-              icon={member.icon}
-              name={member.name}
-              number={member.number}
-              relationship={member.relationship}
-              onPress={() => {
-                router.push({
-                  pathname: '/(profile)/family/edit',
-                  // params: { member }, // Pass the entire member object
-                });
-              }}
-              isPrimary={member.isPrimary}
-            />
-          ))}
+          {/* No family members to display unless fetched from backend */}
 
           {/* Add New Member Button */}
           <FamilyListItem

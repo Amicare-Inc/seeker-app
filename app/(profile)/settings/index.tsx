@@ -14,27 +14,27 @@ const SettingsScreen = () => {
     router.back();
   };
 
-	const dispatch = useDispatch();
-	const queryClient = useQueryClient();
-	const handleSignOut = async () => {
-		try {
-			// Sign out from Firebase
-			await FIREBASE_AUTH.signOut();
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const handleSignOut = async () => {
+    try {
+      // Sign out from Firebase
+      await FIREBASE_AUTH.signOut();
 
-			// Clear Redux state
-			dispatch(clearUser());
-			dispatch(clearActiveProfile());
-			
-			// Clear React Query cache
-			queryClient.clear();
+      // Clear Redux state
+      dispatch(clearUser());
+      dispatch(clearActiveProfile());
+      
+      // Clear React Query cache
+      queryClient.clear();
 
-			// Navigate to the sign-in screen (or your landing page)
-			router.replace('/sign-in');
-		} catch (error) {
-			console.error('Error signing out:', error);
-			// Optionally, show an alert or toast to the user.
-		}
-	};
+      // Navigate to the sign-in screen (or your landing page)
+      router.replace('/sign-in');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Optionally, show an alert or toast to the user.
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-grey-0">
@@ -52,9 +52,10 @@ const SettingsScreen = () => {
         <View className="bg-white rounded-lg mx-4 mt-6">
           {/* Personal Details */}
           <SettingsListItem
-            icon={<Ionicons name="person" size={28} color="#303031" />}
+            icon={<Ionicons name="person" size={28} color="#BFBFC3" />}
             label="Personal Details"
-            onPress={() => console.log('Personal Details pressed')}
+            onPress={() => {}}
+            disabled
           />
           {/* Security & Privacy */}
           <SettingsListItem
@@ -67,18 +68,21 @@ const SettingsScreen = () => {
             icon={<Ionicons name="list-circle" size={28} color="#303031" />}
             label="Care Needs"
             onPress={() => router.push('/(profile)/settings/edit-onboarding-details/edit_care_needs_1')}
+            disabled
           />
           {/* Care Schedule */}
           <SettingsListItem
             icon={<Ionicons name="time" size={28} color="#303031" />}
             label="Care Schedule"
             onPress={() => router.push('/(profile)/settings/edit-onboarding-details/edit_care_schedule')}
+            disabled
           />
           {/* Notifications */}
           <SettingsListItem
             icon={<Ionicons name="notifications" size={28} color="#303031" />}
             label="Notifications"
             onPress={() => router.push('/(profile)/settings/notifications')}
+            disabled
           />
           {/* Log Out */}
           <SettingsListItem
@@ -93,18 +97,24 @@ const SettingsScreen = () => {
 };
 
 interface SettingsListItemProps {
-  icon: React.ReactNode; // Accept any React node as the icon
+  icon: React.ReactNode;
   label: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 
-const SettingsListItem: React.FC<SettingsListItemProps> = ({ icon, label, onPress }) => {
+const SettingsListItem: React.FC<SettingsListItemProps> = ({ icon, label, onPress, disabled }) => {
   return (
-    <TouchableOpacity onPress={onPress} className="flex-row items-center p-4 gap-3">
+    <TouchableOpacity
+      onPress={disabled ? undefined : onPress}
+      className="flex-row items-center p-4 gap-3"
+      disabled={disabled}
+      style={disabled ? { opacity: 0.5 } : undefined}
+    >
       <View className="w-7 h-7 items-center justify-center">
         {icon}
       </View>
-      <Text className="flex-1 text-base text-grey-80 font-medium">{label}</Text>
+      <Text className="flex-1 text-base font-medium" style={{ color: disabled ? '#BFBFC3' : '#303031' }}>{label}</Text>
       <Ionicons name="chevron-forward" size={20} color="#bfbfc3" />
     </TouchableOpacity>
   );
