@@ -43,9 +43,9 @@ export class PaymentService {
                 paymentIntentClientSecret: clientSecret,
                 merchantDisplayName: 'Amicare',
                 returnURL: 'amicare://stripe-redirect',
-                applePay: {
-                    merchantCountryCode: 'CA'
-                },
+                // applePay: {
+                //     merchantCountryCode: 'CA'
+                // },
                 googlePay: {
                     merchantCountryCode: 'CA',
                     testEnv: true

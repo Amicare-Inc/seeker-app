@@ -20,8 +20,7 @@
       },
       "bundleIdentifier": "com.amicare.app",
       "teamId": "5284JKTY8S",
-      "merchantId": "merchant.com.amicare.app",
-      "buildNumber": "5"
+      "buildNumber": "6"
     },
     "android": {
       "permissions": [
@@ -41,7 +40,6 @@
       [
         "@stripe/stripe-react-native",
         {
-          "merchantIdentifier": "merchant.com.amicare.app",
           "enableGooglePay": true
         }
       ]

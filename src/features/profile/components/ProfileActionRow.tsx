@@ -103,10 +103,11 @@ const WalletPanel: React.FC = () => {
 				</Text>
 				<Ionicons name="chevron-forward" size={18} color="#000" />
 			</View>
-			<View className="border-b border-gray-200 py-2 flex-row justify-between items-center">
+			{/* Apple Pay option - commented out */}
+			{/* <View className="border-b border-gray-200 py-2 flex-row justify-between items-center">
 				<Text className="text-sm text-gray-700">Apple Pay</Text>
 				<Ionicons name="chevron-forward" size={18} color="#000" />
-			</View>
+			</View> */}
 			<TouchableOpacity className="mt-3 p-3 border border-gray-300 rounded-lg items-center">
 				<Text className="text-sm font-semibold text-blue-600">
 					+ Add Payment Method

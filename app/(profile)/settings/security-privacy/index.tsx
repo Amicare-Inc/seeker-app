@@ -160,7 +160,7 @@ const SecurityPrivaryScreen = () => {
                   <TouchableOpacity
                     onPress={() => {
                       closeAccountDeletionModal(); // Close the modal
-                      router.push('/(profile)/settings/security-privacy/verify/contact'); // Navigate to the verification screen
+                      router.push('/(profile)/settings/security-privacy/delete-account'); // Navigate to the verification screen
                     }}
                     className="bg-brand-blue w-[47%] h-10 rounded-xl flex items-center justify-center"
                   >

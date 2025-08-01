@@ -85,7 +85,7 @@ const LayoutWithProviders = () => {
 			  <StripeProvider
 				publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
 				urlScheme="amicare"
-				merchantIdentifier="merchant.com.specul8tor.AmiCare"
+				// merchantIdentifier="merchant.com.specul8tor.AmiCare" // Commented out - remove Apple Pay
 			  >
 				{/* GlobalDataLoader preloads global slices; navigation now handled directly in socket listener */}
 				<GlobalDataLoader />

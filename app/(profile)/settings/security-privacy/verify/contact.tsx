@@ -9,24 +9,20 @@ const VerifyContactScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Skeleton: handle back navigation
   const handleBackPress = () => {
     router.back();
   };
 
-  // Skeleton: validate contact (phone/email)
   const validateContact = (value: string) => {
     // TODO: Add validation logic for phone or email
     return value.trim().length > 0;
   };
 
-  // Skeleton: handle input change
   const handleInputChange = (value: string) => {
     setContact(value);
     setError('');
   };
 
-  // Skeleton: handle continue button
   const handleContinue = async () => {
     if (!validateContact(contact)) {
       setError('Please enter a valid phone number or email.');
@@ -52,16 +48,15 @@ const VerifyContactScreen = () => {
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-xl font-medium">Delete Account</Text>
+          <Text className="text-xl font-medium">Verify Contact</Text>
         </View>
       </View>
 
       <ScrollView className="flex-1">
         <View className="mx-4 mt-10">
-          <Text className="text-xl font-semibold">{"What's your phone number or email?"}</Text>
-          <Text className="text-base mt-4">{"You’ll use this number to recover your account"}</Text>
+          <Text className="text-xl font-semibold">What's your phone number or email?</Text>
+          <Text className="text-base mt-4">You'll use this number to recover your account</Text>
           <View className="flex-row gap-5 mt-4 items-center justify-center">
-            {/* Phone Number or Email Input */}
             <TextInput
               placeholder="Enter phone number or email"
               placeholderTextColor="#A3A3A3"
@@ -78,7 +73,7 @@ const VerifyContactScreen = () => {
             <Text className="text-xs mt-2 text-red-500">{error}</Text>
           ) : null}
           <Text className="text-xs mt-4 text-grey-49 mb-20">
-            {"A verification code will be sent to this number"}
+            A verification code will be sent to this number
           </Text>
 
           <TouchableOpacity
