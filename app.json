@@ -21,7 +21,7 @@
       "bundleIdentifier": "com.amicare.app",
       "teamId": "5284JKTY8S",
       "merchantId": "merchant.com.amicare.app",
-      "buildNumber": "3"
+      "buildNumber": "5"
     },
     "android": {
       "permissions": [

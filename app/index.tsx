@@ -49,7 +49,7 @@ export default function Index() {
                     }}
                 >
                     <Image
-                        source={require('@/assets/role.png')}
+                        source={require('@/assets/role_reduced.png')}
                         style={{
                             width: '100%',
                             height: '100%',
