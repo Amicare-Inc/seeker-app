@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import { ref } from 'firebase/storage';
 
 const ReferralsScreen = () => {
-  const [referralLink] = useState('amicare.io/invitejs/janedoe...');
+  const [referralLink] = useState('Link Unavailable In Beta'); // Placeholder for referral link
 
   const handleBackPress = () => {
     router.back();

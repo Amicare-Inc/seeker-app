@@ -4,18 +4,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { PrivacyPolicyModal } from '@/features/privacy';
+import { DataRetentionModal } from '@/features/privacy/components/DataRetentionModal';
 
 const PrivacySettingsScreen = () => {
   const [displayProfile, setDisplayProfile] = useState(true);
   const [showHealthInfo, setShowHealthInfo] = useState(true);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showDataRetentionModal, setShowDataRetentionModal] = useState(false);
 
   const handleBackPress = () => {
     router.back();
   };
 
-  const handleDataRetention = () => {
-    console.log('Navigate to Data Retention');
+  const handleViewDataRetention = () => {
+    setShowDataRetentionModal(true);
   };
 
   const handleViewPrivacyPolicy = () => {
@@ -63,7 +65,7 @@ const PrivacySettingsScreen = () => {
         <PrivacyNavigationItem
           title="Data Retention"
           description="Find out what data of yours we store, and for how long it is stored. e.g. Chat, Sessions, etc."
-          onPress={handleDataRetention}
+          onPress={handleViewDataRetention}
         />
 
         {/* View Privacy Policy */}
@@ -82,6 +84,10 @@ const PrivacySettingsScreen = () => {
         />
       </ScrollView>
       
+      <DataRetentionModal
+        visible={showDataRetentionModal}
+        onClose={() => setShowDataRetentionModal(false)}
+      />
       <PrivacyPolicyModal 
         visible={showPrivacyModal} 
         onClose={() => setShowPrivacyModal(false)} 
