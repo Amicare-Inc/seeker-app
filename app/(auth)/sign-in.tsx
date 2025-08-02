@@ -15,8 +15,10 @@ const SignIn = () => {
 	const [form, setForm] = useState({
 		// email: "aisha.khan@example.com",
 		// password: "asdfgh",
-		email: 'owen.lee@example.com',
-		password: 'asdfgh',
+		// email: 'owen.lee@example.com',
+		// password: 'asdfgh',
+		email: '',
+		password: '',
 	});
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const loading = useSelector((state: RootState) => state.user.loading);
@@ -49,38 +51,45 @@ const SignIn = () => {
 				return;
 			}
 
-			const resultAction = await dispatch(fetchUserFromLoginThunk({
-				email: form.email, 
-				password: form.password
-			}));
+					const resultAction = await dispatch(fetchUserFromLoginThunk({
+			email: form.email, 
+			password: form.password
+		}));
+		
+		if (fetchUserFromLoginThunk.fulfilled.match(resultAction)) {
+			console.log(' Sign-in successful, payload:', resultAction.payload);
 			
-			if (fetchUserFromLoginThunk.fulfilled.match(resultAction)) {
-				console.log('Sign-in successful:', resultAction.payload);
-			} else if (fetchUserFromLoginThunk.rejected.match(resultAction)) {
-				// Error is handled by Redux and will appear in reduxError
-				console.error('Sign-in failed:', resultAction.payload);
+
+			const userData = resultAction.payload;
+			router.dismissAll();
+			setTimeout(() => {
+			}, 100);
+			
+			if (userData.onboardingComplete === true) {
+				if (userData.isPsw === true) {
+					console.log('Navigating to PSW dashboard');
+					router.replace('/(dashboard)/(psw)/psw-home');
+				} else {
+					console.log('Navigating to seeker dashboard');
+					router.replace('/(dashboard)/(seeker)/seeker-home');
+				}
+			} else {
+				console.log('Navigating to onboarding');
+				router.replace('/(onboarding)/care_needs_1');
 			}
+		} else if (fetchUserFromLoginThunk.rejected.match(resultAction)) {
+			// Error is handled by Redux and will appear in reduxError
+			console.error('Sign-in failed:', resultAction.payload);
+		}
 		} catch (error: any) {
 			console.error('Unexpected sign-in error:', error);
 			setLocalError('An unexpected error occurred. Please try again.');
 		}
 	};
-
-	// Get the current error to display (prioritize local error, then Redux error)
 	const currentError = localError || reduxError;
-
 	useEffect(() => {
-		if (!initialNavComplete && userData) {
-			if (userData.onboardingComplete == true) {
-				dispatch(setNavigationComplete(true));
-				if (userData.isPsw == true) {
-					router.push('/(psw)/psw-home');
-				} else if (userData.isPsw == false) {
-					router.push('/(seeker)/seeker-home');
-				}
-			}
-		}
 		if (userData && userData.id) {
+			console.log('Connecting socket for user:', userData.id);
 			connectSocket(userData.id);
 		}
 	}, [userData]);
@@ -142,7 +151,7 @@ const SignIn = () => {
 								Don't have an account?
 							</Text>
 							<TouchableOpacity 
-								onPress={() => router.replace('/sign-up')}
+								onPress={() => router.replace('/')}
 								disabled={loading}
 							>
 								<Text className={`text-xs font-normal ${loading ? 'text-gray-400' : 'text-blue-900'}`}>

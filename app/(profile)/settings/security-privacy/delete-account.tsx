@@ -46,7 +46,8 @@ const DeleteAccountScreen = () => {
                     text: 'OK',
                     onPress: () => {
                       // Navigate to sign-in screen
-                      router.replace('/(auth)/sign-in');
+                      router.dismissAll();
+                      router.replace('/');
                     },
                   },
                 ]

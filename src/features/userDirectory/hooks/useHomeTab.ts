@@ -8,6 +8,8 @@ export const useHomeTab = (isPsw: boolean, withDistance: boolean = false) => {
     const currentUserId = useSelector((state: RootState) => state.user.userData?.id);
     const userType = isPsw ? 'psw' : 'seeker';
     
+    console.log('useHomeTab - currentUserId:', currentUserId, 'userType:', userType, 'withDistance:', withDistance);
+    
     const usersQuery = withDistance 
         ? useAvailableUsersWithDistance(userType, currentUserId)
         : useAvailableUsers(userType, currentUserId);
