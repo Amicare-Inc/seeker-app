@@ -57,7 +57,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 							? `${address.city}, ${address.province}`
 							: address?.fullAddress || 'Toronto, ON'
 				}
-				userRating="4.8 out of 5"
+				userRating={user.rating ? `${user.rating.toFixed(1)} out of 5` : 'No rating yet'}
 				userPhoto={user.profilePhotoUrl}
 				onMenuPress={() => {}}
 				isMyProfile={isMyProfile}

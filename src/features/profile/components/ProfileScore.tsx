@@ -150,19 +150,19 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                 <View className="flex-row justify-between">
                     {/* Total Sessions */}
                     <View className="items-center flex-1">
-                        <Text className="text-2xl font-bold text-black">47</Text>
+                        <Text className="text-2xl font-bold text-black">{user.totalSessions || 0}</Text>
                         <Text className="text-sm text-gray-600 mt-1">Total Sessions</Text>
                     </View>
 
                     {/* Total Hours */}
                     <View className="items-center flex-1">
-                        <Text className="text-2xl font-bold text-black">156</Text>
+                        <Text className="text-2xl font-bold text-black">{user.totalCareHours || 0}</Text>
                         <Text className="text-sm text-gray-600 mt-1">Total Hours</Text>
                     </View>
 
                     {/* Client Rating */}
                     <View className="items-center flex-1">
-                        <Text className="text-2xl font-bold text-black">4.8</Text>
+                        <Text className="text-2xl font-bold text-black">{user.rating?.toFixed(1) || 'N/A'}</Text>
                         <Text className="text-sm text-gray-600 mt-1">Client Rating</Text>
                     </View>
                 </View>

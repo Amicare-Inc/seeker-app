@@ -20,6 +20,7 @@ import { requestSession, updateSession } from '@/features/sessions/api/sessionAp
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
+import { usePricingQuote } from '@/features/pricing/api/usePricingQuote';
 
 interface SessionData {
 	id: string;
@@ -367,6 +368,22 @@ const RequestSession = () => {
 		}
 	};
 
+	const originAddress = getLocationToDisplay();
+	const pswIdForQuote = otherUserId as string;
+	const quoteEnabled = Boolean(pswIdForQuote && originAddress && startDate && endDate);
+	const { data: quote } = usePricingQuote(quoteEnabled, {
+	  pswId: pswIdForQuote,
+	  originAddress,
+	  startTime: startDate?.toISOString(),
+	  endTime: endDate?.toISOString()
+	});
+
+	const effectiveRate = quote?.hourlyRate ?? pswRate;
+	const displayBasePrice = quote?.billing?.basePrice ?? basePrice;
+	const displayTaxes = quote?.billing?.taxes ?? taxes;
+	const displayServiceFee = quote?.billing?.serviceFee ?? serviceFee;
+	const displayTotal = quote?.billing?.total ?? total;
+
 	return (
 		<SafeAreaView className="flex-1 bg-grey-0">
 			{/* Custom Header */}
@@ -447,10 +464,11 @@ const RequestSession = () => {
 
 					{/* Billing Info */}
 					<BillingCard
-						basePrice={basePrice}
-						taxes={taxes}
-						serviceFee={serviceFee}
-						total={total}
+						basePrice={displayBasePrice}
+						taxes={displayTaxes}
+						serviceFee={displayServiceFee}
+						total={displayTotal}
+						hourlyRate={effectiveRate}
 					/>
 
 
