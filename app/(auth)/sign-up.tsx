@@ -19,6 +19,9 @@ const SignUp = () => {
         email: '',
         password: '',
         confirm_password: '',
+        // email: 'martin.droruga@example.',
+        // password: 'asdfgh',
+        // confirm_password: 'asdfgh',
     });
 
     const [passwordError, setPasswordError] = useState('');

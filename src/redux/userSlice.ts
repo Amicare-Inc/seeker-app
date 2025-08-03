@@ -24,6 +24,7 @@ export const fetchUserFromLoginThunk = createAsyncThunk<
 			const { signInWithEmailAndPassword } = await import('firebase/auth');
 			const { FIREBASE_AUTH } = await import('@/firebase.config');
 			
+			console.log('Starting sign-in process for:', email);
 			console.log('Attempting Firebase authentication...');
 			
 			// Authenticate with Firebase Auth (this verifies the password)
@@ -31,14 +32,21 @@ export const fetchUserFromLoginThunk = createAsyncThunk<
 			const user = userCredential.user;
 			
 			console.log('Firebase authentication successful:', user.uid);
+			console.log('Now calling backend API to get user profile...');
 			
 			// Now get the user profile from our backend using the verified user
 			const userDoc = await AuthApi.signIn(email, password);
 			if (!userDoc) {
+				console.error('Backend returned null/undefined user profile');
 				throw new Error('Failed to load user profile from backend');
 			}
 			
-			console.log('User profile loaded successfully');
+			console.log('User profile loaded successfully:', {
+				id: userDoc.id,
+				email: userDoc.email,
+				onboardingComplete: userDoc.onboardingComplete,
+				isPsw: userDoc.isPsw
+			});
 			return { ...userDoc } as User;
 		} catch (error: any) {
 			console.error('Login error:', error);
@@ -151,8 +159,10 @@ const userSlice = createSlice({
 			})
 			.addCase(fetchUserFromLoginThunk.fulfilled, (state, action: PayloadAction<User>) => {
 				// Update current user and also store it in allUsers
+				// Always update userData on sign-in if the payload has a valid ID
 				if (
 					!state.userData ||
+					!state.userData.id ||
 					state.userData.id === action.payload.id
 				) {
 					state.userData = action.payload;

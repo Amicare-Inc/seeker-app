@@ -97,7 +97,11 @@ export const AuthApi = {
 
   async signIn(email: string, password: string): Promise<any> {
     try {
-      console.log('AuthApi.signIn: Calling backend signin endpoint');
+      console.log('AuthApi.signIn: Calling backend signin endpoint for:', email);
+      console.log('Backend URL:', process.env.EXPO_PUBLIC_BACKEND_BASE_URL);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signin`, {
         method: 'POST',
@@ -105,7 +109,12 @@ export const AuthApi = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
+      
+      console.log('Backend response status:', response.status);
       
       if (!response.ok) {
         let errorMessage = 'Sign-in failed';
@@ -135,10 +144,19 @@ export const AuthApi = {
       }
       
       const data = await response.json();
-      console.log('AuthApi.signIn: Backend signin successful');
+      console.log('✅ AuthApi.signIn: Backend signin successful, returning:', {
+        id: data.id,
+        email: data.email,
+        onboardingComplete: data.onboardingComplete,
+        isPsw: data.isPsw
+      });
       return data;
     } catch (error: any) {
-      console.error('AuthApi.signIn error:', error);
+      if (error.name === 'AbortError') {
+        console.error('❌ AuthApi.signIn: Request timed out after 15 seconds');
+        throw new Error('Request timed out. Please check your internet connection and try again.');
+      }
+      console.error('❌ AuthApi.signIn error:', error);
       
       // Re-throw with a consistent error message
       if (error.message) {

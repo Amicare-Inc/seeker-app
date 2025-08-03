@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { ProfileScreen, PendingSessionSlider } from '@/features/profile';
 import { User } from '@/types/User';
-import { SessionCard } from '@/features/sessions';
+import { SessionCard, InterestedCard } from '@/features/sessions';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 
 const OtherUserProfileScreen = () => {
@@ -33,7 +33,7 @@ const OtherUserProfileScreen = () => {
 				firstName: familyMember.firstName,
 				lastName: familyMember.lastName,
 				profilePhotoUrl: familyMember.profilePhotoUrl,
-				bio: familyMember.bio || user.bio,
+				bio: (familyMember as any).bio || user.bio,
 				address: familyMember.address,
 				// Use family member's care preferences with correct availability source
 				carePreferences: {
@@ -89,7 +89,7 @@ const OtherUserProfileScreen = () => {
 				firstName: familyMember.firstName,
 				lastName: familyMember.lastName,
 				profilePhotoUrl: familyMember.profilePhotoUrl,
-				bio: familyMember.bio || user.bio,
+				bio: (familyMember as any).bio || user.bio,
 				// Use family member's care preferences with correct availability source
 				carePreferences: {
 					...familyMember.carePreferences, // Family member's care types, tasks, etc.
@@ -143,6 +143,10 @@ const OtherUserProfileScreen = () => {
 			{activeEnrichedProfile &&
 				activeEnrichedProfile.status === 'newRequest' && (
 					<SessionCard {...activeEnrichedProfile} />
+				)}
+			{activeEnrichedProfile &&
+				activeEnrichedProfile.status === 'interested' && (
+					<InterestedCard session={activeEnrichedProfile} />
 				)}
 		</>
 	);

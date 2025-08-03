@@ -1,9 +1,12 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { User } from '@/types/User';
+import { useRequestSession } from '@/features/sessions/api/queries';
+import { SessionDTO } from '@/types/dtos/SessionDto';
+import { router } from 'expo-router';
 
 interface ProfileScoreProps {
     user: User;
@@ -11,6 +14,8 @@ interface ProfileScoreProps {
 
 const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
     const currentUser = useSelector((state: RootState) => state.user.userData);
+    const [isConnecting, setIsConnecting] = useState(false);
+    const requestSessionMutation = useRequestSession();
     
     // Only show buttons if current user is PSW and viewing a seeker profile
     const shouldShowButtons = currentUser?.isPsw && !user.isPsw;
@@ -19,8 +24,63 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
         // Message functionality (currently disabled)
     };
 
-    const handleConnectPress = () => {
-        // Connect functionality (to be implemented)
+    const handleConnectPress = async () => {
+        if (!currentUser) {
+            Alert.alert('Error', 'You must be signed in to express interest.');
+            return;
+        }
+
+        if (isConnecting) {
+            return; // Prevent double-clicks
+        }
+
+        setIsConnecting(true);
+
+        try {
+            // Determine care recipient information
+            const careRecipientId = user.isFamilyMemberCard && user.familyMemberInfo 
+                ? user.familyMemberInfo.id 
+                : user.id;
+            
+            const careRecipientType = user.isFamilyMemberCard ? 'family' : 'self';
+            
+            // Get the actual user ID (strip family member suffix if present)
+            const receiverId = user.isFamilyMemberCard && user.id 
+                ? user.id.split('-family-')[0] 
+                : user.id;
+
+            if (!currentUser.id || !receiverId) {
+                throw new Error('Missing required user information');
+            }
+
+            const interestedSessionData: SessionDTO = {
+                senderId: currentUser.id,
+                receiverId: receiverId,
+                careRecipientId: careRecipientId,
+                careRecipientType: careRecipientType,
+                note: 'PSW expressing interest in providing care'
+            };
+
+            await requestSessionMutation.mutateAsync(interestedSessionData);
+            
+            Alert.alert(
+                'Interest Sent',
+                'Your interest has been sent successfully. The care seeker will be notified.',
+                [{ text: 'OK', onPress: () => {
+                    // Navigate back to PSW home after expressing interest
+                    router.replace('/(dashboard)/(psw)/psw-home');
+                } }]
+            );
+        } catch (error: any) {
+            console.error('Error expressing interest:', error);
+            Alert.alert(
+                'Error',
+                error.message || 'Failed to send interest. Please try again.',
+                [{ text: 'OK' }]
+            );
+        } finally {
+            setIsConnecting(false);
+        }
     };
 
     const handleReportPress = () => {
@@ -48,11 +108,18 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                         {/* Connect Button */}
                         <TouchableOpacity 
                             onPress={handleConnectPress}
-                            className="items-center flex-1 bg-white rounded-lg py-4"
+                            disabled={isConnecting}
+                            className={`items-center flex-1 bg-white rounded-lg py-4 ${isConnecting ? 'opacity-50' : ''}`}
                             style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
                         >
-                            <Ionicons name="arrow-forward-outline" size={28} color="#000" />
-                            <Text className="text-base text-black mt-2 font-medium">Connect</Text>
+                            <Ionicons 
+                                name={isConnecting ? "hourglass-outline" : "arrow-forward-outline"} 
+                                size={28} 
+                                color="#000" 
+                            />
+                            <Text className="text-base text-black mt-2 font-medium">
+                                {isConnecting ? 'Connecting...' : 'Connect'}
+                            </Text>
                         </TouchableOpacity>
 
                         {/* Report Issue Button */}
