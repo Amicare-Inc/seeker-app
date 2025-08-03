@@ -29,10 +29,9 @@ const SettingsScreen = () => {
       queryClient.clear();
 
       // Navigate to the sign-in screen (or your landing page)
-      router.replace('/sign-in');
+      router.replace('/');
     } catch (error) {
       console.error('Error signing out:', error);
-      // Optionally, show an alert or toast to the user.
     }
   };
 

@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { useSelector } from 'react-redux';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Modal, TouchableWithoutFeedback, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { PrivacyPolicyModal } from '@/features/privacy';
 import { DataRetentionModal } from '@/features/privacy/components/DataRetentionModal';
 
+import type { RootState } from '@/src/redux/store';
+
 const PrivacySettingsScreen = () => {
+  // Get userData from Redux
+  const userData = useSelector((state: RootState) => state.user.userData);
+
   const [displayProfile, setDisplayProfile] = useState(true);
   const [showHealthInfo, setShowHealthInfo] = useState(true);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showDataRetentionModal, setShowDataRetentionModal] = useState(false);
+  const [showDataDownloadModal, setShowDataDownloadModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleBackPress = () => {
     router.back();
@@ -24,8 +32,53 @@ const PrivacySettingsScreen = () => {
     setShowPrivacyModal(true);
   };
 
-  const handleDataDownloadRequest = () => {
-    console.log('Navigate to Data Download Request');
+  const handleDataDownloadRequest = async () => {
+    setIsLoading(true);
+
+    // Get user email from Redux
+    const userEmail = userData?.email || '';
+
+    if (!userEmail) {
+      Alert.alert('Error', 'User email not found. Please log in again.');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/support-request`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'data_download',
+          email: userEmail,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log('Data download request submitted successfully:', result.id);
+        // Show the success modal
+        setShowDataDownloadModal(true);
+      } else {
+        throw new Error(result.message || 'Failed to submit data download request');
+      }
+    } catch (error) {
+      console.error('Failed to submit data download request:', error);
+      Alert.alert(
+        'Error',
+        'Failed to submit data download request. Please try again later.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const closeDataDownloadModal = () => {
+    setShowDataDownloadModal(false);
   };
 
   return (
@@ -81,6 +134,7 @@ const PrivacySettingsScreen = () => {
           title="Data Download Request"
           description="Request a copy of the information you've shared on Amicare, including your profile, care history, and messages."
           onPress={handleDataDownloadRequest}
+          disabled={isLoading}
         />
       </ScrollView>
       
@@ -92,6 +146,40 @@ const PrivacySettingsScreen = () => {
         visible={showPrivacyModal} 
         onClose={() => setShowPrivacyModal(false)} 
       />
+
+      {/* Data Download Request Submitted Modal */}
+      <Modal
+        transparent={true}
+        visible={showDataDownloadModal}
+        animationType="fade"
+        onRequestClose={closeDataDownloadModal}
+      >
+        <TouchableWithoutFeedback onPress={closeDataDownloadModal}>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View className="bg-white rounded-[14px] p-6 items-center mx-4">
+                <Text className="text-xl font-semibold mt-2 mb-4">Data Download Requested</Text>
+                <Text className="text-center text-base text-grey-58 mb-6 font-medium">
+                  Your data will be sent to your email shortly. Please allow up to 24 hours for processing.
+                </Text>
+                <TouchableOpacity
+                  onPress={closeDataDownloadModal}
+                  className="bg-black rounded-xl px-6 py-3 flex items-center justify-center"
+                >
+                  <Text className="text-base text-white font-medium">Done</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -140,6 +228,7 @@ interface PrivacyNavigationItemProps {
   description: string;
   onPress: () => void;
   showChevron?: boolean;
+  disabled?: boolean;
 }
 
 const PrivacyNavigationItem: React.FC<PrivacyNavigationItemProps> = ({
@@ -147,13 +236,15 @@ const PrivacyNavigationItem: React.FC<PrivacyNavigationItemProps> = ({
   description,
   onPress,
   showChevron = false,
+  disabled = false,
 }) => {
   return (
     <View className="mb-4">
       {/* Clickable Section with White Background */}
       <TouchableOpacity 
-        onPress={onPress}
-        className="bg-white rounded-lg py-[10px] px-[16px] mb-2"
+        onPress={disabled ? undefined : onPress}
+        className={`bg-white rounded-lg py-[10px] px-[16px] mb-2 ${disabled ? 'opacity-50' : ''}`}
+        disabled={disabled}
       >
         <View className="flex-row items-center justify-between">
           <Text className="text-base font-medium text-black flex-1 pr-4">{title}</Text>

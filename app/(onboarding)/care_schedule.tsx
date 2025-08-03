@@ -12,12 +12,12 @@ import { setTempAvailability, setTempFamilyMember } from '@/redux/userSlice';
 
 const days = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'];
 const timeslots = [
-	'8 am - 10 am',
 	'10 am - 12 pm',
 	'12 pm - 2 pm',
 	'2 pm - 4 pm',
 	'4 pm - 6 pm',
 	'6 pm - 8 pm',
+	'8 pm - 12 pm'
 ];
 
 const CareSchedule: React.FC = () => {
