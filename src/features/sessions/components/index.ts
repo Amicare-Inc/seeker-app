@@ -5,6 +5,7 @@ export { default as SessionCircle } from './SessionCircle';
 export { default as SessionDetailsCard } from './SessionDetailsCard';
 export { default as SessionModal } from './SessionModal';
 export { default as SessionFilterCard } from './SessionFilterCard';
+export { default as InterestedCard } from './InterestedCard';
 
 // Export from subdirectories
 export * from './BookedSession';

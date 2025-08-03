@@ -33,7 +33,9 @@ export interface Session {
 		| 'cancelled'
 		| 'inProgress'
 		| 'completed'
-		| 'failed'; // Updated status flow
+		| 'failed'
+		| 'interested' // PSW expressing interest in seeker
+		| 'requested'; // Interested session that was converted to request
 	createdAt?: string;
 	updatedAt?: string;
 	startTime?: string; // ISO date format

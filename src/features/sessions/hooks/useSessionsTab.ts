@@ -22,9 +22,15 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 
 	// Filter sessions by status using useMemo for performance
 	const newRequests = useMemo(() => 
-		allSessions.filter((session) => 
-			session.status === 'newRequest' && session.receiverId === userId
-		), [allSessions, userId]
+		allSessions.filter((session) => {
+			// For seekers: show newRequest sessions they receive + interested sessions from PSWs
+			if (role === 'seeker') {
+				return (session.status === 'newRequest' && session.receiverId === userId) ||
+					   (session.status === 'interested' && session.receiverId === userId);
+			}
+			// For PSWs: show newRequest sessions they receive
+			return session.status === 'newRequest' && session.receiverId === userId;
+		}), [allSessions, userId, role]
 	);
 
 	const pending = useMemo(() => 
@@ -72,6 +78,14 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 			});
 		} else if (session.status === 'newRequest') {
 			// Clear any stale profile and set the correct session user
+			if (session.otherUser) {
+				dispatch(setActiveProfile(session.otherUser));
+			} else {
+				dispatch(clearActiveProfile());
+			}
+			router.push('/other-user-profile');
+		} else if (session.status === 'interested') {
+			// For interested sessions, navigate to profile page like newRequest
 			if (session.otherUser) {
 				dispatch(setActiveProfile(session.otherUser));
 			} else {
