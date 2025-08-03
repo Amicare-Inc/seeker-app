@@ -8,12 +8,14 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
+import { TermsOfUseLink, TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
 
 
 const VerificationPrompt: React.FC = () => {
    const dispatch = useDispatch<AppDispatch>();
    const userData = useSelector(((state: RootState) => state.user.userData));
    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+   const [showTermsModal, setShowTermsModal] = useState(false);
 
    const handleVerify = () => {
 	  router.push('/verification_webview'); // Route to the webview page
@@ -43,9 +45,10 @@ const VerificationPrompt: React.FC = () => {
 
 				  {/* Subtitle */}
 				  <Text className="text-sm text-grey-80 mb-[21px] leading-5 text-center mx-auto">
-					 {userData?.isPsw
-						? 'You will be asked to take a selfie for biometric verification, and also asked to present your certifications and background checks (Vulnerable Sector Check, First Aid, etc).'
-						: 'You will be asked to take a selfie for biometric verification and present your government-issued ID.'}
+					{userData?.isPsw
+					? "To help ensure safety for all users, please verify your identity by submitting a selfie for biometric verification, along with your certifications and background checks (e.g., Vulnerable Sector Check, First Aid, etc.)."
+					: "To help ensure safety for all users, please verify your identity by submitting a selfie for biometric verification and a valid government-issued photo ID."
+					}
 				  </Text>
 			   </View>
 			</ScrollView>
@@ -61,7 +64,8 @@ const VerificationPrompt: React.FC = () => {
 				  <Text style={{ flex: 1, fontSize: 11, color: '#7B7B7E', lineHeight: 15, fontWeight: '500' }}>
 					 By continuing, you agree to our{' '}
 					 <PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} />
-					 <Text className="text-brand-blue">.</Text>
+					 {' and '}
+					 <TermsOfUseLink onPress={() => setShowTermsModal(true)} textStyle={{ color: '#0c7ae2' }} />
 				  </Text>
 			   </View>
 			   <CustomButton
@@ -77,6 +81,7 @@ const VerificationPrompt: React.FC = () => {
 				  textStyles="text-black text-lg"
 			   />
 			   <PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
+			   <TermsOfUseModal visible={showTermsModal} onClose={() => setShowTermsModal(false)} />
 			</View>
 		 </View>
 	  </SafeAreaView>

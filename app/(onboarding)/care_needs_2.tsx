@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
+import { TermsOfUseLink, TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
@@ -69,7 +70,9 @@ const CareNeeds2: React.FC = () => {
     };
 
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
     const handlePrivacyPolicyPress = () => setShowPrivacyModal(true);
+    const handleTermsOfUsePress = () => setShowTermsModal(true);
 
     return (
         <SafeAreaView 
@@ -130,7 +133,7 @@ const CareNeeds2: React.FC = () => {
                     />
                     <Text style={{ flex: 1, fontSize: 12, color: '#7B7B7E', lineHeight: 16, fontWeight: '500' }}>
                         We use your care preferences to personalize your matches. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
-                        <PrivacyPolicyLink onPress={handlePrivacyPolicyPress} textStyle={{ color: '#0c7ae2' }} /> and <Text style={{ color: '#0c7ae2' }}>Terms of Use</Text>.
+                        <PrivacyPolicyLink onPress={handlePrivacyPolicyPress} textStyle={{ color: '#0c7ae2' }} /> and <TermsOfUseLink onPress={handleTermsOfUsePress} textStyle={{ color: '#0c7ae2' }} />.
                     </Text>
                 </View>
                 <CustomButton
@@ -142,6 +145,10 @@ const CareNeeds2: React.FC = () => {
                 <PrivacyPolicyModal
                     visible={showPrivacyModal}
                     onClose={() => setShowPrivacyModal(false)}
+                />
+                <TermsOfUseModal
+                    visible={showTermsModal}
+                    onClose={() => setShowTermsModal(false)}
                 />
             </View>
         </SafeAreaView>

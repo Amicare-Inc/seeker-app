@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
+import { TermsOfUseLink, TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
@@ -22,6 +23,7 @@ const timeslots = [
 
 const CareSchedule: React.FC = () => {
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+	const [showTermsModal, setShowTermsModal] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
@@ -374,7 +376,7 @@ const CareSchedule: React.FC = () => {
 					/>
 					<Text style={{ flex: 1, fontSize: 12, color: '#7B7B7E', lineHeight: 16, fontWeight: '500' }}>
 						We use your care preferences to personalize your match. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
-						<PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} /> and <Text style={{ color: '#0c7ae2' }}>Terms of Use</Text>.
+						<PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} /> and <TermsOfUseLink onPress={() => setShowTermsModal(true)} textStyle={{ color: '#0c7ae2' }} />.
 					</Text>
 				</View>
 				<CustomButton
@@ -389,6 +391,10 @@ const CareSchedule: React.FC = () => {
 				<PrivacyPolicyModal
 					visible={showPrivacyModal}
 					onClose={() => setShowPrivacyModal(false)}
+				/>
+				<TermsOfUseModal
+					visible={showTermsModal}
+					onClose={() => setShowTermsModal(false)}
 				/>
 			</View>
 		</SafeAreaView>

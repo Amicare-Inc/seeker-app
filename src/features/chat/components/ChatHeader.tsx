@@ -225,12 +225,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 					{/* Change / Cancel */}
 					{currentSession.status !== 'inProgress' && (
 						<View className="flex-row items-center justify-between">
-							<TouchableOpacity className="">
+							<TouchableOpacity onPress={handleNavigateToRequestSession} className="">
 								<Text className="text-sm font-medium text-grey-58 underline">
 									Change
 								</Text>
 							</TouchableOpacity>
-							<TouchableOpacity className="">
+							<TouchableOpacity onPress={handleCancelSession} className="">
 								<Text className="text-sm font-medium text-grey-58 underline">
 									Cancel
 								</Text>
