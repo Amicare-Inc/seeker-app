@@ -10,6 +10,7 @@ import { uploadPhotoToFirebase } from '@/services/firebase/storage';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { AuthApi } from '@/features/auth/api/authApi';
+import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 
 const AddProfilePhoto: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
@@ -18,6 +19,7 @@ const AddProfilePhoto: React.FC = () => {
 	const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
 	const [bio, setBio] = useState<string>(''); // Initialize empty, don't use userData.bio as it might contain family member data
 	const [isBioFocused, setIsBioFocused] = useState<boolean>(false);
+	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
 	// Determine if bio should be shown - Updated to check isPsw first
 	const shouldShowBio = userData?.isPsw || userData?.lookingForSelf === true;
@@ -211,9 +213,17 @@ const AddProfilePhoto: React.FC = () => {
 					<Ionicons name="information-circle" size={28} color="#BFBFC3" />
 					<Text className="text-xs text-grey-49 flex-1 leading-4 font-medium">
 						By continuing, you agree to the public display of your profile (name, photo, bio, neighbourhood, availability, and language) to all users. You can control profile visibility in your profile settings. Learn more in our{' '}
-						<Text className="text-brand-blue">Privacy Policy</Text>.
+						<PrivacyPolicyLink 
+							onPress={() => setShowPrivacyModal(true)}
+							textStyle={{ fontSize: 12, fontWeight: '500' }}
+						/>
+						<Text className="text-brand-blue">.</Text>
 					</Text>
 				</View>
+				<PrivacyPolicyModal 
+					visible={showPrivacyModal}
+					onClose={() => setShowPrivacyModal(false)}
+				/>
 				<CustomButton
 					title="Finish"
 					handlePress={handleDone}

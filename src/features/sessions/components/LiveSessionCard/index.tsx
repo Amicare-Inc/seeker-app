@@ -405,7 +405,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
             </View>
             
             {/* Force Complete Button (for testing) */}
-            <View className="mx-5 mt-2">
+            {/* <View className="mx-5 mt-2">
               <TouchableOpacity 
                 onPress={handleForceCompleteSession}
                 className="bg-gray-200 py-2 px-4 rounded-lg self-center"
@@ -414,7 +414,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
                   Force Complete (Testing)
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
           </>
         )}
       </LinearGradient>

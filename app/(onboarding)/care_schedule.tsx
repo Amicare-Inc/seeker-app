@@ -18,7 +18,7 @@ const timeslots = [
 	'2 pm - 4 pm',
 	'4 pm - 6 pm',
 	'6 pm - 8 pm',
-	'10 pm - 12 am'
+	'8 pm - 10 pm'
 ];
 
 const CareSchedule: React.FC = () => {
