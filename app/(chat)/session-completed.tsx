@@ -121,8 +121,73 @@ const SessionCompleted = () => {
 	const accountHolder = sessionData.otherUser;
 	
 	const onReportPress = () => {
-		// TODO: Implement reporting functionality
-		                    // Handle report functionality here
+		setShowReportInput(true);
+	};
+
+	const submitReport = async () => {
+		console.log('🔄 Submit report called');
+		console.log('Report text:', reportText);
+		console.log('Current user:', currentUser);
+		console.log('Session ID:', sessionId);
+
+		if (!reportText.trim()) {
+			Alert.alert('Error', 'Please enter a description of the issue');
+			return;
+		}
+
+		if (!currentUser?.id) {
+			Alert.alert('Error', 'User information not available. Please log in again.');
+			return;
+		}
+
+		if (!sessionId) {
+			Alert.alert('Error', 'Session information not available');
+			return;
+		}
+		
+		setIsSubmitting(true);
+		
+		try {
+			console.log('📤 Calling submitSessionFeedback...');
+			const response = await submitSessionFeedback(
+				sessionId as string,
+				'issue_report',
+				reportText,
+				currentUser.id // Pass the user ID from Redux
+			);
+			
+			console.log('📥 Response received:', response);
+			
+			if (response.success) {
+				Alert.alert(
+					'Report Submitted', 
+					'Thank you for your feedback. We will review your report and take appropriate action.',
+					[{ text: 'OK', onPress: () => {
+						setShowReportInput(false);
+						setReportText('');
+					}}]
+				);
+			} else {
+				const errorMessage = response.error || response.message || 'Failed to submit report. Please try again.';
+				console.error('❌ Submission failed:', errorMessage);
+				Alert.alert('Error', errorMessage);
+			}
+		} catch (error) {
+			console.error('❌ Exception in submitReport:', error);
+			Alert.alert('Error', 'Network error. Please check your connection and try again.');
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	const cancelReport = () => {
+		setShowReportInput(false);
+		setReportText('');
+		Keyboard.dismiss();
+	};
+
+	const handleSubmitEditing = () => {
+		Keyboard.dismiss();
 	};
 
 	const goToDashboard = () => {
@@ -134,8 +199,61 @@ const SessionCompleted = () => {
 		}
 	};
 
+	const submitRating = async () => {
+		if (!sessionData || !currentUser || hasRated) return;
+		
+		setIsSubmittingRating(true);
+		try {
+			const headers = await getAuthHeaders();
+			const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/rate`, {
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					ratedUserId: sessionData.otherUser?.id,
+					rating: userRating
+				})
+			});
+
+			if (response.ok) {
+				setHasRated(true);
+			}
+		} catch (error) {
+			console.error('Error submitting rating:', error);
+		} finally {
+			setIsSubmittingRating(false);
+		}
+	};
+
+	const skipRating = async () => {
+		if (!sessionData || !currentUser || hasRated) return;
+		
+		setIsSubmittingRating(true);
+		try {
+			const headers = await getAuthHeaders();
+			await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/rate`, {
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					ratedUserId: sessionData.otherUser?.id,
+					rating: 5
+				})
+			});
+			setHasRated(true);
+		} catch (error) {
+			console.error('Error submitting rating:', error);
+		} finally {
+			setIsSubmittingRating(false);
+		}
+	};
+
 	return (
-		<SafeAreaView className="flex-1 bg-white">
+		<KeyboardAvoidingView
+			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			style={{ flex: 1 }}
+			keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+		>
+			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+				<SafeAreaView className="flex-1 bg-white">
 			{/* Main Content */}
 			<View className="flex-1 justify-center items-center px-4">
 				{/* Profile Photo(s) */}
@@ -197,6 +315,50 @@ const SessionCompleted = () => {
 					}
 				</Text>
 
+				{!hasRated && sessionData?.otherUser && (
+					<View className="w-full mb-8 p-6 bg-gray-50 rounded-xl">
+						<Text className="text-lg font-semibold text-center mb-4">
+							How was your experience with {sessionData.otherUser.firstName}?
+						</Text>
+						
+						<StarRating
+							rating={userRating}
+							onRatingChange={setUserRating}
+							size={40}
+						/>
+						
+						<View className="flex-row mt-6 space-x-4">
+							<TouchableOpacity
+								onPress={submitRating}
+								disabled={isSubmittingRating}
+								className="flex-1 bg-blue-500 rounded-lg py-3"
+							>
+								<Text className="text-white font-semibold text-center">
+									{isSubmittingRating ? 'Submitting...' : 'Submit Rating'}
+								</Text>
+							</TouchableOpacity>
+							
+							<TouchableOpacity
+								onPress={skipRating}
+								disabled={isSubmittingRating}
+								className="flex-1 bg-gray-300 rounded-lg py-3"
+							>
+								<Text className="text-gray-700 font-semibold text-center">
+									Skip
+								</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				)}
+
+				{hasRated && (
+					<View className="mb-6">
+						<Text className="text-green-600 font-medium text-center">
+							Thank you for your feedback!
+						</Text>
+					</View>
+				)}
+
 				{/* Action Buttons */}
 				<View className="w-full px-4 space-y-3">
 					{/* Dashboard Button */}
@@ -210,20 +372,65 @@ const SessionCompleted = () => {
 						</Text>
 					</TouchableOpacity>
 
-					{/* Report Issue Button */}
-					<TouchableOpacity
-						onPress={onReportPress}
-						className="bg-gray-100 rounded-xl p-4 items-center flex-row justify-center"
-					>
-						<Ionicons name="flag" size={22} color="#6B7280" />
-						<Text className="text-gray-700 text-lg font-medium ml-3">
-							Report an Issue
-						</Text>
-					</TouchableOpacity>
+					{/* Report Issue Button or Input */}
+					{!showReportInput ? (
+						<TouchableOpacity
+							onPress={onReportPress}
+							className="bg-gray-100 rounded-xl p-4 items-center flex-row justify-center"
+						>
+							<Ionicons name="flag" size={22} color="#6B7280" />
+							<Text className="text-gray-700 text-lg font-medium ml-3">
+								Report an Issue
+							</Text>
+						</TouchableOpacity>
+					) : (
+						<View className="bg-white rounded-xl p-4 border border-gray-300">
+							<Text className="text-gray-800 font-medium mb-2">
+								What issue would you like to report?
+							</Text>
+							<TextInput
+								value={reportText}
+								onChangeText={setReportText}
+								placeholder="Describe the issue you experienced..."
+								multiline
+								className="bg-gray-100 rounded-lg p-3 min-h-[100px] text-gray-800 mb-3"
+								textAlignVertical="top"
+								returnKeyType="done"
+								onSubmitEditing={handleSubmitEditing}
+								blurOnSubmit={true}
+							/>
+							<View className="flex-row justify-end space-x-3">
+								<TouchableOpacity
+									onPress={cancelReport}
+									disabled={isSubmitting}
+									className="px-4 py-2 rounded-lg bg-gray-200"
+								>
+									<Text className="text-gray-700 font-medium">Cancel</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={submitReport}
+									disabled={isSubmitting || !reportText.trim()}
+									className={`px-4 py-2 rounded-lg ${
+										isSubmitting || !reportText.trim() 
+											? 'bg-gray-400' 
+											: 'bg-brand-blue'
+									}`}
+								>
+									{isSubmitting ? (
+										<ActivityIndicator size="small" color="white" />
+									) : (
+										<Text className="text-white font-medium">Submit</Text>
+									)}
+								</TouchableOpacity>
+							</View>
+						</View>
+					)}
 				</View>
 			</View>
 		</SafeAreaView>
+			</TouchableWithoutFeedback>
+		</KeyboardAvoidingView>
 	);
 };
 
-export default SessionCompleted; 
+export default SessionCompleted;

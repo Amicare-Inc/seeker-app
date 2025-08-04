@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { useDispatch } from 'react-redux';
+import { RootState } from '@/redux/store';
 import { useRouter } from 'expo-router';
 import { User } from '@/types/User';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
@@ -48,8 +49,8 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 
 	// Navigates to the profile page for this user; passes myProfile: false.
 	const handleMoreInfo = () => {
+		if (!user.id) return;
 		dispatch(setActiveProfile(user));
-		setActiveEnrichedSession(null);
 		router.push('/other-user-profile');
 	};
 
@@ -64,17 +65,19 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 				{/* Header row: Image, Name + rating, Rate */}
 				<View className="flex-row items-center justify-between mb-4">
 					<View className="flex-row items-center">
-						<Image
-							source={
-								user.profilePhotoUrl
-									? { uri: user.profilePhotoUrl }
-									: require('@/assets/default-profile.png')
-							}
-							className="w-[58px] h-[58px] rounded-lg mr-3"
-						/>
+						<View>
+							<Image
+								source={
+									user.profilePhotoUrl
+										? { uri: user.profilePhotoUrl }
+										: require('@/assets/default-profile.png')
+								}
+								className="w-[58px] h-[58px] rounded-lg mr-3"
+							/>
+						</View>
 						<View>
 							<Text className="font-bold text-lg text-black">
-								{user.firstName} {user.lastName}
+								{`${user.firstName} ${user.lastName}`}
 							</Text>
 							{/* Show distance under full name if available */}
 							{user.distanceInfo && (
@@ -101,43 +104,45 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 
 				{/* Bio Section */}
 				{/* Bio Text (header removed as per design) */}
-				<Text className="text-gray-700 mb-3">{bioText}</Text>
+				<Text className="text-gray-700 mb-3">
+					{bioText}
+				</Text>
 
 				{/* Skill Sets */}
 				<Text className="font-bold text-gray-800 mb-1">
 					{user.isPsw ? 'Tasks I Can Assist With' : 'Requiring Help With'}
 				</Text>
-				<Text className="text-gray-700 mb-3">{tasks}</Text>
+				<Text className="text-gray-700 mb-3">
+					{tasks}
+				</Text>
 
 				{/* Diagnosed Conditions */}
 				<Text className="font-bold text-gray-800 mb-1">
 					{user.isPsw ? 'Services Provided' : 'Services Needed'}
 				</Text>
-				<Text className="text-gray-700 mb-3">{diagnosed}</Text>
+				<Text className="text-gray-700 mb-3">
+					{diagnosed}
+				</Text>
 
 				{/* Bottom buttons row */}
-				<View className="flex-row mt-4" pointerEvents="box-none">
+				<View className="flex-row mt-4">
 					{/* Request Session Button */}
 					<TouchableOpacity
-						onPress={(e) => {
-							e.stopPropagation();
-							handleRequestSession();
-						}}
-						className="bg-blue-500 flex-1 mr-2 p-3 rounded-lg items-center"
+						onPress={handleRequestSession}
+						className="flex-1 bg-blue-500 rounded-lg py-3 mr-2"
 					>
-						<Text className="text-white font-bold">
+						<Text className="text-white text-center font-semibold">
 							Request Session
 						</Text>
 					</TouchableOpacity>
 					{/* More Info Button */}
 					<TouchableOpacity
-						onPress={(e) => {
-							e.stopPropagation();
-							handleMoreInfo();
-						}}
-						className="bg-black flex-1 ml-2 p-3 rounded-lg items-center"
+						onPress={handleMoreInfo}
+						className="flex-1 bg-gray-200 rounded-lg py-3 ml-2"
 					>
-						<Text className="text-white font-bold">More Info</Text>
+						<Text className="text-gray-800 text-center font-semibold">
+							More Info
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</View>

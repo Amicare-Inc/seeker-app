@@ -94,6 +94,22 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
     });
   };
 
+  // Force complete session and navigate to session-completed page
+  const handleForceCompleteSession = () => {
+    // Set the session as completed in context
+    setActiveEnrichedSession({
+      ...session,
+      status: 'completed',
+      liveStatus: 'completed'
+    });
+    
+    // Navigate to session completed page
+    router.push({
+      pathname: '/(chat)/session-completed',
+      params: { sessionId: session.id }
+    });
+  };
+
   // PanResponder for swipe gestures
   const panResponder = useRef(
     PanResponder.create({
@@ -386,6 +402,18 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
                   </Text>
                 </TouchableOpacity>
               )}
+            </View>
+            
+            {/* Force Complete Button (for testing) */}
+            <View className="mx-5 mt-2">
+              <TouchableOpacity 
+                onPress={handleForceCompleteSession}
+                className="bg-gray-200 py-2 px-4 rounded-lg self-center"
+              >
+                <Text className="text-gray-800 text-[13px]">
+                  Force Complete (Testing)
+                </Text>
+              </TouchableOpacity>
             </View>
           </>
         )}

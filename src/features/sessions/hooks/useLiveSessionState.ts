@@ -77,6 +77,18 @@ export const useLiveSessionState = (enrichedSession: EnrichedSession) => {
     }
   }, [completedSessions, enrichedSession?.id, enrichedSession, status, setCompletedSession]);
 
+  // for testing
+  const forceNavigateToSessionComplete = (sessionId: string) => {
+    // Set the session as completed in context first
+    setCompletedSession(enrichedSession);
+    
+    // Then navigate
+    router.push({
+      pathname: '/(chat)/session-completed',
+      params: { sessionId: sessionId },
+    });
+  };
+
   return {
     status,
     userConfirmed,
@@ -92,4 +104,4 @@ export const useLiveSessionState = (enrichedSession: EnrichedSession) => {
       confirmEndSession();
     },
   };
-}; 
+};
