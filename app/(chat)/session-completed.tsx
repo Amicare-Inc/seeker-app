@@ -8,7 +8,8 @@ import { useSessionCompletion } from '@/lib/context/SessionCompletionContext';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
-import StarRating from '@/components/StarRating';
+import StarRating from '@/features/common/StarRating';
+import VerificationModal from '@/features/userDirectory/components/VerificationModal';
 import { getAuthHeaders } from '@/lib/auth';
 
 const SessionCompleted = () => {

@@ -77,6 +77,8 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
         </View>
     );
 
+    const remoteUserVerified = user.idManualVerified ?? false;
+
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -85,15 +87,14 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
             <View className="flex-row items-center justify-between">
                 <View className="flex-1">
                     <View className="flex-row items-center">
-                        <Text className="font-bold text-lg text-black mr-1">
-                            {displayName}
-                        </Text>
-                        
-                        <View className="w-[15px] h-[15px] bg-blue-500 rounded-full items-center justify-center mr-2">
-                            <Ionicons name="checkmark" size={10} color="white" />
+                        <View className="flex-row items-center">
+                            <Text className="font-bold text-lg text-black mr-1 flex-shrink">
+                                {displayName}
+                            </Text>
+                            {remoteUserVerified && (
+                                <Ionicons name="checkmark-circle" size={16} color="#3B82F6" />
+                            )}
                         </View>
-
-
                     </View>
                     
                     <Text className="text-sm font-medium text-gray-500">
