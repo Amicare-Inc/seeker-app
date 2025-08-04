@@ -86,4 +86,10 @@ export interface Session {
 	};
 	// Distance information (calculated from PSW to care location)
 	distanceInfo?: SessionDistanceInfo;
+	ratings?: {
+		[userId: string]: {
+			rating: number;
+			ratedAt: string;
+		}
+	};
 }

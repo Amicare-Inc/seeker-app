@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -8,10 +8,15 @@ import { useSessionCompletion } from '@/lib/context/SessionCompletionContext';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
+import StarRating from '@/components/StarRating';
+import { getAuthHeaders } from '@/lib/auth';
 
 const SessionCompleted = () => {
 	const { sessionId } = useLocalSearchParams();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
+	const [userRating, setUserRating] = useState(5);
+	const [hasRated, setHasRated] = useState(false);
+	const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
 	// Context data
 	const { completedSession, clearCompletedSession } = useSessionCompletion();
@@ -134,6 +139,53 @@ const SessionCompleted = () => {
 		}
 	};
 
+	const submitRating = async () => {
+		if (!sessionData || !currentUser || hasRated) return;
+		
+		setIsSubmittingRating(true);
+		try {
+			const headers = await getAuthHeaders();
+			const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/rate`, {
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					ratedUserId: sessionData.otherUser?.id,
+					rating: userRating
+				})
+			});
+
+			if (response.ok) {
+				setHasRated(true);
+			}
+		} catch (error) {
+			console.error('Error submitting rating:', error);
+		} finally {
+			setIsSubmittingRating(false);
+		}
+	};
+
+	const skipRating = async () => {
+		if (!sessionData || !currentUser || hasRated) return;
+		
+		setIsSubmittingRating(true);
+		try {
+			const headers = await getAuthHeaders();
+			await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/rate`, {
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					ratedUserId: sessionData.otherUser?.id,
+					rating: 5
+				})
+			});
+			setHasRated(true);
+		} catch (error) {
+			console.error('Error submitting rating:', error);
+		} finally {
+			setIsSubmittingRating(false);
+		}
+	};
+
 	return (
 		<SafeAreaView className="flex-1 bg-white">
 			{/* Main Content */}
@@ -196,6 +248,50 @@ const SessionCompleted = () => {
 						: ' Thank you for using Amicare.'
 					}
 				</Text>
+
+				{!hasRated && sessionData?.otherUser && (
+					<View className="w-full mb-8 p-6 bg-gray-50 rounded-xl">
+						<Text className="text-lg font-semibold text-center mb-4">
+							How was your experience with {sessionData.otherUser.firstName}?
+						</Text>
+						
+						<StarRating
+							rating={userRating}
+							onRatingChange={setUserRating}
+							size={40}
+						/>
+						
+						<View className="flex-row mt-6 space-x-4">
+							<TouchableOpacity
+								onPress={submitRating}
+								disabled={isSubmittingRating}
+								className="flex-1 bg-blue-500 rounded-lg py-3"
+							>
+								<Text className="text-white font-semibold text-center">
+									{isSubmittingRating ? 'Submitting...' : 'Submit Rating'}
+								</Text>
+							</TouchableOpacity>
+							
+							<TouchableOpacity
+								onPress={skipRating}
+								disabled={isSubmittingRating}
+								className="flex-1 bg-gray-300 rounded-lg py-3"
+							>
+								<Text className="text-gray-700 font-semibold text-center">
+									Skip
+								</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				)}
+
+				{hasRated && (
+					<View className="mb-6">
+						<Text className="text-green-600 font-medium text-center">
+							Thank you for your feedback!
+						</Text>
+					</View>
+				)}
 
 				{/* Action Buttons */}
 				<View className="w-full px-4 space-y-3">
