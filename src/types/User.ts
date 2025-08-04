@@ -35,6 +35,13 @@ export interface User {
 	onboardingComplete: boolean;
 	bio?: string;
 	stripeAccountId?: string;
+	// New fields for pricing algorithm and user management
+	rating?: number; // 1-5 star rating
+	idManualVerified?: boolean; // Manual verification status
+	isActive?: boolean; // User account active status
+	isShowing?: boolean; // Whether user appears in search results
+	totalCareHours?: number; // Total hours of care provided/received
+	totalSessions?: number; // Total number of completed sessions
 	// For family-care seekers (each family member's care needs)
 	familyMembers?: Array<{
 		id: string;
@@ -51,6 +58,7 @@ export interface User {
 		};
 		profilePhotoUrl?: string;
 		bio?: string;
+		rating?: number; // Rating for this family member's care experiences
 		// Each family member has their own care preferences
 		carePreferences: {
 			careType: string[];

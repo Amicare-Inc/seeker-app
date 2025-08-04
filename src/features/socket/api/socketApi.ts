@@ -41,7 +41,7 @@ export const connectSocket = async (userId: string) => {
       query: { userId },
       
       // ✅ Critical reliability improvements
-      transports: ['websocket', 'polling'], // Allow fallback to long-polling
+      transports: ['websocket'], // Force native WebSocket
       upgrade: true, // Allow transport upgrades
       
       // ✅ Reconnection settings - more aggressive for iOS

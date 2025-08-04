@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { User } from '@/types/User';
-import { useRequestSession } from '@/features/sessions/api/queries';
+import { useRequestSession, useEnrichedSessions } from '@/features/sessions/api/queries';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { router } from 'expo-router';
 
@@ -17,12 +17,28 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
     const [isConnecting, setIsConnecting] = useState(false);
     const requestSessionMutation = useRequestSession();
     
+    // Get all sessions for the current user to check for existing sessions
+    const { data: allSessions = [] } = useEnrichedSessions(currentUser?.id);
+    
     // Only show buttons if current user is PSW and viewing a seeker profile
     const shouldShowButtons = currentUser?.isPsw && !user.isPsw;
     
-    const handleMessagePress = () => {
-        // Message functionality (currently disabled)
-    };
+    // Check if there's an existing active session between PSW and this seeker
+    const hasActiveSession = allSessions.some(session => {
+        // Get the actual user ID (strip family member suffix if present)
+        const seekerUserId = user.isFamilyMemberCard && user.id 
+            ? user.id.split('-family-')[0] 
+            : user.id;
+        
+        // Check if this session involves the current seeker
+        const isSessionWithThisSeeker = session.senderId === seekerUserId || 
+                                       session.receiverId === seekerUserId;
+        
+        // Check if session is in an active state
+        const isActiveStatus = ['newRequest', 'pending', 'confirmed', 'inProgress'].includes(session.status);
+        
+        return isSessionWithThisSeeker && isActiveStatus;
+    });
 
     const handleConnectPress = async () => {
         if (!currentUser) {
@@ -30,7 +46,7 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
             return;
         }
 
-        if (isConnecting) {
+        if (isConnecting || hasActiveSession) {
             return; // Prevent double-clicks
         }
 
@@ -94,31 +110,20 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                 {/* Action Buttons Row */}
                 <View className="py-2 mb-4">
                     <View className="flex-row justify-between gap-4">
-                        {/* Message Button - Greyed out */}
-                        <TouchableOpacity 
-                            onPress={handleMessagePress}
-                            disabled={true}
-                            className="items-center flex-1 bg-white rounded-lg py-4 opacity-50"
-                            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
-                        >
-                            <Ionicons name="chatbubble-outline" size={28} color="#000" />
-                            <Text className="text-base text-black mt-2 font-medium">Message</Text>
-                        </TouchableOpacity>
-
                         {/* Connect Button */}
                         <TouchableOpacity 
                             onPress={handleConnectPress}
-                            disabled={isConnecting}
-                            className={`items-center flex-1 bg-white rounded-lg py-4 ${isConnecting ? 'opacity-50' : ''}`}
+                            disabled={isConnecting || hasActiveSession}
+                            className={`items-center flex-1 bg-white rounded-lg py-4 ${(isConnecting || hasActiveSession) ? 'opacity-50' : ''}`}
                             style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
                         >
                             <Ionicons 
-                                name={isConnecting ? "hourglass-outline" : "arrow-forward-outline"} 
+                                name={isConnecting ? "hourglass-outline" : hasActiveSession ? "checkmark-outline" : "arrow-forward-outline"} 
                                 size={28} 
                                 color="#000" 
                             />
                             <Text className="text-base text-black mt-2 font-medium">
-                                {isConnecting ? 'Connecting...' : 'Connect'}
+                                {isConnecting ? 'Connecting...' : hasActiveSession ? 'Already Connected' : 'Connect'}
                             </Text>
                         </TouchableOpacity>
 
@@ -145,19 +150,19 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                 <View className="flex-row justify-between">
                     {/* Total Sessions */}
                     <View className="items-center flex-1">
-                        <Text className="text-2xl font-bold text-black">47</Text>
+                        <Text className="text-2xl font-bold text-black">{user.totalSessions || 0}</Text>
                         <Text className="text-sm text-gray-600 mt-1">Total Sessions</Text>
                     </View>
 
                     {/* Total Hours */}
                     <View className="items-center flex-1">
-                        <Text className="text-2xl font-bold text-black">156</Text>
+                        <Text className="text-2xl font-bold text-black">{user.totalCareHours || 0}</Text>
                         <Text className="text-sm text-gray-600 mt-1">Total Hours</Text>
                     </View>
 
                     {/* Client Rating */}
                     <View className="items-center flex-1">
-                        <Text className="text-2xl font-bold text-black">4.8</Text>
+                        <Text className="text-2xl font-bold text-black">{user.rating?.toFixed(1) || 'N/A'}</Text>
                         <Text className="text-sm text-gray-600 mt-1">Client Rating</Text>
                     </View>
                 </View>
