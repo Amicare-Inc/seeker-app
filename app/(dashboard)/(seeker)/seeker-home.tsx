@@ -122,10 +122,13 @@ const SeekerHomeTab = () => {
 						zIndex: 20,
 					}}
 				>
-					<Ionicons name="checkmark-circle" size={20} color="white" style={{ marginRight: 8 }} />
+					
 					<View className="flex-1">
-						<Text className="text-white font-semibold text-sm">Profile Submitted</Text>
-						<Text className="text-white text-xs opacity-90">Your documents are now under review and will be verified within X days.</Text>
+						<View className="flex-row mb-2 items-center">
+							<Ionicons name="checkmark-circle" size={20} color="white" style={{ marginRight: 8 }} />
+							<Text className="text-white font-semibold text-base">Profile in Review</Text>
+						</View>
+						<Text className="text-white text-sm opacity-90">Profile is being reviewed. As Amicare is in limited beta, this may take up to 5 business days. Our care support team will contact you shortly.</Text>
 					</View>
 				</View>
 			)}

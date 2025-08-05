@@ -191,7 +191,7 @@ Contact information for the Privacy Officer is as follows:
 
 <View style={styles.bullets}>
 <Text style={styles.bullet}>• Email: privacy@amicare.io</Text>
-<Text style={styles.bullet}>• Phone: 3439973997</Text>
+<Text style={styles.bullet}>• Phone: +1 (888) 994-9114</Text>
 <Text style={styles.bullet}>• Postal Address: 18 King Street East, Suite 1400, Toronto, ON M5C 1C4, Canada</Text>
 </View>
 

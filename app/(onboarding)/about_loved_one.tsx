@@ -84,7 +84,35 @@ const AboutLovedOne: React.FC = () => {
         const newErrors: any = {};
         if (!form.firstName) newErrors.firstName = 'First name is required';
         if (!form.lastName) newErrors.lastName = 'Last name is required';
-        if (!form.dob) newErrors.dob = 'Date of birth is required';
+        if (!form.dob) {
+            newErrors.dob = 'Date of birth is required';
+        } else {
+            // Check if the person is over 18
+            const today = new Date();
+            
+            // Parse the MM/DD/YYYY format from DatePickerField
+            const [month, day, year] = form.dob.split('/').map(num => parseInt(num, 10));
+            const birthDate = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+            
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            // Adjust age if birthday hasn't occurred this year
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            console.log('Age validation:', {
+                inputDate: form.dob,
+                parsedDate: birthDate,
+                calculatedAge: age,
+                isValid: age >= 18
+            });
+            
+            if (age < 18) {
+                newErrors.dob = 'Care recipient must be 18 years or older';
+            }
+        }
         if (!form.address.fullAddress && !form.placeOfService) newErrors.address = 'Address is required';
         if (!form.gender) newErrors.gender = 'Gender is required';
         if (!form.hasPermission) newErrors.hasPermission = 'You must confirm permission to continue';

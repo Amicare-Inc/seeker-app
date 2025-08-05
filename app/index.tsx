@@ -108,7 +108,7 @@ export default function Index() {
                         </View>
                     )}
                     <TouchableOpacity 
-                        className="flex-row mb-[40px] w-full items-start"
+                        className="flex-row mb-[30px] w-full items-start"
                         onPress={handleTermsToggle}
                     >
                         <View
@@ -122,17 +122,17 @@ export default function Index() {
                         </View>
 
                         <View className="flex-1">
-                            <Text className="text-sm text-black font-medium">
-                                By continuing, you agree with Amicare's{' '}
+                            <Text className="text-[11px] text-grey-58 font-medium">
+                                By continuing, you confirm that you've read and agree to Amicare's{' '}
                             <TermsOfUseLink
-                                textStyle={{ fontSize: 14, fontWeight: '500' }}
+                                textStyle={{ fontSize: 11, fontWeight: '500' }}
                                 onPress={() => setShowTermsModal(true)}
                             />
                             {' and '}
                             <PrivacyPolicyLink 
-                                textStyle={{ fontSize: 14, fontWeight: '500' }} 
+                                textStyle={{ fontSize: 11, fontWeight: '500' }} 
                                 onPress={() => setShowPrivacyModal(true)}
-                            />
+                            />, and understand that Amicare is a neutral platform - not a healthcare provider. All caregivers are independant professionals.
                             </Text>
                         </View>
                     </TouchableOpacity>

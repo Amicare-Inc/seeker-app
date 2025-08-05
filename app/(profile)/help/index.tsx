@@ -11,7 +11,7 @@ const HelpScreen = () => {
   };
 
   const handleCallSupport = () => {
-    const phoneNumber = 'tel:+8889949114';
+    const phoneNumber = 'tel:+18889949114';
     Linking.openURL(phoneNumber).catch(() => {
       Alert.alert('Error', 'Your device does not support calling.');
     });

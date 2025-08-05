@@ -182,10 +182,12 @@ const PswHomeTab = () => {
 						zIndex: 20,
 					}}
 				>
-					<Ionicons name="checkmark-circle" size={20} color="white" style={{ marginRight: 8 }} />
 					<View className="flex-1">
-						<Text className="text-white font-semibold text-sm">Profile Submitted</Text>
-						<Text className="text-white text-xs opacity-90">Your documents are now under review and will be verified within X days.</Text>
+						<View className="flex-row mb-2 items-center">
+							<Ionicons name="checkmark-circle" size={20} color="white" style={{ marginRight: 8 }} />
+							<Text className="text-white font-semibold text-base">Profile in Review</Text>
+						</View>
+						<Text className="text-white text-sm opacity-90">Your profile is under review. As we are currently in limited Beta, verification may take up to 20 business days. We’ll follow up with next steps via email.</Text>
 					</View>
 				</View>
 			)}

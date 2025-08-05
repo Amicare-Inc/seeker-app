@@ -932,7 +932,7 @@ export function TermsOfUseModal({ visible, onClose }: TermsOfUseModalProps) {
               Toronto, ON M5C 1C4{'\n'}
               Canada{'\n'}
               Email: info@amicare.io{'\n'}
-              Phone: (343) 997-3997
+              Phone: +1 (888) 994-9114
             </Text>
           </ScrollView>
         </View>
