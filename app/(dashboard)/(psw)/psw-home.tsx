@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, TouchableWithoutFeedback, Platform, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -24,6 +24,24 @@ const PswHomeTab = () => {
 	const { setActiveEnrichedSession } = useActiveSession();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const isVerified = currentUser?.idManualVerified ?? false;
+	const [showApprovalPopup, setShowApprovalPopup] = useState(false);
+	const approvalFadeAnim = useRef(new (require('react-native').Animated).Value(0)).current;
+
+	useEffect(() => {
+		if (showApprovalPopup) {
+			require('react-native').Animated.timing(approvalFadeAnim, {
+				toValue: 1,
+				duration: 200,
+				useNativeDriver: true,
+			}).start();
+		} else {
+			require('react-native').Animated.timing(approvalFadeAnim, {
+				toValue: 0,
+				duration: 200,
+				useNativeDriver: true,
+			}).start();
+		}
+	}, [showApprovalPopup, approvalFadeAnim]);
 
 	// Use filtered users if available, otherwise use fetched users
 	const users = filteredUsers ?? fetchedUsers;
@@ -170,10 +188,50 @@ const PswHomeTab = () => {
 				)}
 			</View>
 
+			{/* Approval popup above verification banner */}
+			{!isVerified && (
+				<>
+					<TouchableOpacity
+						activeOpacity={1}
+						onPress={() => setShowApprovalPopup(false)}
+						style={{
+							position: 'absolute',
+							left: 16,
+							right: 16,
+							bottom: Platform.OS === 'ios' ? 325 : 300,
+							zIndex: 21,
+						}}
+					>
+						<Animated.View
+							style={{
+								opacity: approvalFadeAnim,
+								backgroundColor: '#BBDAF7',
+								borderRadius: 8,
+								padding: 10,
+								paddingVertical: 16,
+								shadowColor: '#000',
+								shadowOffset: { width: 0, height: 2 },
+								shadowOpacity: 0.12,
+								shadowRadius: 8,
+								elevation: 2,
+							}}
+						>
+							<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+								<Ionicons name="information-circle" size={40} color="#55A2EB" />
+								<Text style={{ marginLeft: 8, fontWeight: '500', color: '#1a2a3a', fontSize: 13, width: "85%" }}>
+									Approval is subject to our internal screening and terms of use. Since we are in beta, not all applications may be approved.
+								</Text>
+							</View>
+						</Animated.View>
+					</TouchableOpacity>
+
+				</>
+			)}
+
 			{/* Verification Status Banner - Bottom */}
 			{!isVerified && (
 				<View 
-					className="bg-blue-500 mx-4 mb-4 px-4 py-3 rounded-lg flex-row items-center"
+					className="bg-brand-blue mx-4 mb-4 px-4 py-3 rounded-lg flex-row items-center"
 					style={{
 						position: 'absolute',
 						bottom: Platform.OS === 'ios' ? 100 : 80,
@@ -185,9 +243,16 @@ const PswHomeTab = () => {
 					<View className="flex-1">
 						<View className="flex-row mb-2 items-center">
 							<Ionicons name="checkmark-circle" size={20} color="white" style={{ marginRight: 8 }} />
-							<Text className="text-white font-semibold text-base">Profile in Review</Text>
+							<Text className="text-white font-semibold text-base">Profile is under Review</Text>
+							<TouchableOpacity onPress={() => setShowApprovalPopup((prev) => !prev)}>
+								<Ionicons name="information-circle-outline" size={20} color="white" style={{ marginLeft: 8 }} />
+							</TouchableOpacity>
 						</View>
-						<Text className="text-white text-sm opacity-90">Your profile is under review. As we are currently in limited Beta, verification may take up to 20 business days. We’ll follow up with next steps via email.</Text>
+						<Text className="text-white text-sm opacity-90 mb-2">Your caregiver profile is currently under review.
+						As Amicare is in limited Beta, this may take up to 20 business days. A member of our support team will reach out by phone or email to complete your pre-approval.
+						You won’t be able to browse, message, or book until you're approved.
+						</Text>
+						<Text className="text-white text-sm opacity-90 font-medium">Need help? Visit “My Profile” {">"} "Support</Text>
 					</View>
 				</View>
 			)}

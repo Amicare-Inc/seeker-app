@@ -44,17 +44,17 @@ const VerificationPrompt: React.FC = () => {
 				  </View>
 
 				  {/* Subtitle */}
-				  <Text className="text-sm text-grey-80 mb-[21px] leading-5 text-center mx-auto">
+				  <Text className="text-xs text-grey-49 mb-[21px] leading-5 text-center mx-auto">
 					{userData?.isPsw
-					? "To help ensure safety for all users, please verify your identity by submitting a selfie for biometric verification, along with your certifications and background checks (e.g., Vulnerable Sector Check, First Aid, etc.)."
-					: "To help ensure safety for all users, please verify your identity by submitting a selfie for biometric verification and a valid government-issued photo ID."
-					}
+					  ? 'To help ensure platform safety and build trust with care seekers, we ask for a selfie and a valid government-issued photo ID to confirm your identity.'
+					  : 'To help ensure platform safety and build trust between users, we ask for a selfie and valid government-issued photo ID to confirm your identity.'}
+					Your information is encrypted, stored securely, and only used as described in our <PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} />.
 				  </Text>
 			   </View>
 			</ScrollView>
 			{/* Privacy Policy Notice and Buttons at the bottom */}
 			<View className="px-[16px] pb-[21px] w-full" style={{ maxWidth: 480, alignSelf: 'center' }}>
-			   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
+			   <View style={{ flexDirection: 'row', marginBottom: 18 }}>
 				  <Ionicons
 					 name="information-circle"
 					 size={22}
@@ -62,10 +62,10 @@ const VerificationPrompt: React.FC = () => {
 					 style={{ marginRight: 6 }}
 				  />
 				  <Text style={{ flex: 1, fontSize: 11, color: '#7B7B7E', lineHeight: 15, fontWeight: '500' }}>
-					 By continuing, you agree to our{' '}
-					 <PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} />
-					 {' and '}
-					 <TermsOfUseLink onPress={() => setShowTermsModal(true)} textStyle={{ color: '#0c7ae2' }} />
+					{userData?.isPsw
+					  ? 'By continuing, you give Amicare permission to collect, store, and share this information securely with our verification partners as outlined in our '
+					  : 'By continuing, you consent to our collection and use of your identity information in accordance with our '}
+					 <PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} /> and <TermsOfUseLink onPress={() => setShowTermsModal(true)} textStyle={{ color: '#0c7ae2' }} />.
 				  </Text>
 			   </View>
 			   <CustomButton
