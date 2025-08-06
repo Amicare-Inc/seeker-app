@@ -12,12 +12,13 @@ const PersonaVerification: React.FC = () => {
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const [isWebViewVisible, setWebViewVisible] = useState(true);
 	const referenceId = userData?.id;
-	let templateId;
-	if (userData?.isPsw) {
-		templateId = 'itmpl_Bz9PYajndSLv3Jpky7tWPfNrMSrU';
-	} else {
-		templateId = 'itmpl_2Ggp9nCYRzWgwnX5btG5xexxaprE';
-	}
+	// let templateId;
+	// if (userData?.isPsw) {
+	// 	templateId = 'itmpl_Bz9PYajndSLv3Jpky7tWPfNrMSrU';
+	// } else {
+	// 	templateId = 'itmpl_2Ggp9nCYRzWgwnX5btG5xexxaprE';
+	// }
+	const templateId = process.env.EXPO_PUBLIC_PERSONA_TEMPLATE_ID;
 	//   const personaURL = 'https://withpersona.com/verify?is-webview=true&template-id=itmpl_2Ggp9nCYRzWgwnX5btG5xexxaprE&environment=sandbox';
 	const personaBase =
 		'https://withpersona.com/verify?is-webview=true&environment=sandbox';
