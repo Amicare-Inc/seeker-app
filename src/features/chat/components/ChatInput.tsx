@@ -39,6 +39,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 returnKeyType="send"
+                onSubmitEditing={handleSendMessage}
             />
             <TouchableOpacity
                 onPress={handleSendMessage}

@@ -57,7 +57,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 							? `${address.city}, ${address.province}`
 							: address?.fullAddress || 'Toronto, ON'
 				}
-				userRating={user.rating ? `${user.rating.toFixed(1)} out of 5` : 'No rating yet'}
+				userRating={
+					user.isPsw
+						? user.rating
+							? `${user.rating.toFixed(1)} out of 5`
+							: 'No rating yet'
+						: undefined
+				}
 				userPhoto={user.profilePhotoUrl}
 				onMenuPress={() => {}}
 				isMyProfile={isMyProfile}
@@ -80,7 +86,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 				{!isMyProfile && (
 					<>
 						<ProfileScore user={user} />
-						<ProfileAvailabilityTable user={user} />
+						{/* <ProfileAvailabilityTable user={user} /> */}
 					</>
 				)}
 

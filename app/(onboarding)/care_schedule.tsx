@@ -238,7 +238,7 @@ const CareSchedule: React.FC = () => {
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
 					{/* Header */}
-					<View className="flex-row items-center mb-[39px]">
+					<View className="flex-row items-center mb-[20px]">
 						<TouchableOpacity className="absolute" onPress={() => router.back()}>
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
@@ -249,12 +249,12 @@ const CareSchedule: React.FC = () => {
 					</View>
 
 					{/* Question */}
-					<Text className="text-lg text-grey-80 mb-[34px]">
+					<Text className="text-lg text-grey-80 mb-[20px]">
 						On which days do you usually need care?{'\n'}Select all that apply:
 					</Text>
 
 					{/* Day Selection */}
-					<View className="flex-wrap flex-row mb-[14px] justify-between">
+					<View className="flex-wrap flex-row mb-[10px] justify-between">
 						{days.map((day) => {
 							const hasTimeSlots = getSelectedTimeSlotsForDay(day).length > 0;
 							const isActiveDay = activeDay === day;
@@ -296,12 +296,12 @@ const CareSchedule: React.FC = () => {
 						/>
 					</View>
 
-					<Text className="mb-[24px] text-grey-49 text-xs px-1">Care on weekends (Sat/Sun) is currently unavailable during our beta phase.</Text>
+					<Text className="mb-[20px] text-grey-49 text-xs px-1">Care on weekends (Sat/Sun) is currently unavailable during our beta phase.</Text>
 
 					{/* Time Slot Selection */}
 					{activeDay && (
 						<View className="">
-							<Text className="text-lg text-grey-80 mb-[36px]">
+							<Text className="text-lg text-grey-80 mb-[20px]">
 								At roughly what times on{' '}
 								<Text className="font-bold">
 									{activeDay ? dayNameMap[activeDay] || activeDay : ''}
@@ -356,10 +356,13 @@ const CareSchedule: React.FC = () => {
 												))}
 											</View>
 										</>
+										
 									);
 								})()}
 							</View>
+							<Text className="mt-[10px] text-grey-49 text-xs px-1">Our time range during beta will be between 10 am to 10 pm.</Text>
 						</View>
+						
 					)}
 
 				</View>

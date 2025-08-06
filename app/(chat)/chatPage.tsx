@@ -19,6 +19,22 @@ const ChatPage = () => {
     const { data: allSessions = [] } = useEnrichedSessions(currentUser?.id);
     const activeSession = activeEnrichedSession || allSessions.find((s) => s.id === sessionId);
     const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+    // Listen for keyboard events
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+            setIsKeyboardVisible(true);
+        });
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setIsKeyboardVisible(false);
+        });
+
+        return () => {
+            keyboardDidShowListener?.remove();
+            keyboardDidHideListener?.remove();
+        };
+    }, []);
 
     if (!sessionId || !activeSession || !currentUser) return null;
 
@@ -66,36 +82,29 @@ const ChatPage = () => {
     return (
         <SafeAreaView className="flex-1" edges={['left', 'right', 'bottom']}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-            <LinearGradient
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            colors={['#FFFFFF', '#FFFFFF']}
-            style={{
+            
+            {/* White background for status bar area */}
+            <View style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
-                zIndex: 0,
-                paddingTop: insets.top,
-            }}
-            />
-            <View style={{ paddingTop: insets.top }}>
-            <ChatHeader
-                session={activeSession}
-                user={otherUser!}
-                isExpanded={isHeaderExpanded}
-                toggleExpanded={toggleHeaderExpanded}
-            />
-            </View>
+                height: insets.top,
+                backgroundColor: '#FFFFFF',
+                zIndex: 10,
+            }} />
+            
+            {/* Chat content takes full space with gray background */}
             <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className="flex-1"
-            style={{ backgroundColor: '#f0f0f0' }}
+            className="flex-1 bg-grey-0"
+            style={{ paddingTop: insets.top }}
             >
             <ChatMessageList
                 messages={messages}
                 otherUser={otherUser!}
                 currentUserId={currentUser.id!}
+                isKeyboardVisible={isKeyboardVisible}
             />
             <ChatInput
                 newMessage={newMessage}
@@ -104,6 +113,23 @@ const ChatPage = () => {
                 onFocusChange={handleInputFocusChange}
             />
             </KeyboardAvoidingView>
+
+            {/* Header as overlay with white background */}
+            <View style={{ 
+                position: 'absolute',
+                top: insets.top,
+                left: 0,
+                right: 0,
+                zIndex: 10,
+                backgroundColor: '#FFFFFF'
+            }}>
+            <ChatHeader
+                session={activeSession}
+                user={otherUser!}
+                isExpanded={isHeaderExpanded}
+                toggleExpanded={toggleHeaderExpanded}
+            />
+            </View>
         </SafeAreaView>
     );
 };

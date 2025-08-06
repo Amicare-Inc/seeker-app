@@ -8,7 +8,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
-import careTypeOptions from '@/assets/careOptions';
+const careTypeOptions = [
+  'Household Tasks',
+  'Personal Care & Mobility',
+  'Social & Cognitive Support',
+  'Transportation',
+];
 import { TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -29,13 +34,13 @@ const CareNeeds1: React.FC = () => {
 		userData?.carePreferences?.careType || [],
 	);
 
-	const toggleCareType = (careType: string) => {
-		setSelectedCareTypes((prev) =>
-			prev.includes(careType)
-				? prev.filter((type) => type !== careType)
-				: [...prev, careType],
-		);
-	};
+const toggleCareType = (careType: string) => {
+  setSelectedCareTypes((prev) =>
+	prev.includes(careType)
+	  ? prev.filter((type) => type !== careType)
+	  : [...prev, careType],
+  );
+};
 
 	const handleNext = () => {
 		// Update lookingForSelf at top level and carePreferences separately
@@ -94,7 +99,7 @@ const CareNeeds1: React.FC = () => {
 			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
 				<View className="px-[16px]">
 
-					<View className="flex-row items-center mb-[53px]">
+					<View className="flex-row items-center mb-[30px]">
 						<TouchableOpacity className="absolute" onPress={() => router.back()}>
 							<Ionicons name="chevron-back" size={24} color="#000" />
 						</TouchableOpacity>
@@ -107,14 +112,14 @@ const CareNeeds1: React.FC = () => {
 					{/* Only show "A Loved One" vs "Myself" question for seekers (not PSWs) */}
 					{!isPSW && (
 						<>
-							<Text className="text-lg text-grey-80 mb-[36px]">
+							<Text className="text-lg text-grey-80 mb-[26px]">
 								Are you seeking home support for a loved one or yourself?
 							</Text>
-							<View className="flex-row justify-center mb-[48px]">
+							<View className="mb-[30px]">
 								<CustomButton
 									title="A Loved One"
 									handlePress={() => setLookingForSelf(false)}
-									containerStyles={`w-[174px] h-[44px] rounded-full mr-[10px] min-h-[44px] ${
+									containerStyles={`w-full h-[44px] rounded-full mr-[10px] min-h-[44px] mb-[10px] ${
 										lookingForSelf === false
 											? 'bg-brand-blue'
 											: 'bg-white'
@@ -128,7 +133,7 @@ const CareNeeds1: React.FC = () => {
 								<CustomButton
 									title="Myself"
 									handlePress={() => setLookingForSelf(true)}
-									containerStyles={`w-[174px] h-[44px] min-h-[44px] rounded-full ${
+									containerStyles={`w-full h-[44px] min-h-[44px] rounded-full ${
 										lookingForSelf === true
 											? 'bg-brand-blue'
 											: 'bg-white'
@@ -143,62 +148,45 @@ const CareNeeds1: React.FC = () => {
 						</>
 					)}
 
-					<Text className="text-lg text-grey-80 mb-[36px]">
+					<Text className="text-lg text-grey-80 mb-[26px]">
 						{isPSW
 							? 'What types of care do you provide?'
 							: 'What types of care are you interested in?'}
 					</Text>
-					<View className="flex-row flex-wrap mb-[10px]">
+					<View className="flex-col mb-[10px]">
 					{(() => {
-						const leftColumn: string[] = [];
-						const rightColumn: string[] = [];
-						careTypeOptions.forEach((option, idx) => {
-							(idx % 2 === 0 ? leftColumn : rightColumn).push(option);
-						});
-						return (
-							<View className="flex-row w-full">
-								<View className="flex-1 mr-[5px]">
-									{leftColumn.map((option) => (
-										<CustomButton
-											key={option}
-											title={option}
-											handlePress={() => toggleCareType(option)}
-											containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
-												selectedCareTypes.includes(option)
-													? 'bg-brand-blue'
-													: 'bg-white'
-											}`}
-											textStyles={`text-sm font-medium ${
-												selectedCareTypes.includes(option)
-													? 'text-white'
-													: 'text-black'
-											}`}
-										/>
-									))}
-								</View>
-								<View className="flex-1 ml-[5px]">
-									{rightColumn.map((option) => (
-										<CustomButton
-											key={option}
-											title={option}
-											handlePress={() => toggleCareType(option)}
-											containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
-												selectedCareTypes.includes(option)
-													? 'bg-brand-blue'
-													: 'bg-white'
-											}`}
-											textStyles={`text-sm font-medium ${
-												selectedCareTypes.includes(option)
-													? 'text-white'
-													: 'text-black'
-											}`}
-										/>
-									))}
-								</View>
-							</View>
-						);
+		const unavailableOptions = ['Personal Care & Mobility', 'Transportation'];
+		const available = careTypeOptions.filter(option => !unavailableOptions.includes(option));
+		const unavailable = careTypeOptions.filter(option => unavailableOptions.includes(option));
+		const sortedOptions = [...available, ...unavailable];
+		return sortedOptions.map((option) => {
+		  const isUnavailable = unavailableOptions.includes(option);
+		  return (
+			<CustomButton
+			  key={option}
+			  title={option}
+			  handlePress={isUnavailable ? () => {} : () => toggleCareType(option)}
+			  containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
+				selectedCareTypes.includes(option)
+				  ? 'bg-brand-blue'
+				  : 'bg-white'
+			  }`}
+			  textStyles={`text-sm font-medium ${
+				isUnavailable
+				  ? 'text-grey-35'
+				  : selectedCareTypes.includes(option)
+				  ? 'text-white'
+				  : 'text-black'
+			  }`}
+			/>
+		  );
+		});
 					})()}
 					</View>
+
+		<Text className="mb-[24px] text-grey-49 text-xs px-1">
+		  Personal Care & Mobility and Transportation are currently unavailable during our beta phase.
+		</Text>
 
 				</View>
 			</ScrollView>
