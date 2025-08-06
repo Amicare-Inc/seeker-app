@@ -240,13 +240,13 @@ const CareNeeds2: React.FC = () => {
                     <>
                         {showQualificationError && (
                             <View className="w-full mb-2">
-                                <Text className="text-red-500 text-xs text-center font-medium">
-                                    Please confirm your qualifications by checking the box below.
+                                <Text className="text-red-500 text-xs text-center font-medium mt-2 -mb-2">
+                                    Please confirm by checking the box below.
                                 </Text>
                             </View>
                         )}
                         <TouchableOpacity 
-                            className="flex-row mb-4 w-full items-start mt-4"
+                            className="flex-row mb-4 w-full items-start mt-2 p-1.5"
                             onPress={handleQualificationToggle}
                         >
                             <View
@@ -260,7 +260,7 @@ const CareNeeds2: React.FC = () => {
                             </View>
 
                             <View className="flex-1">
-                                <Text className="text-[11px] text-grey-58 font-medium">
+                                <Text className="text-[11px] text-[#7B7B7E] font-medium">
                                     You confirm that you're qualified and comfortable performing the selected tasks, and that you'll comply with local laws and Amicare's guidelines. These responses are part of your public caregiver profile.
                                 </Text>
                             </View>
