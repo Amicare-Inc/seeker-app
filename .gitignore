@@ -9,7 +9,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-firebase.config.ts
+# firebase.config.ts
 utils/amicare-3e988-firebase-adminsdk-o67ir-a07130c044.json
 *.zip
 test/*.jpg
