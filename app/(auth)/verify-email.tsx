@@ -59,7 +59,7 @@ const VerifyEmail = () => {
 	const handleButton = () => {
 		if (user && !resendDisabled) {
 			setResendDisabled(true);
-			setCountdown(60); // 60 second cooldown
+			setCountdown(5); // 5 second cooldown
 			sendEmailVerification(user)
 				.then(() => {
 					console.log(
@@ -115,9 +115,7 @@ const VerifyEmail = () => {
 					{/* Security Notice */}
 					<Text className="text-xs text-gray-400 font-normal text-center px-6">
 						This verification helps us maintain a secure and trusted community. 
-						By verifying your email, you agree to our{' '}
-						<Text className="text-blue-600">Terms of Service</Text> and{' '}
-						<Text className="text-blue-600">Privacy Policy</Text>.
+						By verifying your email, you agree to our Terms of Service and Privacy Policy.
 					</Text>
 				</View>
 			</ScrollView>

@@ -17,6 +17,8 @@ test/*.webp
 /ios
 /android
 .env
+PROD.env
+DEV.env
 # macOS
 .DS_Store
 CLEANUP_SUMMARY.md
