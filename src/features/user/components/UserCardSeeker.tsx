@@ -80,61 +80,61 @@ const UserCardSeeker: React.FC<UserCardSeekerProps> = ({
     const remoteUserVerified = user.idManualVerified ?? false;
 
     return (
-        <TouchableOpacity
+            <TouchableOpacity
             onPress={onPress}
-            className="bg-white rounded-lg p-[14px] pl-[20px] mb-[12px] pr-[42px]"
-        >
-            <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                    <View className="flex-row items-center">
+                className="bg-white rounded-lg p-[14px] pl-[20px] mb-[12px] pr-[42px]"
+            >
+                <View className="flex-row items-center justify-between">
+                    <View className="flex-1">
                         <View className="flex-row items-center">
+                            <View className="flex-row items-center">
                             <Text className="font-bold text-lg text-black mr-1 flex-shrink">
-                                {displayName}
-                            </Text>
-                            {remoteUserVerified && (
-                                <Ionicons name="checkmark-circle" size={16} color="#3B82F6" />
-                            )}
+                                    {displayName}
+                                </Text>
+                                {remoteUserVerified && (
+                                    <Ionicons name="checkmark-circle" size={16} color="#3B82F6" />
+                                )}
+                            </View>
                         </View>
-                    </View>
-                    
+                        
                     <Text className="text-sm font-medium text-gray-500">
-                        {locationText}
-                    </Text>
-                </View>
+                            {locationText}
+                        </Text>
+                    </View>
 
-                <View className="relative">
-                    {/* Core user photo (behind) - always show for family member cards */}
-                    {isForFamilyMember && (
+                    <View className="relative">
+                        {/* Core user photo (behind) - always show for family member cards */}
+                        {isForFamilyMember && (
+                            <Image
+                                source={
+                                    user.profilePhotoUrl
+                                        ? { uri: user.profilePhotoUrl }
+                                        : require('@/assets/default-profile.png')
+                                }
+                                className="w-[58px] h-[58px] rounded-full absolute"
+                                style={{
+                                    right: -35,
+                                    zIndex: 1
+                                }}
+                            />
+                        )}
+                        
+                        {/* Family member or self photo (in front) */}
                         <Image
                             source={
-                                user.profilePhotoUrl
-                                    ? { uri: user.profilePhotoUrl }
+                                profilePhoto
+                                    ? { uri: profilePhoto }
                                     : require('@/assets/default-profile.png')
                             }
-                            className="w-[58px] h-[58px] rounded-full absolute"
+                            className="w-[58px] h-[58px] rounded-full border-2 border-brand-blue"
                             style={{
-                                right: -35,
-                                zIndex: 1
+                                transform: [{ translateX: isForFamilyMember ? 0 : 30 }],
+                                zIndex: 2
                             }}
                         />
-                    )}
-                    
-                    {/* Family member or self photo (in front) */}
-                    <Image
-                        source={
-                            profilePhoto
-                                ? { uri: profilePhoto }
-                                : require('@/assets/default-profile.png')
-                        }
-                        className="w-[58px] h-[58px] rounded-full border-2 border-brand-blue"
-                        style={{
-                            transform: [{ translateX: isForFamilyMember ? 0 : 30 }],
-                            zIndex: 2
-                        }}
-                    />
+                    </View>
                 </View>
-            </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
     );
 };
 
