@@ -107,6 +107,8 @@ const CareNeeds2: React.FC = () => {
     const [selectedTasks, setSelectedTasks] = useState<string[]>(
         userData?.carePreferences?.tasks || [],
     );
+    const [isQualificationAccepted, setIsQualificationAccepted] = useState(false);
+    const [showQualificationError, setShowQualificationError] = useState(false);
 
     const toggleTask = (task: string) => {
         setSelectedTasks((prev) =>
@@ -116,7 +118,21 @@ const CareNeeds2: React.FC = () => {
         );
     };
 
+    const handleQualificationToggle = () => {
+        setIsQualificationAccepted(!isQualificationAccepted);
+        // Hide error message when qualification is accepted
+        if (!isQualificationAccepted) {
+            setShowQualificationError(false);
+        }
+    };
+
     const handleNext = () => {
+        // Check if PSW and has selected tasks but hasn't accepted qualification
+        if (isPSW && selectedTasks.length > 0 && !isQualificationAccepted) {
+            setShowQualificationError(true);
+            return;
+        }
+        
         if (selectedTasks.length > 0) {
             // Check if this is family care
             const isFamily = userData?.lookingForSelf === false;
@@ -219,6 +235,39 @@ const CareNeeds2: React.FC = () => {
 
             {/* Next Button */}
             <View className="px-[16px]">
+                {/* Qualification Confirmation for PSWs */}
+                {isPSW && selectedTasks.length > 0 && (
+                    <>
+                        {showQualificationError && (
+                            <View className="w-full mb-2">
+                                <Text className="text-red-500 text-xs text-center font-medium mt-2 -mb-2">
+                                    Please confirm by checking the box below.
+                                </Text>
+                            </View>
+                        )}
+                        <TouchableOpacity 
+                            className="flex-row mb-4 w-full items-start mt-2 p-1.5"
+                            onPress={handleQualificationToggle}
+                        >
+                            <View
+                                className={`w-5 h-5 mr-3 mt-1 rounded-md bg-white border items-center justify-center flex-shrink-0 ${
+                                    isQualificationAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
+                                }`}
+                            >
+                                {isQualificationAccepted && (
+                                    <Ionicons name="checkmark" size={14} color="white" />
+                                )}
+                            </View>
+
+                            <View className="flex-1">
+                                <Text className="text-[11px] text-[#7B7B7E] font-medium">
+                                    You confirm that you're qualified and comfortable performing the selected tasks, and that you'll comply with local laws and Amicare's guidelines. These responses are part of your public caregiver profile.
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </>
+                )}
+
                 <View style={{ flexDirection: 'row', marginBottom: 21, marginTop: 0 }}>
                     <Ionicons
                         name="information-circle"
