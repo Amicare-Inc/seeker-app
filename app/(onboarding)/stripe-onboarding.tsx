@@ -239,12 +239,12 @@ const StripeOnboarding: React.FC = () => {
                     containerStyles="bg-blue-500 py-3 px-8 rounded-lg mb-4"
                     textStyles="text-white font-semibold"
                 />
-                <CustomButton
+                {/* <CustomButton
                     title="Skip for Now"
                     handlePress={handleSkipForNow}
                     containerStyles="bg-gray-300 py-3 px-8 rounded-lg"
                     textStyles="text-gray-700 font-semibold"
-                />
+                /> */}
                 <StatusBar backgroundColor="#FFFFFF" style="dark" />
             </SafeAreaView>
         );

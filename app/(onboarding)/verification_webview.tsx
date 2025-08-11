@@ -20,8 +20,13 @@ const PersonaVerification: React.FC = () => {
 	// }
 	const templateId = process.env.EXPO_PUBLIC_PERSONA_TEMPLATE_ID;
 	//   const personaURL = 'https://withpersona.com/verify?is-webview=true&template-id=itmpl_2Ggp9nCYRzWgwnX5btG5xexxaprE&environment=sandbox';
-	const personaBase =
-		'https://withpersona.com/verify?is-webview=true&environment=sandbox';
+	
+	const personaEnv = process.env.EXPO_PUBLIC_PERSONA_ENV ?? 'DEV';
+	const personaBase = personaEnv === 'PROD' ? 
+	'https://withpersona.com/verify?is-webview=true' : 
+	`https://withpersona.com/verify?is-webview=true&environment=sandbox}`;
+
+	// const personaBase = `https://withpersona.com/verify?is-webview=true&environment=${personaEnv}`;
 	const personaURL = `${personaBase}&template-id=${templateId}&reference-id=${referenceId}`;
 	console.log('Persona URL:', personaURL);
 
