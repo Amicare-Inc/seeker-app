@@ -15,6 +15,7 @@ import { updateSessionChecklist, addSessionComment } from '@/features/sessions/a
 import { ChecklistItem } from '@/types/Sessions';
 import { useElapsedTimer } from '@/features/sessions/hooks';
 import { LiveStatus } from '@/shared/constants/enums';
+import { TermsOfUseLink, TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +38,8 @@ function formatSessionDuration(startTime: string, endTime: string) {
 
 const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, onCollapse }) => {
   const [expanded, setExpanded] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   
   const expandedRef = useRef(expanded);
   const timer = useElapsedTimer(session.liveStatus, session.liveStatusUpdatedAt);
@@ -148,6 +151,18 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
     confirmEndSession();
   };
 
+  const handleStartSession = () => {
+    if (!hasPermission) {
+      Alert.alert(
+        'Checkbox Required',
+        'Please confirm you understand before starting this session.',
+        [{ text: 'OK', style: 'default' }]
+      );
+      return;
+    }
+    confirmSession();
+  };
+
   return (
     <View
       style={{
@@ -219,7 +234,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
             {/* Start button on right for ready state */}
             {session.liveStatus === LiveStatus.Ready && (
               <TouchableOpacity 
-                onPress={confirmSession}
+                onPress={handleStartSession}
                 className={`py-3 px-6 rounded-lg mr-5 ${userConfirmed ? 'border border-black bg-transparent' : 'bg-white'}`}
               >
                 <Text className="text-black font-medium text-[17px] text-center">
@@ -325,7 +340,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
               {session.liveStatus === LiveStatus.Ready ? (
                 <>
                   <TouchableOpacity 
-                    onPress={confirmSession}
+                    onPress={handleStartSession}
                     className={`py-3 px-6 rounded-lg flex-1 mr-2 ${userConfirmed ? 'border border-black bg-transparent' : 'bg-white'}`}
                   >
                     <Text className="text-black font-medium text-center text-[17px]">
@@ -377,6 +392,30 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
               )}
             </View>
             
+            {/* Permission Checkbox - only show for Ready status */}
+            {session.liveStatus === LiveStatus.Ready && (
+              <TouchableOpacity 
+                className="flex-row items-start mx-5 mt-4"
+                onPress={() => setHasPermission(!hasPermission)}
+              >
+                <View className={`w-5 h-5 mr-3 mt-0.5 rounded border items-center justify-center ${
+                  hasPermission ? 'bg-black border-black' : 'border-black'
+                }`}>
+                  {hasPermission && (
+                    <Ionicons name="checkmark" size={14} color="white" />
+                  )}
+                </View>
+                <Text className="text-[11px] text-black flex-1 leading-[14px]">
+                  By starting, you confirm the session details are correct and agree Amicare is not the care provider. Care is delivered solely by your selected caregiver as an independent contractor. See{' '}
+                  <TermsOfUseLink
+                    textStyle={{ fontSize: 11, fontWeight: '500', color: '#000' }}
+                    onPress={() => setShowTermsModal(true)}
+                  />
+                  .
+                </Text>
+              </TouchableOpacity>
+            )}
+            
             {/* Force Complete Button (for testing) */}
             {/* <View className="mx-5 mt-2">
               <TouchableOpacity 
@@ -391,6 +430,11 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
           </>
         )}
       </LinearGradient>
+      
+      <TermsOfUseModal
+        visible={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </View>
   );
 };

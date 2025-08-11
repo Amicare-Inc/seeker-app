@@ -149,6 +149,14 @@ const OnboardingLayout = () => {
 				}} 
 			/>
 			<Stack.Screen 
+				name="stripe_prompt" 
+				options={{ 
+					headerShown: false,
+					gestureEnabled: false,
+					headerLeft: () => null
+				}} 
+			/>
+			<Stack.Screen 
 				name="stripe-onboarding" 
 				options={{ 
 					headerShown: false,

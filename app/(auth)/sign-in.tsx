@@ -151,7 +151,7 @@ const SignIn = () => {
 								Don't have an account?
 							</Text>
 							<TouchableOpacity 
-								onPress={() => router.replace('/')}
+								onPress={() => router.replace('/(onboarding)/role_selection')}
 								disabled={loading}
 							>
 								<Text className={`text-xs font-normal ${loading ? 'text-gray-400' : 'text-blue-900'}`}>

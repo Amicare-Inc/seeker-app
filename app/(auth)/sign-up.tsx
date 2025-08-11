@@ -50,7 +50,7 @@ const SignUp = () => {
                 );
                 
                 // Navigate to email verification instead of directly to onboarding
-                router.push('/verify-email');
+                router.push('/(onboarding)/care_needs_1');
             } catch (error: any) {
                 // Handle both backend and Firebase errors
                 if (error.message?.includes('already exists')) {

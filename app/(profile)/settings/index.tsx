@@ -29,7 +29,7 @@ const SettingsScreen = () => {
       queryClient.clear();
 
       // Navigate to the sign-in screen (or your landing page)
-      router.replace('/');
+      router.replace('/(onboarding)/role_selection');
     } catch (error) {
       console.error('Error signing out:', error);
     }

@@ -114,9 +114,9 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
 
     if (actionStr === 'book') {
       headerText = 'Confirm Booking';
-      messageText = `By clicking "Book Session" you agree to the terms and conditions. The session will be confirmed once ${otherUser.firstName} also books.`;
-      primaryButtonText = 'Book Session';
-      primaryButtonColor = '#008DF4';
+      messageText = "By clicking “Confirm Session” you agree to the";
+      primaryButtonText = 'Confirm Session';
+      primaryButtonColor = '#000';
       onPrimaryPress = handleBookSession;
     } else if (actionStr === 'cancel') {
       headerText = 'Confirm Cancellation';
