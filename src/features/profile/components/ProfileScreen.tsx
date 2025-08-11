@@ -99,11 +99,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 
 						{/* White container for the list items. */}
 						<View className="bg-white border-gray-200 rounded-[10px]">
-							<ProfileListItem
-								label="Family"
-								iconName="people"
-								onPress={() => router.push('/(profile)/family')}
-							/>
+							{!user.isPsw && (
+								<ProfileListItem
+									label="Family"
+									iconName="people"
+									onPress={() => router.push('/(profile)/family')}
+								/>
+							)}
 							<ProfileListItem
 								label="Settings"
 								iconName="settings"
@@ -118,13 +120,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 								label="Refer friends"
 								iconName="gift"
 								onPress={() => router.push('/(profile)/refer')}
-								
 							/>
 							<ProfileListItem
 								label="Legal"
 								iconName="document-text"
 								onPress={() => router.push('/(profile)/legal')}
-								
 							/>
 						</View>
 					</>

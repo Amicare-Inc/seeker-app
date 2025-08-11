@@ -361,6 +361,12 @@ const AboutLovedOne: React.FC = () => {
 
             {/* Continue Button */}
             <View className="px-[16px] pb-[21px]">
+                <View className="flex-row items-center mb-4 bg-[#FFC8C5] p-2 py-3 rounded-lg">
+                    <Ionicons name="alert-circle" size={40} color="#FF766E" />
+                    <Text style={{ marginLeft: 8, fontWeight: '500', color: '#1a2a3a', fontSize: 13, width: "85%" }}>
+                        Serving Brampton, Mississauga & Scarborough during early access.
+					</Text>
+				</View>
                 <CustomButton
                     title="Continue"
                     handlePress={handleContinue}

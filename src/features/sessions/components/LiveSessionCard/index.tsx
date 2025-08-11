@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, TouchableOpacity, Text, Keyboard, Animated, Alert } from 'react-native';
+import { View, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, TouchableOpacity, Text, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiveSessionCardProps } from '@/types/LiveSession';
 import LiveSessionHeader from './LiveSessionHeader';
@@ -37,7 +37,7 @@ function formatSessionDuration(startTime: string, endTime: string) {
 
 const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, onCollapse }) => {
   const [expanded, setExpanded] = useState(false);
-  const bottomOffset = useRef(new Animated.Value(Platform.OS === 'ios' ? 83 : 64)).current;
+  
   const expandedRef = useRef(expanded);
   const timer = useElapsedTimer(session.liveStatus, session.liveStatusUpdatedAt);
   const { setActiveEnrichedSession } = useActiveSession();
@@ -61,30 +61,6 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   React.useEffect(() => {
     expandedRef.current = expanded;
   }, [expanded]);
-
-  // Keyboard listeners with smooth animation
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
-      Animated.timing(bottomOffset, {
-        toValue: e.endCoordinates.height,
-        duration: e.duration || 250,
-        useNativeDriver: false,
-      }).start();
-    });
-    
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', (e) => {
-      Animated.timing(bottomOffset, {
-        toValue: Platform.OS === 'ios' ? 83 : 64,
-        duration: e.duration || 250,
-        useNativeDriver: false,
-      }).start();
-    });
-
-    return () => {
-      keyboardDidShowListener?.remove();
-      keyboardDidHideListener?.remove();
-    };
-  }, [bottomOffset]);
 
   const handleMessagePress = () => {
     setActiveEnrichedSession(session);
@@ -173,13 +149,10 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
   };
 
   return (
-    <Animated.View
+    <View
       style={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: bottomOffset,
         width,
+        marginBottom: 0,
       }}
       {...panResponder.panHandlers}
     >
@@ -418,7 +391,7 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
           </>
         )}
       </LinearGradient>
-    </Animated.View>
+    </View>
   );
 };
 

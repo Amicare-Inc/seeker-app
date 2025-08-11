@@ -11,30 +11,6 @@ import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 import { TermsOfUseLink, TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
 
 export default function Index() {
-    const dispatch = useDispatch<AppDispatch>();
-    const [isTermsAccepted, setIsTermsAccepted] = useState(false);
-    const [showErrorMessage, setShowErrorMessage] = useState(false);
-    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-    const [showTermsModal, setShowTermsModal] = useState(false);
-
-    const handleRoleSelection = async (isPsw: boolean) => {
-        if (!isTermsAccepted) {
-            setShowErrorMessage(true);
-            return;
-        } else {
-            console.log('GOING TO SIGN UP', isPsw);
-            await dispatch(updateUserFields({ isPsw }));
-            router.push('/sign-up-method');
-        }
-    };
-
-    const handleTermsToggle = () => {
-        setIsTermsAccepted(!isTermsAccepted);
-        // Hide error message when terms are accepted
-        if (!isTermsAccepted) {
-            setShowErrorMessage(false);
-        }
-    };
 
     return (
         <View style={{ flex: 1, backgroundColor: '#F2F2F7' }}>
@@ -50,7 +26,7 @@ export default function Index() {
                     }}
                 >
                     <Image
-                        source={require('@/assets/role_reduced.png')}
+                        source={require('@/assets/info_1.jpg')}
                         style={{
                             width: '100%',
                             height: '100%',
@@ -68,99 +44,20 @@ export default function Index() {
                         }}
                     />
                 </View>
-
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                        padding: 16,
-                        paddingBottom: '12.5%',
-                    }}
-                >
-                    <Text
-                        style={{
-                            fontSize: 38,
-                            fontWeight: '400',
-                            textAlign: 'center',
-                            marginBottom: 30,
-                        }}
-                    >
-                        Get Started:{'\n'}Define Your Role
-                    </Text>
-                    <CustomButton
-                        title="I am a Care Seeker"
-                        handlePress={() => handleRoleSelection(false)}
-                        containerStyles="w-full mb-4"
-                        textStyles="font-medium"
-                    />
-                    <CustomButton
-                        title="I am a Care Giver"
-                        handlePress={() => handleRoleSelection(true)}
-                        containerStyles="w-full bg-white border border-1 border-gray-200 mb-[30px]"
-                        textStyles="font-medium text-black"
-                    />
-                    {showErrorMessage && (
-                        <View className="w-full mb-2">
-                            <Text className="text-red-500 text-xs text-center font-medium">
-                                Please confirm you agree by checking the box below.
-                            </Text>
-                        </View>
-                    )}
-                    <TouchableOpacity 
-                        className="flex-row mb-[30px] w-full items-start"
-                        onPress={handleTermsToggle}
-                    >
-                        <View
-                            className={`w-5 h-5 mr-3 mt-1 rounded-md bg-white border items-center justify-center flex-shrink-0 ${
-                                isTermsAccepted ? 'bg-brand-blue border-brand-blue' : 'border-black'
-                            }`}
-                        >
-                            {isTermsAccepted && (
-                                <Ionicons name="checkmark" size={14} color="white" />
-                            )}
-                        </View>
-
-                        <View className="flex-1">
-                            <Text className="text-[11px] text-grey-58 font-medium">
-                                By continuing, you confirm that you've read and agree to Amicare's{' '}
-                            <TermsOfUseLink
-                                textStyle={{ fontSize: 11, fontWeight: '500' }}
-                                onPress={() => setShowTermsModal(true)}
-                            />
-                            {' and '}
-                            <PrivacyPolicyLink 
-                                textStyle={{ fontSize: 11, fontWeight: '500' }} 
-                                onPress={() => setShowPrivacyModal(true)}
-                            />, and understand that Amicare is a neutral platform - not a healthcare provider. All caregivers are independant professionals.
-                            </Text>
-                        </View>
+                <Text className="mt-[450px] left-4 text-[24px] font-semibold text-grey-80">Welcome to Amicare</Text>
+                <Text className=" left-4 text-[24px] text-grey-80">Your Trusted Care Marketplace</Text>
+                <Text className=" left-4 text-base mt-[26px] text-grey-80 mr-10">Amicare helps families find compatible caregivers for in-home support. Whether you need companionship, help around the house, or daily living support - you’re in the right place. </Text>
+                <View className="flex-row items-center px-5 gap-2 justify-end absolute bottom-[125px] right-0">
+                    <Text className="text-grey-80 font-light text-[20px]">Next</Text>
+                    <TouchableOpacity onPress={() => router.push('/(onboarding)/info_2')}>
+                        <Ionicons name="arrow-forward-circle" size={52} color="#0C7AE2" />
                     </TouchableOpacity>
-                    <Text className="text-center">
-                        Already have an account?{' '}
-                        <Text
-                            style={{ 
-                                textDecorationLine: 'underline',
-                                color: 'black',
-                                fontWeight: '600'
-                            }}
-                            onPress={() => router.push('/sign-in')}
-                            suppressHighlighting={true}
-                        >
-                            Log In!
-                        </Text>
-                    </Text>
+                </View>
+                <View className="flex-row gap-2 left-4 bottom-10 absolute">
+                    <Ionicons name="information-circle" size={30} color="#BFBFC3"/>
+                    <Text className="font-medium text-[11px] text-grey-49 mr-[60px]">By continuing, you agree that Amicare is not a healthcare provider. We are a neutral platform connecting families to independent caregivers.</Text>
                 </View>
             </View>
-            
-            <TermsOfUseModal
-                visible={showTermsModal}
-                onClose={() => setShowTermsModal(false)}
-            />
-            <PrivacyPolicyModal 
-                visible={showPrivacyModal} 
-                onClose={() => setShowPrivacyModal(false)} 
-            />
         </View>
     );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Platform } from 'react-native';
+import { View, Platform, KeyboardAvoidingView } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useLiveSession } from '@/features/sessions';
@@ -76,14 +76,15 @@ const SeekerDashboardLayout = () => {
 					/>
 				</Tabs>
 				{activeLiveSession && (
-					<View 
+					<KeyboardAvoidingView 
 						style={{
 							position: 'absolute',
-							bottom: 0,
+							bottom: Platform.OS === 'ios' ? 83 : 64,
 							left: 0,
 							right: 0,
 							zIndex: 1,
 						}}
+						behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 						pointerEvents="box-none"
 					>
 						<LiveSessionCard
@@ -91,7 +92,7 @@ const SeekerDashboardLayout = () => {
 							onExpand={() => console.log('expanded')}
 							onCollapse={() => console.log('collapsed')}
 						/>
-					</View>
+					</KeyboardAvoidingView>
 				)}
 			</View>
 		</SafeAreaProvider>

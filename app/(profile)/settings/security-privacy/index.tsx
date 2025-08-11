@@ -55,6 +55,11 @@ const SecurityPrivaryScreen = () => {
             onPress={() => router.push('/(profile)/settings/security-privacy/password')}
           />
           <SettingsListItem
+            label="Verify your Identity"
+            description="Complete your account by verifying your identity"
+            onPress={() => router.push('/(profile)/settings/security-privacy/settings_verification_prompt')}
+          />
+          <SettingsListItem
             label="Face ID"
             description="Require Face ID for login, transactions and after 5 minutes of inactivity"
             onPress={() => {}}
@@ -66,6 +71,7 @@ const SecurityPrivaryScreen = () => {
             onPress={() => {}}
             disabled
           />
+
         </View>
         <View className="bg-white rounded-lg mx-4 mt-8">
           <SettingsListItem

@@ -5,6 +5,30 @@ const OnboardingLayout = () => {
 	return (
 		<Stack>
 			<Stack.Screen 
+				name="info_2" 
+				options={{ 
+					headerShown: false,
+					gestureEnabled: false,
+					headerLeft: () => null
+				}} 
+			/>
+			<Stack.Screen 
+				name="info_3" 
+				options={{ 
+					headerShown: false,
+					gestureEnabled: false,
+					headerLeft: () => null
+				}} 
+			/>
+			<Stack.Screen 
+				name="role_selection" 
+				options={{ 
+					headerShown: false,
+					gestureEnabled: false,
+					headerLeft: () => null
+				}} 
+			/>
+			<Stack.Screen 
 				name="role" 
 				options={{ 
 					headerShown: false,
