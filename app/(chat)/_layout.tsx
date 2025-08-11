@@ -14,6 +14,10 @@ const RootLayout = () => {
 				name="session-completed"
 				options={{ headerShown: false }}
 			/>
+			<Stack.Screen
+				name="session-confirmation-2"
+				options={{ headerShown: false }}
+			/>
 		</Stack>
 	);
 };

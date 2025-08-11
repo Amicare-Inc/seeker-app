@@ -61,7 +61,7 @@ const StripePrompt: React.FC = () => {
 			   <CustomButton
 				  title="Set Up Payments"
 				  handlePress={handleSetupPayments}
-				  containerStyles="bg-black py-4 rounded-lg mb-4"
+				  containerStyles="bg-black py-4 rounded-lg mb-4 flex items-center justify-center"
 				  textStyles="text-white text-lg"
 			   />
 			   {/* <CustomButton

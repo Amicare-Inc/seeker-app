@@ -39,7 +39,7 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
   // Navigation helpers -------------------------------------------------
   const navigateToSessionConfirmation = (action: 'book' | 'cancel' | 'change') => {
     if (!user.id) return;
-    router.push({
+    router.replace({
       pathname: '/session-confirmation',
       params: {
         sessionId: currentSession.id,
