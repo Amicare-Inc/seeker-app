@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
-import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,6 +7,8 @@ import { RootState, AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { StripeOnboardingService } from '@/services/stripe/onboarding-service';
 import { CustomButton } from '@/shared/components';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri } from 'expo-auth-session';
 
 const StripeOnboarding: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -19,6 +20,7 @@ const StripeOnboarding: React.FC = () => {
     const [isPolling, setIsPolling] = useState(false);
     const [hasNavigated, setHasNavigated] = useState(false); // Prevent multiple navigation attempts
     const [refreshStarted, setRefreshStarted] = useState(false);
+    const [browserOpened, setBrowserOpened] = useState(false);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const stripeOnboardingService = StripeOnboardingService.getInstance();
@@ -34,7 +36,7 @@ const StripeOnboarding: React.FC = () => {
         };
     }, []);
 
-    // Poll for onboarding completion every 3 seconds when WebView is active
+    // Poll for onboarding completion every 3 seconds while the external browser is open
     useEffect(() => {
         if (isPolling && stripeAccountId && !hasNavigated) {
             pollIntervalRef.current = setInterval(async () => {
@@ -58,6 +60,13 @@ const StripeOnboarding: React.FC = () => {
             }
         };
     }, [isPolling, stripeAccountId, hasNavigated]);
+
+    // When we have an onboarding URL, open it in the system browser
+    useEffect(() => {
+        if (onboardingUrl && !browserOpened && !hasNavigated) {
+            openInBrowser(onboardingUrl);
+        }
+    }, [onboardingUrl, browserOpened, hasNavigated]);
 
     const initializeStripeOnboarding = async () => {
         try {
@@ -113,41 +122,54 @@ const StripeOnboarding: React.FC = () => {
         }, 500);
     };
 
-    const handleWebViewNavigationStateChange = async (navState: any) => {
-        const url = navState.url;
-        
-        // Start polling when user navigates to Stripe onboarding
-        if (url.includes('connect.stripe.com') && !isPolling && !hasNavigated) {
-            setIsPolling(true);
-        }
-        
-        // Check if user completed onboarding (fallback detection)
+    const handleReturnUrl = async (url: string) => {
+        // Start/stop polling based on return
+        setIsPolling(false);
+
         if (url.includes('stripe-onboarding-complete') && !hasNavigated) {
             try {
                 if (stripeAccountId) {
                     const status = await stripeOnboardingService.getOnboardingStatus(stripeAccountId);
-                    
                     if (status.isOnboardingComplete && status.payoutsEnabled) {
                         await handleOnboardingComplete();
                     } else if (status.isOnboardingComplete && !status.payoutsEnabled && !refreshStarted) {
-                        // Load remaining requirements (selfie/ID) via refreshed onboarding link
                         await refreshOnboarding();
                         setRefreshStarted(true);
                     }
                 }
             } catch (error: any) {
                 console.error('Error checking onboarding status:', error);
-                Alert.alert(
-                    'Error',
-                    'Failed to verify onboarding status. Please try again.',
-                    [{ text: 'OK' }]
-                );
+                Alert.alert('Error', 'Failed to verify onboarding status. Please try again.', [{ text: 'OK' }]);
             }
         }
-        
-        // Handle refresh
+
         if (url.includes('stripe-onboarding-refresh')) {
             refreshOnboarding();
+        }
+    };
+
+    const openInBrowser = async (url: string) => {
+        try {
+            setBrowserOpened(true);
+            setIsPolling(true);
+            // Use app deep link scheme so the auth session closes when our HTTPS return page redirects to it
+            const redirectUri = makeRedirectUri({ scheme: 'amicare' });
+            const result = await WebBrowser.openAuthSessionAsync(url, redirectUri, {
+                preferEphemeralSession: true,
+                showInRecents: true,
+            });
+
+            // When the browser returns to the app
+            if (result.type === 'success' && result.url) {
+                await handleReturnUrl(result.url);
+            } else if (result.type === 'cancel') {
+                // user dismissed; keep the screen available to retry
+                setIsPolling(false);
+            }
+        } catch (e) {
+            console.error('Error opening Stripe onboarding:', e);
+            setError('Failed to open onboarding');
+            setIsPolling(false);
         }
     };
 
@@ -156,6 +178,8 @@ const StripeOnboarding: React.FC = () => {
             if (stripeAccountId) {
                 const result = await stripeOnboardingService.refreshOnboardingUrl(stripeAccountId);
                 setOnboardingUrl(result.onboardingUrl);
+                // re-open refreshed link
+                setBrowserOpened(false);
             }
         } catch (error: any) {
             console.error('Error refreshing onboarding URL:', error);
@@ -174,12 +198,9 @@ const StripeOnboarding: React.FC = () => {
         
         Alert.alert(
             'Skip Stripe Setup?',
-            'You can set up payments later in your profile settings, but you won\'t be able to receive payments until this is completed.',
+            "You can set up payments later in your profile settings, but you won't be able to receive payments until this is completed.",
             [
-                {
-                    text: 'Set Up Now',
-                    style: 'default'
-                },
+                { text: 'Set Up Now', style: 'default' },
                 {
                     text: 'Skip for Now',
                     style: 'destructive',
@@ -188,8 +209,8 @@ const StripeOnboarding: React.FC = () => {
                         setTimeout(() => {
                             router.push('/onboard1');
                         }, 100);
-                    }
-                }
+                    },
+                },
             ]
         );
     };
@@ -207,11 +228,7 @@ const StripeOnboarding: React.FC = () => {
                     setRefreshStarted(true);
                 }
             } catch (error: any) {
-                Alert.alert(
-                    'Error',
-                    'Failed to check onboarding status. Please try again.',
-                    [{ text: 'OK' }]
-                );
+                Alert.alert('Error', 'Failed to check onboarding status. Please try again.', [{ text: 'OK' }]);
             } finally {
                 setLoading(false);
             }
@@ -239,12 +256,6 @@ const StripeOnboarding: React.FC = () => {
                     containerStyles="bg-blue-500 py-3 px-8 rounded-lg mb-4"
                     textStyles="text-white font-semibold"
                 />
-                {/* <CustomButton
-                    title="Skip for Now"
-                    handlePress={handleSkipForNow}
-                    containerStyles="bg-gray-300 py-3 px-8 rounded-lg"
-                    textStyles="text-gray-700 font-semibold"
-                /> */}
                 <StatusBar backgroundColor="#FFFFFF" style="dark" />
             </SafeAreaView>
         );
@@ -252,21 +263,18 @@ const StripeOnboarding: React.FC = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-white">
-            <View className="flex-1">
-                {onboardingUrl && (
-                    <WebView
-                        source={{ uri: onboardingUrl }}
-                        onNavigationStateChange={handleWebViewNavigationStateChange}
-                        startInLoadingState={true}
-                        renderLoading={() => (
-                            <View className="flex-1 justify-center items-center">
-                                <ActivityIndicator size="large" color="#008DF4" />
-                            </View>
+            <View className="flex-1 justify-center items-center">
+                {onboardingUrl ? (
+                    <>
+                        {loading ? (
+                            <ActivityIndicator size="large" color="#008DF4" />
+                        ) : (
+                            <Text className="text-gray-600">Opening secure browser for Stripe onboarding...</Text>
                         )}
-                    />
-                )}
+                    </>
+                ) : null}
             </View>
-            
+
             <StatusBar backgroundColor="#FFFFFF" style="dark" />
         </SafeAreaView>
     );

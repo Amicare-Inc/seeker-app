@@ -23,15 +23,41 @@ export class StripeOnboardingService {
         return StripeOnboardingService.instance;
     }
 
+    private buildBackendUrl(path: string): string {
+        const base = this.apiBaseUrl;
+        if (!base) {
+            throw new Error('Backend base URL is not set (EXPO_PUBLIC_BACKEND_BASE_URL)');
+        }
+        try {
+            return new URL(path, base).toString();
+        } catch {
+            throw new Error(`Invalid EXPO_PUBLIC_BACKEND_BASE_URL: ${base}. Use a full HTTPS URL like https://your-api.example.com`);
+        }
+    }
+
     /**
      * Creates a Stripe Express account and returns onboarding URL
      */
-    async createExpressAccount(userId: string, email: string, firstName: string, lastName: string, dob: string, street: string, phone: string, city: string, province: string, country: string, postalCode: string): Promise<CreateExpressAccountResponse> {
+    async createExpressAccount(
+        userId: string,
+        email: string,
+        firstName: string,
+        lastName: string,
+        dob: string,
+        street: string,
+        phone: string,
+        city: string,
+        province: string,
+        country: string,
+        postalCode: string
+    ): Promise<CreateExpressAccountResponse> {
         try {
+            const returnUrl = this.buildBackendUrl('/payments/stripe/onboarding-return');
+            const refreshUrl = this.buildBackendUrl('/payments/stripe/onboarding-refresh');
             const response = await fetch(`${this.apiBaseUrl}/payments/stripe/create-express-account`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     userId,
                     email,
                     firstName,
@@ -43,9 +69,9 @@ export class StripeOnboardingService {
                     province,
                     country,
                     postalCode,
-                    returnUrl: 'https://amicare.app/stripe-onboarding-complete',
-                    refreshUrl: 'https://amicare.app/stripe-onboarding-refresh'
-                })
+                    returnUrl,
+                    refreshUrl,
+                }),
             });
 
             if (!response.ok) {
@@ -67,7 +93,7 @@ export class StripeOnboardingService {
         try {
             const response = await fetch(`${this.apiBaseUrl}/payments/stripe/onboarding-status/${accountId}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
             });
 
             if (!response.ok) {
@@ -87,13 +113,15 @@ export class StripeOnboardingService {
      */
     async refreshOnboardingUrl(accountId: string): Promise<{ onboardingUrl: string }> {
         try {
+            const returnUrl = this.buildBackendUrl('/payments/stripe/onboarding-return');
+            const refreshUrl = this.buildBackendUrl('/payments/stripe/onboarding-refresh');
             const response = await fetch(`${this.apiBaseUrl}/payments/stripe/refresh-onboarding/${accountId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    returnUrl: 'https://amicare.app/stripe-onboarding-complete',
-                    refreshUrl: 'https://amicare.app/stripe-onboarding-refresh'
-                })
+                    returnUrl,
+                    refreshUrl,
+                }),
             });
 
             if (!response.ok) {
@@ -115,7 +143,7 @@ export class StripeOnboardingService {
         try {
             const response = await fetch(`${this.apiBaseUrl}/payments/stripe/identity-link/${accountId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
             });
 
             if (!response.ok) {
