@@ -21,6 +21,7 @@ const StripeOnboarding: React.FC = () => {
     const [hasNavigated, setHasNavigated] = useState(false); // Prevent multiple navigation attempts
     const [refreshStarted, setRefreshStarted] = useState(false);
     const [browserOpened, setBrowserOpened] = useState(false);
+    const [showActions, setShowActions] = useState(false);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const stripeOnboardingService = StripeOnboardingService.getInstance();
@@ -71,6 +72,7 @@ const StripeOnboarding: React.FC = () => {
     const initializeStripeOnboarding = async () => {
         try {
             setLoading(true);
+            setShowActions(false);
             
             if (!userData?.email) {
                 throw new Error('User email not found');
@@ -163,13 +165,15 @@ const StripeOnboarding: React.FC = () => {
             if (result.type === 'success' && result.url) {
                 await handleReturnUrl(result.url);
             } else if (result.type === 'cancel') {
-                // user dismissed; keep the screen available to retry
+                // user dismissed; show actions to recover
                 setIsPolling(false);
+                setShowActions(true);
             }
         } catch (e) {
             console.error('Error opening Stripe onboarding:', e);
             setError('Failed to open onboarding');
             setIsPolling(false);
+            setShowActions(true);
         }
     };
 
@@ -196,23 +200,11 @@ const StripeOnboarding: React.FC = () => {
             pollIntervalRef.current = null;
         }
         
-        Alert.alert(
-            'Skip Stripe Setup?',
-            "You can set up payments later in your profile settings, but you won't be able to receive payments until this is completed.",
-            [
-                { text: 'Set Up Now', style: 'default' },
-                {
-                    text: 'Skip for Now',
-                    style: 'destructive',
-                    onPress: () => {
-                        setHasNavigated(true);
-                        setTimeout(() => {
-                            router.push('/onboard1');
-                        }, 100);
-                    },
-                },
-            ]
-        );
+        // Continue to next onboarding step without Stripe
+        setHasNavigated(true);
+        setTimeout(() => {
+            router.push('/profile_details');
+        }, 100);
     };
 
     const handleManualCheck = async () => {
@@ -263,16 +255,42 @@ const StripeOnboarding: React.FC = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-white">
-            <View className="flex-1 justify-center items-center">
+            <View className="flex-1 justify-center items-center px-6">
                 {onboardingUrl ? (
                     <>
                         {loading ? (
                             <ActivityIndicator size="large" color="#008DF4" />
                         ) : (
-                            <Text className="text-gray-600">Opening secure browser for Stripe onboarding...</Text>
+                            <Text className="text-gray-600 text-center">Opening secure browser for Stripe onboarding...</Text>
                         )}
                     </>
                 ) : null}
+
+                {showActions ? (
+                    <View className="w-full max-w-xs mt-8 space-y-3">
+                        <CustomButton
+                            title="Try Again"
+                            handlePress={() => onboardingUrl && openInBrowser(onboardingUrl)}
+                            containerStyles="bg-blue-500 py-3 rounded-lg"
+                            textStyles="text-white font-semibold"
+                        />
+                        <CustomButton
+                            title="Skip for Now"
+                            handlePress={handleSkipForNow}
+                            containerStyles="bg-gray-200 py-3 rounded-lg"
+                            textStyles="text-gray-800 font-semibold"
+                        />
+                    </View>
+                ) : (
+                    <View className="w-full max-w-xs mt-6">
+                        <CustomButton
+                            title="Skip for Now"
+                            handlePress={handleSkipForNow}
+                            containerStyles="bg-gray-200 py-3 rounded-lg"
+                            textStyles="text-gray-800 font-semibold"
+                        />
+                    </View>
+                )}
             </View>
 
             <StatusBar backgroundColor="#FFFFFF" style="dark" />

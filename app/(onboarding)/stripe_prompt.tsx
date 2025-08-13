@@ -64,12 +64,12 @@ const StripePrompt: React.FC = () => {
 				  containerStyles="bg-black py-4 rounded-lg mb-4 flex items-center justify-center"
 				  textStyles="text-white text-lg"
 			   />
-			   {/* <CustomButton
+			   <CustomButton
 				  title="Skip for Now"
 				  handlePress={handleSkip}
 				  containerStyles="bg-gray-300 py-4 rounded-lg"
 				  textStyles="text-black text-lg"
-			   /> */}
+			   />
 			   <PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
 			   <TermsOfUseModal visible={showTermsModal} onClose={() => setShowTermsModal(false)} />
 			</View>
