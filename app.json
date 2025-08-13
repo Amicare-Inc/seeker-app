@@ -2,7 +2,7 @@
   "expo": {
     "name": "Amicare",
     "slug": "AmiCare",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "scheme": "amicare",
     "icon": "./assets/icon.png",
@@ -20,7 +20,7 @@
       },
       "bundleIdentifier": "com.amicare.app",
       "teamId": "5284JKTY8S",
-      "buildNumber": "11"
+      "buildNumber": "1"
     },
     "android": {
       "permissions": [
