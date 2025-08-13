@@ -41,9 +41,9 @@ const PersonaVerification: React.FC = () => {
 			dispatch(updateUserFields({ idVerified: true }));
 			// Navigate based on role
 			if (userData?.isPsw) {
-				router.push('/stripe-onboarding');
+				router.replace('/(dashboard)/(psw)/psw-profile');
 			} else {
-				router.push('/profile_details');
+				router.replace('/(dashboard)/(seeker)/seeker-profile');
 			}
 		}
 	};

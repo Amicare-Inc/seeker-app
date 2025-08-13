@@ -25,12 +25,15 @@ const SignUp = () => {
     });
 
     const [passwordError, setPasswordError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSignUp = async () => {
         if (form.password != form.confirm_password) {
             setPasswordError('Passwords do not match');
         } else {
             try {
+                setIsLoading(true);
+                setPasswordError('');
                 // Step 1: Create backend user (which also creates Firebase user)
                 const userId = await AuthApi.signUp(form.email, form.password);
                 
@@ -64,6 +67,8 @@ const SignUp = () => {
                     setPasswordError(error.message || 'Sign-up failed');
                 }
                 console.log((error as any).message);
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -110,9 +115,9 @@ const SignUp = () => {
                             otherStyles="mb-4"
                         />
                         <CustomButton
-                            title="Sign Up"
+                            title={isLoading ? "Creating..." : "Sign Up"}
                             handlePress={handleSignUp}
-                            containerStyles="mb-6"
+                            containerStyles={`mb-6 ${isLoading ? 'opacity-50' : ''}`}
                         />
                         <View className="flex justify-center flex-row gap-2">
                             <Text className="text-xs text-gray-500 font-normal text-center">
@@ -127,6 +132,12 @@ const SignUp = () => {
                         </View>
                     </View>
                 </View>
+                {isLoading && (
+                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">
+                        <Ionicons name="hourglass" size={40} color="#0c7ae2" />
+                        <Text className="mt-3 text-blue-600">Creating your account...</Text>
+                    </View>
+                )}
             </KeyboardAvoidingView>
             <StatusBar backgroundColor="#FFFFFF" style="dark" />
         </SafeAreaView>

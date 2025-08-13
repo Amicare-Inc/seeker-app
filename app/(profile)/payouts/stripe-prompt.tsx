@@ -29,6 +29,9 @@ const StripePromptPayouts: React.FC = () => {
 	return (
 		<SafeAreaView className="flex-1 bg-grey-0">
 			<View style={{ flex: 1 }}>
+				<TouchableOpacity onPress={handleSkip} style={{ position: 'absolute', top: 8, left: 8, zIndex: 50, padding: 8 }}>
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
 				<ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
 					<View className="px-[16px] w-full" style={{ maxWidth: 480, alignSelf: 'center' }}>
 						{/* Header */}
@@ -36,9 +39,6 @@ const StripePromptPayouts: React.FC = () => {
 							<Text className="text-2xl font-bold text-center text-black">
 								Complete Your Payment Profile
 							</Text>
-							<TouchableOpacity onPress={handleSkip} className="absolute right-4">
-								<Ionicons name="chevron-back" size={24} color="black" />
-							</TouchableOpacity>
 						</View>
 
 						{/* Subtitle */}

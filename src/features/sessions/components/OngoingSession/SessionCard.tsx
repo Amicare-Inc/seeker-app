@@ -55,7 +55,7 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
                 'You need to set up your payment account before accepting sessions.',
                 [
                     { text: 'Cancel', style: 'cancel' },
-                    { text: 'Set up now', onPress: () => router.replace('/(profile)/settings/stripe-onboarding') },
+                    { text: 'Set up now', onPress: () => router.replace('/(profile)/payouts/stripe-prompt') },
                 ]
             );
             return;

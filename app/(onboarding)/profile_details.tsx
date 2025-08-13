@@ -20,6 +20,7 @@ const AddProfilePhoto: React.FC = () => {
 	const [bio, setBio] = useState<string>(''); // Initialize empty, don't use userData.bio as it might contain family member data
 	const [isBioFocused, setIsBioFocused] = useState<boolean>(false);
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	// Determine if bio should be shown - Updated to check isPsw first
 	const shouldShowBio = userData?.isPsw || userData?.lookingForSelf === true;
@@ -42,6 +43,8 @@ const AddProfilePhoto: React.FC = () => {
 	};
 
 	const handleDone = async () => {
+		if (isSubmitting) return;
+		setIsSubmitting(true);
 		try {
 			let profilePhotoUrl = '';
 			
@@ -111,12 +114,6 @@ const AddProfilePhoto: React.FC = () => {
 					dispatch(clearTempAvailability());
 				}
 				
-				// Always show success alert for profile completion
-				// Alert.alert(
-				// 	'Success',
-				// 	'Your profile has been created successfully!',
-				// );
-				
 				// Navigate to appropriate dashboard
 				const nextRoute = userData?.isPsw
 					? '/(dashboard)/(psw)/psw-home'
@@ -130,6 +127,8 @@ const AddProfilePhoto: React.FC = () => {
 				'Error',
 				'There was an issue saving your profile. Please try again.',
 			);
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -170,9 +169,9 @@ const AddProfilePhoto: React.FC = () => {
 							)}
 						</TouchableOpacity>
 
-						<Text className="text-sm text-grey-80 text-center font-normal px-8">
-							A photo will help careseekers recognize{'\n'}you. This is a requirement, but you can skip{'\n'}this for now and add one at a later time.
-						</Text>
+													<Text className="text-sm text-grey-80 text-center font-normal px-8">
+								A photo will help careseekers recognize{'\n'}you. This is a requirement, but you can skip{'\n'}this for now and add one at a later time.
+							</Text>
 					</View>
 
 					{/* Bio Section - Conditional */}
@@ -225,12 +224,19 @@ const AddProfilePhoto: React.FC = () => {
 					onClose={() => setShowPrivacyModal(false)}
 				/>
 				<CustomButton
-					title="Finish"
+					title={isSubmitting ? 'Finishing...' : 'Finish'}
 					handlePress={handleDone}
-					containerStyles="bg-black py-4 rounded-lg"
+					containerStyles={`bg-black py-4 rounded-lg ${isSubmitting ? 'opacity-50' : ''}`}
 					textStyles="text-white text-xl font-medium"
 				/>
 			</View>
+
+			{isSubmitting && (
+				<View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">
+					<Ionicons name="hourglass" size={36} color="#0c7ae2" />
+					<Text className="mt-2 text-blue-600">Saving your profile...</Text>
+				</View>
+			)}
 		</SafeAreaView>
 	);
 };
