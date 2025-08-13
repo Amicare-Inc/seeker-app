@@ -33,12 +33,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 		// placeholders for your "Diagnoses" / "Experience" etc.
 	} = user;
 
-	// If it's my profile, we show certain placeholders (e.g. "Cancer, Dementia" vs "Housekeeping, Mobility").
-	// If it's another user's profile, we can swap them or rename them "Experience" / "Skills."
-	// const leftTitle = isMyProfile ? "Diagnoses" : "Experience";
-	// const leftSubtitle = isMyProfile ? "Cancer, Dementia" : "Dementia, Cancer";
-	// const rightTitle = isMyProfile ? "Seeking support with" : "Skills";
-	// const rightSubtitle = isMyProfile ? "Housekeeping, Mobility" : "Housekeeping, Mobility";
 	const handleBackPress = () => {
 		router.back();
 	};
@@ -70,10 +64,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 				isPsw={user.isPsw}
 				rate={user.rate}
 				onBackPress={handleBackPress}
-				originalUser={originalUser} // Pass originalUser for family member cases
+				originalUser={originalUser}
 			/>
 			<ScrollView className="flex-1">
-				{/* Bio Label + Bio */}
 				{!!bio && (
 					<View className="">
 						<Text className="font-bold text-black text-base">Bio</Text>
@@ -90,16 +83,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 					</>
 				)}
 
-				{/* If it's my profile, show the "Diagnoses" / "Experience" section. */}
-
-				{/* If it's my profile, show the row of icons + the list items. */}
 				{isMyProfile ? (
 					<>
 						<ProfileActionRow user={user} />
 
 						{/* White container for the list items. */}
 						<View className="bg-white border-gray-200 rounded-[10px]">
-							{!user.isPsw && (
+							{!(user.isPsw || user.lookingForSelf === true) && (
 								<ProfileListItem
 									label="Family"
 									iconName="people"
@@ -111,6 +101,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 								iconName="settings"
 								onPress={() => router.push('/(profile)/settings')}
 							/>
+							{user.isPsw && !user.stripeAccountId && (
+															<ProfileListItem
+								label="Set up Payouts"
+								iconName="card"
+								onPress={() => router.push('/(profile)/payouts/stripe-prompt')}
+							/>
+							)}
+							{user.isPsw && !!user.stripeAccountId && (
+								<ProfileListItem
+									label="Payouts"
+									iconName="card"
+									disabled
+								/>
+							)}
 							<ProfileListItem
 								label="Help"
 								iconName="warning"
@@ -129,9 +133,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 						</View>
 					</>
 				) : (
-					<>
-						{/* <ProfileReviews /> */}
-					</>
+					<></>
 				)}
 			</ScrollView>
 		</SafeAreaView>

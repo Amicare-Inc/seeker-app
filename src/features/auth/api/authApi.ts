@@ -166,4 +166,22 @@ export const AuthApi = {
       }
     }
   },
+
+  async getUser(uid: string): Promise<any> {
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}`, {
+        method: 'GET',
+        headers,
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to fetch user');
+      }
+      return await response.json();
+    } catch (error: any) {
+      console.error('Backend getUser Error:', error);
+      throw new Error(`Failed to fetch user: ${error.message}`);
+    }
+  },
 }; 

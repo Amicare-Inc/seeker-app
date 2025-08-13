@@ -3,11 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import { FIREBASE_AUTH } from '@/firebase.config';
 import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { clearUser } from '@/redux/userSlice';
+import { RootState } from '@/redux/store';
 
 const SettingsScreen = () => {
   const handleBackPress = () => {
@@ -16,19 +17,13 @@ const SettingsScreen = () => {
 
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
+  const currentUser = useSelector((state: RootState) => state.user.userData);
   const handleSignOut = async () => {
     try {
-      // Sign out from Firebase
       await FIREBASE_AUTH.signOut();
-
-      // Clear Redux state
       dispatch(clearUser());
       dispatch(clearActiveProfile());
-      
-      // Clear React Query cache
       queryClient.clear();
-
-      // Navigate to the sign-in screen (or your landing page)
       router.replace('/(onboarding)/role_selection');
     } catch (error) {
       console.error('Error signing out:', error);

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { User } from '@/types/User';
 import { useRequestSession, useEnrichedSessions } from '@/features/sessions/api/queries';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { router } from 'expo-router';
+import { AuthApi } from '@/features/auth/api/authApi';
+import { updateUserFields } from '@/redux/userSlice';
 
 interface ProfileScoreProps {
     user: User;
@@ -14,6 +16,7 @@ interface ProfileScoreProps {
 
 const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
     const currentUser = useSelector((state: RootState) => state.user.userData);
+    const dispatch = useDispatch();
     const [isConnecting, setIsConnecting] = useState(false);
     const requestSessionMutation = useRequestSession();
     
@@ -43,6 +46,19 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
     const handleConnectPress = async () => {
         if (!currentUser) {
             Alert.alert('Error', 'You must be signed in to express interest.');
+            return;
+        }
+
+        // Gate PSWs without Stripe payouts setup
+        if (currentUser.isPsw && !currentUser.stripeAccountId) {
+            Alert.alert(
+                'Set up payments',
+                'You need to set up your payout account before connecting.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Set up now', onPress: () => router.replace('/(profile)/payouts/stripe-onboarding') },
+                ]
+            );
             return;
         }
 
@@ -83,6 +99,13 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                 'Interest Sent',
                 'Your interest has been sent successfully. The care seeker will be notified.',
                 [{ text: 'OK', onPress: () => {
+                    // Optionally refresh current user to reflect latest stripe state
+                    // (useful if returning from Stripe success deep link before Redux updates)
+                    AuthApi.getCurrentUser?.().then((freshUser: any) => {
+                        if (freshUser?.id === currentUser?.id) {
+                            dispatch(updateUserFields(freshUser));
+                        }
+                    }).catch(() => {});
                     // Navigate back to PSW home after expressing interest
                     router.replace('/(dashboard)/(psw)/psw-home');
                 } }]

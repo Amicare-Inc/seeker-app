@@ -22,23 +22,23 @@ const PersonalDetails: React.FC = () => {
 	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
 
 	const [form, setForm] = useState({
-		// firstName: userData?.firstName || 'Martin',
-		// lastName: userData?.lastName || 'Droruga',
-		// dob: userData?.dob || '03/15/1990',
-		firstName: userData?.firstName || '',
-		lastName: userData?.lastName || '',
-		dob: userData?.dob || '',
+		firstName: userData?.firstName || 'Martin',
+		lastName: userData?.lastName || 'Droruga',
+		dob: userData?.dob || '03/15/1990',
+		// firstName: userData?.firstName || '',
+		// lastName: userData?.lastName || '',
+		// dob: userData?.dob || '',
 		address: userData?.address || {
-			// fullAddress: '159 Dundas St E',
-			fullAddress: '',
+			fullAddress: '159 Dundas St E',
+			// fullAddress: '',
 			street: '',
 			city: '',
 			province: '',
 			country: '',
 			postalCode: '',
 		},
-		// phone: userData?.phone || '5879730077',
-		phone: userData?.phone || '',
+		phone: userData?.phone || '5879730077',
+		// phone: userData?.phone || '',
 		email: userData?.email || '',
 		gender: userData?.gender || '',
 
@@ -182,7 +182,8 @@ const PersonalDetails: React.FC = () => {
 					gender: form.gender,
 				}));
 
-				router.push('/verification_prompt');
+				// router.push('/verification_prompt');
+				router.push('/profile_details');
 			} catch (error) {
 				console.error('Error saving user details:', error);
 				alert('Failed to save personal details. Please try again.');

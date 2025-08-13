@@ -10,6 +10,7 @@ import { formatDate } from '@/lib/datetimes/datetimeHelpers';
 import SessionChecklistBox from './SessionChecklistBox';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -47,6 +48,18 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
     ).current;
 
     const handleAccept = async () => {
+        // Gate PSWs without Stripe account
+        if (currentUser?.isPsw && !currentUser?.stripeAccountId) {
+            Alert.alert(
+                'Set up payments',
+                'You need to set up your payment account before accepting sessions.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Set up now', onPress: () => router.replace('/(profile)/settings/stripe-onboarding') },
+                ]
+            );
+            return;
+        }
         try {
             await acceptSessionMutation.mutateAsync(enrichedSession.id);
             router.back();
