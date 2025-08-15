@@ -353,7 +353,7 @@ const RequestSession = () => {
 						{isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && (
 							<CareRecipientSelector familyMembers={currentUser.familyMembers} selectedRecipientId={selectedCareRecipient} onRecipientSelect={handleCareRecipientSelect} />
 						)}
-						{shouldShowLocation() && (<LocationDisplay location={getLocationToDisplay()} label="Location" />)}
+						{/* {currentUser?.isPsw && <LocationDisplay location={getLocationToDisplay()} label="Location" />} */}
 						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={false} />
 						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} />
 						{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}

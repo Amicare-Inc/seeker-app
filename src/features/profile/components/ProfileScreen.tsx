@@ -79,7 +79,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 				{!isMyProfile && (
 					<>
 						<ProfileScore user={user} />
-						{/* <ProfileAvailabilityTable user={user} /> */}
+						{user.isPsw && (
+							<>
+								<ProfileAvailabilityTable user={user} />
+							</>
+						)}
 					</>
 				)}
 
