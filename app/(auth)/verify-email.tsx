@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Button, SafeAreaView, ScrollView } from 'react-native';
 import {
 	getAuth,
 	onAuthStateChanged,
 	sendEmailVerification,
 } from 'firebase/auth';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { FIREBASE_AUTH } from '@/firebase.config';
 
 const VerifyEmail = () => {
 	const router = useRouter();
-	const auth = getAuth();
-	const [user, setUser] = useState(auth.currentUser);
+	// Prefer the configured auth instance
+	const [user, setUser] = useState(FIREBASE_AUTH.currentUser);
 	const [resendDisabled, setResendDisabled] = useState(false);
 	const [countdown, setCountdown] = useState(0);
+	const [isChecking, setIsChecking] = useState(false);
 
 	useEffect(() => {
 		if (user && !user.emailVerified) {
@@ -32,20 +34,40 @@ const VerifyEmail = () => {
 		}
 	}, [user]);
 
+	// Poll using a fresh auth.currentUser reference each tick to avoid stale closures
 	useEffect(() => {
-		if (user && !user.emailVerified) {
+		const current = FIREBASE_AUTH.currentUser;
+		if (current && !current.emailVerified) {
 			const interval = setInterval(async () => {
-				await user.reload();
-				if (user.emailVerified) {
+				const u = FIREBASE_AUTH.currentUser;
+				await u?.reload();
+				if (u?.emailVerified) {
 					clearInterval(interval);
-					// Continue to onboarding after email verification
 					router.push('/(onboarding)/care_needs_1');
 				}
-			}, 3000); // Check every 3 seconds
-
-			return () => clearInterval(interval); // Clear interval on component unmount
+			}, 3000);
+			return () => clearInterval(interval);
 		}
-	}, [user, router]);
+	}, [router]);
+
+	// Also re-check on screen focus
+	useFocusEffect(
+		useCallback(() => {
+			let isActive = true;
+			(async () => {
+				try {
+					const u = FIREBASE_AUTH.currentUser;
+					await u?.reload();
+					if (isActive && u?.emailVerified) {
+						router.push('/(onboarding)/care_needs_1');
+					} else {
+						setUser(u || null);
+					}
+				} catch {}
+			})();
+			return () => { isActive = false; };
+		}, [router])
+	);
 
 	useEffect(() => {
 		if (countdown > 0) {
@@ -72,6 +94,21 @@ const VerifyEmail = () => {
 					setResendDisabled(false);
 					setCountdown(0);
 				});
+		}
+	};
+
+	const handleContinue = async () => {
+		try {
+			setIsChecking(true);
+			const u = FIREBASE_AUTH.currentUser;
+			await u?.reload();
+			if (u?.emailVerified) {
+				router.push('/(onboarding)/care_needs_1');
+			} else {
+				setUser(u || null);
+			}
+		} finally {
+			setIsChecking(false);
 		}
 	};
 
@@ -109,7 +146,15 @@ const VerifyEmail = () => {
 					<CustomButton
 						title={resendDisabled ? `Resend in ${countdown}s` : "Resend verification email"}
 						handlePress={handleButton}
-						containerStyles={`w-full mb-6 ${resendDisabled ? 'bg-gray-300' : ''}`}
+						containerStyles={`w-full mb-3 ${resendDisabled ? 'bg-gray-300' : ''}`}
+					/>
+
+					{/* Manual Continue */}
+					<CustomButton
+						title={isChecking ? 'Checking...' : "I've verified, Continue"}
+						handlePress={handleContinue}
+						containerStyles={`w-full mb-6 ${isChecking ? 'opacity-50' : ''}`}
+						isLoading={isChecking}
 					/>
 
 					{/* Security Notice */}
