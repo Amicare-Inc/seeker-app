@@ -27,14 +27,14 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
   const isConfirmed = currentSession.status === SessionStatus.Confirmed;
   const isUserConfirmed = !!currentUser?.id && currentSession.confirmedBy?.includes(currentUser.id);
 
-  // Address subtitle logic
-  const cityProvince =
-    user.address?.city && user.address?.province
-      ? `${user.address.city}, ${user.address.province}`
-      : user.address?.fullAddress || 'No Address';
+  // Address subtitle logic - show session location, not user's personal address
+  const sessionAddress = currentSession.careRecipientData?.address;
+  const cityProvince = sessionAddress?.city && sessionAddress?.province
+    ? `${sessionAddress.city}, ${sessionAddress.province}`
+    : sessionAddress?.fullAddress || 'No Address';
 
   const showFullAddress = (isConfirmed || currentSession.status === SessionStatus.InProgress) && currentUser?.isPsw;
-  const subTitle = showFullAddress ? user.address?.fullAddress || cityProvince : cityProvince;
+  const subTitle = showFullAddress ? sessionAddress?.fullAddress || cityProvince : cityProvince;
 
   // Navigation helpers -------------------------------------------------
   const navigateToSessionConfirmation = (action: 'book' | 'cancel' | 'change') => {
