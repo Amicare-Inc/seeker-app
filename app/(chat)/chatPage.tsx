@@ -94,41 +94,36 @@ const ChatPage = () => {
                 zIndex: 10,
             }} />
             
-            {/* Chat content takes full space with gray background */}
-            <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className="flex-1 bg-grey-0"
-            style={{ paddingTop: insets.top }}
-            >
-            <ChatMessageList
-                messages={messages}
-                otherUser={otherUser!}
-                currentUserId={currentUser.id!}
-                isKeyboardVisible={isKeyboardVisible}
-            />
-            <ChatInput
-                newMessage={newMessage}
-                setNewMessage={setNewMessage}
-                handleSendMessage={handleSendMessage}
-                onFocusChange={handleInputFocusChange}
-            />
-            </KeyboardAvoidingView>
-
-            {/* Header as overlay with white background */}
-            <View style={{ 
-                position: 'absolute',
-                top: insets.top,
-                left: 0,
-                right: 0,
-                zIndex: 10,
-                backgroundColor: '#FFFFFF'
-            }}>
-            <ChatHeader
-                session={activeSession}
-                user={otherUser!}
-                isExpanded={isHeaderExpanded}
-                toggleExpanded={toggleHeaderExpanded}
-            />
+            {/* Chat content with header in normal layout flow */}
+            <View className="flex-1 bg-grey-0" style={{ paddingTop: insets.top }}>
+                {/* Header as part of normal layout */}
+                <View style={{ backgroundColor: '#FFFFFF' }}>
+                    <ChatHeader
+                        session={activeSession}
+                        user={otherUser!}
+                        isExpanded={isHeaderExpanded}
+                        toggleExpanded={toggleHeaderExpanded}
+                    />
+                </View>
+                
+                {/* KeyboardAvoidingView wraps the message list and input */}
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    className="flex-1"
+                >
+                    <ChatMessageList
+                        messages={messages}
+                        otherUser={otherUser!}
+                        currentUserId={currentUser.id!}
+                        isKeyboardVisible={isKeyboardVisible}
+                    />
+                    <ChatInput
+                        newMessage={newMessage}
+                        setNewMessage={setNewMessage}
+                        handleSendMessage={handleSendMessage}
+                        onFocusChange={handleInputFocusChange}
+                    />
+                </KeyboardAvoidingView>
             </View>
         </SafeAreaView>
     );

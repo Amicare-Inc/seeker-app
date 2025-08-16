@@ -160,6 +160,11 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                             <Text className="text-base text-black mt-2 font-medium">Report Issue</Text>
                         </TouchableOpacity>
                     </View>
+                    {!user.isPsw && (
+                        <Text className="font-base mt-4 text-grey-35 font-medium">
+                            Send a connection request to let this care seeker know you’re available to help.
+                        </Text>
+                    )}
                 </View>
             </View>
         );
