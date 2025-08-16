@@ -27,7 +27,7 @@
         "CAMERA",
         "CAMERA"
       ],
-      "package": "com.amicare.AmiCare",
+      "package": "com.amicare.app",
       "supportsTablet": false
     },
     "web": {
