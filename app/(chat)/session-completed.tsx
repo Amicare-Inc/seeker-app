@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { SafeAreaView, View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, ActivityIndicator, Alert, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
@@ -8,10 +8,20 @@ import { useSessionCompletion } from '@/lib/context/SessionCompletionContext';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
+import { getAuthHeaders } from '@/lib/auth';
+import StarRating from '@/features/common/StarRating';
 
 const SessionCompleted = () => {
 	const { sessionId } = useLocalSearchParams();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
+
+	// Local UI state (guarded to avoid crashes if optional features are not wired)
+	const [showReportInput, setShowReportInput] = useState(false);
+	const [reportText, setReportText] = useState('');
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [hasRated, setHasRated] = useState(false);
+	const [userRating, setUserRating] = useState(5);
+	const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
 	// Context data
 	const { completedSession, clearCompletedSession } = useSessionCompletion();
@@ -146,35 +156,14 @@ const SessionCompleted = () => {
 		}
 		
 		setIsSubmitting(true);
-		
 		try {
-			console.log('📤 Calling submitSessionFeedback...');
-			const response = await submitSessionFeedback(
-				sessionId as string,
-				'issue_report',
-				reportText,
-				currentUser.id // Pass the user ID from Redux
-			);
-			
-			console.log('📥 Response received:', response);
-			
-			if (response.success) {
-				Alert.alert(
-					'Report Submitted', 
-					'Thank you for your feedback. We will review your report and take appropriate action.',
-					[{ text: 'OK', onPress: () => {
-						setShowReportInput(false);
-						setReportText('');
-					}}]
-				);
-			} else {
-				const errorMessage = response.error || response.message || 'Failed to submit report. Please try again.';
-				console.error('❌ Submission failed:', errorMessage);
-				Alert.alert('Error', errorMessage);
-			}
-		} catch (error) {
-			console.error('❌ Exception in submitReport:', error);
-			Alert.alert('Error', 'Network error. Please check your connection and try again.');
+			const { submitSessionFeedback } = await import('@/features/sessions/api/sessionApi');
+			await submitSessionFeedback(sessionId as string, currentUser.id, 'issue_report', reportText);
+			Alert.alert('Report Submitted', 'Thank you for your feedback.');
+			setShowReportInput(false);
+			setReportText('');
+		} catch (error: any) {
+			Alert.alert('Error', error?.message || 'Network error. Please try again.');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -201,11 +190,10 @@ const SessionCompleted = () => {
 
 	const submitRating = async () => {
 		if (!sessionData || !currentUser || hasRated) return;
-		
 		setIsSubmittingRating(true);
 		try {
 			const headers = await getAuthHeaders();
-			const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/rate`, {
+			await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/rate`, {
 				method: 'POST',
 				headers,
 				body: JSON.stringify({
@@ -213,10 +201,7 @@ const SessionCompleted = () => {
 					rating: userRating
 				})
 			});
-
-			if (response.ok) {
-				setHasRated(true);
-			}
+			setHasRated(true);
 		} catch (error) {
 			console.error('Error submitting rating:', error);
 		} finally {
@@ -226,7 +211,6 @@ const SessionCompleted = () => {
 
 	const skipRating = async () => {
 		if (!sessionData || !currentUser || hasRated) return;
-		
 		setIsSubmittingRating(true);
 		try {
 			const headers = await getAuthHeaders();
@@ -315,18 +299,13 @@ const SessionCompleted = () => {
 					}
 				</Text>
 
+				{/* Rating */}
 				{!hasRated && sessionData?.otherUser && (
 					<View className="w-full mb-8 p-6 bg-gray-50 rounded-xl">
 						<Text className="text-lg font-semibold text-center mb-4">
-							How was your experience with {sessionData.otherUser.firstName}?
+							How was your experience with {(sessionData as any)?.otherUser?.firstName || 'the provider'}?
 						</Text>
-						
-						<StarRating
-							rating={userRating}
-							onRatingChange={setUserRating}
-							size={40}
-						/>
-						
+						<StarRating rating={userRating} onRatingChange={setUserRating} size={40} />
 						<View className="flex-row mt-6 space-x-4">
 							<TouchableOpacity
 								onPress={submitRating}
@@ -337,15 +316,12 @@ const SessionCompleted = () => {
 									{isSubmittingRating ? 'Submitting...' : 'Submit Rating'}
 								</Text>
 							</TouchableOpacity>
-							
 							<TouchableOpacity
 								onPress={skipRating}
 								disabled={isSubmittingRating}
 								className="flex-1 bg-gray-300 rounded-lg py-3"
 							>
-								<Text className="text-gray-700 font-semibold text-center">
-									Skip
-								</Text>
+								<Text className="text-gray-700 font-semibold text-center">Skip</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -427,7 +403,7 @@ const SessionCompleted = () => {
 					)}
 				</View>
 			</View>
-		</SafeAreaView>
+			</SafeAreaView>
 			</TouchableWithoutFeedback>
 		</KeyboardAvoidingView>
 	);

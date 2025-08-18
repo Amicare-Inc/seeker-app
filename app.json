@@ -2,7 +2,7 @@
   "expo": {
     "name": "Amicare",
     "slug": "AmiCare",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "scheme": "amicare",
     "icon": "./assets/icon.png",
@@ -20,7 +20,7 @@
       },
       "bundleIdentifier": "com.amicare.app",
       "teamId": "5284JKTY8S",
-      "buildNumber": "2"
+      "buildNumber": "1"
     },
     "android": {
       "permissions": [
@@ -28,7 +28,8 @@
         "CAMERA"
       ],
       "package": "com.amicare.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "bundler": "metro",

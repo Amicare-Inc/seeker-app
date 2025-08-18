@@ -253,4 +253,17 @@ export const addSessionComment = async (sessionId: string, text: string, userId:
     console.error('Error adding session comment:', error);
     throw error;
   }
+};
+
+export const submitSessionFeedback = async (sessionId: string, userId: string, reason: string, additionalInfo?: string): Promise<void> => {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/report`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ userId, reason, additionalInfo })
+  });
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg || 'Failed to submit report');
+  }
 }; 

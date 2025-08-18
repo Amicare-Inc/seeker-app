@@ -1,23 +1,27 @@
 // app/_layout.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { BackHandler, Platform } from 'react-native';
+import { BackHandler, Platform, AppState } from 'react-native';
 import { Stack } from 'expo-router';
-import { Provider, useSelector } from 'react-redux';
+import { Provider, useSelector, useDispatch } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { store, RootState } from '@/redux/store';
 import { router } from 'expo-router';
 import { useSocketListeners } from '@/lib/socket/useSocketListeners';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useEnrichedSessions } from '@/features/sessions/api/queries';
 import { userDirectoryKeys } from '@/features/userDirectory/api/queries';
 import { ActiveSessionProvider } from '@/lib/context/ActiveSessionContext';
 import { SessionCompletionProvider } from '@/lib/context/SessionCompletionContext';
-import { useQueryClient } from '@tanstack/react-query';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/firebase.config';
+import { AuthApi } from '@/features/auth/api/authApi';
+import { fetchExploreUsersWithDistance } from '@/features/userDirectory/api/userDirectoryApi';
+import { getUserSessionTab } from '@/features/sessions/api/sessionApi'
+import { updateUserFields } from '@/redux/userSlice';
 
 const GlobalDataLoader = () => {
+	const dispatch = useDispatch();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const prevSessionsRef = useRef<string>('');
 	const queryClient = useQueryClient();
@@ -44,6 +48,51 @@ const GlobalDataLoader = () => {
 	// Fetch sessions with React Query - only when everything is ready
 	const sessionsQuery = useEnrichedSessions(shouldMakeApiCalls ? currentUser?.id : undefined);
 
+	// Helper to refresh and also push fresh user into Redux
+	const refreshAll = React.useCallback(() => {
+		if (!shouldMakeApiCalls || !currentUser?.id) return Promise.resolve();
+		const uid = currentUser.id as string;
+		const userType = currentUser.isPsw ? 'psw' : 'seeker';
+		return Promise.all([
+			(async () => {
+				try {
+					const fresh = await AuthApi.getUser(uid);
+					if (fresh) {
+						dispatch(updateUserFields(fresh));
+						queryClient.setQueryData(['user', uid], fresh);
+					}
+				} catch {}
+			})(),
+			queryClient.prefetchQuery({
+				queryKey: userDirectoryKeys.withDistance(userType, uid),
+				queryFn: () => fetchExploreUsersWithDistance(userType as 'psw' | 'seeker', uid),
+				staleTime: 180_000,
+			}),
+			queryClient.prefetchQuery({
+				queryKey: ['sessions', 'list', uid],
+				queryFn: () => getUserSessionTab(uid),
+				staleTime: 15_000,
+			}),
+		]).then(() => undefined);
+	}, [shouldMakeApiCalls, currentUser?.id, currentUser?.isPsw, queryClient, dispatch]);
+
+	// Background prefetch on app foreground
+	useEffect(() => {
+		if (!shouldMakeApiCalls || !currentUser?.id) return;
+		refreshAll(); // Run on mount
+		const sub = AppState.addEventListener('change', (s) => { if (s === 'active') refreshAll(); });
+		return () => sub.remove();
+	}, [shouldMakeApiCalls, currentUser?.id, currentUser?.isPsw, queryClient, refreshAll]);
+
+	// Add a 30s background refresh while app is running
+	useEffect(() => {
+		if (!shouldMakeApiCalls || !currentUser?.id) return;
+		const interval = setInterval(() => {
+			refreshAll();
+		}, 30_000);
+		return () => clearInterval(interval);
+	}, [shouldMakeApiCalls, currentUser?.id, currentUser?.isPsw, refreshAll]);
+
 	// Refresh user list when sessions change (someone accepts/declines/etc)
 	useEffect(() => {
 		if (currentUser && sessionsQuery.data && sessionsQuery.data.length > 0) {
@@ -52,7 +101,7 @@ const GlobalDataLoader = () => {
 			
 			if (prevSessionsRef.current && prevSessionsRef.current !== sessionHash) {
 				// Sessions have changed, invalidate all user directory queries to refetch
-				queryClient.invalidateQueries({ queryKey: userDirectoryKeys.lists() });
+				queryClient.invalidateQueries({ queryKey: userDirectoryKeys.lists() as any });
 			}
 			
 			prevSessionsRef.current = sessionHash;
@@ -64,7 +113,17 @@ const GlobalDataLoader = () => {
 
 
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Conservative defaults; specific queries get custom staleTime via prefetch or setQueryDefaults
+      staleTime: 60_000,
+      gcTime: 600_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 
 const LayoutWithProviders = () => {

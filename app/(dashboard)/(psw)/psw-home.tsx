@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
 import { useHomeTab } from '@/features/userDirectory';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { UserCardSeeker, UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
 import { SessionFilterCard } from '@/features/sessions';
@@ -12,6 +12,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { RootState } from '@/redux/store';
+import ReactNative from 'react-native';
+import { useCallback } from 'react';
+import { AuthApi } from '@/features/auth/api/authApi';
+import { updateUserFields } from '@/redux/userSlice';
 
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
@@ -26,6 +30,21 @@ const PswHomeTab = () => {
 	const isVerified = currentUser?.idManualVerified ?? false;
 	const [showApprovalPopup, setShowApprovalPopup] = useState(false);
 	const approvalFadeAnim = useRef(new (require('react-native').Animated).Value(0)).current;
+
+	// Refresh current user on focus so verification updates immediately
+	useFocusEffect(
+		useCallback(() => {
+			let active = true;
+			(async () => {
+				if (!currentUser?.id) return;
+				try {
+					const fresh = await AuthApi.getUser(currentUser.id);
+					if (active && fresh) dispatch(updateUserFields(fresh));
+				} catch {}
+			})();
+			return () => { active = false; };
+		}, [currentUser?.id, dispatch])
+	);
 
 	useEffect(() => {
 		if (showApprovalPopup) {

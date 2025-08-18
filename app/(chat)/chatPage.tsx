@@ -110,6 +110,7 @@ const ChatPage = () => {
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     className="flex-1"
+                    keyboardVerticalOffset={Platform.OS === 'android' ? insets.bottom : 0}
                 >
                     <ChatMessageList
                         messages={messages}

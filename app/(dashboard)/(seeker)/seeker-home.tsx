@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, Platform, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -6,16 +6,35 @@ import { BlurView } from 'expo-blur';
 import { useHomeTab } from '@/features/userDirectory';
 import { UserCard, UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { useFocusEffect } from 'expo-router';
+import { AuthApi } from '@/features/auth/api/authApi';
+import { updateUserFields } from '@/redux/userSlice';
 
 const SeekerHomeTab = () => {
   const { users, isLoading, error } = useHomeTab(true, true); // isPsw = true, withDistance = true
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const currentUser = useSelector((state: RootState) => state.user.userData);
+  const dispatch = useDispatch();
   const isVerified = currentUser?.idManualVerified ?? false;
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
   const fadeAnim = useRef(new (require('react-native').Animated).Value(0)).current;
+
+  // Refresh current user on focus so verification updates immediately
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        if (!currentUser?.id) return;
+        try {
+          const fresh = await AuthApi.getUser(currentUser.id);
+          if (active && fresh) dispatch(updateUserFields(fresh));
+        } catch {}
+      })();
+      return () => { active = false; };
+    }, [currentUser?.id, dispatch])
+  );
 
   useEffect(() => {
 	if (showApprovalPopup) {
