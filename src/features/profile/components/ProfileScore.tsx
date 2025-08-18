@@ -145,8 +145,8 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                                 size={28} 
                                 color="#000" 
                             />
-                            <Text className="text-base text-black mt-2 font-medium">
-                                {isConnecting ? 'Connecting...' : hasActiveSession ? 'Already Connected' : 'Connect'}
+                            <Text className="text-base text-black mt-2 font-medium text-center">
+                                {isConnecting ? 'Connecting...' : hasActiveSession ? 'Already Connected' : 'Send Connection Request'}
                             </Text>
                         </TouchableOpacity>
 
@@ -160,11 +160,11 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                             <Text className="text-base text-black mt-2 font-medium">Report Issue</Text>
                         </TouchableOpacity>
                     </View>
-                    {!user.isPsw && (
+                    {/* {!user.isPsw && (
                         <Text className="font-base mt-4 text-grey-35 font-medium">
                             Send a connection request to let this care seeker know you’re available to help.
                         </Text>
-                    )}
+                    )} */}
                 </View>
             </View>
         );
