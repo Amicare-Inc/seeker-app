@@ -20,9 +20,10 @@
       },
       "bundleIdentifier": "com.amicare.app",
       "teamId": "5284JKTY8S",
-      "buildNumber": "1"
+      "buildNumber": "2"
     },
     "android": {
+      "versionCode": 2,
       "permissions": [
         "CAMERA",
         "CAMERA"
