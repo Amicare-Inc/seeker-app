@@ -50,7 +50,6 @@ export const fetchUserFromLoginThunk = createAsyncThunk<
 			return { ...userDoc } as User;
 		} catch (error: any) {
 			console.error('Login error:', error);
-			
 			// Handle Firebase Auth errors
 			if (error.code === 'auth/user-not-found') {
 				return rejectWithValue('No account found with this email address. Please sign up first.');
@@ -60,7 +59,13 @@ export const fetchUserFromLoginThunk = createAsyncThunk<
 				return rejectWithValue('Invalid email address format.');
 			} else if (error.code === 'auth/too-many-requests') {
 				return rejectWithValue('Too many failed attempts. Please try again later.');
+			} else if (error.code === 'auth/invalid-credential') {
+				return rejectWithValue('Invalid email or password. Please try again.');
 			} else if (error.message) {
+				// Hide technical details for users
+				if (error.message.includes('auth/invalid-credential')) {
+					return rejectWithValue('Invalid email or password. Please try again.');
+				}
 				return rejectWithValue(error.message);
 			} else {
 				return rejectWithValue('Sign-in failed. Please check your credentials and try again.');

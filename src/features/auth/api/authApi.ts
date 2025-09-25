@@ -17,19 +17,39 @@ export const AuthApi = {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        // Check for specific error messages
-        if (response.status === 409 || (errorData.message && errorData.message.includes('already exists'))) {
-          throw new Error('User with this email already exists');
+        let userMessage = 'Sign up failed.';
+        try {
+          const errorData = await response.json();
+          if (response.status === 409 || (errorData.message && errorData.message.includes('already exists'))) {
+            userMessage = 'An account with this email already exists.';
+          } else if (errorData.message && errorData.message.toLowerCase().includes('invalid email')) {
+            userMessage = 'Please enter a valid email address.';
+          } else if (errorData.message && errorData.message.toLowerCase().includes('password')) {
+            userMessage = 'Password does not meet requirements.';
+          } else {
+            userMessage = errorData.message || userMessage;
+          }
+        } catch {
+          userMessage = 'Sign up failed. Please try again.';
         }
-        throw new Error(errorData.message || 'Sign up failed');
+        throw new Error(userMessage);
       }
 
       const data = await response.json();
       return data; // Backend currently returns the userId
     } catch (error: any) {
-      console.error('Backend Sign Up Error:', error);
-      throw new Error(`Backend sign up failed: ${error.message}`);
+      console.error('Sign Up Error:', error);
+      let userMessage = 'Sign up failed.';
+      if (error.message && error.message.toLowerCase().includes('valid email')) {
+        userMessage = 'Please enter a valid email address.';
+      } else if (error.message && error.message.toLowerCase().includes('password')) {
+        userMessage = 'Password does not meet requirements.';
+      } else if (error.message && error.message.toLowerCase().includes('already exists')) {
+        userMessage = 'An account with this email already exists.';
+      } else if (error.message) {
+        userMessage = error.message;
+      }
+      throw new Error(userMessage);
     }
   },
 
@@ -117,30 +137,34 @@ export const AuthApi = {
       console.log('Backend response status:', response.status);
       
       if (!response.ok) {
-        let errorMessage = 'Sign-in failed';
-        
+        let userMessage = 'Sign in failed.';
         try {
           const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          // If we can't parse the error response, try text
-          try {
-            const errorText = await response.text();
-            errorMessage = errorText || errorMessage;
-          } catch (textError) {
-            // Use status-based error message
-            if (response.status === 404) {
-              errorMessage = 'Account not found. Please check your email or sign up.';
-            } else if (response.status === 400) {
-              errorMessage = 'Invalid email or password format.';
-            } else if (response.status === 500) {
-              errorMessage = 'Server error. Please try again later.';
-            }
+          if (response.status === 404 || (errorData.error && errorData.error.toLowerCase().includes('not found'))) {
+            userMessage = 'No account found with this email. Please sign up first.';
+          } else if (response.status === 401 || (errorData.error && errorData.error.toLowerCase().includes('incorrect password'))) {
+            userMessage = 'Incorrect password. Please try again.';
+          } else if (errorData.error && errorData.error.toLowerCase().includes('invalid email')) {
+            userMessage = 'Please enter a valid email address.';
+          } else if (errorData.error && errorData.error.toLowerCase().includes('password')) {
+            userMessage = 'Password does not meet requirements.';
+          } else {
+            userMessage = errorData.error || userMessage;
+          }
+        } catch {
+          if (response.status === 404) {
+            userMessage = 'No account found with this email. Please sign up first.';
+          } else if (response.status === 401) {
+            userMessage = 'Incorrect password. Please try again.';
+          } else if (response.status === 400) {
+            userMessage = 'Invalid email or password format.';
+          } else if (response.status === 500) {
+            userMessage = 'Server error. Please try again later.';
+          } else {
+            userMessage = 'Sign in failed. Please try again.';
           }
         }
-        
-        console.error('AuthApi.signIn error:', errorMessage);
-        throw new Error(errorMessage);
+        throw new Error(userMessage);
       }
       
       const data = await response.json();

@@ -46,10 +46,9 @@ const SettingsScreen = () => {
         <View className="bg-white rounded-lg mx-4 mt-6">
           {/* Personal Details */}
           <SettingsListItem
-            icon={<Ionicons name="person" size={28} color="#BFBFC3" />}
+            icon={<Ionicons name="person" size={28} color="#303031" />}
             label="Personal Details"
-            onPress={() => {}}
-            disabled
+            onPress={() => router.push('/(profile)/settings/personal_details')}
           />
           {/* Security & Privacy */}
           <SettingsListItem
@@ -68,8 +67,7 @@ const SettingsScreen = () => {
           <SettingsListItem
             icon={<Ionicons name="time" size={28} color="#303031" />}
             label="Care Schedule"
-            onPress={() => router.push('/(profile)/settings/edit-onboarding-details/edit_care_schedule')}
-            disabled
+            onPress={() => router.push('/(profile)/settings/care_schedule')}
           />
           {/* Notifications */}
           <SettingsListItem
