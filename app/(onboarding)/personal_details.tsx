@@ -194,11 +194,11 @@ const PersonalDetails: React.FC = () => {
    return (
 	  <SafeAreaView className="flex-1 bg-grey-0">
 			<KeyboardAvoidingView
-				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				style={{ flex: 1 }}
-				keyboardVerticalOffset={0}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 60}
 			>
-				<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+				<ScrollView contentContainerStyle={{ paddingBottom: 20 }} keyboardShouldPersistTaps="handled">
 					<View className="px-[16px]">
 						{/* Header */}
 						<View className="flex-row items-center justify-center mb-[17px] relative">

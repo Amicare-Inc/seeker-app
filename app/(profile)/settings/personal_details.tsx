@@ -57,7 +57,12 @@ const PersonalDetailsScreen = () => {
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F7F8FA' }}>
-      <ScrollView contentContainerStyle={{ padding: 16, flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 60}
+      >
+        <ScrollView contentContainerStyle={{ padding: 16, flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={24} color="black" />
@@ -106,6 +111,7 @@ const PersonalDetailsScreen = () => {
           <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>Continue</Text>
         </TouchableOpacity>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
