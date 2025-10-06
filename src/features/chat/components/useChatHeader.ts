@@ -54,10 +54,12 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
   const handleChangeSession = () => navigateToSessionConfirmation('change');
 
   const handleNavigateToRequestSession = () => {
-    if (session.status === 'confirmed') {
+    if (currentSession.status === 'confirmed') {
       handleChangeSession();
     } else {
       if (!user.id) return;
+      console.log('🔍 useChatHeader - Navigating to request-sessions with currentSession:', currentSession);
+      console.log('🔍 useChatHeader - currentSession.checklist:', currentSession.checklist);
       dispatch(setActiveProfile(user));
       router.push({
         pathname: '/request-sessions',
@@ -84,8 +86,8 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
     currentSession.endTime || '',
   );
 
-  const startDateObj = session.startTime ? new Date(session.startTime) : null;
-  const endDateObj = session.endTime ? new Date(session.endTime) : null;
+  const startDateObj = currentSession.startTime ? new Date(currentSession.startTime) : null;
+  const endDateObj = currentSession.endTime ? new Date(currentSession.endTime) : null;
   const isNextDay =
     startDateObj && endDateObj ? endDateObj.getDate() !== startDateObj.getDate() : false;
 

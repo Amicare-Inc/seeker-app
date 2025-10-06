@@ -42,17 +42,17 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 		handleNavigateToUserProfile,
 	} = useChatHeader({ session, user });
 
-	// Get display info for the session
-	const displayInfo = currentUser ? getSessionDisplayInfo(session, currentUser) : null;
+	// Get display info for the session - use currentSession for fresh data
+	const displayInfo = currentUser ? getSessionDisplayInfo(currentSession, currentUser) : null;
 	
 	// Check if we should show dual photos (family member case)
 	// Only show dual photos when PSW is viewing a session where seeker booked for family member
-	const isShowingFamilyMember = currentUser?.isPsw && session.careRecipient && session.careRecipientType === 'family' && session.otherUser;
+	const isShowingFamilyMember = currentUser?.isPsw && currentSession.careRecipient && currentSession.careRecipientType === 'family' && currentSession.otherUser;
 	
 	// Determine which photos and names to show
 	const primaryPhoto = displayInfo?.primaryPhoto || user.profilePhotoUrl;
 	const primaryName = displayInfo?.primaryName || `${user.firstName} ${user.lastName}`;
-	const secondaryPhoto = isShowingFamilyMember ? session.otherUser?.profilePhotoUrl : undefined;
+	const secondaryPhoto = isShowingFamilyMember ? currentSession.otherUser?.profilePhotoUrl : undefined;
 
 	return (
 		<View style={{ backgroundColor: '#fff' }}>
@@ -119,7 +119,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 						{primaryName}
 					</Text>
 					<Text className="text-xs mt-0.5 text-gray-500">
-						{isShowingFamilyMember && session.otherUser ? `Contact: ${session.otherUser.firstName}` : subTitle}
+						{isShowingFamilyMember && currentSession.otherUser ? `Contact: ${currentSession.otherUser.firstName}` : subTitle}
 					</Text>
 				</TouchableOpacity>
 				{isExpanded && (
@@ -222,21 +222,21 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 						</Text>
 					</View>
 
-					{/* Change / Cancel */}
-					{currentSession.status !== 'inProgress' && (
-						<View className="flex-row items-center justify-between">
-							<TouchableOpacity onPress={handleNavigateToRequestSession} className="">
-								<Text className="text-sm font-medium text-grey-58 underline">
-									Change
-								</Text>
-							</TouchableOpacity>
-							<TouchableOpacity onPress={handleCancelSession} className="">
-								<Text className="text-sm font-medium text-grey-58 underline">
-									Cancel
-								</Text>
-							</TouchableOpacity>
-						</View>
-					)}
+				{/* Change/View / Cancel */}
+				{currentSession.status !== 'inProgress' && (
+					<View className="flex-row items-center justify-between">
+						<TouchableOpacity onPress={handleNavigateToRequestSession} className="">
+							<Text className="text-sm font-medium text-grey-58 underline">
+								{currentUser?.isPsw ? 'View' : 'Change'}
+							</Text>
+						</TouchableOpacity>
+						<TouchableOpacity onPress={handleCancelSession} className="">
+							<Text className="text-sm font-medium text-grey-58 underline">
+								Cancel
+							</Text>
+						</TouchableOpacity>
+					</View>
+				)}
 				</View>
 			)}
 		</View>

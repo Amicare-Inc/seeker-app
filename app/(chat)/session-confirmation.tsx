@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSessionConfirmation } from '@/features/sessions/hooks/useSessionConfirmation';
@@ -36,9 +36,35 @@ const SessionConfirmation = () => {
 	const { headerText, messageText, primaryButtonText, primaryButtonColor, onPrimaryPress, otherUser } = uiContent;
 
 	const handlePrimaryPress = () => {
-		if (userData?.isPsw && action !== 'cancel') {
-			router.replace(`/session-confirmation-2?sessionId=${sessionId}&action=${action}`);
+		// Normalize action (could be string or array)
+		const actionStr = Array.isArray(action) ? action[0] : action;
+		
+		// Debug logging
+		console.log('🔍 session-confirmation - handlePrimaryPress called');
+		console.log('🔍 userData?.isPsw:', userData?.isPsw);
+		console.log('🔍 action (raw):', action);
+		console.log('🔍 actionStr (normalized):', actionStr);
+		console.log('🔍 userData?.stripeAccountId:', userData?.stripeAccountId);
+		
+		// Check if PSW has Stripe account set up before proceeding
+		if (userData?.isPsw && actionStr === 'book' && !userData.stripeAccountId) {
+			console.log('🚫 Blocking PSW - no Stripe account');
+			Alert.alert(
+				'Set up payments',
+				'You need to complete Stripe payouts onboarding before booking.',
+				[
+					{ text: 'Cancel', style: 'cancel' },
+					{ text: 'Set up now', onPress: () => router.replace('/(profile)/payouts/stripe-prompt') },
+				]
+			);
+			return;
+		}
+		
+		if (userData?.isPsw && actionStr !== 'cancel') {
+			console.log('✅ PSW continuing to session-confirmation-2');
+			router.replace(`/session-confirmation-2?sessionId=${sessionId}&action=${actionStr}`);
 		} else {
+			console.log('✅ Non-PSW calling onPrimaryPress');
 			onPrimaryPress();
 		}
 	};

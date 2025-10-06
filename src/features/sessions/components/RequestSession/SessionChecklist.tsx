@@ -4,10 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface SessionChecklistProps {
   onChange: (tasks: string[]) => void;  // Change from string to string[]
+  initialTasks?: string[];  // Accept initial tasks
+  readOnly?: boolean;
 }
 
-const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
-	const [tasks, setTasks] = useState<string[]>([]);
+const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange, initialTasks = [], readOnly = false }) => {
+	const [tasks, setTasks] = useState<string[]>(initialTasks);
 	const [inputValue, setInputValue] = useState<string>(''); // State for the text input
 
 	const addTask = (task: string) => {
@@ -32,6 +34,7 @@ const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
             <Text className="text-base mb-4 text-grey-80">
                 List all the specific tasks you would like accomplished during your session
             </Text>
+            {!readOnly && (
             <View className="flex-row items-center bg-grey-9 rounded-full p-2 pl-5">
                 <TextInput
                     className="flex-1 text-base font-medium"
@@ -51,15 +54,18 @@ const SessionChecklist: React.FC<SessionChecklistProps> = ({ onChange }) => {
                     <Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />
                 </TouchableOpacity>
             </View>
+            )}
 			<View className="flex-wrap flex-row mt-3">
 				{tasks.map((task) => (
 					<View
 						key={task}
 						className="flex-row items-center justify-between bg-white rounded-full px-3 py-2 mr-2 mb-2"
 					>
+                        {!readOnly && (
                         <TouchableOpacity onPress={() => removeTask(task)}>
 							<Text className="text-[12px] mr-2 text-grey-58">X</Text>
 						</TouchableOpacity>
+                        )}
 						<Text className="text-sm">{task}</Text>
 
 					</View>

@@ -48,18 +48,6 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
     ).current;
 
     const handleAccept = async () => {
-        // Gate PSWs without Stripe account
-        if (currentUser?.isPsw && !currentUser?.stripeAccountId) {
-            Alert.alert(
-                'Set up payments',
-                'You need to set up your payment account before accepting sessions.',
-                [
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Set up now', onPress: () => router.replace('/(profile)/payouts/stripe-prompt') },
-                ]
-            );
-            return;
-        }
         try {
             await acceptSessionMutation.mutateAsync(enrichedSession.id);
             router.back();

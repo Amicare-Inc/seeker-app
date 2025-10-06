@@ -6,11 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 interface HelpOptionsDropdownProps {
 	initialValue?: string; // comma-separated string of options
 	onChange: (selected: string) => void;
+	disabled?: boolean;
 }
 
 const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 	initialValue = '',
 	onChange,
+	disabled = false,
 }) => {
 	const [selectedOptions, setSelectedOptions] = useState<string[]>(() => {
 		return initialValue
@@ -36,20 +38,22 @@ const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 	return (
 		<View className="mb-4 border-b pb-3 border-grey-9">
 			<TouchableOpacity
-				onPress={() => setIsOpen((prev) => !prev)}
+				onPress={() => !disabled && setIsOpen((prev) => !prev)}
 				className="p-2 pl-5 bg-grey-9 flex-row items-center"
 				style={{
-					borderRadius: Math.max(8, 24 - (selectedOptions.length * 3))
+					borderRadius: Math.max(8, 24 - (selectedOptions.length * 3)),
+					opacity: disabled ? 0.6 : 1
 				}}
+				disabled={disabled}
 			>
 				<Text className="text-base text-grey-49 font-medium flex-1 pr-3">
 					{selectedOptions.length > 0
 						? selectedOptions.join(', ')
 						: 'I need help with...'}
 				</Text>
-				<Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />
+				{!disabled && <Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />}
 			</TouchableOpacity>
-			{isOpen && (
+			{isOpen && !disabled && (
 				<View className="mt-2 bg-grey-9 rounded-lg">
 					{helpOptions.map((item, index) => (
 						<TouchableOpacity

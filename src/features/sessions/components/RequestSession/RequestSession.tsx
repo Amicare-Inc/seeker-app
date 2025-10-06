@@ -16,7 +16,8 @@ import { mergeDateAndTime, roundDateTo15Min, enforceTwoHourBuffer } from '@/lib/
 import { RootState } from '@/redux/store';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearActiveProfile } from '@/redux/activeProfileSlice';
-import { requestSession, updateSession } from '@/features/sessions/api/sessionApi';
+import { requestSession } from '@/features/sessions/api/sessionApi';
+import { useUpdateSession } from '@/features/sessions/api/queries';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
@@ -41,11 +42,19 @@ interface SessionData {
 	};
 	careRecipientId?: string;
 	careRecipientType?: 'self' | 'family';
+	checklist?: Array<{
+		id: string;
+		task: string;
+		completed?: boolean;
+		checked?: boolean;
+		time?: string;
+	}>;
 }
 
 const RequestSession = () => {
 	const { otherUserId, sessionObj } = useLocalSearchParams();
 	const dispatch = useDispatch();
+	const updateSessionMutation = useUpdateSession();
 	const targetUserFromAllUsers = useSelector(
 		(state: RootState) =>
 			Object.values(state.user.allUsers).find(
@@ -65,6 +74,14 @@ const RequestSession = () => {
 		? JSON.parse(sessionObj as string)
 		: null;
 
+	// Debug: Log the existing session to see what's being passed
+	useEffect(() => {
+		if (existingSession) {
+			console.log('🔍 RequestSession - existingSession:', existingSession);
+			console.log('🔍 RequestSession - existingSession.checklist:', existingSession.checklist);
+		}
+	}, []);
+
 	const [helpText, setHelpText] = useState<string>(
 		existingSession?.note || '',
 	);
@@ -78,7 +95,9 @@ const RequestSession = () => {
 	const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 	const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
 	const [pickerTarget, setPickerTarget] = useState<'start' | 'end'>('start');
-	const [checklist, setChecklist] = useState<string[]>([]);
+	const [checklist, setChecklist] = useState<string[]>(
+		existingSession?.checklist?.map(item => item.task) || []
+	);
 	const [selectedCareRecipient, setSelectedCareRecipient] = useState<string | null>(
 		existingSession?.careRecipientId || null
 	);
@@ -87,6 +106,8 @@ const RequestSession = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const currentUser = useSelector((state: RootState) => state.user.userData);
+	// PSWs should only be able to view sessions, not edit them
+	const isReadOnly = currentUser?.isPsw && !!existingSession;
 	const pswRate = currentUser?.isPsw
 		? currentUser.rate || 20
 		: targetUserObj?.isPsw
@@ -274,19 +295,22 @@ const RequestSession = () => {
 
 			if (existingSession) {
 				console.log('session id', existingSession.id);
-				await updateSession(existingSession.id, {
-					...sessionData,
-					billingDetails: {
-						...sessionData.billingDetails,
-						basePrice: sessionData.billingDetails.dynamicBasePrice,
-					},
-					checklist: checklist.map((task, index) => ({
-						id: index.toString(),
-						task,
-						completed: false,
-						checked: false,
-						time: ''
-					})),
+				await updateSessionMutation.mutateAsync({
+					sessionId: existingSession.id,
+					data: {
+						...sessionData,
+						billingDetails: {
+							...sessionData.billingDetails,
+							basePrice: sessionData.billingDetails.dynamicBasePrice,
+						},
+						checklist: checklist.map((task, index) => ({
+							id: index.toString(),
+							task,
+							completed: false,
+							checked: false,
+							time: ''
+						})),
+					}
 				});
 				alert('Session updated successfully!');
 				router.back();
@@ -349,20 +373,21 @@ const RequestSession = () => {
 			<KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} enabled={true}>
 				<ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'} bounces={false}>
 					<View className="flex-1 p-4">
-						<HelpOptionsDropdown initialValue={helpText} onChange={setHelpText} />
-						{isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && (
+						<HelpOptionsDropdown initialValue={helpText} onChange={setHelpText} disabled={isReadOnly} />
+						{isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && !isReadOnly && (
 							<CareRecipientSelector familyMembers={currentUser.familyMembers} selectedRecipientId={selectedCareRecipient} onRecipientSelect={handleCareRecipientSelect} />
 						)}
 						{/* {currentUser?.isPsw && <LocationDisplay location={getLocationToDisplay()} label="Location" />} */}
-						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={false} />
-						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} />
-						{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}
-						<SessionChecklist onChange={setChecklist} />
-						<BillingCard basePrice={displayBasePrice} taxes={displayTaxes} serviceFee={displayServiceFee} total={displayTotal} hourlyRate={effectiveRate} />
+						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={isReadOnly} />
+						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={isReadOnly} />
+					{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}
+					<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={isReadOnly} />
+					<BillingCard basePrice={displayBasePrice} taxes={displayTaxes} serviceFee={displayServiceFee} total={displayTotal} hourlyRate={effectiveRate} />
 					</View>
-					<DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />
+					{!isReadOnly && <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
 				</ScrollView>
 			</KeyboardAvoidingView>
+			{!isReadOnly && (
 			<View className="bg-transparent">
 				<View className="mx-4 bg-[#BBDAF7] flex-row py-3 px-4 items-start rounded-xl -translate-y-3">
 					<Ionicons name="information-circle" size={38} color="#55A2EB" />
@@ -376,6 +401,7 @@ const RequestSession = () => {
 					<Text className="text-white text-lg font-medium ml-3">{existingSession ? 'Update Session' : isSubmitting ? 'Sending...' : 'Send Request'}</Text>
 				</TouchableOpacity>
 			</View>
+			)}
 			<PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
 			{isSubmitting && (
 				<View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">
