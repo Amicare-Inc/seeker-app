@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, TextInput } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// Removed SafeAreaView for better cross-platform compatibility
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -133,10 +133,8 @@ const AddProfilePhoto: React.FC = () => {
 	};
 
 	return (
-		<SafeAreaView 
-			className="flex-1 bg-grey-0" 
-		>
-			<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+		<View className="flex-1 bg-grey-0" style={{ paddingTop: 32, paddingBottom: 32 }}>
+			<ScrollView contentContainerStyle={{ paddingBottom: 32, paddingTop: 32 }}>
 				<View className="px-[16px]">
 					{/* Header */}
 					<View className="flex-row items-center mb-[22px]">
@@ -237,7 +235,7 @@ const AddProfilePhoto: React.FC = () => {
 					<Text className="mt-2 text-blue-600">Saving your profile...</Text>
 				</View>
 			)}
-		</SafeAreaView>
+		</View>
 	);
 };
 

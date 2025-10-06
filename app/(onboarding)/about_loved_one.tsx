@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
@@ -168,13 +168,13 @@ const AboutLovedOne: React.FC = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-grey-0">
+        <View className="flex-1 bg-grey-0" style={{ paddingTop: 32, paddingBottom: 32 }}>
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
-                keyboardVerticalOffset={0}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 60}
             >
-                <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                <ScrollView contentContainerStyle={{ paddingBottom: 32, paddingTop: 32 }}>
                     <View className="px-[16px]">
                     {/* Header */}
                     <View className="flex-row items-center mb-[17px]">
@@ -375,7 +375,7 @@ const AboutLovedOne: React.FC = () => {
                 />
             </View>
             <StatusBar backgroundColor="#FFFFFF" style="dark" />
-        </SafeAreaView>
+        </View>
     );
 };
 

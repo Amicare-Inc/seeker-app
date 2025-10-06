@@ -26,62 +26,36 @@ interface ProfileActionRowProps {
 	user: User;
 }
 
+import { router } from 'expo-router';
+
 const ProfileActionRow: React.FC<ProfileActionRowProps> = ({ user }) => {
-	const [selectedAction, setSelectedAction] = useState<ActionType>(null);
-
-	const handlePressAction = (action: ActionType) => {
-		LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-		setSelectedAction((prev) => (prev === action ? null : action));
-	};
-
 	return (
 		<View>
-			{/* Rest State: Show three separate buttons filling the row */}
-			{!selectedAction && (
-				<View className="flex-row gap-[10px] mb-[10px]">
-					{/* <TouchableOpacity
-						onPress={() => handlePressAction('wallet')}
-						className="bg-white rounded-[10px] flex-1 items-center p-3"
-					>
-						<Ionicons name="card" size={26} color="#000" />
-						<Text className="text-sm font-medium mt-2">Wallet</Text>
-					</TouchableOpacity> */}
+			<View className="flex-row gap-[10px] mb-[10px]">
+				{/* <TouchableOpacity
+					onPress={() => {}}
+					className="bg-white rounded-[10px] flex-1 items-center p-3"
+				>
+					<Ionicons name="card" size={26} color="#000" />
+					<Text className="text-sm font-medium mt-2">Wallet</Text>
+				</TouchableOpacity> */}
 
-					<TouchableOpacity
-						onPress={() => handlePressAction('history')}
-						className="bg-white rounded-[10px] flex-1 items-center p-3"
-					>
-						<Ionicons name="calendar" size={26} color="#000" />
-						<Text className="text-sm font-medium mt-2">History</Text>
-					</TouchableOpacity>
+				<TouchableOpacity
+					onPress={() => router.push('/(profile)/session_history')}
+					className="bg-white rounded-[10px] flex-1 items-center p-3"
+				>
+					<Ionicons name="calendar" size={26} color="#000" />
+					<Text className="text-sm font-medium mt-2">History</Text>
+				</TouchableOpacity>
 
-					<TouchableOpacity
-						onPress={() => handlePressAction('edit')}
-						className="bg-white rounded-[10px] flex-1 items-center p-3"
-					>
-						<Ionicons name="person" size={26} color="#000" />
-						<Text className="text-sm font-medium mt-2">Edit Profile</Text>
-					</TouchableOpacity>
-				</View>
-			)}
-
-			{/* Expanded State: Show one large panel */}
-			{selectedAction && (
-				<View className="bg-white rounded-[10px] p-4 mb-2">
-					<TouchableOpacity
-						onPress={() => handlePressAction(null)}
-						className="flex-row justify-end mb-2"
-					>
-						<Ionicons name="close" size={24} color="#000" />
-					</TouchableOpacity>
-
-					{/* {selectedAction === 'wallet' && <WalletPanel />} */}
-					{selectedAction === 'history' && <HistoryPanel />}
-					{selectedAction === 'edit' && (
-						<ProfileEditPanel user={user} />
-					)}
-				</View>
-			)}
+				<TouchableOpacity
+					onPress={() => {}}
+					className="bg-white rounded-[10px] flex-1 items-center p-3"
+				>
+					<Ionicons name="person" size={26} color="#000" />
+					<Text className="text-sm font-medium mt-2">Edit Profile</Text>
+				</TouchableOpacity>
+			</View>
 		</View>
 	);
 };

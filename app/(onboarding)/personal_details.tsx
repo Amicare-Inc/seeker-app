@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput } from 'react-native';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector, useDispatch } from 'react-redux';
@@ -191,24 +191,24 @@ const PersonalDetails: React.FC = () => {
 		}
 	};
 
-   return (
-	  <SafeAreaView className="flex-1 bg-grey-0">
+	return (
+		<View className="flex-1 bg-grey-0" style={{ paddingTop: 32, paddingBottom: 32 }}>
 			<KeyboardAvoidingView
-				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				style={{ flex: 1 }}
-				keyboardVerticalOffset={0}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 60}
 			>
-				<ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+				<ScrollView contentContainerStyle={{ paddingBottom: 32, paddingTop: 32 }} keyboardShouldPersistTaps="handled">
 					<View className="px-[16px]">
 						{/* Header */}
-						<View className="flex-row items-center justify-center mb-[17px] relative">
-							<TouchableOpacity className="absolute left-0" onPress={() => router.back()}>
-								<Ionicons name="chevron-back" size={24} color="#000" />
-							</TouchableOpacity>
-							<Text className="text-lg font-bold text-center">
-								Tell us about yourself
-							</Text>
-						</View>
+								<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 17, position: 'relative' }}>
+									<TouchableOpacity style={{ position: 'absolute', left: 0 }} onPress={() => router.back()}>
+										<Ionicons name="chevron-back" size={24} color="#000" />
+									</TouchableOpacity>
+									<Text style={{ flex: 1, textAlign: 'center', fontWeight: 'bold', fontSize: 18 }} numberOfLines={2} ellipsizeMode="tail">
+										Tell us about yourself
+									</Text>
+								</View>
 
 						{/* Subtitle */}
 						<Text className="text-sm text-grey-80 mb-[21px] leading-5 text-center mx-auto">
@@ -402,53 +402,53 @@ const PersonalDetails: React.FC = () => {
 							) : null}
 						</View>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+					</ScrollView>
+				</KeyboardAvoidingView>
 
-		 {/* Privacy Notice with Modal (matches loved_one_relationship style) */}
-		 <View className="px-[16px] pb-[21px]">
-							<View className="flex-row items-center mb-4 bg-[#FFC8C5] p-2 py-3 rounded-lg">
-								<Ionicons name="alert-circle" size={40} color="#FF766E" />
-								<Text style={{ marginLeft: 8, fontWeight: '500', color: '#1a2a3a', fontSize: 13, width: "85%" }}>
-									Serving Brampton, Mississauga & Scarborough during early access.
-								</Text>
-							</View>
-			<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 21 }}>
-				<Ionicons
-					name="information-circle"
-					size={30}
-					color="#BFBFC3"
-					style={{ marginRight: 8 }}
-				/>
-				<Text style={{ 
-					flex: 1, 
-					fontSize: 12, 
-					color: '#7B7B7E', 
-					lineHeight: 16, 
-					fontWeight: '500' 
-				}}>
-					We’ll use this to personalize matches and support. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
-					<PrivacyPolicyLink 
-						onPress={() => setShowPrivacyModal(true)}
-						textStyle={{ color: '#0c7ae2'}}
-					/>
-					<Text className="text-brand-blue">.</Text>
-				</Text>
-			</View>
-			<CustomButton
-			   title="Continue"
-			   handlePress={handleContinue}
-			   containerStyles="bg-black py-4 rounded-lg"
-			   textStyles="text-white text-xl font-medium"
-			/>
-			<PrivacyPolicyModal 
-				visible={showPrivacyModal}
-				onClose={() => setShowPrivacyModal(false)}
-			/>
-		 </View>
+			 {/* Privacy Notice with Modal (matches loved_one_relationship style) */}
+			 <View className="px-[16px] pb-[21px]">
+								 <View className="flex-row items-center mb-4 bg-[#FFC8C5] p-2 py-3 rounded-lg">
+									 <Ionicons name="alert-circle" size={40} color="#FF766E" />
+									 <Text style={{ marginLeft: 8, fontWeight: '500', color: '#1a2a3a', fontSize: 13, width: "85%" }}>
+										 Serving Brampton, Mississauga & Scarborough during early access.
+									 </Text>
+								 </View>
+			 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 21 }}>
+				 <Ionicons
+					 name="information-circle"
+					 size={30}
+					 color="#BFBFC3"
+					 style={{ marginRight: 8 }}
+				 />
+				 <Text style={{ 
+					 flex: 1, 
+					 fontSize: 12, 
+					 color: '#7B7B7E', 
+					 lineHeight: 16, 
+					 fontWeight: '500' 
+				 }}>
+					 We’ll use this to personalize matches and support. This info is confidential and only shared with your consent. By continuing, you agree to our{' '}
+					 <PrivacyPolicyLink 
+						 onPress={() => setShowPrivacyModal(true)}
+						 textStyle={{ color: '#0c7ae2'}}
+					 />
+					 <Text className="text-brand-blue">.</Text>
+				 </Text>
+			 </View>
+			 <CustomButton
+				 title="Continue"
+				 handlePress={handleContinue}
+				 containerStyles="bg-black py-4 rounded-lg"
+				 textStyles="text-white text-xl font-medium"
+			 />
+			 <PrivacyPolicyModal 
+				 visible={showPrivacyModal}
+				 onClose={() => setShowPrivacyModal(false)}
+			 />
+			 </View>
 			<StatusBar backgroundColor="#FFFFFF" style="dark" />
-		</SafeAreaView>
-	);
+		</View>
+		);
 };
 
 export default PersonalDetails;
