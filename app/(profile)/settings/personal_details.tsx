@@ -27,18 +27,20 @@ const PersonalDetailsScreen = () => {
 
   const handleContinue = async () => {
     if (!allFilled) return;
+    // Merge new values with existing userData to avoid losing any fields
     const criticalInfoData = {
-      isPsw: userData?.isPsw || false,
+      ...userData,
       firstName,
       lastName,
       dob,
       address: {
+        ...userData?.address,
         fullAddress: address,
-        street: userData?.address?.street || '',
-        city: '',
-        province: '',
-        country: '',
-        postalCode: userData?.address?.postalCode || '',
+        street: userData?.address?.street ?? '',
+        city: userData?.address?.city ?? '',
+        province: userData?.address?.province ?? '',
+        country: userData?.address?.country ?? '',
+        postalCode: userData?.address?.postalCode ?? '',
       },
       phone,
       email,
@@ -92,8 +94,7 @@ const PersonalDetailsScreen = () => {
         </View>
         <TextInput placeholder="Phone" value={phone} onChangeText={setPhone} style={{ borderWidth: 1, borderColor: '#BFBFC3', borderRadius: 6, padding: 12, backgroundColor: '#fff', marginBottom: 12 }} />
         <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={{ borderWidth: 1, borderColor: '#BFBFC3', borderRadius: 6, padding: 12, backgroundColor: '#fff', marginBottom: 12 }} />
-        {/* Removed country, province, city fields. Address is now handled by RegionValidatedAddressInput. */}
-        <TextInput placeholder="Address" value={address} onChangeText={setAddress} style={{ borderWidth: 1, borderColor: '#BFBFC3', borderRadius: 6, padding: 12, backgroundColor: '#fff', marginBottom: 12 }} />
+    {/* Removed country, province, city fields. Address is now handled by RegionValidatedAddressInput. */}
               {/* Date of Birth */}
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ fontSize: 15, fontWeight: '500', color: '#18181B', marginBottom: 8 }}>Date of Birth <Ionicons name="information-circle-outline" size={16} color="#303031" /></Text>

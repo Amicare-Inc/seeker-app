@@ -17,7 +17,7 @@ const PswDashboardLayout = () => {
 
 	return (
 		<SafeAreaProvider >
-			<View style={{ flex: 1, paddingTop: Platform.OS === 'ios' ? 0 : 32, paddingBottom: dynamicBottom }} >
+			<View style={{ flex: 1, paddingTop: 32, paddingBottom: dynamicBottom + 14 }} >
 				<Tabs
 					screenOptions={({ route }) => ({
 						tabBarShowLabel: true,

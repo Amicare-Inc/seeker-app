@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSessionConfirmation } from '@/features/sessions/hooks/useSessionConfirmation';
@@ -9,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 
 const SessionConfirmation = () => {
+	const insets = useSafeAreaInsets();
 	const { sessionId, action } = useLocalSearchParams();
 	const { isReady, isLoading, uiContent } = useSessionConfirmation(sessionId, action);
 	const [showTermsModal, setShowTermsModal] = useState(false);
@@ -44,7 +46,7 @@ const SessionConfirmation = () => {
 	};
 
 	return (
-		<SafeAreaView className="flex-1 bg-white">
+		<SafeAreaView className="flex-1 bg-white" style={{ paddingTop: Platform.OS === 'android' ? insets.top + 16 : 0 }}>
 			{/* Header */}
 			<View className="flex-row items-center p-4">
 				<TouchableOpacity onPress={() => router.back()}>
@@ -69,15 +71,16 @@ const SessionConfirmation = () => {
 					<Text className="text-xl font-bold mb-[12px]">{headerText}</Text>
 				</View>
 
-				{/* Message */}
-				<Text className="text-base text-grey-58 text-center mb-[44px]">
-					By continuing you agree to the{" "}
-					<TermsOfUseLink
-						textStyle={{ fontSize: 16, fontWeight: '500' }}
-						onPress={() => setShowTermsModal(true)}
-					/>
-				</Text>
-
+				{/* Message - moved further down */}
+				<View style={{ marginTop: 60 }}>
+					<Text className="text-base text-grey-58 text-center mb-[44px]">
+						By continuing you agree to the{" "}
+						<TermsOfUseLink
+							textStyle={{ fontSize: 16, fontWeight: '500' }}
+							onPress={() => setShowTermsModal(true)}
+						/>
+					</Text>
+				</View>
 				<View className="h-[1px] bg-grey-9 w-full mb-[38px]"></View>
 
 				<View className="mb-[52px]">
