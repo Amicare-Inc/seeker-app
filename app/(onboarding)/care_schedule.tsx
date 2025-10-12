@@ -40,13 +40,17 @@ const CareSchedule: React.FC = () => {
 	
 	// Initialize local state with existing availability data
 	const initializeLocalSlots = () => {
+		const safeAvailability = (availability && typeof availability === 'object') ? availability : {};
 		const localSlots: {[day: string]: string[]} = {};
-		Object.entries(availability).forEach(([day, daySlots]) => {
+		const safeEntries = (obj: any) => obj && typeof obj === 'object' ? Object.entries(obj) : [];
+		safeEntries(safeAvailability).forEach(([day, daySlots]) => {
+			const safeDaySlots = Array.isArray(daySlots) ? daySlots : [];
 			localSlots[day] = [];
-			daySlots.forEach(slot => {
-				// Find matching timeslot string
-				Object.entries(timeSlotMap).forEach(([timeString, timeRange]) => {
-					if (timeRange.start === slot.start && timeRange.end === slot.end) {
+			safeDaySlots.forEach(slot => {
+				if (!slot || typeof slot !== 'object') return;
+				safeEntries(timeSlotMap).forEach(([timeString, timeRangeRaw]) => {
+					const timeRange = timeRangeRaw as { start: string; end: string };
+					if (timeRange && timeRange.start === slot.start && timeRange.end === slot.end) {
 						localSlots[day].push(timeString);
 					}
 				});

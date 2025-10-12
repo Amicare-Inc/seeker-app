@@ -11,7 +11,7 @@ const SeekerDashboardLayout = () => {
 
 	return (
 		<SafeAreaProvider>
-			<View style={{ flex: 1 }}>
+			<View style={{ flex: 1, paddingTop: 32, paddingBottom: 15 }}>
 				<Tabs
 					screenOptions={({ route }) => ({
 						tabBarShowLabel: true,

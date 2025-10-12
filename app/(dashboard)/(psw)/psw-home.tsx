@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, TouchableWithoutFeedback, Platform, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// Removed SafeAreaView for Android compatibility
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
 import { useHomeTab } from '@/features/userDirectory';
@@ -134,10 +134,12 @@ const PswHomeTab = () => {
 	};
 
 	return (
-		<SafeAreaView
+		<View
 			className="flex-1"
 			style={{
 				backgroundColor: '#f2f2f7',
+				paddingTop: 32,
+				paddingBottom: 32,
 			}}
 		>
 			{/* Header row */}
@@ -181,7 +183,8 @@ const PswHomeTab = () => {
 						}
 						renderItem={renderItem}
 						contentContainerStyle={{
-							paddingBottom: Platform.OS === 'ios' ? 83 : 64,
+							paddingBottom: 96,
+							paddingTop: 16,
 							paddingHorizontal: 20,
 						}}
 						scrollEnabled={isVerified}
@@ -314,7 +317,7 @@ const PswHomeTab = () => {
 					</Animated.View>
 				</TouchableWithoutFeedback>
 			)}
-		</SafeAreaView>
+	</View>
 	);
 };
 
