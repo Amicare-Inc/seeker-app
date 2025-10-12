@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSessionConfirmation } from '@/features/sessions/hooks/useSessionConfirmation';
@@ -10,6 +11,7 @@ import { RootState } from '@/redux/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SessionConfirmation = () => {
+	const insets = useSafeAreaInsets();
 	const { sessionId, action } = useLocalSearchParams();
 	const { isReady, isLoading, uiContent } = useSessionConfirmation(sessionId, action);
 	const [showTermsModal, setShowTermsModal] = useState(false);
@@ -37,7 +39,7 @@ const SessionConfirmation = () => {
 	const { headerText, messageText, primaryButtonText, primaryButtonColor, onPrimaryPress, otherUser } = uiContent;
 
 	return (
-		<SafeAreaView className="flex-1 bg-white">
+		<SafeAreaView className="flex-1 bg-white" style={{ paddingTop: Platform.OS === 'android' ? insets.top - 35 : 0 }}>
 			{/* Header */}
 			<View className="flex-row items-center p-4">
 				<TouchableOpacity onPress={() => router.back()}>
@@ -58,7 +60,7 @@ const SessionConfirmation = () => {
 				/>
 
 				{/* Header */}
-				<View className="flex-row items-center justify-center mb-2">
+				<View className="flex-row items-center mb-2 justify-center">
 					{action === 'cancel' && (
 						<Ionicons
 							name="alert-circle"
@@ -69,14 +71,16 @@ const SessionConfirmation = () => {
 					<Text className="text-xl font-bold mb-[12px]">{headerText}</Text>
 				</View>
 
-				{/* Message */}
-				<Text className="text-base text-grey-58 text-center mb-[24px]">
-					{messageText}{" "}
-					<TermsOfUseLink
-						textStyle={{ fontSize: 16, fontWeight: '500' }}
-						onPress={() => setShowTermsModal(true)}
-					/>.
-				</Text>
+				{/* Message - moved further down for consistent padding */}
+				<View style={{ marginTop: 60 }}>
+					<Text className="text-base text-grey-58 text-center mb-[44px]">
+						{messageText}{" "}
+						<TermsOfUseLink
+							textStyle={{ fontSize: 16, fontWeight: '500' }}
+							onPress={() => setShowTermsModal(true)}
+						/>.
+					</Text>
+				</View>
 
 				<View className="h-[1px] bg-grey-9 w-full mb-[38px]"></View>
 
