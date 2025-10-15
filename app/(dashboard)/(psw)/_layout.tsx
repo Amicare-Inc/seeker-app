@@ -13,18 +13,18 @@ const PswDashboardLayout = () => {
 	// Calculate bottom padding based on navigation bar height
 	const navBarHeight = screenHeight - windowHeight;
 					const tabBarHeight = Platform.OS === 'ios' ? 60 : 52;
-					const dynamicBottom = Platform.OS === 'ios' ? 8 : Math.max(32, navBarHeight);
+					const dynamicBottom = Platform.OS === 'ios' ? 8 : 5 //Math.max(32, navBarHeight);
 
 	return (
 		<SafeAreaProvider >
-			<View style={{ flex: 1, paddingTop: 32, paddingBottom: dynamicBottom + 14 }} >
-				<Tabs
+			<View style={{ flex: 1, paddingTop: Platform.OS === 'ios' ? 32 : 0, paddingBottom: dynamicBottom}} >
+			<Tabs
 					screenOptions={({ route }) => ({
 						tabBarShowLabel: true,
 						tabBarActiveTintColor: '#000', // Active tint color
 						tabBarInactiveTintColor: '#7B7B7E', // Inactive tint color
 								tabBarStyle: {
-									height: Platform.OS === 'ios' ? 60 : 52,
+									height: Platform.OS === 'ios' ? 83 : 52,
 									paddingBottom: Platform.OS === 'ios' ? 8 : 8,
 									paddingTop: 8,
 									backgroundColor: '#F2F2F7',
@@ -85,7 +85,7 @@ const PswDashboardLayout = () => {
 											<KeyboardAvoidingView 
 												style={{
 													position: 'absolute',
-													 bottom: tabBarHeight + dynamicBottom,
+													bottom: Platform.OS === 'ios' ? tabBarHeight + dynamicBottom + 13 : tabBarHeight + dynamicBottom,
 													left: 0,
 													right: 0,
 													zIndex: 1,
