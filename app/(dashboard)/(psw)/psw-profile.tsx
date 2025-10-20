@@ -7,6 +7,7 @@ import { AuthApi } from '@/features/auth/api/authApi';
 import { updateUserFields } from '@/redux/userSlice';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
 
 const PswProfileScreen = () => {
 	const dispatch = useDispatch();
@@ -39,7 +40,7 @@ const PswProfileScreen = () => {
 	}
 
 	return (
-		<View style={{ flex: 1 }}>
+		<View style={{ flex: 1, paddingTop: LAYOUT_CONSTANTS.SCREEN_TOP_PADDING }}>
 			<ProfileScreen user={currentUser} isMyProfile={true} />
 			{isRefreshing && (
 				<View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">

@@ -17,6 +17,8 @@ import { clearUser } from '@/redux/userSlice';
 import { useDispatch } from 'react-redux';
 import ProfileScore from './ProfileScore';
 import ProfileAvailabilityTable from './ProfileAvailabilityTable';
+import { useLiveSession } from '@/features/sessions';
+import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
 
 interface ProfileScreenProps {
 	user: User;
@@ -32,6 +34,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 		bio,
 		// placeholders for your "Diagnoses" / "Experience" etc.
 	} = user;
+	const activeLiveSession = useLiveSession();
 
 	const handleBackPress = () => {
 		router.back();
@@ -39,7 +42,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 
 	return (
 		<SafeAreaView
-			className="flex-1 px-4 pb-16"
+			className="flex-1 px-4"
 			style={{ backgroundColor: '#f2f2f7' }}
 		>
 			<ProfileHeader
@@ -66,7 +69,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 				onBackPress={handleBackPress}
 				originalUser={originalUser}
 			/>
-			<ScrollView className="flex-1">
+			<ScrollView 
+				className="flex-1"
+				contentContainerStyle={{
+					paddingBottom: LAYOUT_CONSTANTS.getContentBottomPadding(!!activeLiveSession)
+				}}
+			>
 				{!!bio && (
 					<View className="">
 						<Text className="font-bold text-black text-base">Bio</Text>

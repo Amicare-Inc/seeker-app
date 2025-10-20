@@ -2,9 +2,10 @@ import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { SessionList, SessionBookedList } from '@/features/sessions';
+import { SessionList, SessionBookedList, useLiveSession } from '@/features/sessions';
 import { useSessionsTab } from '@/features/sessions';
 import { EnrichedSession } from '@/types/EnrichedSession';
+import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
 
 const SeekerSessionsTab = () => {
 	const {
@@ -15,6 +16,7 @@ const SeekerSessionsTab = () => {
 		error,
 		handleExpandSession,
 	} = useSessionsTab('seeker');
+	const activeLiveSession = useLiveSession();
 
 	if (loading) {
 		return (
@@ -39,7 +41,10 @@ const SeekerSessionsTab = () => {
 	return (
 		<SafeAreaView
 			className="flex-1"
-			style={{ backgroundColor: '#F2F2F7' }}
+			style={{ 
+				backgroundColor: '#F2F2F7',
+				paddingTop: LAYOUT_CONSTANTS.SCREEN_TOP_PADDING
+			}}
 		>
 			<View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
 				<Ionicons
@@ -51,8 +56,12 @@ const SeekerSessionsTab = () => {
 				<Text className="text-xl text-black font-medium">My Sessions</Text>
 			</View>
 
-			<ScrollView>
-				<View className="flex-1 px-3.5 mb-[100px]">
+			<ScrollView 
+				contentContainerStyle={{
+					paddingBottom: LAYOUT_CONSTANTS.getContentBottomPadding(!!activeLiveSession)
+				}}
+			>
+				<View className="flex-1 px-3.5">
 					<SessionList
 						sessions={newRequests}
 						onSessionPress={onSessionPress}

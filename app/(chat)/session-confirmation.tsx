@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, Image, TouchableOpacity, Platform } from 'react-native';
+import { SafeAreaView, View, Text, Image, TouchableOpacity, Platform, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -72,7 +72,7 @@ const SessionConfirmation = () => {
 	};
 
 	return (
-		<SafeAreaView className="flex-1 bg-white" style={{ paddingTop: Platform.OS === 'android' ? insets.top + 16 : 0 }}>
+		<SafeAreaView className="flex-1 bg-white">
 			{/* Header */}
 			<View className="flex-row items-center p-4">
 				<TouchableOpacity onPress={() => router.back()}>
@@ -80,26 +80,24 @@ const SessionConfirmation = () => {
 				</TouchableOpacity>
 			</View>
 
-			{/* Main Content */}
-			<View className="flex-1 items-center px-6">
+			{/* Scrollable Content */}
+			<View className="flex-1 px-6">
 				{/* Profile Photo */}
-				<Image
-					source={
-						otherUser.profilePhotoUrl
-							? { uri: otherUser.profilePhotoUrl }
-							: require('@/assets/default-profile.png')
-					}
-					className="w-[120px] h-[120px] rounded-full mb-[24px]"
-				/>
-
-				{/* Header */}
-				<View className="flex-row items-center mb-2 justify-center">
-					<Text className="text-xl font-bold mb-[12px]">{headerText}</Text>
-				</View>
-
-				{/* Message - moved further down */}
-				<View style={{ marginTop: 60 }}>
-					<Text className="text-base text-grey-58 text-center mb-[44px]">
+				<View className="items-center mt-2">
+					<Image
+						source={
+							otherUser.profilePhotoUrl
+								? { uri: otherUser.profilePhotoUrl }
+								: require('@/assets/default-profile.png')
+						}
+						className="w-[100px] h-[100px] rounded-full mb-4"
+					/>
+					
+					{/* Header */}
+					<Text className="text-xl font-bold mb-3 text-center">{headerText}</Text>
+					
+					{/* Message */}
+					<Text className="text-base text-grey-58 text-center mb-6">
 						By continuing you agree to the{" "}
 						<TermsOfUseLink
 							textStyle={{ fontSize: 16, fontWeight: '500' }}
@@ -107,70 +105,75 @@ const SessionConfirmation = () => {
 						/>
 					</Text>
 				</View>
-				<View className="h-[1px] bg-grey-9 w-full mb-[38px]"></View>
 
-				<View className="mb-[52px]">
-					<Text className="text-grey-58 text-sm font-medium mb-2">Cancellation Policy:</Text>
+				<View className="h-[1px] bg-grey-9 w-full mb-6"></View>
+
+				{/* Cancellation Policy */}
+				<View className="mb-6">
+					<Text className="text-grey-58 text-sm font-medium mb-3">Cancellation Policy:</Text>
 					
 					{!userData?.isPsw ? (
 						<>
-							<Text className="text-grey-58 text-xs">
-								<Text className="font-bold">More than 24 hours before the session starts:</Text> Full Refund to Care Seeker, $0 Payment to Caregiver
+							<Text className="text-grey-58 text-xs mb-2">
+								<Text className="font-bold">More than 24 hours before:</Text> Full Refund to Care Seeker, $0 Payment to Caregiver
+							</Text>
+							<Text className="text-grey-58 text-xs mb-2">
+								<Text className="font-bold">Between 12-24 hours before:</Text> 50% Refund to Care Seeker, 50% of Session Fee to Caregiver*
 							</Text>
 							<Text className="text-grey-58 text-xs">
-								<Text className="font-bold">Between 12 and 24 hours before the session starts:</Text> 50% Refund to Care Seeker, 50% of the Session Fee to Caregiver*
-							</Text>
-							<Text className="text-grey-58 text-xs">
-								<Text className="font-bold">Less than 12 hours before the session starts (or a no-show):</Text> No Refund to Care Seeker, 75% of the Session Fee to Caregiver*
+								<Text className="font-bold">Less than 12 hours before (or no-show):</Text> No Refund to Care Seeker, 75% of Session Fee to Caregiver*
 							</Text>
 						</>
 					) : (
-						<Text className="text-grey-58 text-sm mb-[30px]">
+						<Text className="text-grey-58 text-xs">
 							If a caregiver cancels a confirmed booking, the care seeker gets a full refund.
 							All cancellations are recorded. Repeated or last-minute cancellations may reduce your visibility in the marketplace and could lead to account suspension.
 						</Text>
 					)}
 				</View>
+			</View>
 
-				{/* Buttons */}
-				<View className="flex flex-col w-full">
-					<View className="flex-row gap-2 mr-10">
-						<Ionicons name="information-circle" size={30} color="#BFBFC3"/>
-						<Text className="font-medium text-[11px] text-grey-49 mb-[20px]">
-							By continuing, you agree that cancelling a confirmed booking issues a full refund, is recorded, 
-							and may reduce visibility or lead to suspension, per Amicare’s{" "}
-							<TermsOfUseLink
-								textStyle={{ fontSize: 11, fontWeight: '500' }}
-								onPress={() => setShowTermsModal(true)}
-							/>{" and "}
-							<PrivacyPolicyLink
-								textStyle={{ fontSize: 11, fontWeight: '500' }}
-								onPress={() => setShowPrivacyModal(true)}
-							/>.
-						</Text>
-					</View>
-					<TouchableOpacity
-						onPress={handlePrimaryPress}
-						className="rounded-xl px-6 py-4 flex-row justify-center items-center mb-[20px]"
-						style={{ backgroundColor: primaryButtonColor }}
-						disabled={isLoading}
-					>
-						{!userData?.isPsw && (
-							<Ionicons name="checkmark-circle" size={24} color="white" />
-						)}
-						<Text className="text-white font-medium text-xl text-center">
-							{isLoading ? 'Processing...' : (userData?.isPsw && action !== 'cancel' ? 'Continue' : primaryButtonText)}
-						</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						onPress={() => router.back()}
-						disabled={isLoading}
-					>
-						<Text className="text-black font-medium text-base text-center underline">
-							Back to Chat
-						</Text>
-					</TouchableOpacity>
+			{/* Fixed Bottom Section */}
+			<View className="px-6 pb-6 bg-white">
+				<View className="flex-row gap-2 mb-4">
+					<Ionicons name="information-circle" size={24} color="#BFBFC3"/>
+					<Text className="flex-1 text-[11px] text-grey-49 leading-4">
+						By continuing, you agree that cancelling a confirmed booking issues a full refund, is recorded, 
+						and may reduce visibility or lead to suspension, per Amicare's{" "}
+						<TermsOfUseLink
+							textStyle={{ fontSize: 11, fontWeight: '500' }}
+							onPress={() => setShowTermsModal(true)}
+						/>{" and "}
+						<PrivacyPolicyLink
+							textStyle={{ fontSize: 11, fontWeight: '500' }}
+							onPress={() => setShowPrivacyModal(true)}
+						/>.
+					</Text>
 				</View>
+				
+				<TouchableOpacity
+					onPress={handlePrimaryPress}
+					className="rounded-xl px-6 py-4 flex-row justify-center items-center mb-3"
+					style={{ backgroundColor: primaryButtonColor }}
+					disabled={isLoading}
+				>
+					{!userData?.isPsw && (
+						<Ionicons name="checkmark-circle" size={24} color="white" style={{ marginRight: 8 }} />
+					)}
+					<Text className="text-white font-medium text-lg text-center">
+						{isLoading ? 'Processing...' : (userData?.isPsw && action !== 'cancel' ? 'Continue' : primaryButtonText)}
+					</Text>
+				</TouchableOpacity>
+				
+				<TouchableOpacity
+					onPress={() => router.back()}
+					disabled={isLoading}
+					className="py-2"
+				>
+					<Text className="text-black font-medium text-base text-center underline">
+						Back to Chat
+					</Text>
+				</TouchableOpacity>
 			</View>
 			
 			{/* Modals */}

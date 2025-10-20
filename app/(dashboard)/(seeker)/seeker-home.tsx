@@ -11,6 +11,8 @@ import { RootState } from '@/redux/store';
 import { useFocusEffect } from 'expo-router';
 import { AuthApi } from '@/features/auth/api/authApi';
 import { updateUserFields } from '@/redux/userSlice';
+import { useLiveSession } from '@/features/sessions';
+import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
 
 const SeekerHomeTab = () => {
   const { users, isLoading, error } = useHomeTab(true, true); // isPsw = true, withDistance = true
@@ -20,6 +22,7 @@ const SeekerHomeTab = () => {
   const isVerified = currentUser?.idManualVerified ?? false;
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
   const fadeAnim = useRef(new (require('react-native').Animated).Value(0)).current;
+  const activeLiveSession = useLiveSession();
 
   // Refresh current user on focus so verification updates immediately
   useFocusEffect(
@@ -76,7 +79,10 @@ const SeekerHomeTab = () => {
   return (
 	<SafeAreaView
 	  className="flex-1"
-	  style={{ backgroundColor: '#f2f2f7' }}
+	  style={{ 
+		backgroundColor: '#f2f2f7',
+		paddingTop: LAYOUT_CONSTANTS.SCREEN_TOP_PADDING
+	  }}
 	>
 	  <View className="flex-row items-center justify-between px-4 pb-2 mb-2">
 		{/* Left side: Icon + Title */}
@@ -117,7 +123,7 @@ const SeekerHomeTab = () => {
 			keyExtractor={(item) => item.id!}
 			renderItem={renderItem}
 			contentContainerStyle={{
-			  paddingBottom: Platform.OS === 'ios' ? 83 : 64,
+			  paddingBottom: LAYOUT_CONSTANTS.getContentBottomPadding(!!activeLiveSession),
 			  paddingHorizontal: 20,
 			}}
 			scrollEnabled={isVerified}

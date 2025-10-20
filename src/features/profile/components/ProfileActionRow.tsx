@@ -40,21 +40,32 @@ const ProfileActionRow: React.FC<ProfileActionRowProps> = ({ user }) => {
 					<Text className="text-sm font-medium mt-2">Wallet</Text>
 				</TouchableOpacity> */}
 
-				<TouchableOpacity
+				{/* <TouchableOpacity
 					onPress={() => router.push('/(profile)/session_history')}
 					className="bg-white rounded-[10px] flex-1 items-center p-3"
 				>
 					<Ionicons name="calendar" size={26} color="#000" />
 					<Text className="text-sm font-medium mt-2">History</Text>
-				</TouchableOpacity>
-
+				</TouchableOpacity> */}
 				<TouchableOpacity
-					onPress={() => {}}
-					className="bg-white rounded-[10px] flex-1 items-center p-3"
-				>
-					<Ionicons name="person" size={26} color="#000" />
-					<Text className="text-sm font-medium mt-2">Edit Profile</Text>
-				</TouchableOpacity>
+				onPress={() => router.push('/(profile)/session_history')}
+				className="bg-white rounded-[10px] flex-1 items-center p-3"
+				disabled
+				style={{ opacity: 0.5 }}
+			>
+				<Ionicons name="calendar" size={26} color="#9ca3af" />
+				<Text className="text-sm font-medium mt-2 text-gray-400">History</Text>
+			</TouchableOpacity>
+
+			<TouchableOpacity
+				onPress={() => {}}
+				className="bg-white rounded-[10px] flex-1 items-center p-3"
+				disabled
+				style={{ opacity: 0.5 }}
+			>
+				<Ionicons name="person" size={26} color="#9ca3af" />
+				<Text className="text-sm font-medium mt-2 text-gray-400">Edit Profile</Text>
+			</TouchableOpacity>
 			</View>
 		</View>
 	);

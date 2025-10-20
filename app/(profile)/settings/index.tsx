@@ -49,6 +49,7 @@ const SettingsScreen = () => {
             icon={<Ionicons name="person" size={28} color="#303031" />}
             label="Personal Details"
             onPress={() => router.push('/(profile)/settings/personal_details')}
+            disabled
           />
           {/* Security & Privacy */}
           <SettingsListItem
@@ -68,6 +69,7 @@ const SettingsScreen = () => {
             icon={<Ionicons name="time" size={28} color="#303031" />}
             label="Care Schedule"
             onPress={() => router.push('/(profile)/settings/care_schedule')}
+            disabled
           />
           {/* Notifications */}
           <SettingsListItem

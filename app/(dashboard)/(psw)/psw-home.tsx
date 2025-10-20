@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, TouchableWithoutFeedback, Platform, Animated } from 'react-native';
-// Removed SafeAreaView for Android compatibility
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
 import { useHomeTab } from '@/features/userDirectory';
@@ -16,6 +16,8 @@ import ReactNative from 'react-native';
 import { useCallback } from 'react';
 import { AuthApi } from '@/features/auth/api/authApi';
 import { updateUserFields } from '@/redux/userSlice';
+import { useLiveSession } from '@/features/sessions';
+import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
 
 const PswHomeTab = () => {
 	// Fetch available care seekers (isPsw = false)
@@ -30,6 +32,7 @@ const PswHomeTab = () => {
 	const isVerified = currentUser?.idManualVerified ?? false;
 	const [showApprovalPopup, setShowApprovalPopup] = useState(false);
 	const approvalFadeAnim = useRef(new (require('react-native').Animated).Value(0)).current;
+	const activeLiveSession = useLiveSession();
 
 	// Refresh current user on focus so verification updates immediately
 	useFocusEffect(
@@ -134,12 +137,11 @@ const PswHomeTab = () => {
 	};
 
 	return (
-		<View
+		<SafeAreaView
 			className="flex-1"
-			style={{
+			style={{ 
 				backgroundColor: '#f2f2f7',
-				paddingTop: 32,
-				paddingBottom: 32,
+				paddingTop: LAYOUT_CONSTANTS.SCREEN_TOP_PADDING
 			}}
 		>
 			{/* Header row */}
@@ -183,7 +185,7 @@ const PswHomeTab = () => {
 						}
 						renderItem={renderItem}
 						contentContainerStyle={{
-							paddingBottom: 96,
+							paddingBottom: LAYOUT_CONSTANTS.getContentBottomPadding(!!activeLiveSession),
 							paddingTop: 16,
 							paddingHorizontal: 20,
 						}}
@@ -317,7 +319,7 @@ const PswHomeTab = () => {
 					</Animated.View>
 				</TouchableWithoutFeedback>
 			)}
-	</View>
+	</SafeAreaView>
 	);
 };
 

@@ -10,7 +10,7 @@ const careOptions = [
     { id: 'personal', title: 'Personal Care', selected: false },
     { id: 'medication', title: 'Medication Mgmt', selected: false },
     { id: 'mobility', title: 'Mobility', selected: false },
-    { id: 'household', title: 'Household Tasks', selected: true },
+    { id: 'household', title: 'Household Tasks', selected: false },
     { id: 'companionship', title: 'Companionship', selected: false },
     { id: 'transportation', title: 'Transportation', selected: false },
     { id: 'errands', title: 'Errands', selected: false },
@@ -20,7 +20,7 @@ const CareNeedsSelection = () => {
     const [selectedOptions, setSelectedOptions] = useState(
         careOptions.map(option => ({ ...option }))
     );
-    const [careRecipient, setCareRecipient] = useState<'loved-one' | 'myself' | null>('loved-one');
+    const [careRecipient, setCareRecipient] = useState<'loved-one' | 'myself' | null>(null);
 
     const toggleOption = (id: string) => {
         setSelectedOptions(prev =>
