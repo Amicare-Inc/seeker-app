@@ -205,6 +205,24 @@ export const getMessages = async (sessionId: string): Promise<Message[]> => {
   }
 }
 
+export const markMessagesRead = async (sessionId: string): Promise<{ sessionId: string; userId: string; lastReadAt: string }> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/messages/read`, {
+      method: 'POST',
+      headers,
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error: any) {
+    console.error(`Error marking messages read for session ${sessionId}:`, error);
+    throw error;
+  }
+}
+
 export const updateSessionChecklist = async (sessionId: string, checklist: ChecklistItem[]): Promise<Session> => {
   try {
     // ✅ Optional: Emit immediate socket event for instant feedback while API call is in flight

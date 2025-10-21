@@ -47,7 +47,15 @@ export const useSocketListeners = (userId?: string) => {
     /* ---------------------------- HANDLERS -------------------------------- */
     const handleSessionUpdate = (payload: SocketPayloads['session:update']) => {
       socketLogger.debug('session:update', { count: payload.length });
-      // Update React Query cache for sessions - invalidate all session lists to refetch
+      // Seed unread last-message meta from session payload if present
+      try {
+        payload.forEach((s: any) => {
+          if (s?.id && s?.lastMessageAt && s?.lastMessageBy) {
+            upsertLastMessageMeta(s.id, s.lastMessageAt, s.lastMessageBy);
+          }
+        });
+      } catch {}
+      // Invalidate session lists to refetch latest data
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
     };
 
@@ -77,7 +85,27 @@ export const useSocketListeners = (userId?: string) => {
             );
           }
         );
+        // Invalidate sessions to refresh lastMessageAt/By via server
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
       }
+    };
+
+    const handleChatNotify = (payload: SocketPayloads['chat:notify']) => {
+      // Conservative: refetch sessions; server listener will push updates too
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    };
+
+    const handleChatReadReceipt = (payload: SocketPayloads['chat:readReceipt']) => {
+      try {
+        if (!payload?.sessionId || !payload?.userId || !payload?.lastReadAt) return;
+        // If receipt is for me, align local lastReadAt to server
+        const me = userId;
+        if (payload.userId === me) {
+          // Write to lastReadAt map cache via queryClient directly (same key used by useUnread)
+          // Let session refetch update readReceipts; optionally, force refetch here
+          queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+        }
+      } catch {}
     };
 
     const handleSessionStarted = (data: SocketPayloads['session:started']) => {
@@ -218,6 +246,8 @@ export const useSocketListeners = (userId?: string) => {
     /* --------------------------- SUBSCRIPTIONS ----------------------------- */
     socket.on('session:update', handleSessionUpdate);
     socket.on('chat:newMessage', handleChatNewMessage);
+    socket.on('chat:notify', handleChatNotify);
+    socket.on('chat:readReceipt', handleChatReadReceipt);
     socket.on('session:started', handleSessionStarted);
     socket.on('session:completed', handleSessionCompleted);
     socket.on('session:booked', handleSessionBooked);
@@ -238,6 +268,8 @@ export const useSocketListeners = (userId?: string) => {
     return () => {
       socket.off('session:update', handleSessionUpdate);
       socket.off('chat:newMessage', handleChatNewMessage);
+      socket.off('chat:notify', handleChatNotify);
+      socket.off('chat:readReceipt', handleChatReadReceipt);
       socket.off('session:started', handleSessionStarted);
       socket.off('session:completed', handleSessionCompleted);
       socket.off('session:booked', handleSessionBooked);

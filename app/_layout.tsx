@@ -19,6 +19,7 @@ import { AuthApi } from '@/features/auth/api/authApi';
 import { fetchExploreUsersWithDistance } from '@/features/userDirectory/api/userDirectoryApi';
 import { getUserSessionTab } from '@/features/sessions/api/sessionApi'
 import { updateUserFields } from '@/redux/userSlice';
+import { useUnreadSetup } from '@/features/chat/unread/useUnread';
 
 const GlobalDataLoader = () => {
 	const dispatch = useDispatch();
@@ -44,6 +45,9 @@ const GlobalDataLoader = () => {
 
 	// Global socket listeners (will lazily connect when userId available and auth is ready)
 	useSocketListeners(shouldMakeApiCalls ? currentUser?.id : undefined);
+
+	// Initialize unread storage mapping after auth/user ready
+	useUnreadSetup();
 
 	// Fetch sessions with React Query - only when everything is ready
 	const sessionsQuery = useEnrichedSessions(shouldMakeApiCalls ? currentUser?.id : undefined);

@@ -4,6 +4,35 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
+import { useUnreadBadge } from '@/features/chat/unread/useUnread';
+
+const AvatarWithUnread: React.FC<{ uri?: string; borderColor: string; sessionId: string }> = ({ uri, borderColor, sessionId }) => {
+    const { unread } = useUnreadBadge(sessionId);
+    return (
+        <View style={{ position: 'relative', overflow: 'visible' }}>
+            <Image
+                source={uri ? { uri } : require('@/assets/default-profile.png')}
+                className="w-[78px] h-[78px] rounded-full border-4"
+                style={{ borderColor }}
+            />
+            {unread ? (
+                <View
+                    style={{
+                        position: 'absolute',
+                        right: 4,
+                        top: 4,
+                        width: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        backgroundColor: '#FF3B30',
+                        zIndex: 10,
+                        elevation: 3,
+                    }}
+                />
+            ) : null}
+        </View>
+    );
+};
 
 interface SessionListProps {
 	sessions: EnrichedSession[];
@@ -43,15 +72,7 @@ const SessionList: React.FC<SessionListProps> = ({
 				onPress={() => onSessionPress(item)}
 				className="items-center mr-6"
 			>
-				<Image
-					source={
-						displayInfo.primaryPhoto
-							? { uri: displayInfo.primaryPhoto }
-							: require('@/assets/default-profile.png')
-					}
-					className="w-[78px] h-[78px] rounded-full border-4"
-					style={{ borderColor }}
-				/>
+                                    <AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={borderColor} sessionId={item.id} />
 				<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
 					{displayInfo.primaryName.split(' ')[0]}
 				</Text>
@@ -101,15 +122,7 @@ const SessionList: React.FC<SessionListProps> = ({
 									onPress={() => onSessionPress(item)}
 									className="items-center mr-6"
 								>
-									<Image
-										source={
-											displayInfo.primaryPhoto
-												? { uri: displayInfo.primaryPhoto }
-												: require('@/assets/default-profile.png')
-										}
-										className="w-[78px] h-[78px] rounded-full border-4"
-										style={{ borderColor }}
-									/>
+									<AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={borderColor} sessionId={item.id} />
 									<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
 										{displayInfo.primaryName.split(' ')[0]}
 									</Text>

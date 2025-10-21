@@ -8,6 +8,8 @@ export type SocketPayloads = {
   'session:completed': { sessionId: string; actualEndTime: string };
   'session:booked': { sessionId: string; status: string; bookedBy: string; updatedAt: string };
   'chat:newMessage': Message[];
+  'chat:notify': { sessionId: string; lastMessageAt: string; lastMessageBy: string };
+  'chat:readReceipt': { sessionId: string; userId: string; lastReadAt: string };
   'session:liveStatusUpdate': { sessionId: string; liveStatus: string };
   'session:userConfirmed': { sessionId: string; userId: string };
   'session:userEndConfirmed': { sessionId: string; userId: string };

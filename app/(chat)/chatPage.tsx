@@ -10,6 +10,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useMessages, useSendMessage, useEnrichedSessions } from '@/features/sessions/api/queries';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { joinChatSession, leaveChatSession } from '@/src/features/socket';
+import { markMessagesRead } from '@/features/sessions/api/sessionApi';
+import { useUnreadActions } from '@/features/chat/unread/useUnread';
 
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
@@ -20,6 +22,7 @@ const ChatPage = () => {
     const activeSession = activeEnrichedSession || allSessions.find((s) => s.id === sessionId);
     const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const { markRead } = useUnreadActions();
 
     // Listen for keyboard events
     useEffect(() => {
@@ -47,6 +50,9 @@ const ChatPage = () => {
     useEffect(() => {
         if (sessionId) {
             joinChatSession(sessionId as string);
+            // Mark as read on open (server + local)
+            markRead(sessionId as string);
+            markMessagesRead(sessionId as string).catch(() => {});
             return () => {
                 leaveChatSession(sessionId as string);
             };

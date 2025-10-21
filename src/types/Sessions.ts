@@ -38,6 +38,9 @@ export interface Session {
 		| 'requested'; // Interested session that was converted to request
 	createdAt?: string;
 	updatedAt?: string;
+	lastMessageAt?: string;
+	lastMessageBy?: string;
+	readReceipts?: { [userId: string]: string };
 	startTime?: string; // ISO date format
 	endTime?: string; // ISO date format
 	note?: string;

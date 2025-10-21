@@ -6,6 +6,34 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
+import { useUnreadBadge } from '@/features/chat/unread/useUnread';
+
+const SmallAvatarWithUnread: React.FC<{ uri?: string; sessionId: string }> = ({ uri, sessionId }) => {
+    const { unread } = useUnreadBadge(sessionId);
+    return (
+        <View style={{ position: 'relative', overflow: 'visible' }}>
+            <Image
+                source={uri ? { uri } : require('@/assets/default-profile.png')}
+                className="w-[58px] h-[58px] rounded-full mr-4"
+            />
+            {unread ? (
+                <View
+                    style={{
+                        position: 'absolute',
+                        right: 4,
+                        top: 4,
+                        width: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        backgroundColor: '#FF3B30',
+                        zIndex: 10,
+                        elevation: 3,
+                    }}
+                />
+            ) : null}
+        </View>
+    );
+};
 
 interface SessionBookedListProps {
 	sessions: EnrichedSession[];
@@ -137,14 +165,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 						>
 							<View className="rounded-full w-[360px] h-[84px] flex-row items-center justify-between bg-[#0e7ae2] pl-4 pr-12">
 								<View className="flex-row items-center">
-									<Image
-										source={
-											displayInfo.primaryPhoto
-												? { uri: displayInfo.primaryPhoto }
-												: require('@/assets/default-profile.png')
-										}
-										className="w-[58px] h-[58px] rounded-full mr-4"
-									/>
+                                    <SmallAvatarWithUnread uri={displayInfo.primaryPhoto} sessionId={item.id!} />
 									<View className="ml-3">
 										<Text
 											className="text-white text-lg font-semibold"
