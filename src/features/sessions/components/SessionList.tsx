@@ -108,7 +108,7 @@ const SessionList: React.FC<SessionListProps> = ({
 				<ScrollView 
 					horizontal
 					showsHorizontalScrollIndicator={false}
-					contentContainerStyle={{ paddingHorizontal: 4, marginTop: 20 }}
+					contentContainerStyle={{ paddingHorizontal: 4, marginTop: 6 }}
 				>
 					{sessions.length > 0 ? (
 						sessions.map((item) => {

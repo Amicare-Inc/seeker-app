@@ -5,23 +5,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLiveSession } from '@/features/sessions';
 import { LiveSessionCard } from '@/features/sessions';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
 
 const PswDashboardLayout = () => {
 	const activeLiveSession = useLiveSession();
 
 	return (
-		<SafeAreaProvider>
-			<View style={{ flex: 1 }}>
-			<Tabs
+		<SafeAreaProvider >
+			<View style={{ flex: 1 }} >
+				<Tabs
+					initialRouteName="psw-sessions"
 					screenOptions={({ route }) => ({
 						tabBarShowLabel: true,
-						tabBarActiveTintColor: '#000',
-						tabBarInactiveTintColor: '#7B7B7E',
+						tabBarActiveTintColor: '#000', // Active tint color
+						tabBarInactiveTintColor: '#7B7B7E', // Inactive tint color
 						tabBarStyle: {
-							height: LAYOUT_CONSTANTS.TAB_BAR_HEIGHT,
-							paddingBottom: LAYOUT_CONSTANTS.TAB_BAR_PADDING_BOTTOM,
-							paddingTop: LAYOUT_CONSTANTS.TAB_BAR_PADDING_TOP,
+							height: Platform.OS === 'ios' ? 83 : 64,
+							paddingBottom: Platform.OS === 'ios' ? 30 : 12,
+							paddingTop: 12,
 							backgroundColor: '#F2F2F7',
 							borderTopWidth: 1,
 							borderTopColor: "#79797966",
@@ -35,10 +35,8 @@ const PswDashboardLayout = () => {
 						tabBarIcon: ({ focused, color, size }) => {
 							let iconName: React.ComponentProps<
 								typeof Ionicons
-							>['name'] = 'home';
-							if (route.name === 'psw-home') {
-								iconName = 'home';
-							} else if (route.name === 'psw-sessions') {
+							>['name'] = 'time';
+							if (route.name === 'psw-sessions') {
 								iconName = 'time';
 							} else if (route.name === 'psw-profile') {
 								iconName =  'person';
@@ -57,8 +55,7 @@ const PswDashboardLayout = () => {
 					<Tabs.Screen
 						name="psw-home"
 						options={{
-							title: 'Home',
-							headerShown: false,
+							href: null,
 						}}
 					/>
 					<Tabs.Screen
@@ -80,7 +77,7 @@ const PswDashboardLayout = () => {
 					<KeyboardAvoidingView 
 						style={{
 							position: 'absolute',
-							bottom: LAYOUT_CONSTANTS.TAB_BAR_HEIGHT + LAYOUT_CONSTANTS.LIVE_SESSION_CARD_SPACING,
+							bottom: Platform.OS === 'ios' ? 83 : 64,
 							left: 0,
 							right: 0,
 							zIndex: 1,
