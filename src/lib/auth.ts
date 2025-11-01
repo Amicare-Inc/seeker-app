@@ -25,7 +25,7 @@ export const getAuthToken = async (): Promise<string | null> => {
  */
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
   const token = await getAuthToken();
-  
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

@@ -9,7 +9,8 @@ import {
   declineSession,
   cancelSession,
   getMessages,
-  sendMessage
+  sendMessage,
+  getNewRequestsTab
 } from '@/features/sessions/api/sessionApi';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Session } from '@/types/Sessions';
@@ -24,6 +25,7 @@ export const sessionKeys = {
   detail: (id: string) => [...sessionKeys.details(), id] as const,
   messages: () => [...sessionKeys.all, 'messages'] as const,
   messagesBySession: (sessionId: string) => [...sessionKeys.messages(), sessionId] as const,
+  newRequests: () => [...sessionKeys.all, 'newRequests'] as const,
 };
 
 // Fetch enriched sessions
@@ -31,6 +33,15 @@ export function useEnrichedSessions(userId: string | undefined) {
   return useQuery({
     queryKey: sessionKeys.list(userId || ''),
     queryFn: () => getUserSessionTab(userId!),
+    enabled: !!userId,
+  });
+}
+//fetch new requested sessions
+
+export function useNewRequestSession(userId: string | undefined) {
+  return useQuery({
+    queryKey: sessionKeys.newRequests(),
+    queryFn: () => getNewRequestsTab(),
     enabled: !!userId,
   });
 }

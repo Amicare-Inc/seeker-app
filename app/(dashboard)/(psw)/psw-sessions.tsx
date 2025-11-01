@@ -24,6 +24,10 @@ const PswSessionsTab = () => {
 		handleExpandSession,
 	} = useSessionsTab('psw');
 
+	// Hooks must be called before any early returns
+	const currentUser = useSelector((state: RootState) => state.user.userData);
+	const isVerified = currentUser?.idManualVerified ?? false;
+
     if (loading) {
         return (
             <SafeAreaView className="flex-1 items-center justify-center bg-white">
@@ -39,8 +43,6 @@ const PswSessionsTab = () => {
             </SafeAreaView>
         );
     }
-    const currentUser = useSelector((state: RootState) => state.user.userData);
-    const isVerified = currentUser?.idManualVerified ?? false;
 
     const handleSessionPress = (session: EnrichedSession) => {
         if (!isVerified) return; //prevent interaction when not verified
@@ -64,7 +66,7 @@ const PswSessionsTab = () => {
         router.push('/other-user-profile');
 
     };
-
+	
     const renderItem = ({item}: {item: EnrichedSession}) => (
         <RequestSessionCard
             session={item}
@@ -79,16 +81,17 @@ const PswSessionsTab = () => {
             style={{ backgroundColor: '#F2F2F7' }}
         >
 
-            <ScrollView>
+            {/* <ScrollView>
                 <View className="flex-1 px-3.5 mb-[100px]">
                     <SessionList
                         sessions={[...confirmed, ...pending]}
                         onSessionPress={handleSessionPress}
-                        title={undefined}
+                        title="pending"
+                        isNewRequestsSection={false}
                     />
                 </View>
-            </ScrollView>
-            <View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
+            </ScrollView> */}
+            {/* <View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
                 <Ionicons
                     name="time"
                     size={26}
@@ -96,7 +99,7 @@ const PswSessionsTab = () => {
                     style={{ marginRight: 8 }}
                 />
                 <Text className="text-xl text-black font-medium">New</Text>
-            </View>
+            </View> */}
 
             <View className="flex-1 relative">
 				{/* Main content */}
@@ -111,10 +114,7 @@ const PswSessionsTab = () => {
 				) : (
 					<FlatList
 						data={newRequests}
-						keyExtractor={(item) => item.isForFamilyMember 
-							? `${item.otherUser?.id}-${item.otherUser?.familyMemberInfo?.id}` 
-							: item.otherUser?.id!
-						}
+						keyExtractor={(item) => item.id}
 						renderItem={renderItem}
 						contentContainerStyle={{
 							paddingBottom: Platform.OS === 'ios' ? 83 : 64,

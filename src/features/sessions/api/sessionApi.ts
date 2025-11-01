@@ -26,6 +26,28 @@ export const getUserSessionTab = async (userId: string): Promise<EnrichedSession
   }
 };
 
+export const getNewRequestsTab= async (): Promise<EnrichedSession[]> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/requested-tab`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const sessions: EnrichedSession[] = await response.json();
+    return sessions;
+  } catch (error: any) {
+    console.error('Error fetching user sessions from backend:', error);
+    throw error;
+  }
+
+};
+
 export const requestSession = async (session: SessionDTO): Promise<void> => {
 	try {
 		const headers = await getAuthHeaders();

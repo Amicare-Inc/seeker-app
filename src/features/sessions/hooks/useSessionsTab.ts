@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { router } from 'expo-router';
 import { RootState } from '@/redux/store';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
-import { useEnrichedSessions } from '@/features/sessions/api/queries';
+import { useEnrichedSessions, useNewRequestSession } from '@/features/sessions/api/queries';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { setActiveProfile, clearActiveProfile } from '@/redux/activeProfileSlice';
 
@@ -18,20 +18,27 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		useState<EnrichedSession | null>(null);
 
 	// Fetch sessions using React Query
-	const { data: allSessions = [], isLoading: loading, error } = useEnrichedSessions(userId);
+	const { data: allSessions = [], isLoading: sessionsLoading, error } = useEnrichedSessions(userId);
+	//fetch new requested sessions
+	const { data: newRequestSessions = [], isLoading: newRequestsLoading, error: newRequestError } = useNewRequestSession(userId);
+
+	const loading = sessionsLoading || newRequestsLoading;
 
 	// Filter sessions by status using useMemo for performance
 	const newRequests = useMemo(() => 
-		allSessions.filter((session) => {
+		newRequestSessions.filter((session) => {
 			// For seekers: show newRequest sessions they receive + interested sessions from PSWs
 			if (role === 'seeker') {
 				return (session.status === 'newRequest' && session.receiverId === userId) ||
 					   (session.status === 'interested' && session.receiverId === userId);
 			}
-			// For PSWs: show newRequest sessions they receive
-			return session.status === 'newRequest' && session.receiverId === userId;
-		}), [allSessions, userId, role]
+			// For PSWs: show ALL newRequest sessions, regardless of receiverId
+			console.log(session.receiverId);
+			
+			return session.status === 'newRequest';
+		}), [newRequestSessions, userId, role]
 	);
+
 
 	const pending = useMemo(() => 
 		allSessions.filter((session) => session.status === 'pending'), 
