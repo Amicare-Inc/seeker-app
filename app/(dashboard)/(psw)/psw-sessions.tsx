@@ -12,6 +12,7 @@ import RequestSessionCard from '@/features/sessions/components/RequestSession/Se
 import { RootState } from '@/redux/store';
 import { router, useFocusEffect } from 'expo-router';
 import { ActivityIndicator, FlatList, Platform } from 'react-native';
+import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 const PswSessionsTab = () => {
     const dispatch = useDispatch();
 	const {
@@ -43,7 +44,7 @@ const PswSessionsTab = () => {
             </SafeAreaView>
         );
     }
-
+	const { setActiveEnrichedSession } = useActiveSession(); // if inside same component
     const handleSessionPress = (session: EnrichedSession) => {
         if (!isVerified) return; //prevent interaction when not verified
         if (!session.otherUser) return;
@@ -63,6 +64,7 @@ const PswSessionsTab = () => {
 			});
 		}
         dispatch(setActiveProfile(session.otherUser));
+        setActiveEnrichedSession(session);
         router.push('/other-user-profile');
 
     };

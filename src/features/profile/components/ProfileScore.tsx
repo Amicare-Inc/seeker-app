@@ -146,7 +146,7 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                                 color="#000" 
                             />
                             <Text className="text-base text-black mt-2 font-medium text-center">
-                                {isConnecting ? 'Connecting...' : hasActiveSession ? 'Already Connected' : 'Send Connection Request'}
+                                {isConnecting ? 'Connecting...' : hasActiveSession ? 'Message' : 'Send Connection Request'}
                             </Text>
                         </TouchableOpacity>
 

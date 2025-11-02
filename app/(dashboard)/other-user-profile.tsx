@@ -130,6 +130,8 @@ const OtherUserProfileScreen = () => {
 			}
 		});
 	}
+	console.log('activeEnrichedProfile', activeEnrichedProfile);
+	console.log('status', activeEnrichedProfile?.status);
 
 	return (
 		<>

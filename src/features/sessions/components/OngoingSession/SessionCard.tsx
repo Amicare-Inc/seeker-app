@@ -231,7 +231,7 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
                 disabled={acceptSessionMutation.isPending}
               >
                 <Text className="text-black text-base font-medium">
-                  {acceptSessionMutation.isPending ? 'Accepting...' : 'Accept'}
+                  {acceptSessionMutation.isPending ? 'Applying...' : 'Apply'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity 
