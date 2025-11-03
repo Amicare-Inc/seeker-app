@@ -20,7 +20,12 @@
       },
       "bundleIdentifier": "com.amicare.app",
       "teamId": "5284JKTY8S",
-      "buildNumber": "4"
+      "buildNumber": "4",
+      "config": {
+        "googleMaps":{
+          "apiKey":"AIzaSyDXmMXjEKlPtirOe5fXbofOJpit0_rvlb4"
+        }
+      }
     },
     "android": {
       "permissions": [
@@ -30,7 +35,12 @@
       "package": "com.amicare.app",
       "supportsTablet": false,
       "softwareKeyboardLayoutMode": "resize",
-      "versionCode": 3
+      "versionCode": 3,
+      "config": {
+        "googleMaps":{
+          "apiKey":"AIzaSyDXmMXjEKlPtirOe5fXbofOJpit0_rvlb4"
+        }
+      }
     },
     "web": {
       "bundler": "metro",

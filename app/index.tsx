@@ -11,10 +11,38 @@ import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 import { TermsOfUseLink, TermsOfUseModal } from '@/features/privacy/components/TermsOfUseModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useEffect } from 'react';
+
+import { useRouter, useSegments } from 'expo-router';
+
+
+  
+
 const { height: screenHeight } = Dimensions.get('window');
 
 export default function Index() {
 	const insets = useSafeAreaInsets();
+	const router = useRouter();
+	const segments = useSegments() as string[];
+	const [redirecting, setRedirecting] = useState(true);
+
+	useEffect(() => {
+		// Only redirect if the skip flag is set
+		if (process.env.EXPO_PUBLIC_SKIP_ONBOARDING === 'true') {
+		// Make sure segments are initialized
+		if (segments.length > 0) {
+			router.replace('/dashboard/seeker-sessions');
+		}
+		} else {
+		setRedirecting(false);
+		}
+	}, [segments]);
+
+	// While redirecting, render nothing
+	if (process.env.EXPO_PUBLIC_SKIP_ONBOARDING === 'true' && redirecting) {
+		return null;
+	}
+
 	return (
 		<View style={{ flex: 1, backgroundColor: '#F2F2F7' }}>
 			<StatusBar hidden />
