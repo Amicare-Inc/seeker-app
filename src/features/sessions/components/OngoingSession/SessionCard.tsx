@@ -48,12 +48,24 @@ const SessionCard = (enrichedSession: EnrichedSession) => {
     ).current;
 
     const handleAccept = async () => {
-        try {
-            await acceptSessionMutation.mutateAsync(enrichedSession.id);
-            router.back();
-        } catch (err) {
-            console.error('Error accepting session:', err);
-        }
+        // Create confirmation data to pass to the confirmation page
+        const confirmationData = {
+            receiverName: enrichedSession.otherUser?.firstName ? 
+                `${enrichedSession.otherUser.firstName} ${enrichedSession.otherUser.lastName}` : 
+                'Unknown',
+            rate: enrichedSession.otherUser?.rate || '25',
+            total: enrichedSession.billingDetails?.total?.toFixed(2) || '0.00',
+            sessionId: enrichedSession.id,
+            sessionData: enrichedSession
+        };
+        
+        router.push({ 
+            pathname: '/session-application', 
+            params: { 
+                otherUserId: enrichedSession.otherUser?.id || '',
+                sessionData: JSON.stringify(confirmationData)
+            } 
+        });
     };
 
     const handleReject = async () => {
