@@ -35,32 +35,33 @@ const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 		});
 	};
 
+	const removeOption = (option: string) => {
+		setSelectedOptions((prev) => prev.filter((o) => o !== option));
+	};
+
 	return (
 		<View className="mb-4 border-b pb-3 border-grey-9">
 			<TouchableOpacity
 				onPress={() => !disabled && setIsOpen((prev) => !prev)}
-				className="p-2 pl-5 bg-grey-9 flex-row items-center"
+				className="p-2 pl-5 bg-grey-9 flex-row items-center rounded-lg mb-2"
 				style={{
-					borderRadius: Math.max(8, 24 - (selectedOptions.length * 3)),
 					opacity: disabled ? 0.6 : 1
 				}}
 				disabled={disabled}
 			>
 				<Text className="text-base text-grey-49 font-medium flex-1 pr-3">
-					{selectedOptions.length > 0
-						? selectedOptions.join(', ')
-						: 'I need help with...'}
+					I need help with...
 				</Text>
 				{!disabled && <Ionicons name="arrow-down-circle" size={32} color="#9D9DA1" />}
 			</TouchableOpacity>
+
 			{isOpen && !disabled && (
-				<View className="mt-2 bg-grey-9 rounded-lg">
+				<View className="mt-2 bg-grey-9 rounded-lg mb-3">
 					{helpOptions.map((item, index) => (
 						<TouchableOpacity
 							key={item}
 							onPress={() => {
 								toggleOption(item);
-								setIsOpen(false); // close dropdown immediately after selecting
 							}}
 							className={`p-3 flex-row items-center justify-between ${
 								index === helpOptions.length - 1
@@ -73,6 +74,24 @@ const HelpOptionsDropdown: React.FC<HelpOptionsDropdownProps> = ({
 								<Ionicons name="checkmark" size={20} color="green" />
 							)}
 						</TouchableOpacity>
+					))}
+				</View>
+			)}
+			
+			{selectedOptions.length > 0 && (
+				<View className="flex-wrap flex-row mt-3">
+					{selectedOptions.map((option) => (
+						<View
+							key={option}
+							className="flex-row items-center justify-between bg-white rounded-full px-3 py-2 mr-2 mb-2"
+						>
+							{!disabled && (
+								<TouchableOpacity onPress={() => removeOption(option)}>
+									<Text className="text-[12px] mr-2 text-grey-58">X</Text>
+								</TouchableOpacity>
+							)}
+							<Text className="text-sm">{option}</Text>
+						</View>
 					))}
 				</View>
 			)}

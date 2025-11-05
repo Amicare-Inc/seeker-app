@@ -1,6 +1,6 @@
 export interface SessionDTO {
   senderId: string;
-  receiverId: string;
+  receiverId?: string;
   startTime?: string;
   endTime?: string;
   note?: string;

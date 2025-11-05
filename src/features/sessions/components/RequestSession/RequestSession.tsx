@@ -26,7 +26,7 @@ import { usePricingQuote } from '@/features/pricing/api/usePricingQuote';
 interface SessionData {
 	id: string;
 	senderId: string;
-	receiverId: string;
+	receiverId?: string;
 	participants: string[];
 	status: string;
 	createdAt: string;
@@ -49,6 +49,11 @@ interface SessionData {
 		checked?: boolean;
 		time?: string;
 	}>;
+	distanceInfo?: {
+		distance: string;
+		duration: string;
+		distanceValue: number;
+	};
 }
 
 const RequestSession = () => {
@@ -277,17 +282,21 @@ const RequestSession = () => {
 				note: helpText,
 				startTime: startDate.toISOString(),
 				endTime: endDate.toISOString(),
-				billingDetails: {
-					dynamicBasePrice: basePrice,
-					taxes,
-					serviceFee,
-					total,
-				},
+				
+				// Billing details are handled in the update case below
+				// billingDetails: {
+				// 	dynamicBasePrice: basePrice,
+				// 	taxes,
+				// 	serviceFee,
+				// 	total,
+				// },
+
 				checklist: checklist.map((task, index) => ({
 					id: index.toString(),
 					task,
 					completed: false
 				})),
+
 				// Add care recipient data
 				careRecipientId: selectedCareRecipient || currentUser.id,
 				careRecipientType: (isLookingForFamily && selectedCareRecipient) ? 'family' as const : 'self' as const,
@@ -295,53 +304,70 @@ const RequestSession = () => {
 
 			if (existingSession) {
 				console.log('session id', existingSession.id);
+				const updateData: any = {
+					...sessionData, 
+					checklist: checklist.map((task, index) => ({
+						id: index.toString(),
+						task,
+						completed: false,
+						checked: false,
+						time: '',
+					})),
+				}
+
+				if (otherUserId && otherUserId !== currentUser?.id) {
+					updateData.receiverId = otherUserId;
+					if (targetUserObj?.distanceInfo) {
+						updateData.distanceInfo = targetUserObj.distanceInfo;
+					}
+				}
+
+				// Only add billingDetails if it already exists (i.e. we're updating the sess)
+				if ((otherUserId && otherUserId !== currentUser?.id) || existingSession.billingDetails) {
+					updateData.billingDetails = {
+						basePrice,
+						taxes,
+						serviceFee,
+						total,
+					}
+				}
+
 				await updateSessionMutation.mutateAsync({
 					sessionId: existingSession.id,
-					data: {
-						...sessionData,
-						billingDetails: {
-							...sessionData.billingDetails,
-							basePrice: sessionData.billingDetails.dynamicBasePrice,
-						},
-						checklist: checklist.map((task, index) => ({
-							id: index.toString(),
-							task,
-							completed: false,
-							checked: false,
-							time: ''
-						})),
-					}
+					data: updateData,
 				});
+
 				alert('Session updated successfully!');
 				router.back();
 			} else {
-				const receiverId = (() => {
-					if (targetUserObj?.isFamilyMemberCard && targetUserObj?.id) {
-						const originalUserId = targetUserObj.id.split('-family-')[0];
-						return originalUserId;
-					}
-					return targetUserObj?.id || otherUserId as string;
-				})();
+				// const receiverId = (() => {
+				// 	if (targetUserObj?.isFamilyMemberCard && targetUserObj?.id) {
+				// 		const originalUserId = targetUserObj.id.split('-family-')[0];
+				// 		return originalUserId;
+				// 	}
+				// 	return targetUserObj?.id || otherUserId as string;
+				// })();
 
-				if (!receiverId) {
-					alert('Unable to find target user. Please try again.');
-					return;
-				}
+				// if (!receiverId) {
+				// 	alert('Unable to find target user. Please try again.');
+				// 	return;
+				// }
 
 				const newSessionData = {
 					...sessionData,
 					senderId: currentUser.id,
-					receiverId: receiverId,
-					billingDetails: {
-						...sessionData.billingDetails,
-						basePrice: sessionData.billingDetails.dynamicBasePrice,
-					},
-					...(targetUserObj?.distanceInfo && { distanceInfo: targetUserObj.distanceInfo }),
+					// receiverId: receiverId,
+					// billingDetails: {
+					// 	...sessionData.billingDetails,
+					// 	basePrice: sessionData.billingDetails.dynamicBasePrice,
+					// },
+					// ...(targetUserObj?.distanceInfo && { distanceInfo: targetUserObj.distanceInfo }),
 				} as SessionDTO;
 
-				console.log('📝 Creating session with distance info:', !!newSessionData.distanceInfo);
+				// console.log('📝 Creating session with distance info:', !!newSessionData.distanceInfo);
 				await requestSession(newSessionData);
-				router.push({ pathname: '/sent-request', params: { otherUserId: receiverId } });
+				// router.push({ pathname: '/sent-request', params: { otherUserId: receiverId } });
+				router.back();
 			}
 		} catch (error) {
 			console.error('Error submitting session request:', error);
@@ -377,12 +403,12 @@ const RequestSession = () => {
 						{isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && !isReadOnly && (
 							<CareRecipientSelector familyMembers={currentUser.familyMembers} selectedRecipientId={selectedCareRecipient} onRecipientSelect={handleCareRecipientSelect} />
 						)}
-						{/* {currentUser?.isPsw && <LocationDisplay location={getLocationToDisplay()} label="Location" />} */}
+						<LocationDisplay location={getLocationToDisplay()} label="Location" />
 						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={isReadOnly} />
 						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={isReadOnly} />
 					{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}
 					<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={isReadOnly} />
-					<BillingCard basePrice={displayBasePrice} taxes={displayTaxes} serviceFee={displayServiceFee} total={displayTotal} hourlyRate={effectiveRate} />
+					{otherUserId && otherUserId !== currentUser?.id && <BillingCard basePrice={displayBasePrice} taxes={displayTaxes} serviceFee={displayServiceFee} total={displayTotal} hourlyRate={effectiveRate} />}
 					</View>
 					{!isReadOnly && <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
 				</ScrollView>
