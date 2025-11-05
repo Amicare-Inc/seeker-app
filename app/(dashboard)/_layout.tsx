@@ -18,6 +18,10 @@ const OnboardingLayout = () => {
 				name="other-user-profile"
 				options={{ headerShown: false }}
 			/>
+			<Stack.Screen
+				name="session-application"
+				options={{ headerShown: false }}
+			/>
 		</Stack>
 	);
 };
