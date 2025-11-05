@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SessionList, SessionBookedList } from '@/features/sessions';
+import AppliedSessions from '@/features/sessions/components/AppliedSessions';
 import { useSessionsTab } from '@/features/sessions';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { BlurView } from 'expo-blur';
@@ -24,6 +25,13 @@ const PswSessionsTab = () => {
 		error,
 		handleExpandSession,
 	} = useSessionsTab('psw');
+
+	// Include ongoing sessions in the horizontal header by merging with pending.
+	// We consider sessions with status 'confirmed' or 'inProgress' as ongoing for display purposes.
+	const ongoingForHeader = React.useMemo(
+		() => confirmed.filter((s) => s.status === 'confirmed' || s.status === 'inProgress'),
+		[confirmed]
+	);
 
 	// Hooks must be called before any early returns
 	const currentUser = useSelector((state: RootState) => state.user.userData);
@@ -83,25 +91,7 @@ const PswSessionsTab = () => {
             style={{ backgroundColor: '#F2F2F7' }}
         >
 
-            {/* <ScrollView>
-                <View className="flex-1 px-3.5 mb-[100px]">
-                    <SessionList
-                        sessions={[...confirmed, ...pending]}
-                        onSessionPress={handleSessionPress}
-                        title="pending"
-                        isNewRequestsSection={false}
-                    />
-                </View>
-            </ScrollView> */}
-            {/* <View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
-                <Ionicons
-                    name="time"
-                    size={26}
-                    color="black"
-                    style={{ marginRight: 8 }}
-                />
-                <Text className="text-xl text-black font-medium">New</Text>
-            </View> */}
+    
 
             <View className="flex-1 relative">
 				{/* Main content */}
@@ -118,6 +108,29 @@ const PswSessionsTab = () => {
 						data={newRequests}
 						keyExtractor={(item) => item.id}
 						renderItem={renderItem}
+						// AppliedSessions header usage notes:
+						// - AppliedSessions renders a horizontal avatar strip with the Amicare icon first,
+						//   followed by the sessions passed via its `sessions` prop.
+						// - Inside AppliedSessions:
+						//   • Pending-like items (status 'pending' or 'newRequest') are dimmed (opacity 0.5) and never show the unread dot.
+						//   • Ongoing items (status 'confirmed' or 'inProgress') can show the unread red dot.
+						//   • Border color defaults to gray; when `isPending` is set, it uses #1A8BF8.
+						//
+						// To ensure ongoing sessions are also included in this top horizontal list,
+						// pass a merged array that contains both applied/pending and ongoing items.
+						//
+						//   2) If useSessionsTab later returns an explicit `ongoing` array:
+						//      <AppliedSessions sessions={[...pending, ...ongoing]} onSessionPress={handleSessionPress} />
+						// AppliedSessions will handle unread-dot visibility and dimming per session.status automatically.
+						ListHeaderComponent={
+							<View style={{ marginTop: 12, marginBottom: 8 }}>
+								<AppliedSessions
+									sessions={[...pending, ...ongoingForHeader]}
+									onSessionPress={handleSessionPress}
+									title="Applied"
+								/>
+							</View>
+						}
 						contentContainerStyle={{
 							paddingBottom: Platform.OS === 'ios' ? 83 : 64,
 							paddingHorizontal: 20,

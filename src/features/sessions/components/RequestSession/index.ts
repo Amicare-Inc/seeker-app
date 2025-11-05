@@ -5,3 +5,4 @@ export { default as SessionLengthSelector } from './SessionLengthSelector';
 export { default as BillingCard } from './BillingCard';
 export { default as HelpOptionsDropdown } from './HelpOptionsDropdown';
 export { default as SessionChecklist } from './SessionChecklist'; 
+export { default as SeekerRequestCard } from './SeekerRequestCard';

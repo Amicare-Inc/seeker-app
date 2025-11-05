@@ -106,8 +106,8 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
                             dispatch(updateUserFields(freshUser));
                         }
                     }).catch(() => {});
-                    // Navigate back to PSW home after expressing interest
-                    router.replace('/(dashboard)/(psw)/psw-home');
+                    // Navigate back to PSW sessions after expressing interest
+                    router.replace('/(dashboard)/(psw)/psw-sessions');
                 } }]
             );
         } catch (error: any) {

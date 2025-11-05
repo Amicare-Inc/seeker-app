@@ -60,8 +60,8 @@ const SessionCompleted = () => {
 			<TouchableOpacity
 				onPress={() => {
 					clearCompletedSession();
-					if (currentUser?.isPsw) {
-						router.replace('/(dashboard)/(psw)/psw-home');
+                    if (currentUser?.isPsw) {
+                        router.replace('/(dashboard)/(psw)/psw-sessions');
 					} else {
 						router.replace('/(dashboard)/(seeker)/seeker-home');
 					}
@@ -108,8 +108,8 @@ const SessionCompleted = () => {
 				<TouchableOpacity
 					onPress={() => {
 						clearCompletedSession();
-						if (currentUser?.isPsw) {
-							router.replace('/(dashboard)/(psw)/psw-home');
+                        if (currentUser?.isPsw) {
+                            router.replace('/(dashboard)/(psw)/psw-sessions');
 						} else {
 							router.replace('/(dashboard)/(seeker)/seeker-home');
 						}
@@ -181,8 +181,8 @@ const SessionCompleted = () => {
 
 	const goToDashboard = () => {
 		clearCompletedSession(); // Clean up context
-		if (currentUser.isPsw) {
-			router.replace('/(dashboard)/(psw)/psw-home');
+        if (currentUser.isPsw) {
+            router.replace('/(dashboard)/(psw)/psw-sessions');
 		} else {
 			router.replace('/(dashboard)/(seeker)/seeker-home');
 		}

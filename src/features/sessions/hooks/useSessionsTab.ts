@@ -33,8 +33,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 					   (session.status === 'interested' && session.receiverId === userId);
 			}
 			// For PSWs: show ALL newRequest sessions, regardless of receiverId
-			console.log(session.receiverId);
-			
+		
 			return session.status === 'newRequest';
 		}), [newRequestSessions, userId, role]
 	);

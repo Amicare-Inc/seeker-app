@@ -1,11 +1,12 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { SessionList, SessionBookedList, useLiveSession } from '@/features/sessions';
+import { useLiveSession } from '@/features/sessions';
 import { useSessionsTab } from '@/features/sessions';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
+import SeekerRequestCard from '@/features/sessions/components/RequestSession/SeekerRequestCard';
 
 const SeekerSessionsTab = () => {
 	const {
@@ -56,31 +57,27 @@ const SeekerSessionsTab = () => {
 				<Text className="text-xl text-black font-medium">My Sessions</Text>
 			</View>
 
-			<ScrollView 
-				contentContainerStyle={{
-					paddingBottom: LAYOUT_CONSTANTS.getContentBottomPadding(!!activeLiveSession)
-				}}
-			>
-				<View className="flex-1 px-3.5">
-					<SessionList
-						sessions={newRequests}
-						onSessionPress={onSessionPress}
-						isNewRequestsSection={true}
-					/>
-
-					<SessionList
-						sessions={pending}
-						onSessionPress={onSessionPress}
-						title="Pending"
-					/>
-
-					<SessionBookedList
-						sessions={confirmed}
-						onSessionPress={onSessionPress}
-						title="Booked"
-					/>
-				</View>
-			</ScrollView>
+			<View className="flex-1 px-3.5">
+				<FlatList
+					data={newRequests}
+					keyExtractor={(item) => item.id}
+					renderItem={({ item }) => (
+						<SeekerRequestCard
+							session={item}
+							onPress={() => onSessionPress(item)}
+						/>
+					)}
+					ItemSeparatorComponent={() => <View style={{ height: 0 }} />}
+					contentContainerStyle={{
+						paddingBottom: LAYOUT_CONSTANTS.getContentBottomPadding(!!activeLiveSession),
+					}}
+					ListEmptyComponent={(
+						<View className="items-center mt-6">
+							<Text className="text-gray-600">No new requests yet.</Text>
+						</View>
+					)}
+				/>
+			</View>
 		</SafeAreaView>
 	);
 };

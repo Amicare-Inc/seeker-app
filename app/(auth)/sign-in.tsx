@@ -68,7 +68,7 @@ const SignIn = () => {
 			if (userData.onboardingComplete === true) {
 				if (userData.isPsw === true) {
 					console.log('Navigating to PSW dashboard');
-					router.replace('/(dashboard)/(psw)/psw-home');
+                    router.replace('/(dashboard)/(psw)/psw-sessions');
 				} else {
 					console.log('Navigating to seeker dashboard');
 					router.replace('/(dashboard)/(seeker)/seeker-home');
