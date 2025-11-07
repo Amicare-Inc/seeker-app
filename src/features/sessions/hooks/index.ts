@@ -6,4 +6,5 @@ export * from './useLiveSessionSocket';
 export * from './useLiveSessionState';
 export * from './useSessionManagerRefactored';
 export * from './useSessionsTab';
-export * from './useSessionConfirmation'; 
+export * from './useSessionConfirmation';
+export * from './useSessionApplications'; 
