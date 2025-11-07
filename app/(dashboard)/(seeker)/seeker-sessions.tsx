@@ -1,12 +1,13 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, FlatList } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLiveSession } from '@/features/sessions';
 import { useSessionsTab } from '@/features/sessions';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
 import SeekerRequestCard from '@/features/sessions/components/RequestSession/SeekerRequestCard';
+import { router } from 'expo-router';
 
 const SeekerSessionsTab = () => {
 	const {
@@ -37,6 +38,12 @@ const SeekerSessionsTab = () => {
 
 	const onSessionPress = (session: EnrichedSession) => {
 		handleExpandSession(session);
+	};
+
+	const handleRequestSession = () => {
+		router.push({
+			pathname: '/request-sessions'
+		});
 	};
 
 	return (
@@ -78,6 +85,24 @@ const SeekerSessionsTab = () => {
 					)}
 				/>
 			</View>
+
+			<TouchableOpacity
+				onPress={handleRequestSession}
+				className="bg-brand-blue rounded-full p-4 absolute right-6"
+				style={{
+					bottom: LAYOUT_CONSTANTS.TAB_BAR_HEIGHT + (activeLiveSession ? 60 : 0) + 16,
+					shadowColor: "#000",
+					shadowOffset: {width: 0, height: 2},
+					shadowOpacity: 0.25,
+					shadowRadius: 3.84,
+					elevation: 5,
+				}}
+			>
+				<View className="flex-row items-center">
+					<Ionicons name="add" size={28} color="white" style={{ marginRight: 8 }}/>
+					<Text className="text-white text-lg font-medium mr-3">Request Session</Text>
+				</View>
+			</TouchableOpacity>
 		</SafeAreaView>
 	);
 };

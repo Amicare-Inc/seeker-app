@@ -8,7 +8,7 @@ import { UserCard, UserCardExpanded } from '@/features/userDirectory';
 import { User } from '@/types/User';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { AuthApi } from '@/features/auth/api/authApi';
 import { updateUserFields } from '@/redux/userSlice';
 import { useLiveSession } from '@/features/sessions';
@@ -204,9 +204,9 @@ const SeekerHomeTab = () => {
 				  <Ionicons name="information-circle-outline" size={20} color="white" style={{ marginLeft: 8 }} />
 				</TouchableOpacity>
 			  </View>
-			  <Text className="text-white text-sm opacity-90 mb-2">As Amicare is in limited beta, this may take up to 5 business days. During this time, booking and messaging are unavailable. Our support team will reach out by phone or email to complete your pre-approval. Booking and messaging are unavailable until you’re approved.
+			  <Text className="text-white text-sm opacity-90 mb-2">As Amicare is in limited beta, this may take up to 5 business days. During this time, booking and messaging are unavailable. Our support team will reach out by phone or email to complete your pre-approval. Booking and messaging are unavailable until you're approved.
 			  </Text>
-			  <Text className="text-white text-sm opacity-90 font-medium">Need help? Visit “My Profile” {">"} "Help”</Text>
+			  <Text className="text-white text-sm opacity-90 font-medium">Need help? Visit "My Profile" {">"} "Help"</Text>
 			</View>
 		  </View>
 		</>
