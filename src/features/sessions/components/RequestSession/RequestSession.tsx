@@ -280,6 +280,7 @@ const RequestSession = () => {
 			setIsSubmitting(true);
 			const sessionData = {
 				note: helpText,
+				status: 'newRequest',
 				startTime: startDate.toISOString(),
 				endTime: endDate.toISOString(),
 				

@@ -51,7 +51,7 @@ export const getNewRequestsTab= async (): Promise<EnrichedSession[]> => {
 export const requestSession = async (session: SessionDTO): Promise<void> => {
 	try {
 		const headers = await getAuthHeaders();
-		const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions`, {
+		const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/new-request`, {
 			method: 'POST',
 			headers,
 			body: JSON.stringify(session)

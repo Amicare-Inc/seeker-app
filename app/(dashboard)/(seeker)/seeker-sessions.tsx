@@ -39,7 +39,7 @@ const SeekerSessionsTab = () => {
 	const onSessionPress = (session: EnrichedSession) => {
 		handleExpandSession(session);
 	};
-
+	console.log('newRequests', newRequests);
 	const handleRequestSession = () => {
 		router.push({
 			pathname: '/request-sessions'

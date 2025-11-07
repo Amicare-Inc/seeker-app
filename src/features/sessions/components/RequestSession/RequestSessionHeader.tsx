@@ -18,17 +18,10 @@ const RequestSessionHeader: React.FC<RequestSessionHeaderProps> = ({
 			<TouchableOpacity onPress={onBack} className="mr-2">
 				<Ionicons name="chevron-back" size={24} color="#000" />
 			</TouchableOpacity>
-			<Image
-				source={
-					photoUrl
-						? { uri: photoUrl }
-						: require('@/assets/default-profile.png')
-				}
-				className="w-10 h-10 rounded-lg mr-3"
-			/>
+	
 			<View className="flex-1">
 				<Text className="text-lg font-bold">Request Session</Text>
-				<Text className="text-xs text-gray-500">with {firstName}</Text>
+			
 			</View>
 		</View>
 	);
