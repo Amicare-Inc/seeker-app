@@ -13,12 +13,14 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { requestSession, acceptSession } from '@/features/sessions/api/sessionApi';
 
+import { useApplyToSession } from '@/features/sessions/api/queries';
+
 const SessionApplication = () => {
 const { otherUserId, sessionData } = useLocalSearchParams();
 const currentUser = useSelector((state: RootState) => state.user.userData);
 const sessionInfo = sessionData ? JSON.parse(sessionData as string) : null;
 const [isSubmitting, setIsSubmitting] = useState(false);
-
+const applyToSessionMutation = useApplyToSession();
 const handleBack = () => {
 router.back();
 };
@@ -30,23 +32,28 @@ return;
 }
 
 try {
-setIsSubmitting(true);
+ setIsSubmitting(true);
 
-if (sessionInfo.sessionId) {
-await acceptSession(sessionInfo.sessionId);
-} else {
-await requestSession(sessionInfo.sessionData);
-}
+ if (sessionInfo.sessionId) {
+ // Apply to an existing session using mutation
+ await applyToSessionMutation.mutateAsync({
+   sessionId: sessionInfo.sessionId as string,
+   data: {},
+ });
+ } else {
+ // Create a new session request
+ await requestSession(sessionInfo.sessionData);
+ }
 
-if (sessionInfo.sessionId) {
-if (currentUser?.isPsw) {
-router.replace('/(psw)/psw-sessions');
-} else {
-router.replace('/(seeker)/seeker-home');
-}
-} else {
-router.push({ pathname: '/sent-request', params: { otherUserId } });
-}
+ if (sessionInfo.sessionId) {
+ if (currentUser?.isPsw) {
+ router.replace('/(dashboard)/(psw)/psw-sessions');
+ } else {
+ router.replace('/(dashboard)/(seeker)/seeker-home');
+ }
+ } else {
+ router.push({ pathname: '/sent-request', params: { otherUserId } });
+ }
 } catch (error) {
 console.error('Error sending session request:', error);
 alert('An error occurred while sending your request.');
@@ -134,10 +141,7 @@ Back to Sessions
 
 <View className="mt-6 flex-row items-center">
 <Ionicons name="filter" size={16} color="#ccc" />
-<Text className="text-xs text-gray-400 ml-2">
-This is filter text. This is filter text This is filter text. this
-is filter text This is filter text. this is filter text
-</Text>
+
 </View>
 </View>
 

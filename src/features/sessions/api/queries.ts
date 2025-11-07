@@ -5,6 +5,7 @@ import {
   rejectSession,
   updateSession,
   requestSession,
+  applyToSession,
   bookSession,
   declineSession,
   cancelSession,
@@ -149,6 +150,19 @@ export function useUpdateSession() {
   });
 }
 
+export function useApplyToSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({sessionId, data}: {sessionId: string; data: Partial<Session>}) =>
+      applyToSession(sessionId, data),
+    onSuccess: (_, variables) => {
+      // Invalidate sessions list to refetch
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: sessionKeys.detail(variables.sessionId) });
+    },
+  })
+
+}
 // Request session mutation
 export function useRequestSession() {
   const queryClient = useQueryClient();

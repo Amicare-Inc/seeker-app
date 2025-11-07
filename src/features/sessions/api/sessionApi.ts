@@ -86,7 +86,25 @@ export const updateSession = async (sessionId: string, session: Partial<Session>
 	throw error;
   }
 }
-
+export const applyToSession = async (sessionId: string, session: Partial<Session>): Promise<Session> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/applicants`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(session)
+    });
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(errorData.toString() || `HTTP error! status: ${response.status}`);
+    }
+    const updatedSession: Session = await response.json();
+    return updatedSession;
+  } catch (error: any) {
+    console.error(`Error applying to session ${sessionId}:`, error);
+    throw error;
+  }
+}
 export const acceptSession = async (sessionId: string): Promise<Session> => {
   console.log('acceptSession called with:', sessionId);
   try {

@@ -29,7 +29,7 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		newRequestSessions.filter((session) => {
 			// For seekers: show newRequest sessions they receive + interested sessions from PSWs
 			if (role === 'seeker') {
-				return (session.status === 'newRequest' && session.receiverId === userId) ||
+				return (session.status === 'newRequest' && session.senderId === userId) ||
 					   (session.status === 'interested' && session.receiverId === userId);
 			}
 			// For PSWs: show ALL newRequest sessions, regardless of receiverId
