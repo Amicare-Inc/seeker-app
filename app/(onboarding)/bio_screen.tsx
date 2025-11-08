@@ -50,14 +50,14 @@ const BioScreen: React.FC = () => {
 			// Navigate based on flow
 			if (lookingForSelf === false && hasFamilyMemberData) {
 				// Family flow complete - go to dashboard
-                const nextRoute = userData?.isPsw
+				const nextRoute = userData?.isPsw
                     ? '/(dashboard)/(psw)/psw-sessions'
 					: '/(dashboard)/(seeker)/seeker-home';
 				console.log('Family flow complete, navigating to:', nextRoute);
 				router.push(nextRoute);
 			} else {
 				// Regular flow - go to dashboard
-                const nextRoute = userData?.isPsw
+				const nextRoute = userData?.isPsw
                     ? '/(dashboard)/(psw)/psw-sessions'
 					: '/(dashboard)/(seeker)/seeker-home';
 				console.log('Regular flow complete, navigating to:', nextRoute);

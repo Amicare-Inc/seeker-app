@@ -32,28 +32,28 @@ return;
 }
 
 try {
- setIsSubmitting(true);
+setIsSubmitting(true);
 
- if (sessionInfo.sessionId) {
+if (sessionInfo.sessionId) {
  // Apply to an existing session using mutation
  await applyToSessionMutation.mutateAsync({
    sessionId: sessionInfo.sessionId as string,
    data: {},
  });
- } else {
+} else {
  // Create a new session request
- await requestSession(sessionInfo.sessionData);
- }
+await requestSession(sessionInfo.sessionData);
+}
 
- if (sessionInfo.sessionId) {
- if (currentUser?.isPsw) {
+if (sessionInfo.sessionId) {
+if (currentUser?.isPsw) {
  router.replace('/(dashboard)/(psw)/psw-sessions');
- } else {
+} else {
  router.replace('/(dashboard)/(seeker)/seeker-home');
- }
- } else {
- router.push({ pathname: '/sent-request', params: { otherUserId } });
- }
+}
+} else {
+router.push({ pathname: '/sent-request', params: { otherUserId } });
+}
 } catch (error) {
 console.error('Error sending session request:', error);
 alert('An error occurred while sending your request.');
