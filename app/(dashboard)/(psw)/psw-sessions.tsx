@@ -71,8 +71,21 @@ const PswSessionsTab = () => {
 				isPsw: session.otherUser.isPsw
 			});
 		}
+
+        const shouldOpenMessages =
+			session.status === 'confirmed' || session.status === 'inProgress';
+
         dispatch(setActiveProfile(session.otherUser));
         setActiveEnrichedSession(session);
+
+        if (shouldOpenMessages) {
+            router.push({
+                pathname: '/(chat)/chatPage',
+                params: { sessionId: session.id },
+            });
+            return;
+        }
+
         router.push('/other-user-profile');
 
     };

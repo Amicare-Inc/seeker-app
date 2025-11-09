@@ -7,12 +7,15 @@ interface AmicareCircleProps {
 
 const AmicareCircle: React.FC<AmicareCircleProps> = ({ firstName }) => {
 	return (
-		<View className="flex items-center justify-center mb-0 ml-2">
+		<View className="items-center">
 			<Image
 				source={require('@/assets/icon.png')}
-				className="w-16 h-16 rounded-full border-2 border-blue-500"
+				className="w-[78px] h-[78px] rounded-full border-4"
+				style={{ borderColor: '#1A8BF8' }}
 			/>
-			<Text className="text-black mt-2">{firstName}</Text>
+			<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
+				{firstName}
+			</Text>
 		</View>
 	);
 };

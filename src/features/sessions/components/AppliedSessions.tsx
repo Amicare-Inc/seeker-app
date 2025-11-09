@@ -69,6 +69,8 @@ const AppliedSessions: React.FC<AppliedSessionsProps> = ({ sessions, onSessionPr
                       const displayInfo = getSessionDisplayInfo(item, currentUser);
                       const isPendingItem = item.status === 'pending' || item.status === 'newRequest';
                       const enableUnread = item.status === 'confirmed' || item.status === 'inProgress';
+                      const avatarBorder = isPendingItem ? '#D4D4D8' : borderColor;
+                      const labelColor = isPendingItem ? '#9CA3AF' : '#00000099';
 
                       return (
                           <TouchableOpacity
@@ -77,8 +79,8 @@ const AppliedSessions: React.FC<AppliedSessionsProps> = ({ sessions, onSessionPr
                               className="items-center mr-6"
                               style={{ opacity: isPendingItem ? 0.5 : 1 }}
                           >
-                              <AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={borderColor} sessionId={item.id} enableUnread={enableUnread} />
-                              <Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
+                              <AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={avatarBorder} sessionId={item.id} enableUnread={enableUnread} />
+                              <Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: labelColor }}>
                                   {displayInfo.primaryName.split(' ')[0]}
                               </Text>
                           </TouchableOpacity>
