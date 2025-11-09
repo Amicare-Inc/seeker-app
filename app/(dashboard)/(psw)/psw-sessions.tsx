@@ -68,12 +68,34 @@ const PswSessionsTab = () => {
 			console.log('🔍 Regular user card clicked:', {
 				userId: session.otherUser.id,
 				userName: `${session.otherUser.firstName} ${session.otherUser.lastName}`,
-				isPsw: session.otherUser.isPsw
+				isPsw: session.otherUser.isPsw,
+				sessionStatus: session.status
 			});
 		}
+        
         dispatch(setActiveProfile(session.otherUser));
         setActiveEnrichedSession(session);
-        router.push('/other-user-profile');
+        
+        // Check if this is a pending application (dimmed story circle)
+        if (session.status === 'pending') {
+            // Navigate to the application-sent page (grey expandable slider)
+            const sessionData = {
+                session: session,
+                otherUser: session.otherUser,
+                status: session.status,
+                sessionId: session.id
+            };
+            
+            router.push({
+                pathname: '/application-sent',
+                params: {
+                    sessionData: JSON.stringify(sessionData)
+                }
+            });
+        } else {
+            // For confirmed, inProgress, or newRequest sessions, go to regular profile
+            router.push('/other-user-profile');
+        }
 
     };
 	
