@@ -56,6 +56,8 @@ const PswDashboardLayout = () => {
 						name="psw-home"
 						options={{
 							href: null,
+							tabBarButton: () => null,
+							headerShown: false,
 						}}
 					/>
 					<Tabs.Screen
