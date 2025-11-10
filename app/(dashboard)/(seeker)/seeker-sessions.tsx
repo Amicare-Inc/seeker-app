@@ -130,6 +130,13 @@ const SeekerSessionsTab = () => {
 					)}
 
 				</View>
+				{!currentUser?.isPsw && (
+					<SessionBookedList
+						sessions={confirmed}
+						onSessionPress={onSessionPress}
+						title="Confirmed"
+					/>
+				)}
 			</ScrollView>
 			<TouchableOpacity
 				onPress={handleRequestSession}
@@ -143,19 +150,14 @@ const SeekerSessionsTab = () => {
 					elevation: 5,
 				}}
 			>
+				
 				<View className="flex-row items-center">
 					<Ionicons name="add" size={28} color="white" style={{ marginRight: 8 }}/>
 					<Text className="text-white text-lg font-medium mr-3">Request Session</Text>
 				</View>
 			</TouchableOpacity>
 
-			{!currentUser?.isPsw && (
-					<SessionBookedList
-						sessions={confirmed}
-						onSessionPress={onSessionPress}
-						title="Confirmed"
-					/>
-				)}
+			
 		</SafeAreaView>
 	);
 };
