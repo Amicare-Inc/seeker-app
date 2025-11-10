@@ -21,6 +21,8 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
         let isMounted = true;
         const fetchApplicants = async () => {
             try {
+
+                console.log('fetching applicants for session:', session.id);
                 setApplicationsLoading(true);
                 const headers = await getAuthHeaders();
                 const res = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${session.id}/candidates`, {
@@ -109,9 +111,9 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                             {applications
                                 .slice(0, 3)
                                 .map((applicant: any, index: number) => (
-                                    console.log('applicant', applicant),
+                                    // console.log('applicant', applicant),
                                     <Image
-                                        key={applicant.userId || applicant.pswId || index}
+                                        key={applicant.id || index}
                                         source={
                                             applicant.profilePhotoUrl
                                                 ? { uri: applicant.profilePhotoUrl}
@@ -174,10 +176,12 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                     ) : applications && applications.length > 0 ? (
                         <>
                             {applications.map((applicant: any, index: number) => (
+                                // console.log('applicant', applicant),
+                                // console.log('applicant.userId', applicant.id),
                                 <TouchableOpacity
-                                    key={applicant.userId || applicant.pswId || index}
+                                    key={applicant.id || index}
                                     onPress={() =>
-                                        onSelectPSW?.(applicant.userId || applicant.pswId, applicant)
+                                        onSelectPSW?.(applicant.id, applicant)
                                     }
                                     className={`flex-row items-center px-4 py-3 ${
                                         index < applications.length - 1 ? 'border-b border-gray-100' : ''

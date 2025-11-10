@@ -10,6 +10,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import {
 	useLiveSession,
 } from '@/features/sessions';
+import { SessionList, SessionBookedList } from '@/features/sessions';
 import { useSessionsTab } from '@/features/sessions';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { LAYOUT_CONSTANTS } from '@/shared/constants/layout';
@@ -36,6 +37,9 @@ const SeekerSessionsTab = () => {
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 
 	// Debug logging
+	console.log('pending', pending.map((session) => session.id));
+	console.log('newRequests', newRequests.map((session) => session.id));
+	console.log('confirmed', confirmed.map((session) => session.id));
 	console.log('🔍 [Sessions Debug]', {
 		newRequestsCount: newRequests.length,
 		pendingCount: pending.length,
@@ -62,17 +66,20 @@ const SeekerSessionsTab = () => {
 	const onSessionPress = (session: EnrichedSession) => {
 		handleExpandSession(session);
 	};
-	console.log('newRequests', newRequests);
+	// console.log('newRequests', newRequests);
 	const handleRequestSession = () => {
 		router.push({
 			pathname: '/request-sessions'
 		});
 	};
 	const handleSelectPSW = async (pswId: string, pswData: any, session: EnrichedSession) => {
-		// Set selected applicant as active profile and current session context, then navigate
-		dispatch(setActiveProfile({ ...pswData, id: pswId } as any));
+		
+		const selectedId = pswId; // explicitly use applicant.id passed from SeekerRequestCard
+		console.log('selectedId', selectedId);
+		dispatch(setActiveProfile({ ...pswData, id: selectedId } as any));
+		
 		setActiveEnrichedSession(session);
-		router.push('/other-user-profile');
+		router.push({ pathname: '/other-user-profile', params: { selectedId } });
 	};
 
 	return (
@@ -106,6 +113,8 @@ const SeekerSessionsTab = () => {
 				<View className="flex-1 px-3.5">
 					{newRequests.length > 0 ? (
 						newRequests.map((session) => (
+
+	
 							<SeekerRequestCard
 								key={session.id}
 								session={session}
@@ -139,6 +148,14 @@ const SeekerSessionsTab = () => {
 					<Text className="text-white text-lg font-medium mr-3">Request Session</Text>
 				</View>
 			</TouchableOpacity>
+
+			{!currentUser?.isPsw && (
+					<SessionBookedList
+						sessions={confirmed}
+						onSessionPress={onSessionPress}
+						title="Confirmed"
+					/>
+				)}
 		</SafeAreaView>
 	);
 };
