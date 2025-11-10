@@ -68,25 +68,42 @@ const PswSessionsTab = () => {
 			console.log('🔍 Regular user card clicked:', {
 				userId: session.otherUser.id,
 				userName: `${session.otherUser.firstName} ${session.otherUser.lastName}`,
-				isPsw: session.otherUser.isPsw
+				isPsw: session.otherUser.isPsw,
+				sessionStatus: session.status
 			});
 		}
-
+        
         const shouldOpenMessages =
 			session.status === 'confirmed' || session.status === 'inProgress';
 
         dispatch(setActiveProfile(session.otherUser));
         setActiveEnrichedSession(session);
-
-        if (shouldOpenMessages) {
+        
+        // Check if this is a pending application (dimmed story circle)
+        if (session.status === 'pending') {
+            // Navigate to the application-sent page (grey expandable slider)
+            const sessionData = {
+                session: session,
+                otherUser: session.otherUser,
+                status: session.status,
+                sessionId: session.id
+            };
+            
+            router.push({
+                pathname: '/application-sent',
+                params: {
+                    sessionData: JSON.stringify(sessionData)
+                }
+            });
+        } else if (shouldOpenMessages) {
             router.push({
                 pathname: '/(chat)/chatPage',
                 params: { sessionId: session.id },
             });
-            return;
+        } else {
+            // For other statuses (newRequest, etc.), go to regular profile
+            router.push('/other-user-profile');
         }
-
-        router.push('/other-user-profile');
 
     };
 	

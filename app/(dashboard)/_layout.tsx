@@ -22,6 +22,10 @@ const OnboardingLayout = () => {
 				name="session-application"
 				options={{ headerShown: false }}
 			/>
+			<Stack.Screen
+				name="application-sent"
+				options={{ headerShown: false }}
+			/>
 		</Stack>
 	);
 };
