@@ -150,7 +150,13 @@ const SeekerSessionsTab = () => {
 					elevation: 5,
 				}}
 			>
-				
+				{/* {!currentUser?.isPsw && (
+					<SessionBookedList
+						sessions={confirmed}
+						onSessionPress={onSessionPress}
+						title="Confirmed"
+					/>
+				)} */}
 				<View className="flex-row items-center">
 					<Ionicons name="add" size={28} color="white" style={{ marginRight: 8 }}/>
 					<Text className="text-white text-lg font-medium mr-3">Request Session</Text>

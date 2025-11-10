@@ -14,7 +14,6 @@ const SeekerDashboardLayout = () => {
 		<SafeAreaProvider>
 			<View style={{ flex: 1 }}>
 			<Tabs
-					initialRouteName="seeker-sessions"
 					screenOptions={({ route }) => ({
 						tabBarShowLabel: true,
 						tabBarActiveTintColor: '#000',
@@ -58,9 +57,7 @@ const SeekerDashboardLayout = () => {
 					<Tabs.Screen
 						name="seeker-home"
 						options={{
-							// Hide Home from the tab bar and deep links
-							href: null,
-							tabBarButton: () => null,
+							title: 'Home',
 							headerShown: false,
 						}}
 					/>
