@@ -71,6 +71,8 @@ const PswSessionsTab = () => {
 				isPsw: session.otherUser.isPsw
 			});
 		}
+		
+		
 
         const shouldOpenMessages =
 			session.status === 'confirmed' || session.status === 'inProgress';
@@ -88,6 +90,11 @@ const PswSessionsTab = () => {
 
         router.push('/other-user-profile');
 
+    };
+	
+    // Trigger expand interaction for booked/confirmed sessions list
+    const onSessionPress = (session: EnrichedSession) => {
+        handleExpandSession(session);
     };
 	
     const renderItem = ({item}: {item: EnrichedSession}) => (
@@ -167,6 +174,13 @@ const PswSessionsTab = () => {
 							bottom: 0,
 							zIndex: 10,
 						}}
+					/>
+				)}
+				{!currentUser?.isPsw && (
+					<SessionBookedList
+						sessions={confirmed}
+						onSessionPress={onSessionPress}
+						title="Confirmed"
 					/>
 				)}
 			</View>

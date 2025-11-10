@@ -3,20 +3,29 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { ProfileScreen, PendingSessionSlider } from '@/features/profile';
 import { User } from '@/types/User';
-import { SessionCard, InterestedCard } from '@/features/sessions';
+import { InterestedCard } from '@/features/sessions';
+import SessionCardBook from '@/features/sessions/components/OngoingSession/SessionCardBook';
+import SessionCard from '@/features/sessions/components/OngoingSession/SessionCard';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
+import { useLocalSearchParams } from 'expo-router';
 
 const OtherUserProfileScreen = () => {
 	const activeProfileMoreInfo = useSelector(
 		(state: RootState) => state.activeProfile.activeUser,
 	);
+	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const { activeEnrichedSession: activeEnrichedProfile } = useActiveSession();
+	const params = useLocalSearchParams<{ selectedId?: string }>();
+	const selectedIdParam = params?.selectedId as string | undefined;
+	console.log('selectedIdParam', selectedIdParam);
 	// Fix: Prioritize actively selected user over session user to prevent stuck profiles
 	const activeProfile =
 		activeProfileMoreInfo || activeEnrichedProfile?.otherUser || null;
 
 	// Create a display user for family member cases
 	const getDisplayUser = (user: User): User => {
+
+		console.log('user id', user.isPsw)
 		// Check if this is a family member card (transformed by useHomeTab)
 		if (user.isFamilyMemberCard && user.familyMemberInfo) {
 			// Use the specific family member that was clicked
@@ -26,7 +35,7 @@ const OtherUserProfileScreen = () => {
 			const availabilitySource = isFamily 
 				? familyMember.carePreferences?.availability // Family member's availability
 				: user.carePreferences?.availability; // Core user's availability
-			
+			console.log('id', user.id);
 			return {
 				...user, // Keep core user data for billing/communication
 				id: user.id, // Keep core user's ID
@@ -106,6 +115,8 @@ const OtherUserProfileScreen = () => {
 	if (displayUser && activeProfile) {
 		const isFamily = activeProfile.lookingForSelf === false;
 		console.log('PSW viewing profile - DETAILED DEBUG:', {
+
+			displayUserId: displayUser.id,
 			displayUserName: `${displayUser.firstName} ${displayUser.lastName}`,
 			originalUserName: `${activeProfile.firstName} ${activeProfile.lastName}`,
 			lookingForSelf: activeProfile.lookingForSelf,
@@ -130,9 +141,8 @@ const OtherUserProfileScreen = () => {
 			}
 		});
 	}
-	console.log('activeEnrichedProfile', activeEnrichedProfile);
-	console.log('status', activeEnrichedProfile?.status);
-
+	
+	console.log('displayUser id', activeProfile?.id);
 	return (
 		<>
 			{displayUser && (
@@ -144,7 +154,16 @@ const OtherUserProfileScreen = () => {
 			)}
 			{activeEnrichedProfile &&
 				activeEnrichedProfile.status === 'newRequest' && (
-					<SessionCard {...activeEnrichedProfile} />
+					currentUser?.isPsw ? (
+						<SessionCard
+							{...activeEnrichedProfile}
+						/>
+					) : (
+						<SessionCardBook
+							{...activeEnrichedProfile}
+							candidateUserId={selectedIdParam ?? ''}
+						/>
+					)
 				)}
 			{activeEnrichedProfile &&
 				activeEnrichedProfile.status === 'interested' && (

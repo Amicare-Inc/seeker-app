@@ -165,6 +165,44 @@ export const bookSession = async (sessionId: string, currentUserId: string): Pro
     throw error;
   }
 };
+export const bookCandidateSession = async (sessionId: string, currentUserId: string,candidateUserId: string): Promise<Session> => {
+  try {
+    console.log('bookCandidateSession called with:', sessionId, currentUserId, candidateUserId);
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/book-candidate`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ userId: currentUserId,candidateUserId: candidateUserId, sessionId: sessionId }),
+    });
+    
+    if (!response.ok) {
+      // Handle non-JSON error bodies gracefully
+      const errorText = await response.text().catch(() => '');
+      try {
+        const errorData = JSON.parse(errorText);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      } catch {
+        throw new Error(errorText || `HTTP error! status: ${response.status}`);
+      }
+    }
+
+    // Some backends may return plain text like "Session booked" instead of JSON
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const updatedSession: Session = await response.json();
+      return updatedSession;
+    } else {
+      // Read and ignore text body; data isn't used by caller (we invalidate queries)
+      await response.text().catch(() => {});
+      // Return a dummy object to satisfy type, caller does not use this value directly
+      return {} as Session;
+    }
+  } catch (error: any) {
+    console.error(`Error booking session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
 
 export const declineSession = async (sessionId: string): Promise<Session> => {
   try {

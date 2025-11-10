@@ -11,7 +11,8 @@ import {
   cancelSession,
   getMessages,
   sendMessage,
-  getNewRequestsTab
+  getNewRequestsTab,
+  bookCandidateSession
 } from '@/features/sessions/api/sessionApi';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Session } from '@/types/Sessions';
@@ -104,6 +105,17 @@ export function useBookSession() {
       bookSession(sessionId, currentUserId),
     onSuccess: () => {
       // Invalidate sessions list to refetch
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    },
+  });
+}
+
+export function useBookCandidateSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sessionId, currentUserId, candidateUserId }: { sessionId: string; currentUserId: string; candidateUserId: string }) =>
+      bookCandidateSession(sessionId, currentUserId, candidateUserId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
     },
   });
