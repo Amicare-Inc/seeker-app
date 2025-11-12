@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchExploreUsers, fetchExploreUsersWithDistance } from '@/features/userDirectory';
+import type { MapUser } from '@/types/MapUser';
 // Query keys
 export const userDirectoryKeys = {
   all: ['userDirectory'] as const,
@@ -18,6 +19,7 @@ export function useAvailableUsers(userType: 'psw' | 'seeker', currentUserId: str
 }
 
 // Fetch available users with distance
+/*
 export function useAvailableUsersWithDistance(userType: 'psw' | 'seeker', currentUserId: string | undefined) {
   return useQuery({
     queryKey: userDirectoryKeys.withDistance(userType, currentUserId || ''),
@@ -25,3 +27,15 @@ export function useAvailableUsersWithDistance(userType: 'psw' | 'seeker', curren
     enabled: !!currentUserId,
   });
 } 
+*/
+
+export function useAvailableUsersWithDistance(
+  userType: 'psw' | 'seeker',
+  currentUserId?: string
+) {
+  return useQuery<MapUser[]>({
+    queryKey: ['userDirectory', 'withDistance', userType, currentUserId],
+    queryFn: () => fetchExploreUsersWithDistance(userType, currentUserId!),
+    enabled: !!currentUserId,
+  });
+}
