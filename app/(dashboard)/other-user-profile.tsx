@@ -8,7 +8,9 @@ import SessionCardBook from '@/features/sessions/components/OngoingSession/Sessi
 import SessionCard from '@/features/sessions/components/OngoingSession/SessionCard';
 import SessionCardPending from '@/features/sessions/components/RequestSession/SessionCardPending';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import PendingSessionSliderPsw from '@/features/profile/components/PendingSessionSliderPsw';
+
 
 const OtherUserProfileScreen = () => {
 	const activeProfileMoreInfo = useSelector(
@@ -144,6 +146,17 @@ const OtherUserProfileScreen = () => {
 	}
 	
 	console.log('displayUser id', activeProfile?.id);
+	console.log('isPsw', currentUser?.isPsw);
+	const handleRequestChange = () => {
+		if (!activeEnrichedProfile?.otherUser) return;
+		router.push({
+			pathname: '/request-sessions',
+			params: {
+				otherUserId: activeEnrichedProfile.otherUser.id,
+				sessionObj: JSON.stringify(activeEnrichedProfile),
+			},
+		});
+	};
 	return (
 		<>
 			{displayUser && (
@@ -170,12 +183,24 @@ const OtherUserProfileScreen = () => {
 				activeEnrichedProfile.status === 'interested' && (
 					<InterestedCard session={activeEnrichedProfile} />
 				)}
-				{activeEnrichedProfile &&
-					activeEnrichedProfile.status === 'pending' && (
-						<PendingSessionSlider
-							session={activeEnrichedProfile}
-						/>
-					)}
+		
+			{(activeEnrichedProfile && activeEnrichedProfile.status === 'applied' && !currentUser?.isPsw) && (
+				<SessionCardBook
+				{...activeEnrichedProfile}
+				candidateUserId={selectedIdParam ?? ''}
+				/>
+			)}
+			{(activeEnrichedProfile && activeEnrichedProfile.status === 'pending' && currentUser?.isPsw) && (
+				<PendingSessionSliderPsw
+					session={activeEnrichedProfile}
+					onRequestChange={handleRequestChange}
+				/>
+			)}
+			{(activeEnrichedProfile && activeEnrichedProfile.status === 'pending' && !currentUser?.isPsw) && (
+				<PendingSessionSlider
+					session={activeEnrichedProfile}
+				/>
+			)}
 		</>
 	);
 };

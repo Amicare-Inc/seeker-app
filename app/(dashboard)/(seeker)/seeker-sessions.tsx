@@ -38,10 +38,18 @@ const SeekerSessionsTab = () => {
 		newRequests,
 		pending,
 		confirmed,
+		applied,
 		loading: sessionsLoading,
 		error: sessionsError,
 		handleExpandSession,
 	} = useSessionsTab('seeker');
+
+	const openSessions: EnrichedSession[] = React.useMemo(() => {
+		const byId = new Map<string, EnrichedSession>();
+		[...(applied || []), ...(newRequests || [])].forEach((s) => byId.set(s.id, s));
+		return Array.from(byId.values());
+	}, [applied, newRequests]);
+
 	const activeLiveSession = useLiveSession();
 	const dispatch = useDispatch();
 	const { setActiveEnrichedSession } = useActiveSession();
@@ -239,7 +247,7 @@ const SeekerSessionsTab = () => {
 			)}
 			{!showMap && (
 				<>
-				
+					
 					
 					<ScrollView
 						contentContainerStyle={{
@@ -249,12 +257,14 @@ const SeekerSessionsTab = () => {
 								),
 						}}
 					>
+					<View style={{ marginTop: 12, marginBottom: 8 }}>
 						<PendingSessions
 							sessions={pending}
 							onSessionPress={handleSessionPress}
-							title="Pending"
+							title="Applied"
 						/>
-						<View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px] mt-[10px]">
+					</View>
+					<View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px] mt-[10px]">
 						<Ionicons
 							name="time"
 							size={26}
@@ -267,8 +277,8 @@ const SeekerSessionsTab = () => {
 						</Text>
 					</View>
 						<View className="flex-1 px-3.5">
-							{newRequests.length > 0 ? (
-								newRequests.map((session) => (
+							{openSessions.length > 0 ? (
+								openSessions.map((session) => (
 									<SeekerRequestCard
 										key={session.id}
 										session={session}

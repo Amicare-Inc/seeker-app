@@ -112,7 +112,10 @@ const RequestSession = () => {
 
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	// PSWs should only be able to view sessions, not edit them
-	const isReadOnly = currentUser?.isPsw && !!existingSession;
+	const isReadOnly = !!(currentUser?.isPsw && !!existingSession);
+	// Allow PSWs to change time when routed here with an existing session (Change/Cancel flow)
+	const canEditTime = !!existingSession && !!currentUser?.isPsw;
+	const showRequestChangeButton = !!(existingSession && currentUser?.isPsw);
 	const pswRate = currentUser?.isPsw
 		? currentUser.rate || 20
 		: targetUserObj?.isPsw
@@ -405,13 +408,20 @@ const RequestSession = () => {
 							<CareRecipientSelector familyMembers={currentUser.familyMembers} selectedRecipientId={selectedCareRecipient} onRecipientSelect={handleCareRecipientSelect} />
 						)}
 						<LocationDisplay location={getLocationToDisplay()} label="Location" />
-						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={isReadOnly} />
-						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={isReadOnly} />
+						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={isReadOnly && !canEditTime} />
+						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={isReadOnly && !canEditTime} />
 					{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}
 					<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={isReadOnly} />
 					{otherUserId && otherUserId !== currentUser?.id && <BillingCard basePrice={displayBasePrice} taxes={displayTaxes} serviceFee={displayServiceFee} total={displayTotal} hourlyRate={effectiveRate} />}
 					</View>
-					{!isReadOnly && <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
+					{(!isReadOnly || canEditTime) && <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
+					{showRequestChangeButton && (
+			<View className="bg-transparent">
+				<TouchableOpacity onPress={() => {}} className="bg-white rounded-xl p-4 mx-4 items-center flex-row justify-center mb-4 border border-[#E5E5EA]">
+					<Text className="text-black text-lg font-medium">Request Change</Text>
+				</TouchableOpacity>
+			</View>
+			)}
 				</ScrollView>
 			</KeyboardAvoidingView>
 			{!isReadOnly && (
@@ -429,6 +439,7 @@ const RequestSession = () => {
 				</TouchableOpacity>
 			</View>
 			)}
+		
 			<PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
 			{isSubmitting && (
 				<View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">

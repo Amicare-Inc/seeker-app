@@ -35,7 +35,8 @@ export interface Session {
 		| 'completed'
 		| 'failed'
 		| 'interested' // PSW expressing interest in seeker
-		| 'requested'; // Interested session that was converted to request
+		| 'requested'
+		| 'applied'; // Interested session that was converted to request
 	createdAt?: string;
 	updatedAt?: string;
 	lastMessageAt?: string;

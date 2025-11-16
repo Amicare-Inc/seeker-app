@@ -72,7 +72,7 @@ const SessionList: React.FC<SessionListProps> = ({
 				onPress={() => onSessionPress(item)}
 				className="items-center mr-6"
 			>
-                                    <AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={borderColor} sessionId={item.id} />
+            <AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={borderColor} sessionId={item.id} />
 				<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
 					{displayInfo.primaryName.split(' ')[0]}
 				</Text>

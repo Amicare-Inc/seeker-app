@@ -70,7 +70,7 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
       Alert.alert(
         'Success',
         'Session booked successfully!',
-        [{ text: 'OK', onPress: () => router.back() }]
+        [{ text: 'OK', onPress: () => router.replace('/(dashboard)/(psw)/psw-sessions')}]
       );
     } catch (error) {
       console.error('Error booking session:', error);

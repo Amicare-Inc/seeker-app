@@ -23,6 +23,7 @@ const PswSessionsTab = () => {
 		confirmed,
 		loading,
 		error,
+		applied,
 		handleExpandSession,
 	} = useSessionsTab('psw');
 
@@ -36,6 +37,7 @@ const PswSessionsTab = () => {
 	// Hooks must be called before any early returns
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const isVerified = currentUser?.idManualVerified ?? false;
+	const { setActiveEnrichedSession } = useActiveSession(); // keep hook order consistent
 
     if (loading) {
         return (
@@ -52,7 +54,6 @@ const PswSessionsTab = () => {
             </SafeAreaView>
         );
     }
-	const { setActiveEnrichedSession } = useActiveSession(); // if inside same component
     const handleSessionPress = (session: EnrichedSession) => {
         if (!isVerified) return; //prevent interaction when not verified
         if (!session.otherUser) return;
@@ -80,33 +81,14 @@ const PswSessionsTab = () => {
         setActiveEnrichedSession(session);
         
         // Check if this is a pending application (dimmed story circle)
-        if (session.status === 'pending') {
-            // Navigate to the application-sent page (grey expandable slider)
-            const sessionData = {
-                session: session,
-                otherUser: session.otherUser,
-                status: session.status,
-                sessionId: session.id
-            };
-            
-            router.push({
-                pathname: '/application-sent',
-                params: {
-                    sessionData: JSON.stringify(sessionData)
-                }
-            });
-        } else if (shouldOpenMessages) {
-            router.push({
+        if (shouldOpenMessages) {
+                  router.push({
                 pathname: '/(chat)/chatPage',
                 params: { sessionId: session.id },
             });
         } else {
-            // For other statuses (newRequest, etc.), go to regular profile
             router.push('/other-user-profile');
         }
-
-        router.push('/other-user-profile');
-
     };
 	
     // Trigger expand interaction for booked/confirmed sessions list
@@ -127,9 +109,6 @@ const PswSessionsTab = () => {
             className="flex-1"
             style={{ backgroundColor: '#F2F2F7' }}
         >
-
-    
-
             <View className="flex-1 relative">
 				{/* Main content */}
 				{ loading ? (
@@ -149,7 +128,7 @@ const PswSessionsTab = () => {
 						ListHeaderComponent={
 							<View style={{ marginTop: 12, marginBottom: 8 }}>
 								<AppliedSessions
-									sessions={[...pending, ...ongoingForHeader]}
+									sessions={[...pending, ...applied, ...ongoingForHeader]}
 									onSessionPress={handleSessionPress}
 									title="Applied"
 								/>

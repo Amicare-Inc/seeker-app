@@ -68,7 +68,7 @@ const AppliedSessions: React.FC<AppliedSessionsProps> = ({ sessions, onSessionPr
 
                       const displayInfo = getSessionDisplayInfo(item, currentUser);
                       const isPendingItem = item.status === 'pending' || item.status === 'newRequest';
-                      const enableUnread = item.status === 'confirmed' || item.status === 'inProgress';
+                      const enableUnread = item.status === 'confirmed' || item.status === 'inProgress' || item.status === 'pending';
                       const avatarBorder = isPendingItem ? '#D4D4D8' : borderColor;
                       const labelColor = isPendingItem ? '#9CA3AF' : '#00000099';
 
