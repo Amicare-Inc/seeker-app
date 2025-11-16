@@ -24,7 +24,7 @@ const SessionRequestSent = () => {
 		if (currentUser?.isPsw) {
             router.replace('/(dashboard)/(psw)/psw-sessions');
 		} else {
-			router.replace('/(seeker)/seeker-home');
+			router.replace('/(dashboard)/(seeker)/seeker-sessions');
 		}
 	};
 

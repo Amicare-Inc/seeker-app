@@ -71,7 +71,7 @@ const SignIn = () => {
                     router.replace('/(dashboard)/(psw)/psw-sessions');
 				} else {
 					console.log('Navigating to seeker dashboard');
-					router.replace('/(dashboard)/(seeker)/seeker-home');
+					router.replace('/(dashboard)/(seeker)/seeker-sessions');
 				}
 			} else {
 				console.log('Navigating to onboarding');

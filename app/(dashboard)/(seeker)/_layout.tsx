@@ -14,6 +14,7 @@ const SeekerDashboardLayout = () => {
 		<SafeAreaProvider>
 			<View style={{ flex: 1 }}>
 			<Tabs
+					initialRouteName="seeker-sessions"
 					screenOptions={({ route }) => ({
 						tabBarShowLabel: true,
 						tabBarActiveTintColor: '#000',
@@ -35,10 +36,8 @@ const SeekerDashboardLayout = () => {
 						tabBarIcon: ({ focused, color, size }) => {
 							let iconName: React.ComponentProps<
 								typeof Ionicons
-							>['name'] = 'home';
-							if (route.name === 'seeker-home') {
-								iconName = 'home';
-							} else if (route.name === 'seeker-sessions') {
+							>['name'] = 'time';
+							if (route.name === 'seeker-sessions') {
 								iconName = 'time';
 							} else if (route.name === 'seeker-profile') {
 								iconName = 'person';
@@ -54,13 +53,6 @@ const SeekerDashboardLayout = () => {
 						},
 					})}
 				>
-					<Tabs.Screen
-						name="seeker-home"
-						options={{
-							title: 'Home',
-							headerShown: false,
-						}}
-					/>
 					<Tabs.Screen
 						name="seeker-sessions"
 						options={{

@@ -63,7 +63,7 @@ const SessionCompleted = () => {
 					if (currentUser?.isPsw) {
                         router.replace('/(dashboard)/(psw)/psw-sessions');
 					} else {
-						router.replace('/(dashboard)/(seeker)/seeker-home');
+						router.replace('/(dashboard)/(seeker)/seeker-sessions');
 					}
 				}}
 				className="bg-blue-500 rounded-lg px-6 py-3 mt-4"
@@ -111,7 +111,7 @@ const SessionCompleted = () => {
 						if (currentUser?.isPsw) {
                             router.replace('/(dashboard)/(psw)/psw-sessions');
 						} else {
-							router.replace('/(dashboard)/(seeker)/seeker-home');
+							router.replace('/(dashboard)/(seeker)/seeker-sessions');
 						}
 					}}
 					className="bg-blue-500 rounded-lg px-6 py-3 mt-6"
@@ -184,7 +184,7 @@ const SessionCompleted = () => {
 		if (currentUser.isPsw) {
             router.replace('/(dashboard)/(psw)/psw-sessions');
 		} else {
-			router.replace('/(dashboard)/(seeker)/seeker-home');
+			router.replace('/(dashboard)/(seeker)/seeker-sessions');
 		}
 	};
 

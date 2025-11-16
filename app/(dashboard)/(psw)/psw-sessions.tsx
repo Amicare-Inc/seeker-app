@@ -73,8 +73,6 @@ const PswSessionsTab = () => {
 			});
 		}
 		        
-		
-
         const shouldOpenMessages =
 			session.status === 'confirmed' || session.status === 'inProgress';
 
@@ -147,20 +145,7 @@ const PswSessionsTab = () => {
 						data={newRequests}
 						keyExtractor={(item) => item.id}
 						renderItem={renderItem}
-						// AppliedSessions header usage notes:
-						// - AppliedSessions renders a horizontal avatar strip with the Amicare icon first,
-						//   followed by the sessions passed via its `sessions` prop.
-						// - Inside AppliedSessions:
-						//   • Pending-like items (status 'pending' or 'newRequest') are dimmed (opacity 0.5) and never show the unread dot.
-						//   • Ongoing items (status 'confirmed' or 'inProgress') can show the unread red dot.
-						//   • Border color defaults to gray; when `isPending` is set, it uses #1A8BF8.
-						//
-						// To ensure ongoing sessions are also included in this top horizontal list,
-						// pass a merged array that contains both applied/pending and ongoing items.
-						//
-						//   2) If useSessionsTab later returns an explicit `ongoing` array:
-						//      <AppliedSessions sessions={[...pending, ...ongoing]} onSessionPress={handleSessionPress} />
-						// AppliedSessions will handle unread-dot visibility and dimming per session.status automatically.
+						
 						ListHeaderComponent={
 							<View style={{ marginTop: 12, marginBottom: 8 }}>
 								<AppliedSessions

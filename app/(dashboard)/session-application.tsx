@@ -49,7 +49,7 @@ if (sessionInfo.sessionId) {
 if (currentUser?.isPsw) {
  router.replace('/(dashboard)/(psw)/psw-sessions');
 } else {
- router.replace('/(dashboard)/(seeker)/seeker-home');
+ router.replace('/(dashboard)/(seeker)/seeker-sessions');
 }
 } else {
 router.push({ pathname: '/sent-request', params: { otherUserId } });
@@ -64,9 +64,9 @@ setIsSubmitting(false);
 
 const handleBackToSessions = () => {
 if (currentUser?.isPsw) {
-router.replace('/(psw)/psw-sessions');
+router.replace('/(dashboard)/(psw)/psw-sessions');
 } else {
-router.replace('/(seeker)/seeker-home');
+router.replace('/(dashboard)/(seeker)/seeker-sessions');
 }
 };
 

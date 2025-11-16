@@ -117,7 +117,7 @@ const AddProfilePhoto: React.FC = () => {
 				// Navigate to appropriate dashboard
 				const nextRoute = userData?.isPsw
                     ? '/(dashboard)/(psw)/psw-sessions'
-					: '/(dashboard)/(seeker)/seeker-home';
+					: '/(dashboard)/(seeker)/seeker-sessions';
 				console.log('Profile complete, navigating to:', nextRoute);
 				router.push(nextRoute);
 			}

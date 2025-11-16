@@ -6,6 +6,7 @@ import { User } from '@/types/User';
 import { InterestedCard } from '@/features/sessions';
 import SessionCardBook from '@/features/sessions/components/OngoingSession/SessionCardBook';
 import SessionCard from '@/features/sessions/components/OngoingSession/SessionCard';
+import SessionCardPending from '@/features/sessions/components/RequestSession/SessionCardPending';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -169,6 +170,12 @@ const OtherUserProfileScreen = () => {
 				activeEnrichedProfile.status === 'interested' && (
 					<InterestedCard session={activeEnrichedProfile} />
 				)}
+				{activeEnrichedProfile &&
+					activeEnrichedProfile.status === 'pending' && (
+						<PendingSessionSlider
+							session={activeEnrichedProfile}
+						/>
+					)}
 		</>
 	);
 };
