@@ -25,7 +25,7 @@ const CareNeeds1: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
-	const isPSW = userData?.isPsw;
+	
 
 	const [lookingForSelf, setLookingForSelf] = useState<boolean | null>(
 		userData?.lookingForSelf || null,
@@ -47,9 +47,9 @@ const toggleCareType = (careType: string) => {
 		const updates: any = {};
 		
 		// Only set lookingForSelf for non-PSW users (seekers)
-		if (!isPSW && lookingForSelf !== null) {
-			updates.lookingForSelf = lookingForSelf;
-		}
+	
+		updates.lookingForSelf = lookingForSelf;
+	
 		
 		// Check if this is family care
 		const isFamily = lookingForSelf === false;
@@ -57,7 +57,7 @@ const toggleCareType = (careType: string) => {
 		console.log('🔍 CARE_NEEDS_1 DEBUG:', {
 			lookingForSelf,
 			isFamily,
-			isPSW,
+			// isPSW,
 			selectedCareTypes,
 			userData,
 			tempFamilyMember
@@ -110,7 +110,7 @@ const toggleCareType = (careType: string) => {
 					</View>
 
 					{/* Only show "A Loved One" vs "Myself" question for seekers (not PSWs) */}
-					{!isPSW && (
+				
 						<>
 							<Text className="text-lg text-grey-80 mb-[26px]">
 								Are you seeking home support for a loved one or yourself?
@@ -146,12 +146,10 @@ const toggleCareType = (careType: string) => {
 								/>
 							</View>
 						</>
-					)}
+					
 
 					<Text className="text-lg text-grey-80 mb-[26px]">
-						{isPSW
-							? 'What types of care do you provide?'
-							: 'What types of care are you interested in?'}
+					 'What types of care are you interested in?'
 					</Text>
 					<View className="flex-col mb-[10px]">
 					{(() => {

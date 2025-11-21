@@ -11,14 +11,14 @@ interface ProfileStatsProps {
  * Displays two lines:
  * 1) Type of care (provided/interested in)
  * 2) Tasks (assisting by / seeking support with)
- * Both are left-aligned, based on whether user.isPsw is true or false.
+ * Both are left-aligned.
  */
 const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
-	const isPsw = user.isPsw;
+	
 
 	// Titles based on role
-	const tasksTitle = isPsw ? 'Assisting with:' : 'Seeking support with:';
-	const availabilityTitle = isPsw ? 'Times I can assist:' : 'Times I need support:';
+	const tasksTitle = 'Seeking support with:';
+	const availabilityTitle = 'Times I need support:';
 
 	// Data extraction
 	const tasks = user.carePreferences?.tasks?.join(', ') || 'N/A';
@@ -35,7 +35,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
 	const availabilityText = availabilityStrings.join(' · ') || 'N/A';
 
 	// Care type title
-	const careTypeTitle = isPsw ? 'Experience with:' : 'Requiring help with:';
+	const careTypeTitle = 'Requiring help with:';
 	const careType = user.carePreferences?.careType?.join(', ') || 'N/A';
 
 	return (

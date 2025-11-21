@@ -13,7 +13,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 const CareNeeds1: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const userData = useSelector((state: RootState) => state.user.userData);
-	const isPSW = userData?.isPsw;
+
 
 	const [lookingForSelf, setLookingForSelf] = useState<boolean | null>(
 		userData?.lookingForSelf || null,
@@ -35,9 +35,9 @@ const CareNeeds1: React.FC = () => {
 		const updates: any = {};
 		
 		// Only set lookingForSelf for non-PSW users (seekers)
-		if (!isPSW && lookingForSelf !== null) {
-			updates.lookingForSelf = lookingForSelf;
-		}
+
+		updates.lookingForSelf = lookingForSelf;
+	
 		
 		if (selectedCareTypes.length > 0) {
 			updates.carePreferences = {
@@ -106,9 +106,7 @@ const CareNeeds1: React.FC = () => {
 						</>
 
 					<Text className="text-lg text-grey-80 mb-[36px]">
-						{isPSW
-							? 'What types of care do you provide?'
-							: 'What types of care are you interested in?'}
+						'What types of care are you interested in?'
 					</Text>
 					<View className="flex-wrap flex-row -mr-[10px] mb-[75px]">
 					{careTypeOptions.map((option) => (

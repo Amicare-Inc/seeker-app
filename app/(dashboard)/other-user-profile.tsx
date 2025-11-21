@@ -5,11 +5,8 @@ import { ProfileScreen, PendingSessionSlider } from '@/features/profile';
 import { User } from '@/types/User';
 import { InterestedCard } from '@/features/sessions';
 import SessionCardBook from '@/features/sessions/components/OngoingSession/SessionCardBook';
-import SessionCard from '@/features/sessions/components/OngoingSession/SessionCard';
-import SessionCardPending from '@/features/sessions/components/RequestSession/SessionCardPending';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { router, useLocalSearchParams } from 'expo-router';
-import PendingSessionSliderPsw from '@/features/profile/components/PendingSessionSliderPsw';
 
 
 const OtherUserProfileScreen = () => {
@@ -28,7 +25,7 @@ const OtherUserProfileScreen = () => {
 	// Create a display user for family member cases
 	const getDisplayUser = (user: User): User => {
 
-		console.log('user id', user.isPsw)
+		
 		// Check if this is a family member card (transformed by useHomeTab)
 		if (user.isFamilyMemberCard && user.familyMemberInfo) {
 			// Use the specific family member that was clicked
@@ -168,35 +165,24 @@ const OtherUserProfileScreen = () => {
 			)}
 			{activeEnrichedProfile &&
 				activeEnrichedProfile.status === 'newRequest' && (
-					currentUser?.isPsw ? (
-						<SessionCard
-							{...activeEnrichedProfile}
-						/>
-					) : (
-						<SessionCardBook
-							{...activeEnrichedProfile}
-							candidateUserId={selectedIdParam ?? ''}
-						/>
-					)
+					<SessionCardBook
+						{...activeEnrichedProfile}
+						candidateUserId={selectedIdParam ?? ''}
+					/>
 				)}
 			{activeEnrichedProfile &&
 				activeEnrichedProfile.status === 'interested' && (
 					<InterestedCard session={activeEnrichedProfile} />
 				)}
 		
-			{(activeEnrichedProfile && activeEnrichedProfile.status === 'applied' && !currentUser?.isPsw) && (
+			{(activeEnrichedProfile && activeEnrichedProfile.status === 'applied' ) && (
 				<SessionCardBook
 				{...activeEnrichedProfile}
 				candidateUserId={selectedIdParam ?? ''}
 				/>
 			)}
-			{(activeEnrichedProfile && activeEnrichedProfile.status === 'pending' && currentUser?.isPsw) && (
-				<PendingSessionSliderPsw
-					session={activeEnrichedProfile}
-					onRequestChange={handleRequestChange}
-				/>
-			)}
-			{(activeEnrichedProfile && activeEnrichedProfile.status === 'pending' && !currentUser?.isPsw) && (
+			
+			{(activeEnrichedProfile && activeEnrichedProfile.status === 'pending' ) && (
 				<PendingSessionSlider
 					session={activeEnrichedProfile}
 				/>

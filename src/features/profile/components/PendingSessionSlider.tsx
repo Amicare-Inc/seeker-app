@@ -61,15 +61,11 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 
 	// Determine the pending message based on user type
 	const getPendingMessage = () => {
-		if (currentUser?.isPsw) {
-			// PSW sees message about core seeker
-			const contactName = session.otherUser?.firstName || 'Client';
-			return `Awaiting final booking from ${contactName}. Feel free to message them if you need any changes`;
-		} else {
-			// Core seeker sees message about PSW
-			const pswName = session.otherUser?.firstName || 'PSW';
-			return `Awaiting final booking from ${pswName}. Feel free to message them if you need any changes`;
-		}
+
+		// Core seeker sees message about PSW
+		const pswName = session.otherUser?.firstName || 'PSW';
+		return `Awaiting final booking from ${pswName}. Feel free to message them if you need any changes`;
+	
 	};
 
 	return (
@@ -148,12 +144,7 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 						<Text className="text-white text-sm font-medium">
 							Total: ${totalCost}
 						</Text>
-						{/* Show distance for PSWs */}
-						{currentUser?.isPsw && session.distanceInfo && (
-							<Text className="text-white text-sm ml-4">
-								• {session.distanceInfo.distance}
-							</Text>
-						)}
+						
 					</View>
 				</View>
 

@@ -43,32 +43,14 @@ const SessionConfirmation = () => {
 		
 		// Debug logging
 		console.log('🔍 session-confirmation - handlePrimaryPress called');
-		console.log('🔍 userData?.isPsw:', userData?.isPsw);
+		// console.log('🔍 userData?.isPsw:', userData?.isPsw);
 		console.log('🔍 action (raw):', action);
 		console.log('🔍 actionStr (normalized):', actionStr);
 		console.log('🔍 userData?.stripeAccountId:', userData?.stripeAccountId);
 		
-		// Check if PSW has Stripe account set up before proceeding
-		if (userData?.isPsw && actionStr === 'book' && !userData.stripeAccountId) {
-			console.log('🚫 Blocking PSW - no Stripe account');
-			Alert.alert(
-				'Set up payments',
-				'You need to complete Stripe payouts onboarding before booking.',
-				[
-					{ text: 'Cancel', style: 'cancel' },
-					{ text: 'Set up now', onPress: () => router.replace('/(profile)/payouts/stripe-prompt') },
-				]
-			);
-			return;
-		}
-		
-		if (userData?.isPsw && actionStr !== 'cancel') {
-			console.log('✅ PSW continuing to session-confirmation-2');
-			router.replace(`/session-confirmation-2?sessionId=${sessionId}&action=${actionStr}`);
-		} else {
 			console.log('✅ Non-PSW calling onPrimaryPress');
 			onPrimaryPress();
-		}
+		
 	};
 
 	return (
@@ -112,24 +94,12 @@ const SessionConfirmation = () => {
 				<View className="mb-6">
 					<Text className="text-grey-58 text-sm font-medium mb-3">Cancellation Policy:</Text>
 					
-					{!userData?.isPsw ? (
-						<>
-							<Text className="text-grey-58 text-xs mb-2">
-								<Text className="font-bold">More than 24 hours before:</Text> Full Refund to Care Seeker, $0 Payment to Caregiver
-							</Text>
-							<Text className="text-grey-58 text-xs mb-2">
-								<Text className="font-bold">Between 12-24 hours before:</Text> 50% Refund to Care Seeker, 50% of Session Fee to Caregiver*
-							</Text>
-							<Text className="text-grey-58 text-xs">
-								<Text className="font-bold">Less than 12 hours before (or no-show):</Text> No Refund to Care Seeker, 75% of Session Fee to Caregiver*
-							</Text>
-						</>
-					) : (
+					
 						<Text className="text-grey-58 text-xs">
 							If a caregiver cancels a confirmed booking, the care seeker gets a full refund.
 							All cancellations are recorded. Repeated or last-minute cancellations may reduce your visibility in the marketplace and could lead to account suspension.
 						</Text>
-					)}
+					
 				</View>
 			</View>
 
@@ -157,11 +127,11 @@ const SessionConfirmation = () => {
 					style={{ backgroundColor: primaryButtonColor }}
 					disabled={isLoading}
 				>
-					{!userData?.isPsw && (
-						<Ionicons name="checkmark-circle" size={24} color="white" style={{ marginRight: 8 }} />
-					)}
+				
+					<Ionicons name="checkmark-circle" size={24} color="white" style={{ marginRight: 8 }} />
+				
 					<Text className="text-white font-medium text-lg text-center">
-						{isLoading ? 'Processing...' : (userData?.isPsw && action !== 'cancel' ? 'Continue' : primaryButtonText)}
+						{isLoading ? 'Processing...' : ( primaryButtonText)}
 					</Text>
 				</TouchableOpacity>
 				

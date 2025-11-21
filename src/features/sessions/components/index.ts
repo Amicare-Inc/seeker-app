@@ -16,4 +16,3 @@ export * from './OngoingSession';
 // Re-export specific components for easier access
 export { SessionBookedList } from './BookedSession';
 export { RequestSession } from './RequestSession';
-export { SessionCard } from './OngoingSession'; 

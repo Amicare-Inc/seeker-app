@@ -12,7 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 const CareNeeds2: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector((state: RootState) => state.user.userData);
-    const isPSW = userData?.isPsw;
+    
 
     const [selectedTasks, setSelectedTasks] = useState<string[]>(
         userData?.carePreferences?.tasks || [],
@@ -59,9 +59,7 @@ const CareNeeds2: React.FC = () => {
 
                     {/* Question */}
                     <Text className="text-lg text-grey-80 mb-[34px]">
-                        {isPSW
-                            ? 'What tasks are you able to assist with?'
-                            : 'What kind of tasks would you need help with?'}
+                        'What kind of tasks would you need help with?'
                     </Text>
 
                     {/* Task Options */}

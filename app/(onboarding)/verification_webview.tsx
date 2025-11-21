@@ -40,11 +40,9 @@ const PersonaVerification: React.FC = () => {
 			// Update Redux: Mark user as verified
 			dispatch(updateUserFields({ idVerified: true }));
 			// Navigate based on role
-			if (userData?.isPsw) {
-				router.replace('/(dashboard)/(psw)/psw-profile');
-			} else {
-				router.replace('/(dashboard)/(seeker)/seeker-profile');
-			}
+			
+			router.replace('/(dashboard)/(seeker)/seeker-profile');
+		
 		}
 	};
 

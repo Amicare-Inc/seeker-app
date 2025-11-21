@@ -94,12 +94,7 @@ export default function Index() {
                         containerStyles="w-full mb-4"
                         textStyles="font-medium"
                     />
-                    <CustomButton
-                        title="I am a Care Giver"
-                        handlePress={() => handleRoleSelection(true)}
-                        containerStyles="w-full bg-white border border-1 border-gray-200 mb-[30px]"
-                        textStyles="font-medium text-black"
-                    />
+                  
                     {showErrorMessage && (
                         <View className="w-full mb-2">
                             <Text className="text-red-500 text-xs text-center font-medium">

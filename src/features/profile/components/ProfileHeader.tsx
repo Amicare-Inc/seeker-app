@@ -116,11 +116,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 				</TouchableOpacity>
 			) : (
 				<View className="items-center">
-					{isPsw && rate && (
-						<Text className="text-lg font-semibold text-green-600">
-							${rate}/hr
-						</Text>
-					)}
+				
 				</View>
 			)}
 		</View>

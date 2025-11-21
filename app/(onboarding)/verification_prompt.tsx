@@ -23,12 +23,7 @@ const VerificationPrompt: React.FC = () => {
 
    const handleSkip = () => {
 	  dispatch(updateUserFields({ idVerified: false })); // Set idVerified to false in Redux
-	  // Navigate based on role
-	  if (userData?.isPsw) {
-		 router.push('/stripe_prompt');
-	  } else {
-		 router.push('/profile_details');
-	  }
+	  router.push('/profile_details');
    };
 
    return (
@@ -45,9 +40,7 @@ const VerificationPrompt: React.FC = () => {
 
 				  {/* Subtitle */}
 				  <Text className="text-xs text-grey-49 mb-[30px] leading-5 text-center mx-auto">
-					{userData?.isPsw
-					  ? 'To help ensure platform safety and build trust with care seekers, we ask for a selfie and a valid government-issued photo ID to confirm your identity.'
-					  : 'To help ensure platform safety and build trust between users, we ask for a selfie and valid government-issued photo ID to confirm your identity.'}
+					{'To help ensure platform safety and build trust between users, we ask for a selfie and valid government-issued photo ID to confirm your identity.'}
 					Your information is encrypted, stored securely, and only used as described in our <PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} />.
 				  </Text>
 
@@ -64,9 +57,8 @@ const VerificationPrompt: React.FC = () => {
 					 style={{ marginRight: 6 }}
 				  />
 				  <Text style={{ flex: 1, fontSize: 11, color: '#7B7B7E', lineHeight: 15, fontWeight: '500' }}>
-					{userData?.isPsw
-					  ? 'By continuing, you give Amicare permission to collect, store, and share this information securely with our verification partners as outlined in our '
-					  : 'By continuing, you consent to our collection and use of your identity information in accordance with our '}
+					{
+					  'By continuing, you consent to our collection and use of your identity information in accordance with our '}
 					 <PrivacyPolicyLink onPress={() => setShowPrivacyModal(true)} textStyle={{ color: '#0c7ae2' }} /> and <TermsOfUseLink onPress={() => setShowTermsModal(true)} textStyle={{ color: '#0c7ae2' }} />.
 				  </Text>
 			   </View>

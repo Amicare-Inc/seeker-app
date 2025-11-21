@@ -111,16 +111,12 @@ const RequestSession = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const currentUser = useSelector((state: RootState) => state.user.userData);
-	// PSWs should only be able to view sessions, not edit them
-	const isReadOnly = !!(currentUser?.isPsw && !!existingSession);
+	
+
 	// Allow PSWs to change time when routed here with an existing session (Change/Cancel flow)
-	const canEditTime = !!existingSession && !!currentUser?.isPsw;
-	const showRequestChangeButton = !!(existingSession && currentUser?.isPsw);
-	const pswRate = currentUser?.isPsw
-		? currentUser.rate || 20
-		: targetUserObj?.isPsw
-			? targetUserObj?.rate || 20
-			: 20;
+	
+	
+	const pswRate = 20;
 
 	const basePrice = pswRate * sessionLength;
 	const taxes = basePrice * 0.13;
@@ -128,9 +124,7 @@ const RequestSession = () => {
 	const total = basePrice + taxes + serviceFee;
 	const isLookingForFamily = isFamilyCareSeeker(currentUser);
 	const shouldShowLocation = () => {
-		if (currentUser?.isPsw) {
-			return true;
-		}
+		
 		if (currentUser?.lookingForSelf === true) {
 			return true;
 		}
@@ -140,9 +134,6 @@ const RequestSession = () => {
 		return false;
 	};
 	const getLocationToDisplay = () => {
-		if (currentUser?.isPsw) {
-			return currentUser?.address?.fullAddress || '';
-		}
 		if (currentUser?.lookingForSelf === true) {
 			return currentUser?.address?.fullAddress || '';
 		}
@@ -403,28 +394,22 @@ const RequestSession = () => {
 			<KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} enabled={true}>
 				<ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'} bounces={false}>
 					<View className="flex-1 p-4">
-						<HelpOptionsDropdown initialValue={helpText} onChange={setHelpText} disabled={isReadOnly} />
-						{isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && !isReadOnly && (
+						<HelpOptionsDropdown initialValue={helpText} onChange={setHelpText} disabled={false} />
+						{isLookingForFamily && currentUser?.familyMembers && currentUser.familyMembers.length > 0 && !false && (
 							<CareRecipientSelector familyMembers={currentUser.familyMembers} selectedRecipientId={selectedCareRecipient} onRecipientSelect={handleCareRecipientSelect} />
 						)}
 						<LocationDisplay location={getLocationToDisplay()} label="Location" />
-						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={isReadOnly && !canEditTime} />
-						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={isReadOnly && !canEditTime} />
+						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={false} />
+						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={false} />
 					{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}
-					<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={isReadOnly} />
+					<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={false} />
 					{otherUserId && otherUserId !== currentUser?.id && <BillingCard basePrice={displayBasePrice} taxes={displayTaxes} serviceFee={displayServiceFee} total={displayTotal} hourlyRate={effectiveRate} />}
 					</View>
-					{(!isReadOnly || canEditTime) && <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
-					{showRequestChangeButton && (
-			<View className="bg-transparent">
-				<TouchableOpacity onPress={() => {}} className="bg-white rounded-xl p-4 mx-4 items-center flex-row justify-center mb-4 border border-[#E5E5EA]">
-					<Text className="text-black text-lg font-medium">Request Change</Text>
-				</TouchableOpacity>
-			</View>
-			)}
+					{ <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
+					
 				</ScrollView>
 			</KeyboardAvoidingView>
-			{!isReadOnly && (
+			{ (
 			<View className="bg-transparent">
 				<View className="mx-4 bg-[#BBDAF7] flex-row py-3 px-4 items-start rounded-xl -translate-y-3">
 					<Ionicons name="information-circle" size={38} color="#55A2EB" />

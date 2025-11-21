@@ -104,7 +104,7 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 
 			{/* Dropdown for Care Type */}
 			<OptionsDropdown
-				label={user.isPsw ? 'Experience with' : 'Requiring'}
+				label={'Requiring'}
 				options={careTypeOptions}
 				initialValue={careTypeSelection.join(', ')}
 				onChange={handleCareTypeChange}
@@ -112,7 +112,7 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 
 			{/* Dropdown for Tasks */}
 			<OptionsDropdown
-				label={user.isPsw ? 'Assisting with' : 'Need Assistance with'}
+				label={'Need Assistance with'}
 				options={tasksOptions}
 				initialValue={tasksSelection.join(', ')}
 				onChange={handleTasksChange}

@@ -55,11 +55,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 							: address?.fullAddress || 'Toronto, ON'
 				}
 				userRating={
-					user.isPsw
-						? user.rating
-							? `${user.rating.toFixed(1)} out of 5`
-							: 'No rating yet'
-						: undefined
+					undefined
 				}
 				userPhoto={user.profilePhotoUrl}
 				onMenuPress={() => {}}
@@ -87,11 +83,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 				{!isMyProfile && (
 					<>
 						<ProfileScore user={user} />
-						{user.isPsw && (
-							<>
-								<ProfileAvailabilityTable user={user} />
-							</>
-						)}
 					</>
 				)}
 
@@ -101,7 +92,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 
 						{/* White container for the list items. */}
 						<View className="bg-white border-gray-200 rounded-[10px]">
-							{!(user.isPsw || user.lookingForSelf === true) && (
+							{!(user.lookingForSelf === true) && (
 								<ProfileListItem
 									label="Family"
 									iconName="people"
@@ -113,20 +104,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, isMyProfile, origin
 								iconName="settings"
 								onPress={() => router.push('/(profile)/settings')}
 							/>
-							{user.isPsw && !user.stripeAccountId && (
-															<ProfileListItem
-								label="Set up Payouts"
-								iconName="card"
-								onPress={() => router.push('/(profile)/payouts/stripe-prompt')}
-							/>
-							)}
-							{user.isPsw && !!user.stripeAccountId && (
-								<ProfileListItem
-									label="Payouts"
-									iconName="card"
-									disabled
-								/>
-							)}
+							
 							<ProfileListItem
 								label="Help"
 								iconName="warning"

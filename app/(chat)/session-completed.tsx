@@ -60,11 +60,9 @@ const SessionCompleted = () => {
 			<TouchableOpacity
 				onPress={() => {
 					clearCompletedSession();
-					if (currentUser?.isPsw) {
-                        router.replace('/(dashboard)/(psw)/psw-sessions');
-					} else {
-						router.replace('/(dashboard)/(seeker)/seeker-sessions');
-					}
+					
+					router.replace('/(dashboard)/(seeker)/seeker-sessions');
+					
 				}}
 				className="bg-blue-500 rounded-lg px-6 py-3 mt-4"
 			>
@@ -108,11 +106,9 @@ const SessionCompleted = () => {
 				<TouchableOpacity
 					onPress={() => {
 						clearCompletedSession();
-						if (currentUser?.isPsw) {
-                            router.replace('/(dashboard)/(psw)/psw-sessions');
-						} else {
+						
 							router.replace('/(dashboard)/(seeker)/seeker-sessions');
-						}
+						
 					}}
 					className="bg-blue-500 rounded-lg px-6 py-3 mt-6"
 				>
@@ -181,11 +177,9 @@ const SessionCompleted = () => {
 
 	const goToDashboard = () => {
 		clearCompletedSession(); // Clean up context
-		if (currentUser.isPsw) {
-            router.replace('/(dashboard)/(psw)/psw-sessions');
-		} else {
+		
 			router.replace('/(dashboard)/(seeker)/seeker-sessions');
-		}
+		
 	};
 
 	const submitRating = async () => {
@@ -242,30 +236,7 @@ const SessionCompleted = () => {
 			<View className="flex-1 justify-center items-center px-4">
 				{/* Profile Photo(s) */}
 				<View className="mb-6 relative">
-					{/* Show dual photos for PSWs viewing family member sessions */}
-					{currentUser.isPsw && isForFamilyMember && careRecipient && accountHolder ? (
-						<View className="relative">
-							{/* Core user photo (behind) */}
-							<Image
-								source={
-									accountHolder.profilePhotoUrl
-										? { uri: accountHolder.profilePhotoUrl }
-										: require('@/assets/default-profile.png')
-								}
-								className="w-36 h-36 rounded-full absolute"
-								style={{ right: -40 }}
-							/>
-							{/* Family member photo (in front) */}
-							<Image
-								source={
-									careRecipient.profilePhotoUrl
-										? { uri: careRecipient.profilePhotoUrl }
-										: require('@/assets/default-profile.png')
-								}
-								className="w-36 h-36 rounded-full border-4 border-white"
-							/>
-						</View>
-					) : (
+					 
 						/* Single profile photo */
 						<Image
 							source={
@@ -275,7 +246,7 @@ const SessionCompleted = () => {
 							}
 							className="w-36 h-36 rounded-full"
 						/>
-					)}
+					
 				</View>
 
 				{/* Success Icon and Header */}
@@ -293,9 +264,8 @@ const SessionCompleted = () => {
 				{/* Message */}
 				<Text className="text-base text-gray-600 text-center mb-8 px-4 leading-6">
 					Your session with {displayInfo.primaryName.split(' ')[0]} has been completed successfully. 
-					{currentUser.isPsw 
-						? ' Payment has been processed to your account.'
-						: ' Thank you for using Amicare.'
+					{
+						' Thank you for using Amicare.'
 					}
 				</Text>
 

@@ -4,9 +4,9 @@ import { RootState } from '@/redux/store';
 import { useAvailableUsers, useAvailableUsersWithDistance } from '@/features/userDirectory/api/queries';
 import { User } from '@/types/User';
 
-export const useHomeTab = (isPsw: boolean, withDistance: boolean = false) => {
+export const useHomeTab = (withDistance: boolean = false) => {
     const currentUserId = useSelector((state: RootState) => state.user.userData?.id);
-    const userType = isPsw ? 'psw' : 'seeker';
+    const userType = 'seeker';
     
     console.log('useHomeTab - currentUserId:', currentUserId, 'userType:', userType, 'withDistance:', withDistance);
     

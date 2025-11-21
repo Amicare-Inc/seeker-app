@@ -23,9 +23,6 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
     // Get all sessions for the current user to check for existing sessions
     const { data: allSessions = [] } = useEnrichedSessions(currentUser?.id);
     
-    // Only show buttons if current user is PSW and viewing a seeker profile
-    const shouldShowButtons = currentUser?.isPsw && !user.isPsw;
-    
     // Check if there's an existing active session between PSW and this seeker
     const hasActiveSession = allSessions.some(session => {
         // Get the actual user ID (strip family member suffix if present)
@@ -43,132 +40,7 @@ const ProfileScore: React.FC<ProfileScoreProps> = ({ user }) => {
         return isSessionWithThisSeeker && isActiveStatus;
     });
 
-    const handleConnectPress = async () => {
-        if (!currentUser) {
-            Alert.alert('Error', 'You must be signed in to express interest.');
-            return;
-        }
-
-        // Gate PSWs without Stripe payouts setup
-        if (currentUser.isPsw && !currentUser.stripeAccountId) {
-            Alert.alert(
-                'Set up payments',
-                'You need to set up your payout account before connecting.',
-                [
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Set up now', onPress: () => router.replace('/(profile)/payouts/stripe-onboarding') },
-                ]
-            );
-            return;
-        }
-
-        if (isConnecting || hasActiveSession) {
-            return; // Prevent double-clicks
-        }
-
-        setIsConnecting(true);
-
-        try {
-            // Determine care recipient information
-            const careRecipientId = user.isFamilyMemberCard && user.familyMemberInfo 
-                ? user.familyMemberInfo.id 
-                : user.id;
-            
-            const careRecipientType = user.isFamilyMemberCard ? 'family' : 'self';
-            
-            // Get the actual user ID (strip family member suffix if present)
-            const receiverId = user.isFamilyMemberCard && user.id 
-                ? user.id.split('-family-')[0] 
-                : user.id;
-
-            if (!currentUser.id || !receiverId) {
-                throw new Error('Missing required user information');
-            }
-
-            const interestedSessionData: SessionDTO = {
-                senderId: currentUser.id,
-                receiverId: receiverId,
-                careRecipientId: careRecipientId,
-                careRecipientType: careRecipientType,
-                note: 'PSW expressing interest in providing care'
-            };
-
-            await requestSessionMutation.mutateAsync(interestedSessionData);
-            
-            Alert.alert(
-                'Interest Sent',
-                'Your interest has been sent successfully. The care seeker will be notified.',
-                [{ text: 'OK', onPress: () => {
-                    // Optionally refresh current user to reflect latest stripe state
-                    // (useful if returning from Stripe success deep link before Redux updates)
-                    AuthApi.getCurrentUser?.().then((freshUser: any) => {
-                        if (freshUser?.id === currentUser?.id) {
-                            dispatch(updateUserFields(freshUser));
-                        }
-                    }).catch(() => {});
-                    // Navigate back to PSW sessions after expressing interest
-                    router.replace('/(dashboard)/(psw)/psw-sessions');
-                } }]
-            );
-        } catch (error: any) {
-            console.error('Error expressing interest:', error);
-            Alert.alert(
-                'Error',
-                error.message || 'Failed to send interest. Please try again.',
-                [{ text: 'OK' }]
-            );
-        } finally {
-            setIsConnecting(false);
-        }
-    };
-
-    const handleReportPress = () => {
-        // Report Issue functionality (to be implemented)
-    };
-
-    if (shouldShowButtons) {
-        // Show buttons for PSWs viewing seeker profiles
-        return (
-            <View className="mb-6">
-                {/* Action Buttons Row */}
-                <View className="py-2 mb-4">
-                    <View className="flex-row justify-between gap-4">
-                        {/* Connect Button */}
-                        <TouchableOpacity 
-                            onPress={handleConnectPress}
-                            disabled={isConnecting || hasActiveSession}
-                            className={`items-center flex-1 bg-white rounded-lg py-4 ${(isConnecting || hasActiveSession) ? 'opacity-50' : ''}`}
-                            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
-                        >
-                            <Ionicons 
-                                name={isConnecting ? "hourglass-outline" : hasActiveSession ? "checkmark-outline" : "arrow-forward-outline"} 
-                                size={28} 
-                                color="#000" 
-                            />
-                            <Text className="text-base text-black mt-2 font-medium text-center">
-                                {isConnecting ? 'Connecting...' : hasActiveSession ? 'Message' : 'Send Connection Request'}
-                            </Text>
-                        </TouchableOpacity>
-
-                        {/* Report Issue Button */}
-                        <TouchableOpacity 
-                            onPress={handleReportPress}
-                            className="items-center flex-1 bg-white rounded-lg py-4"
-                            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
-                        >
-                            <Ionicons name="alert-circle-outline" size={28} color="#000" />
-                            <Text className="text-base text-black mt-2 font-medium">Report Issue</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {/* {!user.isPsw && (
-                        <Text className="font-base mt-4 text-grey-35 font-medium">
-                            Send a connection request to let this care seeker know you’re available to help.
-                        </Text>
-                    )} */}
-                </View>
-            </View>
-        );
-    }
+    
 
     // Show stats for seekers viewing PSW profiles (original implementation)
     return (

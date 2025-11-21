@@ -110,7 +110,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 
 					{/* Skill Sets */}
 				<Text className="font-bold text-gray-800 mb-1">
-						{user.isPsw ? 'Tasks I Can Assist With' : 'Requiring Help With'}
+						{'Requiring Help With'}
 					</Text>
 				<Text className="text-gray-700 mb-3">
 					{tasks}
@@ -118,7 +118,7 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 
 					{/* Diagnosed Conditions */}
 				<Text className="font-bold text-gray-800 mb-1">
-						{user.isPsw ? 'Services Provided' : 'Services Needed'}
+						{'Services Needed'}
 					</Text>
 				<Text className="text-gray-700 mb-3">
 					{diagnosed}

@@ -2,17 +2,16 @@ import { getAuthHeaders } from '@/lib/auth';
 
 // Auth API service
 export const AuthApi = {
-  async signUp(email: string, password: string, isPsw?: boolean): Promise<any> {
+  async signUp(email: string, password: string): Promise<any> {
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          email, 
+        body: JSON.stringify({
+          email,
           password,
-          ...(isPsw !== undefined && { isPsw })
         }),
       });
 

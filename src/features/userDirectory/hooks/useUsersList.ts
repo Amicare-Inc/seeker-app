@@ -5,7 +5,7 @@ import { useAvailableUsers } from '@/features/userDirectory/api/queries';
 
 const useUsersList = (isPsw: boolean) => {
 	const currentUserId = useSelector((state: RootState) => state.user.userData?.id);
-	const userType = isPsw ? 'psw' : 'seeker';
+	const userType = 'seeker';
 	
 	const usersQuery = useAvailableUsers(userType, currentUserId);
 

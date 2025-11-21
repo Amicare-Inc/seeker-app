@@ -32,34 +32,19 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
     
     setProcessing(true);
     try {
-      // PSW must have payouts set up before booking
-      if (currentUser.isPsw && !currentUser.stripeAccountId) {
-        Alert.alert(
-          'Set up payments',
-          'You need to complete Stripe payouts onboarding before booking.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Set up now', onPress: () => router.replace('/(profile)/payouts/stripe-prompt') },
-          ]
-        );
+
+      if (!stripe) {
+        console.error('Stripe not initialized');
+        Alert.alert('Error', 'Payment system not available. Please try again.');
         setProcessing(false);
         return;
       }
-
-      if (!currentUser.isPsw) {
-        if (!stripe) {
-          console.error('Stripe not initialized');
-          Alert.alert('Error', 'Payment system not available. Please try again.');
-          setProcessing(false);
-          return;
-        }
-        
-        const paymentService = PaymentService.getInstance();
-        const paymentSuccess = await paymentService.initiatePayment(activeSession, stripe);
-        if (!paymentSuccess) {
-          setProcessing(false);
-          return;
-        }
+      
+      const paymentService = PaymentService.getInstance();
+      const paymentSuccess = await paymentService.initiatePayment(activeSession, stripe);
+      if (!paymentSuccess) {
+        setProcessing(false);
+        return;
       }
 
       await bookSessionMutation.mutateAsync({

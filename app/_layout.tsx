@@ -56,7 +56,7 @@ const GlobalDataLoader = () => {
 	const refreshAll = React.useCallback(() => {
 		if (!shouldMakeApiCalls || !currentUser?.id) return Promise.resolve();
 		const uid = currentUser.id as string;
-		const userType = currentUser.isPsw ? 'psw' : 'seeker';
+		const userType = 'seeker';
 		return Promise.all([
 			(async () => {
 				try {
@@ -78,7 +78,7 @@ const GlobalDataLoader = () => {
 				staleTime: 15_000,
 			}),
 		]).then(() => undefined);
-	}, [shouldMakeApiCalls, currentUser?.id, currentUser?.isPsw, queryClient, dispatch]);
+	}, [shouldMakeApiCalls, currentUser?.id, false, queryClient, dispatch]);
 
 	// Background prefetch on app foreground
 	useEffect(() => {
@@ -86,7 +86,7 @@ const GlobalDataLoader = () => {
 		refreshAll(); // Run on mount
 		const sub = AppState.addEventListener('change', (s) => { if (s === 'active') refreshAll(); });
 		return () => sub.remove();
-	}, [shouldMakeApiCalls, currentUser?.id, currentUser?.isPsw, queryClient, refreshAll]);
+	}, [shouldMakeApiCalls, currentUser?.id, false, queryClient, refreshAll]);
 
 	// Add a 30s background refresh while app is running
 	useEffect(() => {
@@ -95,7 +95,7 @@ const GlobalDataLoader = () => {
 			refreshAll();
 		}, 30_000);
 		return () => clearInterval(interval);
-	}, [shouldMakeApiCalls, currentUser?.id, currentUser?.isPsw, refreshAll]);
+	}, [shouldMakeApiCalls, currentUser?.id, false, refreshAll]);
 
 	// Refresh user list when sessions change (someone accepts/declines/etc)
 	useEffect(() => {

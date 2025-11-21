@@ -66,13 +66,10 @@ const SignIn = () => {
 			}, 100);
 			
 			if (userData.onboardingComplete === true) {
-				if (userData.isPsw === true) {
-					console.log('Navigating to PSW dashboard');
-                    router.replace('/(dashboard)/(psw)/psw-sessions');
-				} else {
-					console.log('Navigating to seeker dashboard');
-					router.replace('/(dashboard)/(seeker)/seeker-sessions');
-				}
+			
+				console.log('Navigating to seeker dashboard');
+				router.replace('/(dashboard)/(seeker)/seeker-sessions');
+				
 			} else {
 				console.log('Navigating to onboarding');
 				router.replace('/(onboarding)/care_needs_1');

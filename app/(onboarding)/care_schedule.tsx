@@ -127,12 +127,8 @@ const CareSchedule: React.FC = () => {
 	
 	const handleNext = () => {
 		// Navigate based on user type - same logic as useAvailability hook
-		const { isPsw, lookingForSelf } = userData || {};
 		
-		if (isPsw) {
-			// PSWs go to personal details (their provider flow)
-			router.push('/personal_details');
-		} else if (lookingForSelf === false) {
+		if (userData?.lookingForSelf === false) {
 			// Family care seeker - go to about loved one
 			router.push('/about_loved_one');
 		} else {

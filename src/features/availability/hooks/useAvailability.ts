@@ -95,13 +95,10 @@ export const useAvailability = () => {
         // Store availability in tempAvailability for later use
         dispatch(setTempAvailability(availability));
         
-        // Navigate based on user type - check isPsw first
-        const { isPsw, lookingForSelf } = userData || {};
+        // Navigate based on user type
+        const lookingForSelf = userData?.lookingForSelf;
         
-        if (isPsw) {
-            // PSWs go to personal details (their provider flow)
-            router.push('/personal_details');
-        } else if (lookingForSelf === false) {
+         if (lookingForSelf === false) {
             // Family care seeker - go to about loved one
             router.push('/about_loved_one');
         } else {

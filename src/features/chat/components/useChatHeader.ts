@@ -33,8 +33,7 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
     ? `${sessionAddress.city}, ${sessionAddress.province}`
     : sessionAddress?.fullAddress || 'No Address';
 
-  const showFullAddress = (isConfirmed || currentSession.status === SessionStatus.InProgress) && currentUser?.isPsw;
-  const subTitle = showFullAddress ? sessionAddress?.fullAddress || cityProvince : cityProvince;
+  const subTitle = cityProvince;
 
   // Navigation helpers -------------------------------------------------
   const navigateToSessionConfirmation = (action: 'book' | 'cancel' | 'change') => {

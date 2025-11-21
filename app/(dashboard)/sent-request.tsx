@@ -21,11 +21,9 @@ const SessionRequestSent = () => {
 
 	const handleBack = () => {
 		// Navigate based on current user's role, not other user's role
-		if (currentUser?.isPsw) {
-            router.replace('/(dashboard)/(psw)/psw-sessions');
-		} else {
-			router.replace('/(dashboard)/(seeker)/seeker-sessions');
-		}
+	
+		router.replace('/(dashboard)/(seeker)/seeker-sessions');
+	
 	};
 
 	// Or you can hardcode placeholders if you don't have a param.

@@ -47,12 +47,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	
 	// Check if we should show dual photos (family member case)
 	// Only show dual photos when PSW is viewing a session where seeker booked for family member
-	const isShowingFamilyMember = currentUser?.isPsw && currentSession.careRecipient && currentSession.careRecipientType === 'family' && currentSession.otherUser;
 	
 	// Determine which photos and names to show
 	const primaryPhoto = displayInfo?.primaryPhoto || user.profilePhotoUrl;
 	const primaryName = displayInfo?.primaryName || `${user.firstName} ${user.lastName}`;
-	const secondaryPhoto = isShowingFamilyMember ? currentSession.otherUser?.profilePhotoUrl : undefined;
+	const secondaryPhoto = undefined;
 
 	return (
 		<View style={{ backgroundColor: '#fff' }}>
@@ -63,63 +62,24 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 				</TouchableOpacity>
 				
 				{/* Profile Photo Section */}
-				<View className="relative mr-[13px]" style={{ width: isShowingFamilyMember ? 64 : 44 }}>
-					{isShowingFamilyMember ? (
-						<>
-							{/* Family member photo (main position) */}
-							<Image
-								source={
-									primaryPhoto
-										? { uri: primaryPhoto }
-										: require('@/assets/default-profile.png')
-								}
-								className="w-[44px] h-[44px] rounded-full"
-								style={{ 
-									zIndex: 2,
-									shadowColor: '#000', 
-									shadowOffset: { width: 0, height: 2 }, 
-									shadowOpacity: 0.1, 
-									shadowRadius: 3 
-								}}
-							/>
-							{/* Core user photo (slight overlap to the right) */}
-							<Image
-								source={
-									secondaryPhoto
-										? { uri: secondaryPhoto }
-										: require('@/assets/default-profile.png')
-								}
-								className="w-[44px] h-[44px] rounded-full absolute"
-								style={{ 
-									right: -20,
-									top: 0,
-									zIndex: 1,
-									shadowColor: '#000', 
-									shadowOffset: { width: 0, height: 2 }, 
-									shadowOpacity: 0.1, 
-									shadowRadius: 3 
-								}}
-							/>
-						</>
-					) : (
-						<Image
-							source={
-								primaryPhoto
-									? { uri: primaryPhoto }
-									: require('@/assets/default-profile.png')
-							}
-							className="w-[44px] h-[44px] rounded-full"
-							style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
-						/>
-					)}
+				<View className="relative mr-[13px]" style={{ width: 44 }}>
+					<Image
+						source={
+							primaryPhoto
+								? { uri: primaryPhoto }
+								: require('@/assets/default-profile.png')
+						}
+						className="w-[44px] h-[44px] rounded-full"
+						style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 }}
+					/>
 				</View>
 				
-				<TouchableOpacity onPress={toggleExpanded} className="flex-1" style={{ marginLeft: isShowingFamilyMember ? 20 : 0 }}>
+				<TouchableOpacity onPress={toggleExpanded} className="flex-1" style={{ marginLeft: 0 }}>
 					<Text className="font-semibold text-lg text-black">
 						{primaryName}
 					</Text>
 					<Text className="text-xs mt-0.5 text-gray-500">
-						{isShowingFamilyMember && currentSession.otherUser ? `Contact: ${currentSession.otherUser.firstName}` : subTitle}
+						{subTitle}
 					</Text>
 				</TouchableOpacity>
 				{isExpanded && (
@@ -227,7 +187,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 					<View className="flex-row items-center justify-between">
 						<TouchableOpacity onPress={handleNavigateToRequestSession} className="">
 							<Text className="text-sm font-medium text-grey-58 underline">
-								{currentUser?.isPsw ? 'View' : 'Change'}
+								Change
 							</Text>
 						</TouchableOpacity>
 						<TouchableOpacity onPress={handleCancelSession} className="">

@@ -125,28 +125,10 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
     onCollapse?.();
   };
 
-  // PSW checklist validation
-  const validatePSWChecklist = () => {
-    if (!currentUser?.isPsw || !session.checklist) {
-      return true; // Not a PSW or no checklist, allow end session
-    }
-    
-    const incompleteTasks = session.checklist.filter(item => !item.checked);
-    return incompleteTasks.length === 0;
-  };
+
+ 
 
   const handleEndSessionPress = () => {
-    if (currentUser?.isPsw && session.checklist) {
-      const isChecklistComplete = validatePSWChecklist();
-      if (!isChecklistComplete) {
-        Alert.alert(
-          'Incomplete Checklist',
-          'Please make sure all tasks in the checklist are completed before ending the session.',
-          [{ text: 'OK', style: 'default' }]
-        );
-        return;
-      }
-    }
     
     confirmEndSession();
   };
@@ -312,8 +294,8 @@ const LiveSessionCard: React.FC<LiveSessionCardProps> = ({ session, onExpand, on
               		<SessionChecklistBox 
                     checklist={session.checklist || []} 
                     comments={session.comments || []}
-                    editable={currentUser!.isPsw ? true : false}
-                    showComment={currentUser!.isPsw ? true : false}
+                    editable={true}
+                    showComment={true}
                     currentUserId={currentUser?.id}
                     onChecklistUpdate={async (checklist: ChecklistItem[]) => {
                       try {
