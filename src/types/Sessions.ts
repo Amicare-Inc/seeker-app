@@ -96,4 +96,11 @@ export interface Session {
 			ratedAt: string;
 		}
 	};
+	timeChangeRequest?: {
+		proposedStartTime: string;
+		proposedEndTime: string;
+		proposedBy: string; // userId of PSW who proposed the change
+		proposedAt: string;
+		note?: string;
+	};
 }

@@ -18,6 +18,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearActiveProfile } from '@/redux/activeProfileSlice';
 import { requestSession } from '@/features/sessions/api/sessionApi';
 import { useUpdateSession } from '@/features/sessions/api/queries';
+import { proposeTimeChange } from '@/features/sessions/api/sessionApi';
 import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
@@ -299,41 +300,62 @@ const RequestSession = () => {
 
 			if (existingSession) {
 				console.log('session id', existingSession.id);
-				const updateData: any = {
-					...sessionData, 
-					checklist: checklist.map((task, index) => ({
-						id: index.toString(),
-						task,
-						completed: false,
-						checked: false,
-						time: '',
-					})),
-				}
+				
+				// Check if this is a PSW proposing a time change for an applied session
+				// PSW scenario: existingSession exists, status is 'applied', and current user is NOT the sender
+				const isPSWProposingTimeChange = 
+					existingSession.status === 'applied' && 
+					existingSession.senderId !== currentUser.id;
 
-				if (otherUserId && otherUserId !== currentUser?.id) {
-					updateData.receiverId = otherUserId;
-					if (targetUserObj?.distanceInfo) {
-						updateData.distanceInfo = targetUserObj.distanceInfo;
+				if (isPSWProposingTimeChange) {
+					// PSW is proposing an alternate time for a session they applied to
+					await proposeTimeChange(
+						existingSession.id,
+						startDate.toISOString(),
+						endDate.toISOString(),
+						helpText
+					);
+
+					alert('Time change request sent to the seeker!');
+					router.back();
+				} else {
+					// Regular session update flow (seeker updating their own session)
+					const updateData: any = {
+						...sessionData, 
+						checklist: checklist.map((task, index) => ({
+							id: index.toString(),
+							task,
+							completed: false,
+							checked: false,
+							time: '',
+						})),
 					}
-				}
 
-				// Only add billingDetails if it already exists (i.e. we're updating the sess)
-				if ((otherUserId && otherUserId !== currentUser?.id) || existingSession.billingDetails) {
-					updateData.billingDetails = {
-						basePrice,
-						taxes,
-						serviceFee,
-						total,
+					if (otherUserId && otherUserId !== currentUser?.id) {
+						updateData.receiverId = otherUserId;
+						if (targetUserObj?.distanceInfo) {
+							updateData.distanceInfo = targetUserObj.distanceInfo;
+						}
 					}
+
+					// Only add billingDetails if it already exists (i.e. we're updating the sess)
+					if ((otherUserId && otherUserId !== currentUser?.id) || existingSession.billingDetails) {
+						updateData.billingDetails = {
+							basePrice,
+							taxes,
+							serviceFee,
+							total,
+						}
+					}
+
+					await updateSessionMutation.mutateAsync({
+						sessionId: existingSession.id,
+						data: updateData,
+					});
+
+					alert('Session updated successfully!');
+					router.back();
 				}
-
-				await updateSessionMutation.mutateAsync({
-					sessionId: existingSession.id,
-					data: updateData,
-				});
-
-				alert('Session updated successfully!');
-				router.back();
 			} else {
 				// const receiverId = (() => {
 				// 	if (targetUserObj?.isFamilyMemberCard && targetUserObj?.id) {
