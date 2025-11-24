@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, Modal } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { useSelector } from 'react-redux';
@@ -7,6 +7,8 @@ import { RootState } from '@/redux/store';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { getAuthHeaders } from '@/lib/auth';
+import { acceptTimeChange, rejectTimeChange } from '@/features/sessions/api/sessionApi';
+import { useQueryClient } from '@tanstack/react-query';
 import { useDistanceToPsw } from '@/features/sessions/hooks/useDistanceToPsw';
 interface SeekerRequestCardProps {
     session: EnrichedSession;
@@ -25,9 +27,12 @@ const DistanceText: React.FC<{ origin?: string; destination?: string }> = ({ ori
 
 const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelectPSW}) => {
     const currentUser = useSelector((state: RootState) => state.user.userData);
+    const queryClient = useQueryClient();
     const isVerified = currentUser?.idManualVerified ?? false;
     const [applications, setApplications] = useState<any[]>([]);
     const [applicationsLoading, setApplicationsLoading] = useState<boolean>(true);
+    const [showTimeChangeModal, setShowTimeChangeModal] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     useEffect(() => {
         let isMounted = true;
         const fetchApplicants = async () => {
@@ -73,12 +78,49 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
     const timeRange = startDate && endDate ? formatTimeRange(startDate, endDate) : undefined;
     const dayTimeDisplay = weekday && timeRange ? `${weekday}. ${timeRange}` : 'Time TBD';
 
+    // Check if there's a time change request
+    const hasTimeChangeRequest = !!session.timeChangeRequest;
+
     // Prefer care recipient address when present, otherwise other user's address
     const address = session.careRecipient?.address || session.otherUser?.address;
     
 
     const toggleExpanded = () => {
         setIsExpanded(!isExpanded);
+    };
+
+    const handleTimeChangeClick = () => {
+        setShowTimeChangeModal(true);
+    };
+
+    const handleAcceptTimeChange = async () => {
+        try {
+            setIsProcessing(true);
+            await acceptTimeChange(session.id);
+            await queryClient.invalidateQueries({ queryKey: ['enrichedSessions'] });
+            setShowTimeChangeModal(false);
+            alert('Time change accepted! Session time has been updated.');
+        } catch (error) {
+            console.error('Error accepting time change:', error);
+            alert('Failed to accept time change. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleRejectTimeChange = async () => {
+        try {
+            setIsProcessing(true);
+            await rejectTimeChange(session.id);
+            await queryClient.invalidateQueries({ queryKey: ['enrichedSessions'] });
+            setShowTimeChangeModal(false);
+            alert('Time change request declined.');
+        } catch (error) {
+            console.error('Error rejecting time change:', error);
+            alert('Failed to reject time change. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
     };
     console.log('applications', applications);
     return (
@@ -145,7 +187,29 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                 </View>
 
                 {/* Separator Line */}
-                {applications && applications.length > 0 && (
+                {hasTimeChangeRequest && (
+                    <TouchableOpacity 
+                        onPress={handleTimeChangeClick}
+                        className="border-t border-orange-200 mt-3 pt-3 bg-orange-50 -mx-4 px-4 -mb-4 pb-4 rounded-b-xl active:bg-orange-100"
+                    >
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-1">
+                                <View className="flex-row items-center">
+                                    <Ionicons name="time-outline" size={20} color="#f97316" style={{ marginRight: 8 }} />
+                                    <Text className="text-sm font-semibold text-orange-600 mr-2">
+                                        Time Change Requested
+                                    </Text>
+                                </View>
+                                <Text className="text-xs text-orange-700 mt-1">
+                                    A caregiver has proposed an alternate time
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color="#f97316" />
+                        </View>
+                    </TouchableOpacity>
+                )}
+
+                {applications && applications.length > 0 && !hasTimeChangeRequest && (
                     <View className="border-t border-gray-200 mt-3 pt-3">
                         <View className="flex-row items-center">
                             <Text className="text-sm text-gray-600 mr-2">
@@ -170,7 +234,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                 )}
 
                 {/* No applicants case */}
-                {(!applications || applications.length === 0) && !applicationsLoading && (
+                {(!applications || applications.length === 0) && !applicationsLoading && !hasTimeChangeRequest && (
                     <View className="border-t border-gray-200 mt-3 pt-3">
                         <Text className="text-sm text-gray-500">
                             No applicants yet
@@ -249,6 +313,156 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                     )}
                 </View>
             )}
+            
+            {/* Time Change Request Modal */}
+            <Modal
+                visible={showTimeChangeModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowTimeChangeModal(false)}
+            >
+                <View className="flex-1 bg-black/50 justify-end">
+                    <View className="bg-white rounded-t-3xl p-6 pb-10">
+                        {/* Header */}
+                        <View className="flex-row items-center justify-between mb-6">
+                            <Text className="text-xl font-bold text-gray-900">
+                                Time Change Request
+                            </Text>
+                            <TouchableOpacity onPress={() => setShowTimeChangeModal(false)}>
+                                <Ionicons name="close" size={28} color="#666" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {session.timeChangeRequest && (
+                            <>
+                                {/* Debug logging */}
+                                {console.log('Time Change Request Data:', {
+                                    proposedStartTime: session.timeChangeRequest.proposedStartTime,
+                                    proposedEndTime: session.timeChangeRequest.proposedEndTime,
+                                    proposedStartType: typeof session.timeChangeRequest.proposedStartTime,
+                                    proposedEndType: typeof session.timeChangeRequest.proposedEndTime
+                                })}
+                                
+                                {/* Current Time */}
+                                <View className="mb-6">
+                                    <Text className="text-sm font-semibold text-gray-500 mb-2">
+                                        Current Session Time
+                                    </Text>
+                                    <View className="bg-gray-50 p-4 rounded-xl">
+                                        <Text className="text-base text-gray-900">
+                                            {dayTimeDisplay}
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                {/* Proposed Time */}
+                                <View className="mb-6">
+                                    <Text className="text-sm font-semibold text-orange-600 mb-2">
+                                        Proposed New Time
+                                    </Text>
+                                    <View className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                                        <Text className="text-base font-semibold text-gray-900">
+                                            {(() => {
+                                                try {
+                                                    const proposedStartTime = session.timeChangeRequest.proposedStartTime;
+                                                    const proposedEndTime = session.timeChangeRequest.proposedEndTime;
+                                                    
+                                                    console.log('Raw timestamps:', { proposedStartTime, proposedEndTime });
+                                                    
+                                                    let proposedStart: Date;
+                                                    let proposedEnd: Date;
+                                                    
+                                                    // Handle different timestamp formats
+                                                    if (typeof proposedStartTime === 'string') {
+                                                        // ISO string
+                                                        proposedStart = new Date(proposedStartTime);
+                                                    } else if (typeof proposedStartTime === 'number') {
+                                                        // Unix timestamp - could be seconds or milliseconds
+                                                        // If less than year 2100 in seconds, it's in seconds
+                                                        proposedStart = proposedStartTime < 10000000000 
+                                                            ? new Date(proposedStartTime * 1000) 
+                                                            : new Date(proposedStartTime);
+                                                    } else if (proposedStartTime && typeof proposedStartTime === 'object') {
+                                                        // Firestore Timestamp object with seconds/nanoseconds or _seconds/_nanoseconds
+                                                        const seconds = (proposedStartTime as any).seconds || (proposedStartTime as any)._seconds;
+                                                        const nanoseconds = (proposedStartTime as any).nanoseconds || (proposedStartTime as any)._nanoseconds || 0;
+                                                        proposedStart = new Date(seconds * 1000 + nanoseconds / 1000000);
+                                                    } else {
+                                                        proposedStart = new Date(proposedStartTime);
+                                                    }
+                                                    
+                                                    if (typeof proposedEndTime === 'string') {
+                                                        proposedEnd = new Date(proposedEndTime);
+                                                    } else if (typeof proposedEndTime === 'number') {
+                                                        proposedEnd = proposedEndTime < 10000000000 
+                                                            ? new Date(proposedEndTime * 1000) 
+                                                            : new Date(proposedEndTime);
+                                                    } else if (proposedEndTime && typeof proposedEndTime === 'object') {
+                                                        const seconds = (proposedEndTime as any).seconds || (proposedEndTime as any)._seconds;
+                                                        const nanoseconds = (proposedEndTime as any).nanoseconds || (proposedEndTime as any)._nanoseconds || 0;
+                                                        proposedEnd = new Date(seconds * 1000 + nanoseconds / 1000000);
+                                                    } else {
+                                                        proposedEnd = new Date(proposedEndTime);
+                                                    }
+                                                    
+                                                    console.log('Parsed dates:', { 
+                                                        proposedStart: proposedStart.toISOString(), 
+                                                        proposedEnd: proposedEnd.toISOString()
+                                                    });
+                                                    
+                                                    // Check if dates are valid
+                                                    if (isNaN(proposedStart.getTime()) || isNaN(proposedEnd.getTime())) {
+                                                        console.error('Invalid dates after parsing');
+                                                        return `Invalid date (start: ${proposedStartTime}, end: ${proposedEndTime})`;
+                                                    }
+                                                    
+                                                    const weekday = proposedStart.toLocaleDateString('en-US', { weekday: 'short' });
+                                                    const timeRange = formatTimeRange(
+                                                        proposedStart.toISOString(),
+                                                        proposedEnd.toISOString()
+                                                    );
+                                                    return `${weekday}. ${timeRange}`;
+                                                } catch (error) {
+                                                    console.error('Error formatting proposed time:', error);
+                                                    return `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+                                                }
+                                            })()}
+                                        </Text>
+                                        {session.timeChangeRequest.note && (
+                                            <Text className="text-sm text-gray-600 mt-2">
+                                                Note: {session.timeChangeRequest.note}
+                                            </Text>
+                                        )}
+                                    </View>
+                                </View>
+
+                                {/* Action Buttons */}
+                                <View className="flex-row gap-3">
+                                    <TouchableOpacity
+                                        onPress={handleRejectTimeChange}
+                                        disabled={isProcessing}
+                                        className="flex-1 bg-gray-200 rounded-xl py-4 items-center"
+                                    >
+                                        <Text className="text-gray-800 font-semibold text-base">
+                                            Decline
+                                        </Text>
+                                    </TouchableOpacity>
+                                    
+                                    <TouchableOpacity
+                                        onPress={handleAcceptTimeChange}
+                                        disabled={isProcessing}
+                                        className={`flex-1 bg-brand-blue rounded-xl py-4 items-center ${isProcessing ? 'opacity-50' : ''}`}
+                                    >
+                                        <Text className="text-white font-semibold text-base">
+                                            {isProcessing ? 'Processing...' : 'Accept'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };

@@ -363,3 +363,72 @@ export const submitSessionFeedback = async (sessionId: string, userId: string, r
     throw new Error(msg || 'Failed to submit report');
   }
 }; 
+
+export const proposeTimeChange = async (
+  sessionId: string,
+  proposedStartTime: string,
+  proposedEndTime: string,
+  note?: string
+): Promise<Session> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/propose-time-change`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ proposedStartTime, proposedEndTime, note }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.session;
+  } catch (error: any) {
+    console.error(`Error proposing time change for session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
+export const acceptTimeChange = async (sessionId: string): Promise<Session> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/accept-time-change`, {
+      method: 'POST',
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.session;
+  } catch (error: any) {
+    console.error(`Error accepting time change for session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
+export const rejectTimeChange = async (sessionId: string): Promise<Session> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/reject-time-change`, {
+      method: 'POST',
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.session;
+  } catch (error: any) {
+    console.error(`Error rejecting time change for session ${sessionId}:`, error);
+    throw error;
+  }
+};
