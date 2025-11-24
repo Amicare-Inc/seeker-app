@@ -1,11 +1,13 @@
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { User } from '@/types/User';
+import { useDistanceToPsw } from '@/features/sessions/hooks/useDistanceToPsw';
 
 export interface SessionDisplayInfo {
 	primaryName: string;
 	primaryPhoto?: string;
 	subtitle: string;
 	location: string;
+
 	contactInfo?: string;
 }
 
@@ -14,7 +16,7 @@ export const getSessionDisplayInfo = (
 	currentUser: User
 ): SessionDisplayInfo => {
 	
-	
+
 	 {
 		// Seeker sees PSW info
 		const psw = session.otherUser;
@@ -25,9 +27,11 @@ export const getSessionDisplayInfo = (
 			primaryPhoto: psw?.profilePhotoUrl,
 			subtitle: psw?.address?.city || 'Toronto, ON',
 			location: psw?.address?.fullAddress || 'No address available',
+
 			contactInfo: session.isForFamilyMember && careRecipient
 				? `Care for: ${careRecipient.firstName} ${careRecipient.lastName}`
 				: undefined
+	
 		};
 	}
 };

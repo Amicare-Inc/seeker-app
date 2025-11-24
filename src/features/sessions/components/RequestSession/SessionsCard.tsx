@@ -61,7 +61,7 @@ const RequestSessionCard: React.FC<RequestSessionCardProps> = ({
     const locationText = address?.city && address?.province 
         ? `${address.city}, ${address.province}` 
         : 'Burlington, Toronto';
-    // const distanceInfo = session.distanceInfo?.distance;
+
 
     const startDate = session.startTime;
     const endDate = session.endTime;
@@ -77,7 +77,7 @@ const RequestSessionCard: React.FC<RequestSessionCardProps> = ({
 
     // Name, rate, distance string: "Jane, $25/hr, 5 km away"
     // const rate = session.otherUser?.rate;
-    const distance = distanceInfo?.distance || session.distanceInfo?.distance;
+    const distance =  session.distanceInfo?.distance;
     const metaLineParts = [
         displayName,
         // typeof rate === 'number' ? `$${rate}/hr` : undefined,

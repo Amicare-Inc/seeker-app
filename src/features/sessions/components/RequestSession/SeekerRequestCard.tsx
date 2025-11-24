@@ -7,14 +7,25 @@ import { RootState } from '@/redux/store';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { formatTimeRange } from '@/lib/datetimes/datetimeHelpers';
 import { getAuthHeaders } from '@/lib/auth';
-
+import { useDistanceToPsw } from '@/features/sessions/hooks/useDistanceToPsw';
 interface SeekerRequestCardProps {
     session: EnrichedSession;
     onSelectPSW?: (pswId: string, applicant: any) => void;
 }
 
-const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelectPSW }) => {
+const DistanceText: React.FC<{ origin?: string; destination?: string }> = ({ origin, destination }) => {
+    const { data } = useDistanceToPsw(origin, destination);
+    if (!origin || !destination || !data?.distance?.text) return null;
+    return (
+        <Text className="text-xs text-gray-500 mt-0.5">
+            {data.distance.text} away
+        </Text>
+    );
+};
+
+const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelectPSW}) => {
     const currentUser = useSelector((state: RootState) => state.user.userData);
+    const isVerified = currentUser?.idManualVerified ?? false;
     const [applications, setApplications] = useState<any[]>([]);
     const [applicationsLoading, setApplicationsLoading] = useState<boolean>(true);
     useEffect(() => {
@@ -64,12 +75,12 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
 
     // Prefer care recipient address when present, otherwise other user's address
     const address = session.careRecipient?.address || session.otherUser?.address;
-  
+    
 
     const toggleExpanded = () => {
         setIsExpanded(!isExpanded);
     };
-
+    console.log('applications', applications);
     return (
         <View className="mb-6">
             {/* Session Info Card - Always Visible */}
@@ -87,14 +98,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                        
                         <View className="flex-row items-center mt-1">
                             <Text className="text-sm text-gray-600">
-                                {displayInfo.primaryName},{' '}
-                                {session.careRecipient?.address?.city ||
-                                    session.otherUser?.address?.city ||
-                                    'Toronto'}
-                                ,{' '}
-                                {session.careRecipient?.address?.province ||
-                                    session.otherUser?.address?.province ||
-                                    'ON'}
+                              {session.careRecipient?.firstName} {session.careRecipient?.lastName}, {address?.street}
                             </Text>
                             <Ionicons
                                 name="checkmark-circle"
@@ -155,6 +159,15 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                         </View>
                     </View>
                 )}
+                {/* Verified badge */}
+                {!isVerified && (
+                    <View className="flex-row items-center">
+                        <Ionicons name="checkmark-circle" size={16} color="#1A8BF8" />
+                        <Text className="text-sm text-gray-600 ml-2">
+                            Request not sent, waiting for approval
+                        </Text>
+                    </View>
+                )}
 
                 {/* No applicants case */}
                 {(!applications || applications.length === 0) && !applicationsLoading && (
@@ -200,15 +213,16 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                                             {applicant.firstName}{' '}
                                             {applicant.lastName?.charAt(0)}.
                                         </Text>
-                                        {applicant.specialties && applicant.specialties.length > 0 && (
+                                        {applicant.careType && applicant.careType.length > 0 && (
                                             <Text className="text-sm text-gray-600 mt-0.5">
-                                                {applicant.specialties.join(', ')}
+                                                {applicant.careType.join(', ')}
                                             </Text>
                                         )}
-                                        {applicant.distance && (
-                                            <Text className="text-xs text-gray-500 mt-0.5">
-                                                {applicant.distance}
-                                            </Text>
+                                        {applicant.address && (
+                                            <DistanceText
+                                                origin={currentUser?.address?.fullAddress}
+                                                destination={applicant.address.fullAddress}
+                                            />
                                         )}
                                     </View>
                                     <View className="items-end">

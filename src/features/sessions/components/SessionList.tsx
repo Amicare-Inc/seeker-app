@@ -5,8 +5,9 @@ import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { useUnreadBadge } from '@/features/chat/unread/useUnread';
+import AmicareCircle from '@/features/sessions/components/AmicareCircle';
 
-const AvatarWithUnread: React.FC<{ uri?: string; borderColor: string; sessionId: string }> = ({ uri, borderColor, sessionId }) => {
+const AvatarWithUnread: React.FC<{ uri?: string; borderColor: string; sessionId: string; enableUnread?: boolean }> = ({ uri, borderColor, sessionId, enableUnread = true }) => {
     const { unread } = useUnreadBadge(sessionId);
     return (
         <View style={{ position: 'relative', overflow: 'visible' }}>
@@ -15,7 +16,7 @@ const AvatarWithUnread: React.FC<{ uri?: string; borderColor: string; sessionId:
                 className="w-[78px] h-[78px] rounded-full border-4"
                 style={{ borderColor }}
             />
-            {unread ? (
+            {enableUnread && unread ? (
                 <View
                     style={{
                         position: 'absolute',
@@ -58,8 +59,6 @@ const SessionList: React.FC<SessionListProps> = ({
 	let borderColor = 'transparent';
 	if (!title) {
 		borderColor = '#797979'; // gray border
-	} else if (title === 'Pending') {
-		borderColor = '#1A8BF8'; // #1A8BF8 border
 	}
 
 	const renderItem = ({ item }: { item: EnrichedSession }) => {
@@ -104,42 +103,45 @@ const SessionList: React.FC<SessionListProps> = ({
 						New
 					</Text>
 				</View>
-			) : (
-				<ScrollView 
-					horizontal
-					showsHorizontalScrollIndicator={false}
-					contentContainerStyle={{ paddingHorizontal: 4, marginTop: 6 }}
-				>
-					{sessions.length > 0 ? (
-						sessions.map((item) => {
-							if (!item.otherUser || !currentUser) return null;
+			) : <ScrollView
+			horizontal
+			showsHorizontalScrollIndicator={false}
+			contentContainerStyle={{ paddingHorizontal: 4, marginTop: 6 }}
+		>
+			{/* Always show Amicare as the first avatar */}
+			<View className="items-center mr-6">
+				<AmicareCircle firstName="Amicare" />
+			</View>
+			{sessions.length > 0
+				? sessions.map((item) => {
+					  if (!item.otherUser || !currentUser) return null;
 
-							const displayInfo = getSessionDisplayInfo(item, currentUser);
+					  const displayInfo = getSessionDisplayInfo(item, currentUser);
+					  const isPendingItem = item.status === 'pending' || item.status === 'newRequest';
+					  const enableUnread = item.status === 'confirmed' || item.status === 'inProgress';
+					  const avatarBorder = borderColor;
+					  const labelColor = '#00000099';
 
-							return (
-								<TouchableOpacity
-									key={item.id}
-									onPress={() => onSessionPress(item)}
-									className="items-center mr-6"
-								>
-									<AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={borderColor} sessionId={item.id} />
-									<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: '#00000099' }}>
-										{displayInfo.primaryName.split(' ')[0]}
-									</Text>
-								</TouchableOpacity>
-							);
-						})
-					) : title === 'Pending' ? (
-						// Invisible placeholder for Pending section to maintain layout
-						<View className="items-center mr-6">
-							<View className="w-[78px] h-[78px] rounded-full" style={{ opacity: 0 }} />
-							<Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ opacity: 0 }}>
-								Placeholder
-							</Text>
-						</View>
-					) : null}
-				</ScrollView>
-			)}
+					  return (
+						  <TouchableOpacity
+							  key={item.id}
+							  onPress={() => onSessionPress(item)}
+							  className="items-center mr-6"
+							  
+						  >
+							  <AvatarWithUnread uri={displayInfo.primaryPhoto} borderColor={avatarBorder} sessionId={item.id} enableUnread={enableUnread} />
+							  <Text className="text-sm font-medium mb-[20px] mt-[5px]" style={{ color: labelColor }}>
+								  {displayInfo.primaryName.split(' ')[0]}
+							  </Text>
+						  </TouchableOpacity>
+					  );
+				  })
+				: null}
+		</ScrollView>
+}
+
+	
+		
 		</View>
 	);
 };

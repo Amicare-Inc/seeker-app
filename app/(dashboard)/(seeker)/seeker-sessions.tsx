@@ -6,8 +6,7 @@ import {
 	Text,
 	ScrollView,
 	TouchableOpacity,
-	Platform,
-	FlatList,
+
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {
@@ -44,6 +43,9 @@ const SeekerSessionsTab = () => {
 		handleExpandSession,
 	} = useSessionsTab('seeker');
 
+
+		
+
 	const openSessions: EnrichedSession[] = React.useMemo(() => {
 		const byId = new Map<string, EnrichedSession>();
 		[...(applied || []), ...(newRequests || [])].forEach((s) => byId.set(s.id, s));
@@ -54,6 +56,7 @@ const SeekerSessionsTab = () => {
 	const dispatch = useDispatch();
 	const { setActiveEnrichedSession } = useActiveSession();
 	const currentUser = useSelector((state: RootState) => state.user.userData);
+
 	const [markerCoords, setMarkerCoords] = useState<Record<string, { latitude: number; longitude: number }>>({});
 		const [showMap, setShowMap] = useState(true);
 
@@ -143,7 +146,7 @@ const SeekerSessionsTab = () => {
 			</SafeAreaView>
 		);
 	}
-	// console.log('newRequests', newRequests);
+	
 	const onSessionPress = (session: EnrichedSession) => {
 		handleExpandSession(session);
 	};
@@ -161,26 +164,17 @@ const SeekerSessionsTab = () => {
 		setActiveEnrichedSession(session);
 		router.push({ pathname: '/other-user-profile', params: { selectedId } });
 	};
-	const handleSessionPress = (session: EnrichedSession) => {
 
-		
+	const handleSessionPress = (session: EnrichedSession) => {
 
 		dispatch(setActiveProfile(session.otherUser as any));
 		setActiveEnrichedSession(session);
 		// Check if this is a pending application (dimmed story circle)
 		if (session.status === 'pending') {
-			// Navigate to the application-sent page (grey expandable slider)
-
-		router.push('/other-user-profile');
+			router.push('/other-user-profile');
 		}
 	};
-	const renderItem = ({ item }: { item: EnrichedSession }) => (
-		<SeekerRequestCard
-			key={item.id}
-			session={item}
-			onSelectPSW={(pswId, applicant) => handleSelectPSW(pswId, applicant, item)}
-		/>
-	);
+
 
 	return (
 		<SafeAreaView
@@ -192,7 +186,7 @@ const SeekerSessionsTab = () => {
 		>
 			
 			<View className="flex-row items-center justify-between px-[15px] border-b border-[#79797966] pb-4 mb-[10px]">
-				<Text className="text-xl text-black font-medium">Nearby PSWs</Text>
+			<Text className="text-xl text-black font-medium">Nearby PSWs</Text>
 				{showMap ? (
 					<TouchableOpacity onPress={() => setShowMap(false)} className="px-2 py-1">
 						<Text className="text-black">Hide</Text>
@@ -227,7 +221,7 @@ const SeekerSessionsTab = () => {
 						<View className="items-center mt-6">
 							<TouchableOpacity
 								onPress={handleRequestSession}
-								className="bg-brand-blue rounded-full px-5 py-4"
+								className="bg-brand-blue rounded-full px-5 py-4 mt-2"
 								style={{
 									shadowColor: '#000',
 									shadowOffset: { width: 0, height: 2 },
@@ -247,8 +241,6 @@ const SeekerSessionsTab = () => {
 			)}
 			{!showMap && (
 				<>
-					
-					
 					<ScrollView
 						contentContainerStyle={{
 							paddingBottom:
@@ -257,24 +249,12 @@ const SeekerSessionsTab = () => {
 								),
 						}}
 					>
-					<View style={{ marginTop: 12, marginBottom: 8 }}>
-						<PendingSessions
-							sessions={pending}
-							onSessionPress={handleSessionPress}
-							title="Applied"
-						/>
-					</View>
 					<View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px] mt-[10px]">
-						<Ionicons
-							name="time"
-							size={26}
-							color="black"
-							style={{ marginRight: 8 }}
-						/>
+					
 						
-						<Text className="text-xl text-black font-medium">
-							My Sessions
-						</Text>
+					<Text className="text-xl text-black font-medium">
+						New
+					</Text>
 					</View>
 						<View className="flex-1 px-3.5">
 							{openSessions.length > 0 ? (
@@ -292,14 +272,28 @@ const SeekerSessionsTab = () => {
 									<Text className="text-gray-600">No new requests yet.</Text>
 								</View>
 							)}
-
 					</View>
-		
-				<SessionBookedList
-					sessions={confirmed}
-					onSessionPress={onSessionPress}
-					title="Confirmed"
-				/>
+
+					<View style={{ marginTop: 12, marginBottom: 8 }}>
+						<SessionList
+							sessions={newRequests}
+							onSessionPress={handleSessionPress}
+							title="New"
+						/>
+					</View>
+					<View style={{ marginTop: 12, marginBottom: 8 }}>
+						<PendingSessions
+							sessions={pending}
+							onSessionPress={handleSessionPress}
+							title="Applied"
+						/>
+					</View>
+
+					<SessionBookedList
+						sessions={confirmed}
+						onSessionPress={onSessionPress}
+						title="Confirmed"
+					/>
 				<TouchableOpacity
 					onPress={handleRequestSession}
 					className="bg-white rounded-full px-5 py-3 self-center border border-[#E5E5EA] mt-4 mb-6"
