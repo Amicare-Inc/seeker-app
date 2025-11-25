@@ -94,7 +94,8 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const startDate = enrichedSession.startTime ? new Date(enrichedSession.startTime) : null;
     const endDate = enrichedSession.endTime ? new Date(enrichedSession.endTime) : null;
     const isNextDay = startDate && endDate ? endDate.getDate() !== startDate.getDate() : false;
-
+    console.log('timeRange', enrichedSession.startTime);
+    console.log('requestedTimeRange',  enrichedSession.timeChangeRequest?.proposedStartTime );
     const handleToggle = () => {
         LayoutAnimation.easeInEaseOut();
         setExpanded((prev) => !prev);
