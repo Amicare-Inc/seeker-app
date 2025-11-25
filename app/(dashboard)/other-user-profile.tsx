@@ -164,23 +164,14 @@ const OtherUserProfileScreen = () => {
 				/>
 			)}
 			{activeEnrichedProfile &&
-				activeEnrichedProfile.status === 'newRequest' && (
+				(activeEnrichedProfile.status === 'newRequest'  || activeEnrichedProfile.status === 'applied') && (
 					<SessionCardBook
 						{...activeEnrichedProfile}
 						candidateUserId={selectedIdParam ?? ''}
 					/>
 				)}
-			{activeEnrichedProfile &&
-				activeEnrichedProfile.status === 'interested' && (
-					<InterestedCard session={activeEnrichedProfile} />
-				)}
-		
-			{(activeEnrichedProfile && activeEnrichedProfile.status === 'applied' ) && (
-				<SessionCardBook
-				{...activeEnrichedProfile}
-				candidateUserId={selectedIdParam ?? ''}
-				/>
-			)}
+			
+	
 			
 			{(activeEnrichedProfile && activeEnrichedProfile.status === 'pending' ) && (
 				<PendingSessionSlider

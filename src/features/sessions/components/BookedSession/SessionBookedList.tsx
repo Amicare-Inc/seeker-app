@@ -128,7 +128,11 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 
 	return (
 		<View>
-			<Text className="text-xl text-black font-medium mt-[10px] mb-[20px]">{title}</Text>
+			<View className="flex-row items-center px-[15px] border-b border-[#79797966] pb-4 mb-[10px] mt-[10px]">
+				<Text className="text-xl text-black font-medium">
+					{title}
+				</Text>
+			</View>
 			<ScrollView 
 				showsVerticalScrollIndicator={false}
 				contentContainerStyle={{ paddingHorizontal: 4 }}

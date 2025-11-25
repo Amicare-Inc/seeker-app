@@ -9,7 +9,7 @@ import { useBookCandidateSession, useRejectSession } from '@/features/sessions/a
 import SessionChecklistBox from './SessionChecklistBox';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-
+import { acceptTimeChange, rejectTimeChange } from '@/features/sessions/api/sessionApi';
 const { width } = Dimensions.get('window');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -48,6 +48,20 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     console.log('enrichedSession.candidateUserId', enrichedSession.candidateUserId);
     const handleBook = async () => {
         if (!currentUser?.id) return;
+        if (enrichedSession.timeChangeRequest?.proposedBy === enrichedSession.candidateUserId) {
+            try {
+                await acceptTimeChange(enrichedSession.id);
+                await bookSessionMutation.mutateAsync({
+                    sessionId: enrichedSession.id,
+                    currentUserId: currentUser.id,
+                    candidateUserId: enrichedSession.candidateUserId ?? ''
+                });
+                router.back();
+            } catch (err) {
+                console.error('Error accepting time change:', err);
+            }
+            return;
+        }
         try {
             await bookSessionMutation.mutateAsync({
                 sessionId: enrichedSession.id,
@@ -74,7 +88,9 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const timeRange = enrichedSession.startTime && enrichedSession.endTime
         ? formatTimeRange(enrichedSession.startTime, enrichedSession.endTime)
         : 'Invalid Time';
-
+    const requestedTimeRange = enrichedSession.timeChangeRequest?.proposedStartTime && enrichedSession.timeChangeRequest?.proposedEndTime
+        ? formatTimeRange(enrichedSession.timeChangeRequest?.proposedStartTime, enrichedSession.timeChangeRequest?.proposedEndTime)
+        : null;
     const startDate = enrichedSession.startTime ? new Date(enrichedSession.startTime) : null;
     const endDate = enrichedSession.endTime ? new Date(enrichedSession.endTime) : null;
     const isNextDay = startDate && endDate ? endDate.getDate() !== startDate.getDate() : false;
@@ -147,7 +163,8 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                             </View>
                         )}
                     </View>
-
+                   
+                    
                     <Ionicons name="calendar-outline" size={32} color="#fff" style={{ position: 'absolute', right: 25, top: 15 }} />
                 </TouchableOpacity>
 
@@ -161,8 +178,17 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                             </View>
                             <View style={{ width: 1, height: 28 }} className="bg-neutral-100" />
                             <View className="flex-row items-center">
+                            {enrichedSession.timeChangeRequest?.proposedBy === enrichedSession.candidateUserId && (
+                                <>
+                                    <Ionicons name="alert-circle" size={20} color="#f59e0b" />
+                                </>
+                                )}
                                 <Ionicons name="time-outline" size={24} color="#fff" />
-                                <Text className="text-white ml-2 text-[17px] font-medium">{timeRange}</Text>
+                                {requestedTimeRange ? (
+                                    <Text className="text-white ml-2 text-[17px] font-medium">{requestedTimeRange}</Text>
+                                ) : (
+                                    <Text className="text-white ml-2 text-[17px] font-medium">{timeRange}</Text>
+                                )}
                             </View>
                         </View>
 

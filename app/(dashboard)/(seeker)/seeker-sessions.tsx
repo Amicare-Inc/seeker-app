@@ -275,11 +275,7 @@ const SeekerSessionsTab = () => {
 					</View>
 
 					<View style={{ marginTop: 12, marginBottom: 8 }}>
-						<SessionList
-							sessions={newRequests}
-							onSessionPress={handleSessionPress}
-							title="New"
-						/>
+					
 					</View>
 					<View style={{ marginTop: 12, marginBottom: 8 }}>
 						<PendingSessions
@@ -292,7 +288,7 @@ const SeekerSessionsTab = () => {
 					<SessionBookedList
 						sessions={confirmed}
 						onSessionPress={onSessionPress}
-						title="Confirmed"
+						title="Booked"
 					/>
 				<TouchableOpacity
 					onPress={handleRequestSession}

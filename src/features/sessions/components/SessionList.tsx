@@ -96,12 +96,7 @@ const SessionList: React.FC<SessionListProps> = ({
 						alignItems: 'center'
 					}}
 				>
-					<Text 
-						className="text-lg text-grey-35 font-medium"
-						style={{ color: '#999999' }}
-					>
-						New
-					</Text>
+					
 				</View>
 			) : <ScrollView
 			horizontal

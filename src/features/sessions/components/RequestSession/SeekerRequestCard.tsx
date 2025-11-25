@@ -275,7 +275,10 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                                     <View className="flex-1">
                                         <Text className="text-base font-semibold text-gray-900">
                                             {applicant.firstName}{' '}
-                                            {applicant.lastName?.charAt(0)}.
+                                            {applicant.lastName?.charAt(0)}. {' '}
+                                            {session?.timeChangeRequest?.proposedBy === applicant.id && (
+                                             <Ionicons name="alert-circle" size={16} color="#f59e0b" />
+                                        )}
                                         </Text>
                                         {applicant.careType && applicant.careType.length > 0 && (
                                             <Text className="text-sm text-gray-600 mt-0.5">
@@ -288,6 +291,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                                                 destination={applicant.address.fullAddress}
                                             />
                                         )}
+                                       
                                     </View>
                                     <View className="items-end">
                                         {applicant.hourlyRate && (
@@ -334,6 +338,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                         </View>
 
                         {session.timeChangeRequest && (
+                            console.log('session.timeChangeRequest', session.timeChangeRequest),
                             <>
                                 {/* Debug logging */}
                                 {console.log('Time Change Request Data:', {
