@@ -42,6 +42,9 @@ const SeekerDashboardLayout = () => {
 							} else if (route.name === 'seeker-profile') {
 								iconName = 'person';
 							}
+							else if (route.name === 'seeker-meetups') {
+								iconName = 'people';
+							}
 							return (
 								<Ionicons
 									name={iconName}
@@ -53,6 +56,13 @@ const SeekerDashboardLayout = () => {
 						},
 					})}
 				>
+										<Tabs.Screen
+						name="seeker-meetups"
+						options={{
+							title: 'Meetups',
+							headerShown: false,
+						}}
+					/>
 					<Tabs.Screen
 						name="seeker-sessions"
 						options={{
@@ -67,6 +77,7 @@ const SeekerDashboardLayout = () => {
 							headerShown: false,
 						}}
 					/>
+
 				</Tabs>
 				{activeLiveSession && (
 					<KeyboardAvoidingView 

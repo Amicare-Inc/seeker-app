@@ -88,8 +88,29 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const timeRange = enrichedSession.startTime && enrichedSession.endTime
         ? formatTimeRange(enrichedSession.startTime, enrichedSession.endTime)
         : 'Invalid Time';
-    const requestedTimeRange = enrichedSession.timeChangeRequest?.proposedStartTime && enrichedSession.timeChangeRequest?.proposedEndTime
-        ? formatTimeRange(enrichedSession.timeChangeRequest?.proposedStartTime, enrichedSession.timeChangeRequest?.proposedEndTime)
+    const toIsoString = (value: any): string | null => {
+        if (!value) return null;
+        if (typeof value === 'string') {
+            const d = new Date(value);
+            return isNaN(d.getTime()) ? null : d.toISOString();
+        }
+        if (typeof value === 'number') {
+            const ms = value < 10000000000 ? value * 1000 : value;
+            const d = new Date(ms);
+            return isNaN(d.getTime()) ? null : d.toISOString();
+        }
+        const seconds = (value as any).seconds ?? (value as any)._seconds;
+        const nanoseconds = (value as any).nanoseconds ?? (value as any)._nanoseconds ?? 0;
+        if (typeof seconds === 'number') {
+            const d = new Date(seconds * 1000 + nanoseconds / 1e6);
+            return isNaN(d.getTime()) ? null : d.toISOString();
+        }
+        return null;
+    };
+    const proposedStartIso = toIsoString(enrichedSession.timeChangeRequest?.proposedStartTime);
+    const proposedEndIso = toIsoString(enrichedSession.timeChangeRequest?.proposedEndTime);
+    const requestedTimeRange = proposedStartIso && proposedEndIso
+        ? formatTimeRange(proposedStartIso, proposedEndIso)
         : null;
     const startDate = enrichedSession.startTime ? new Date(enrichedSession.startTime) : null;
     const endDate = enrichedSession.endTime ? new Date(enrichedSession.endTime) : null;

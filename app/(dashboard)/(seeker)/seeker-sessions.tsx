@@ -218,10 +218,10 @@ const SeekerSessionsTab = () => {
 						<Text className="text-center text-black text-3xl font-semibold mt-1">
 							in your area
 						</Text>
-						<View className="items-center mt-6">
+						<View className="items-center mt-2">
 							<TouchableOpacity
 								onPress={handleRequestSession}
-								className="bg-brand-blue rounded-full px-5 py-4 mt-2"
+								className="bg-brand-blue rounded-full px-5 py-4"
 								style={{
 									shadowColor: '#000',
 									shadowOffset: { width: 0, height: 2 },
