@@ -18,31 +18,26 @@ const BillingCard: React.FC<BillingCardProps> = ({
 	hourlyRate,
 }) => {
 	return (
-		<View className="bg-white p-3 rounded-xl mb-4">
-			{/* Hourly Rate Row */}
-			<View className="flex-row justify-between mb-1">
-				<Text className="text-sm text-grey-58">Approximate Hourly Rate:</Text>
-				<Text className="text-sm text-grey-58">${hourlyRate.toFixed(2)}/hr</Text>
-			</View>
+		<View className="bg-grey-0 rounded-xl mb-2">
 			{/* Base Price Row */}
-			<View className="flex-row justify-between mb-1">
-				<Text className="text-sm text-grey-58">Base Price:</Text>
-				<Text className="text-sm text-grey-58">${basePrice.toFixed(2)}</Text>
+			<View className="flex-row justify-between mb-2">
+				<Text className="text-sm text-grey-58">Base Price</Text>
+				<Text className="text-sm text-grey-80 font-medium">${basePrice.toFixed(2)}</Text>
 			</View>
 			{/* Taxes Row */}
-			<View className="flex-row justify-between mb-1">
-				<Text className="text-sm text-grey-58">Taxes:</Text>
-				<Text className="text-sm text-grey-58">${taxes.toFixed(2)}</Text>
+			<View className="flex-row justify-between mb-2">
+				<Text className="text-sm text-grey-58">Taxes</Text>
+				<Text className="text-sm text-grey-80 font-medium">${taxes.toFixed(2)}</Text>
 			</View>
 			{/* Service Fee Row */}
-			<View className="flex-row justify-between mb-2">
-				<Text className="text-sm text-grey-58">Service Fee:</Text>
-				<Text className="text-sm text-grey-58">${serviceFee.toFixed(2)}</Text>
+			<View className="flex-row justify-between mb-3">
+				<Text className="text-sm text-grey-58">Service Fee</Text>
+				<Text className="text-sm text-grey-80 font-medium">${serviceFee.toFixed(2)}</Text>
 			</View>
 			{/* Total Row */}
-			<View className="flex-row justify-between">
-				<Text className="text-base font-medium">Total:</Text>
-				<Text className="text-base font-medium">${total.toFixed(2)}</Text>
+			<View className="flex-row justify-between pt-2 border-t border-grey-9">
+				<Text className="text-base font-semibold text-grey-80">Total</Text>
+				<Text className="text-base font-bold text-grey-80">${total.toFixed(2)}</Text>
 			</View>
 		</View>
 	);

@@ -338,16 +338,16 @@ const RequestSession = () => {
 						}
 					}
 
-					// Only add billingDetails if it already exists (i.e. we're updating the sess)
-					if ((otherUserId && otherUserId !== currentUser?.id) || existingSession.billingDetails) {
-						updateData.billingDetails = {
-							basePrice,
-							taxes,
-							serviceFee,
-							total,
-						}
-					}
 
+				// Only add billingDetails if it already exists (i.e. we're updating the sess)
+				if ((otherUserId && otherUserId !== currentUser?.id) || existingSession.billingDetails) {
+					updateData.billingDetails = {
+						basePrice: Number(displayBasePrice.toFixed(2)),
+						taxes: Number(displayTaxes.toFixed(2)),
+						serviceFee: Number(displayServiceFee.toFixed(2)),
+						total: Number(displayTotal.toFixed(2)),
+					}
+				}
 					await updateSessionMutation.mutateAsync({
 						sessionId: existingSession.id,
 						data: updateData,
@@ -401,7 +401,9 @@ const RequestSession = () => {
 	  pswId: pswIdForQuote,
 	  originAddress,
 	  startTime: startDate?.toISOString(),
-	  endTime: endDate?.toISOString()
+	  endTime: endDate?.toISOString(),
+	  useAlgorithmic: true, // Enable new 5-feature pricing algorithm
+	  numApplicants: 0, // Default to 0 for new requests (no applicants yet)
 	});
 
 	const effectiveRate = quote?.hourlyRate ?? pswRate;
@@ -422,32 +424,46 @@ const RequestSession = () => {
 						)}
 						<LocationDisplay location={getLocationToDisplay()} label="Location" />
 						<DateTimeRow label="Starts" dateLabel={formatDate(startDate)} timeLabel={formatTime(startDate)} onPressDate={() => showDatePicker('start', 'date')} onPressTime={() => showDatePicker('start', 'time')} disabled={false} />
-						<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={false} />
-					{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}
-					<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={false} />
-					{otherUserId && otherUserId !== currentUser?.id && <BillingCard basePrice={displayBasePrice} taxes={displayTaxes} serviceFee={displayServiceFee} total={displayTotal} hourlyRate={effectiveRate} />}
-					</View>
+					<SessionLengthSelector sessionLength={sessionLength} formatSessionLength={formatSessionLength} incrementBy30={() => incrementSessionLength(0.5)} incrementBy60={() => incrementSessionLength(1)} onReset={() => setSessionLength(0)} disabled={false} />
+				{startDate && sessionLength > 0 && (<DateTimeRow label="Ends" dateLabel={formatDate(endDate)} timeLabel={formatTime(endDate)} onPressDate={() => {}} onPressTime={() => {}} disabled={true} />)}
+				<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={false} />
+				</View>
 					{ <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
 					
-				</ScrollView>
-			</KeyboardAvoidingView>
-			{ (
-			<View className="bg-transparent">
-				<View className="mx-4 bg-[#BBDAF7] flex-row py-3 px-4 items-start rounded-xl -translate-y-3">
-					<Ionicons name="information-circle" size={38} color="#55A2EB" />
-					<Text className="flex-1 text-[13px] text-grey-80 leading-[18px]">
-						By sending this request, you agree to share this information with the caregiver. Learn more in our{' '}
-						<PrivacyPolicyLink textStyle={{ fontSize: 13, color: '#0c7ae2' }} onPress={() => setShowPrivacyModal(true)} />
-					</Text>
+			</ScrollView>
+		</KeyboardAvoidingView>
+		{/* Fixed bottom section with pricing and send button */}
+		{ (
+		<View className="bg-white border-t border-grey-9">
+			{/* Pricing Card - Fixed at bottom, visible when we have session timing */}
+			{startDate && endDate && sessionLength > 0 && (
+				<View className="px-4 pt-3 pb-2">
+					<BillingCard 
+						basePrice={displayBasePrice} 
+						taxes={displayTaxes} 
+						serviceFee={displayServiceFee} 
+						total={displayTotal} 
+						hourlyRate={effectiveRate} 
+					/>
 				</View>
-				<TouchableOpacity onPress={handleSubmit} disabled={isSubmitting} className={`bg-brand-blue rounded-xl p-4 mx-4 items-center flex-row justify-center mb-4 ${isSubmitting ? 'opacity-50' : ''}`}>
-					<Ionicons name="paper-plane" size={22} color="white"/>
-					<Text className="text-white text-lg font-medium ml-3">{existingSession ? 'Update Session' : isSubmitting ? 'Sending...' : 'Send Request'}</Text>
-				</TouchableOpacity>
-			</View>
 			)}
-		
-			<PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
+			
+			{/* Privacy Notice */}
+			<View className="mx-4 bg-[#BBDAF7] flex-row py-3 px-4 items-start rounded-xl mb-3">
+				<Ionicons name="information-circle" size={38} color="#55A2EB" />
+				<Text className="flex-1 text-[13px] text-grey-80 leading-[18px]">
+					By sending this request, you agree to share this information with the caregiver. Learn more in our{' '}
+					<PrivacyPolicyLink textStyle={{ fontSize: 13, color: '#0c7ae2' }} onPress={() => setShowPrivacyModal(true)} />
+				</Text>
+			</View>
+			
+			{/* Send Request Button */}
+			<TouchableOpacity onPress={handleSubmit} disabled={isSubmitting} className={`bg-brand-blue rounded-xl p-4 mx-4 items-center flex-row justify-center mb-4 ${isSubmitting ? 'opacity-50' : ''}`}>
+				<Ionicons name="paper-plane" size={22} color="white"/>
+				<Text className="text-white text-lg font-medium ml-3">{existingSession ? 'Update Session' : isSubmitting ? 'Sending...' : 'Send Request'}</Text>
+			</TouchableOpacity>
+		</View>
+		)}			<PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
 			{isSubmitting && (
 				<View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">
 					<Ionicons name="hourglass" size={36} color="#0c7ae2" />

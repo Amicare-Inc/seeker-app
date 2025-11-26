@@ -98,7 +98,7 @@ const ApplicationSent = () => {
 		}
 	};
 
-	// Calculate duration and pricing
+	// Calculate duration and get pricing from session
 	const calculateSessionDuration = () => {
 		if (!session?.startTime || !session?.endTime) return 4; // Default 4 hours
 		try {
@@ -111,11 +111,13 @@ const ApplicationSent = () => {
 	};
 
 	const sessionDuration = calculateSessionDuration();
+	// Use billingDetails from session object (calculated by pricing algorithm)
+	// Fall back to calculated values only if billingDetails is unavailable
+	const basePrice = session?.billingDetails?.basePrice ?? (sessionDuration * (session?.hourlyRate || 25));
+	const taxes = session?.billingDetails?.taxes ?? (Math.round(basePrice * 0.13 * 100) / 100);
+	const serviceFee = session?.billingDetails?.serviceFee ?? 40;
+	const totalAmount = session?.billingDetails?.total ?? (basePrice + taxes + serviceFee);
 	const hourlyRate = session?.hourlyRate || 25;
-	const basePrice = sessionDuration * hourlyRate;
-	const taxes = Math.round(basePrice * 0.13 * 100) / 100; // 13% tax
-	const serviceFee = 40;
-	const totalAmount = basePrice + taxes + serviceFee;
 
 	const toggleExpansion = () => {
 		const toValue = isExpanded ? 200 : screenHeight * 0.85;
