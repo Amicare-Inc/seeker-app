@@ -36,7 +36,7 @@ export const changeUserPassword = async (currentPassword: string, newPassword: s
 /**
  * Deletes the user's account using Firebase Client SDK with proper re-authentication
  */
-export const deleteUserAccount = async (password: string): Promise<void> => {
+export const deleteUserAccount = async (password: string, isPsW: boolean): Promise<void> => {
   const user = FIREBASE_AUTH.currentUser;
   
   if (!user || !user.email) {
@@ -63,7 +63,7 @@ export const deleteUserAccount = async (password: string): Promise<void> => {
       };
       
       console.log('Making DELETE request to backend...');
-      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${user.uid}/data`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${user.uid}`, {
         method: 'DELETE',
         headers,
       });

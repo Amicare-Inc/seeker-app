@@ -5,12 +5,13 @@ import { Session } from '@/types/Sessions';
 import { ChecklistItem } from '@/types/Sessions';
 import { getAuthHeaders } from '@/lib/auth';
 
-export const getUserSessionTab = async (userId: string): Promise<EnrichedSession[]> => {
+export const getUserSessionTab = async (userId: string, isPsW: boolean): Promise<EnrichedSession[]> => {
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/tab?userId=${userId}`, {
       method: 'GET',
       headers,
+      body: JSON.stringify({ isPsw: false }),
     });
 
     if (!response.ok) {
@@ -32,6 +33,7 @@ export const getNewRequestsTab= async (): Promise<EnrichedSession[]> => {
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/requested-tab`, {
       method: 'GET',
       headers,
+      body: JSON.stringify({ isPsw: false }),
     });
 
     if (!response.ok) {

@@ -31,10 +31,10 @@ export const sessionKeys = {
 };
 
 // Fetch enriched sessions
-export function useEnrichedSessions(userId: string | undefined) {
+export function useEnrichedSessions(userId: string | undefined, isPsW: boolean) {
   return useQuery({
     queryKey: sessionKeys.list(userId || ''),
-    queryFn: () => getUserSessionTab(userId!),
+    queryFn: () => getUserSessionTab(userId!, isPsW),
     enabled: !!userId,
   });
 }

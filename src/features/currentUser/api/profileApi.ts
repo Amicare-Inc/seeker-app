@@ -9,6 +9,7 @@ export const updateUserProfile = async (userId: string, updatedFields: any) => {
       body: JSON.stringify({
         uid: userId,
         ...updatedFields,
+        isPsw: false,
       }),
     });
 

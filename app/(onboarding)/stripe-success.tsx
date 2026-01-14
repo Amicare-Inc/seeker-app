@@ -28,7 +28,7 @@ const StripeSuccess: React.FC = () => {
             }
 
             // Save Stripe account ID to Firebase
-            await AuthApi.updateStripeAccount(userData.id, accountId);
+            await AuthApi.updateStripeAccount(userData.id, accountId, userData?.isPsw || false);
             console.log('Stripe account ID saved to Firebase successfully');
             
             setSuccess(true);

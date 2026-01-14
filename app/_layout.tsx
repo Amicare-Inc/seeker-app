@@ -50,7 +50,7 @@ const GlobalDataLoader = () => {
 	useUnreadSetup();
 
 	// Fetch sessions with React Query - only when everything is ready
-	const sessionsQuery = useEnrichedSessions(shouldMakeApiCalls ? currentUser?.id : undefined);
+	const sessionsQuery = useEnrichedSessions(shouldMakeApiCalls ? currentUser?.id : undefined, !!currentUser?.isPsw);
 
 	// Helper to refresh and also push fresh user into Redux
 	const refreshAll = React.useCallback(() => {
@@ -60,7 +60,7 @@ const GlobalDataLoader = () => {
 		return Promise.all([
 			(async () => {
 				try {
-					const fresh = await AuthApi.getUser(uid);
+					const fresh = await AuthApi.getUser(uid, !!currentUser?.isPsw);
 					if (fresh) {
 						dispatch(updateUserFields(fresh));
 						queryClient.setQueryData(['user', uid], fresh);
@@ -74,7 +74,7 @@ const GlobalDataLoader = () => {
 			}),
 			queryClient.prefetchQuery({
 				queryKey: ['sessions', 'list', uid],
-				queryFn: () => getUserSessionTab(uid),
+				queryFn: () => getUserSessionTab(uid, !!currentUser?.isPsw),
 				staleTime: 15_000,
 			}),
 		]).then(() => undefined);

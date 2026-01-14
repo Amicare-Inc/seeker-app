@@ -25,7 +25,7 @@ const StripeSuccessPayouts: React.FC = () => {
 			if (!userData?.id || !accountId) {
 				throw new Error('Missing user ID or account ID');
 			}
-			await AuthApi.updateStripeAccount(userData.id, accountId);
+			await AuthApi.updateStripeAccount(userData.id, accountId, userData?.isPsw || false);
 			setSuccess(true);
 		} catch (error: any) {
 			console.error('Failed to save Stripe account ID:', error);

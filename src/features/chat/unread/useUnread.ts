@@ -12,10 +12,14 @@ export function useUnreadBadge(sessionId?: string) {
 
   if (!sessionId || !userId) return { unread: false };
   const s = allSessions.find((x) => x.id === sessionId);
+  
+  console.log('sessionId', sessionId);
+
   if (!s) return { unread: false };
   const lastAt = s.lastMessageAt ? new Date(s.lastMessageAt) : null;
-  const lastBy = s.lastMessageBy;
-  const readAtStr = s.readReceipts?.[userId];
+  const lastBy = s.senderId;
+  const key = `readReceipts.${userId}`;
+  const readAtStr = (s as any)[key];
   const readAt = readAtStr ? new Date(readAtStr) : null;
   const unread = !!(lastAt && lastBy && lastBy !== userId && (!readAt || lastAt > readAt));
 

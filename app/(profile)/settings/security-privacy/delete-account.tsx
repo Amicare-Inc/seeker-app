@@ -4,12 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { deleteUserAccount } from '@/lib/auth-operations';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 const DeleteAccountScreen = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
+  const currentUser = useSelector((state: RootState) => state.user.userData);
   const handleBackPress = () => {
     router.back();
   };
@@ -36,7 +38,7 @@ const DeleteAccountScreen = () => {
             setIsLoading(true);
             try {
               // Use Firebase Client SDK for secure account deletion with re-authentication
-              await deleteUserAccount(password);
+              await deleteUserAccount(password, !!currentUser?.isPsw);
               
               Alert.alert(
                 'Account Deleted',

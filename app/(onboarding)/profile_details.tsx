@@ -75,6 +75,7 @@ const AddProfilePhoto: React.FC = () => {
 			if (userData?.id) {
 				// Filter out undefined values
 				const optionalInfoData: any = {
+					isPsW: userData?.isPsw || false,
 					profilePhotoUrl: profilePhotoUrl,
 					lookingForSelf: userData.lookingForSelf, // Add lookingForSelf as separate parameter
 				};

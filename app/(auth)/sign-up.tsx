@@ -35,7 +35,7 @@ const SignUp = () => {
                 setIsLoading(true);
                 setPasswordError('');
                 // Step 1: Create backend user (which also creates Firebase user)
-                const userId = await AuthApi.signUp(form.email, form.password);
+                const userId = await AuthApi.signUp(form.email, form.password, false);
                 
                 // Step 2: Sign in with Firebase to establish auth state
                 await signInWithEmailAndPassword(

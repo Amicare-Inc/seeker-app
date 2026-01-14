@@ -2,16 +2,17 @@ import { getAuthHeaders } from '@/lib/auth';
 
 // Auth API service
 export const AuthApi = {
-  async signUp(email: string, password: string): Promise<any> {
+  async signUp(email: string, password: string, isPsW: boolean): Promise<any> {
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email,
+        body: JSON.stringify({ 
+          email, 
           password,
+          isPsW,
         }),
       });
 
@@ -95,13 +96,13 @@ export const AuthApi = {
     }
   },
 
-  async updateStripeAccount(uid: string, stripeAccountId: string): Promise<void> {
+  async updateStripeAccount(uid: string, stripeAccountId: string, isPsw: boolean): Promise<void> {
     try {
       const headers = await getAuthHeaders();
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}/stripe-account`, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ stripeAccountId }),
+        body: JSON.stringify({ stripeAccountId, isPsw: isPsw}),
       });
 
       if (!response.ok) {
@@ -127,7 +128,7 @@ export const AuthApi = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, isPsw: false}),
         signal: controller.signal,
       });
       
@@ -190,10 +191,10 @@ export const AuthApi = {
     }
   },
 
-  async getUser(uid: string): Promise<any> {
+  async getUser(uid: string, isPsW: boolean): Promise<any> {
     try {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}?isPsW=${isPsW}`, {
         method: 'GET',
         headers,
       });

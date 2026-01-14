@@ -35,7 +35,8 @@ const BioScreen: React.FC = () => {
 					carePreferences: userData.carePreferences,
 					idVerified: userData.idVerified,
 					bio: bio,
-					onboardingComplete: true
+					onboardingComplete: true,
+					isPsw: userData?.isPsw || false
 				});
 				
 				// Only show success alert if completing the entire flow
