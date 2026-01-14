@@ -23,6 +23,7 @@ import { SessionDTO } from '@/types/dtos/SessionDto';
 import { Ionicons } from '@expo/vector-icons';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
 import { usePricingQuote } from '@/features/pricing/api/usePricingQuote';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SessionData {
 	id: string;
@@ -60,6 +61,7 @@ interface SessionData {
 const RequestSession = () => {
 	const { otherUserId, sessionObj } = useLocalSearchParams();
 	const dispatch = useDispatch();
+	const queryClient = useQueryClient();
 	const updateSessionMutation = useUpdateSession();
 	const targetUserFromAllUsers = useSelector(
 		(state: RootState) =>
@@ -80,13 +82,6 @@ const RequestSession = () => {
 		? JSON.parse(sessionObj as string)
 		: null;
 
-	// Debug: Log the existing session to see what's being passed
-	useEffect(() => {
-		if (existingSession) {
-			console.log('🔍 RequestSession - existingSession:', existingSession);
-			console.log('🔍 RequestSession - existingSession.checklist:', existingSession.checklist);
-		}
-	}, []);
 
 	const [helpText, setHelpText] = useState<string>(
 		existingSession?.note || '',
@@ -110,12 +105,8 @@ const RequestSession = () => {
 	const [selectedCareRecipientData, setSelectedCareRecipientData] = useState<any>(null);
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-
 	const currentUser = useSelector((state: RootState) => state.user.userData);
-	
-
 	// Allow PSWs to change time when routed here with an existing session (Change/Cancel flow)
-	
 	
 	const pswRate = 20;
 
@@ -124,16 +115,7 @@ const RequestSession = () => {
 	const serviceFee = basePrice * 0.1;
 	const total = basePrice + taxes + serviceFee;
 	const isLookingForFamily = isFamilyCareSeeker(currentUser);
-	const shouldShowLocation = () => {
-		
-		if (currentUser?.lookingForSelf === true) {
-			return true;
-		}
-		if (isLookingForFamily && selectedCareRecipientData) {
-			return true;
-		}
-		return false;
-	};
+	
 	const getLocationToDisplay = () => {
 		if (currentUser?.lookingForSelf === true) {
 			return currentUser?.address?.fullAddress || '';
@@ -143,6 +125,14 @@ const RequestSession = () => {
 		}
 		return '';
 	};
+
+	// Debug: Log the existing session to see what's being passed
+	useEffect(() => {
+		if (existingSession) {
+			console.log('🔍 RequestSession - existingSession:', existingSession);
+			console.log('🔍 RequestSession - existingSession.checklist:', existingSession.checklist);
+		}
+	}, []);
 
 	useEffect(() => {
 		if (startDate && endDate) {
@@ -278,15 +268,6 @@ const RequestSession = () => {
 				status: 'newRequest',
 				startTime: startDate.toISOString(),
 				endTime: endDate.toISOString(),
-				
-				// Billing details are handled in the update case below
-				// billingDetails: {
-				// 	dynamicBasePrice: basePrice,
-				// 	taxes,
-				// 	serviceFee,
-				// 	total,
-				// },
-
 				checklist: checklist.map((task, index) => ({
 					id: index.toString(),
 					task,
@@ -316,6 +297,8 @@ const RequestSession = () => {
 						helpText
 					);
 
+					// Invalidate sessions so previous screen reflects proposed change
+					await queryClient.invalidateQueries({ queryKey: ['enrichedSessions'] });
 					alert('Time change request sent to the seeker!');
 					router.back();
 				} else {
@@ -353,37 +336,22 @@ const RequestSession = () => {
 						data: updateData,
 					});
 
+					// Invalidate sessions so previous screen refreshes on back
+					await queryClient.invalidateQueries({ queryKey: ['enrichedSessions'] });
 					alert('Session updated successfully!');
 					router.back();
 				}
 			} else {
-				// const receiverId = (() => {
-				// 	if (targetUserObj?.isFamilyMemberCard && targetUserObj?.id) {
-				// 		const originalUserId = targetUserObj.id.split('-family-')[0];
-				// 		return originalUserId;
-				// 	}
-				// 	return targetUserObj?.id || otherUserId as string;
-				// })();
-
-				// if (!receiverId) {
-				// 	alert('Unable to find target user. Please try again.');
-				// 	return;
-				// }
-
+	
 				const newSessionData = {
 					...sessionData,
 					senderId: currentUser.id,
-					// receiverId: receiverId,
-					// billingDetails: {
-					// 	...sessionData.billingDetails,
-					// 	basePrice: sessionData.billingDetails.dynamicBasePrice,
-					// },
-					// ...(targetUserObj?.distanceInfo && { distanceInfo: targetUserObj.distanceInfo }),
+			
 				} as SessionDTO;
 
-				// console.log('📝 Creating session with distance info:', !!newSessionData.distanceInfo);
 				await requestSession(newSessionData);
-				// router.push({ pathname: '/sent-request', params: { otherUserId: receiverId } });
+				// Invalidate sessions so previous screen refreshes on back
+				await queryClient.invalidateQueries({ queryKey: ['enrichedSessions'] });
 				router.back();
 			}
 		} catch (error) {
@@ -429,24 +397,20 @@ const RequestSession = () => {
 				<SessionChecklist onChange={setChecklist} initialTasks={checklist} readOnly={false} />
 				</View>
 					{ <DateTimePickerModal isVisible={isDatePickerVisible} mode={pickerMode} onConfirm={handleConfirm} onCancel={hideDatePicker} minuteInterval={15} minimumDate={pickerTarget === 'start' ? (startDate && startDate.toDateString() !== new Date().toDateString() ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0) : new Date(Date.now() + 2 * 60 * 60 * 1000)) : startDate || new Date()} />}
-					
-			</ScrollView>
-		</KeyboardAvoidingView>
-		{/* Fixed bottom section with pricing and send button */}
-		{ (
-		<View className="bg-white border-t border-grey-9">
-			{/* Pricing Card - Fixed at bottom, visible when we have session timing */}
-			{startDate && endDate && sessionLength > 0 && (
-				<View className="px-4 pt-3 pb-2">
-					<BillingCard 
-						basePrice={displayBasePrice} 
-						taxes={displayTaxes} 
-						serviceFee={displayServiceFee} 
-						total={displayTotal} 
-						hourlyRate={effectiveRate} 
-					/>
-				</View>
-			)}
+					{ (
+					<View className="bg-white border-t border-grey-9">
+						{/* Pricing Card - Fixed at bottom, visible when we have session timing */}
+						{startDate && endDate && sessionLength > 0 && (
+							<View className="px-4 pt-3 pb-2">
+								<BillingCard 
+									basePrice={displayBasePrice} 
+									taxes={displayTaxes} 
+									serviceFee={displayServiceFee} 
+									total={displayTotal} 
+									hourlyRate={effectiveRate} 
+								/>
+							</View>
+						)}
 			
 			{/* Privacy Notice */}
 			<View className="mx-4 bg-[#BBDAF7] flex-row py-3 px-4 items-start rounded-xl mb-3">
@@ -463,7 +427,11 @@ const RequestSession = () => {
 				<Text className="text-white text-lg font-medium ml-3">{existingSession ? 'Update Session' : isSubmitting ? 'Sending...' : 'Send Request'}</Text>
 			</TouchableOpacity>
 		</View>
-		)}			<PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
+		)}
+			</ScrollView>
+		</KeyboardAvoidingView>
+		{/* Fixed bottom section with pricing and send button */}
+				<PrivacyPolicyModal visible={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
 			{isSubmitting && (
 				<View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">
 					<Ionicons name="hourglass" size={36} color="#0c7ae2" />

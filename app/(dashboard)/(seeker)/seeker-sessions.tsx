@@ -8,6 +8,7 @@ import {
 	TouchableOpacity,
 
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {
 	useLiveSession,
@@ -26,7 +27,6 @@ import SeekerRequestCard from '@/features/sessions/components/RequestSession/See
 import { router } from 'expo-router';
 import { setActiveProfile } from '@/redux/activeProfileSlice';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
-import AppliedSessions from '@/features/sessions/components/AppliedSessions';
 import PendingSessions from '@/features/sessions/components/PendingSessions';
 
 
@@ -41,16 +41,25 @@ const SeekerSessionsTab = () => {
 		loading: sessionsLoading,
 		error: sessionsError,
 		handleExpandSession,
+		refetchEnrichedSessions,
+		refetchNewRequests,
 	} = useSessionsTab('seeker');
-
-
-		
 
 	const openSessions: EnrichedSession[] = React.useMemo(() => {
 		const byId = new Map<string, EnrichedSession>();
 		[...(applied || []), ...(newRequests || [])].forEach((s) => byId.set(s.id, s));
 		return Array.from(byId.values());
 	}, [applied, newRequests]);
+
+	/**
+	 * Refetch when this screen gains focus to always get latest applied + newRequests
+	 */
+	useFocusEffect(
+		React.useCallback(() => {
+			refetchEnrichedSessions();
+			refetchNewRequests();
+		}, [refetchEnrichedSessions, refetchNewRequests]),
+	);
 
 	const activeLiveSession = useLiveSession();
 	const dispatch = useDispatch();

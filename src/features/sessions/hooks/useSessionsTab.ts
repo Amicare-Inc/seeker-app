@@ -18,9 +18,19 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		useState<EnrichedSession | null>(null);
 
 	// Fetch sessions using React Query
-	const { data: allSessions = [], isLoading: sessionsLoading, error } = useEnrichedSessions(userId);
+	const {
+		data: allSessions = [],
+		isLoading: sessionsLoading,
+		error,
+		refetch: refetchEnrichedSessions,
+	} = useEnrichedSessions(userId);
 	//fetch new requested sessions
-	const { data: newRequestSessions = [], isLoading: newRequestsLoading, error: newRequestError } = useNewRequestSession(userId);
+	const {
+		data: newRequestSessions = [],
+		isLoading: newRequestsLoading,
+		error: newRequestError,
+		refetch: refetchNewRequests,
+	} = useNewRequestSession(userId);
 
 	const loading = sessionsLoading || newRequestsLoading;
 
@@ -120,5 +130,8 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		error: error ? String(error) : null,
 		expandedSession,
 		handleExpandSession,
+		// expose refetchers so screens can refresh on focus
+		refetchEnrichedSessions,
+		refetchNewRequests,
 	};
 } 

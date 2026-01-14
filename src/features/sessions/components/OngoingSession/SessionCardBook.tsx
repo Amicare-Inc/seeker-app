@@ -209,7 +209,7 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                                 {requestedTimeRange ? (
                                     <Text className="text-white ml-2 text-[17px] font-medium">{requestedTimeRange}</Text>
                                 ) : (
-                                    <Text className="text-white ml-2 text-[17px] font-medium">{timeRange}</Text>
+                                <Text className="text-white ml-2 text-[17px] font-medium">{timeRange}</Text>
                                 )}
                             </View>
                         </View>

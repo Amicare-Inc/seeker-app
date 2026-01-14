@@ -71,12 +71,18 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
 
     const startDate = session.startTime;
     const endDate = session.endTime;
-
+    const date = startDate ? new Date(startDate) : undefined;
     const weekday = startDate
         ? new Date(startDate).toLocaleDateString('en-US', { weekday: 'short' })
         : undefined;
     const timeRange = startDate && endDate ? formatTimeRange(startDate, endDate) : undefined;
-    const dayTimeDisplay = weekday && timeRange ? `${weekday}. ${timeRange}` : 'Time TBD';
+    const dateNumber = date ? date.getDate() : undefined;
+    const dayTimeDisplay =
+        weekday && typeof dateNumber === 'number' && timeRange
+            ? `${weekday} ${dateNumber}. ${timeRange}`
+            : weekday && timeRange
+                ? `${weekday}. ${timeRange}`
+                : 'Time TBD';
 
     // Check if there's a time change request
     const hasTimeChangeRequest = !!session.timeChangeRequest;
@@ -122,7 +128,6 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
             setIsProcessing(false);
         }
     };
-    console.log('applications', applications);
     return (
         <View className="mb-6">
             {/* Session Info Card - Always Visible */}
@@ -140,7 +145,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                        
                         <View className="flex-row items-center mt-1">
                             <Text className="text-sm text-gray-600">
-                              {session.careRecipient?.firstName} {session.careRecipient?.lastName}, {address?.street}
+                              {session.careRecipientData?.firstName} {session.careRecipientData?.lastName}, {session.careRecipientData?.address?.street}
                             </Text>
                             <Ionicons
                                 name="checkmark-circle"
