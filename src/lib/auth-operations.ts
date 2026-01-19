@@ -63,9 +63,10 @@ export const deleteUserAccount = async (password: string, isPsW: boolean): Promi
       };
       
       console.log('Making DELETE request to backend...');
-      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${user.uid}`, {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${user.uid}/data`, {
         method: 'DELETE',
         headers,
+        body: JSON.stringify({ isPsW }),
       });
 
       console.log('Backend response status:', response.status);

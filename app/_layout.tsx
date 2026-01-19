@@ -60,7 +60,7 @@ const GlobalDataLoader = () => {
 		return Promise.all([
 			(async () => {
 				try {
-					const fresh = await AuthApi.getUser(uid, !!currentUser?.isPsw);
+					const fresh = await AuthApi.getUser(uid, false);
 					if (fresh) {
 						dispatch(updateUserFields(fresh));
 						queryClient.setQueryData(['user', uid], fresh);

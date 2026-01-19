@@ -8,7 +8,7 @@ export function useUnreadSetup() {}
 
 export function useUnreadBadge(sessionId?: string) {
   const userId = useSelector((s: RootState) => s.user.userData?.id);
-  const { data: allSessions = [] } = useEnrichedSessions(userId);
+  const { data: allSessions = [] } = useEnrichedSessions(userId, false);
 
   if (!sessionId || !userId) return { unread: false };
   const s = allSessions.find((x) => x.id === sessionId);
