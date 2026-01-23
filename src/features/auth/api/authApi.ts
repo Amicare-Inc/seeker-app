@@ -194,10 +194,10 @@ export const AuthApi = {
   async getUser(uid: string, isPsW: boolean): Promise<any> {
     try {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}`, {
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}?isPsw=false`;
+      const response = await fetch(url, {
         method: 'GET',
         headers,
-        body: JSON.stringify({ isPsW }),
       });
       if (!response.ok) {
         const errorText = await response.text();

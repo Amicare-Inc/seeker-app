@@ -28,7 +28,7 @@ const SessionCompleted = () => {
 	// Active session context (may still hold the session)
 	const { activeEnrichedSession } = useActiveSession();
 	// React Query cache / network fallback
-	const { data: allSessions = [], isFetching } = useEnrichedSessions(currentUser?.id, !!currentUser?.isPsw);
+	const { data: allSessions = [], isFetching } = useEnrichedSessions(currentUser?.id);
 
 	// Determine session data using priority order
 	const sessionData = completedSession || activeEnrichedSession || allSessions.find(s => s.id === sessionId);

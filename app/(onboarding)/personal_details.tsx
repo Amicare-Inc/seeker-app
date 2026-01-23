@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput } from 'react-native';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
@@ -12,6 +12,7 @@ import { RegionValidatedAddressInput } from '@/shared/components';
 import { type AddressComponents } from '@/services/google/googlePlacesService';
 import { Ionicons } from '@expo/vector-icons';
 import { PrivacyPolicyLink, PrivacyPolicyModal } from '@/features/privacy';
+import { FIREBASE_AUTH } from '@/firebase.config';
 
 const genderOptions = ['Male', 'Female', 'Other'];
 
@@ -21,7 +22,11 @@ const PersonalDetails: React.FC = () => {
 	const userData = useSelector((state: RootState) => state.user.userData);
 	const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
 
-	const [form, setForm] = useState({
+	const [form, setForm] = useState(() => {
+		const firebaseEmail = FIREBASE_AUTH.currentUser?.email;
+		const initialmail = userData?.email || firebaseEmail || '';
+		
+		return {
 		// firstName: userData?.firstName || 'Martin',
 		// lastName: userData?.lastName || 'Droruga',
 		// dob: userData?.dob || '03/15/1990',
@@ -39,10 +44,20 @@ const PersonalDetails: React.FC = () => {
 		},
 		// phone: userData?.phone || '5879730077',
 		phone: userData?.phone || '',
-		email: userData?.email || '',
+		email: initialmail,
 		gender: userData?.gender || '',
-
+		};
 	});
+	// Update email from Firebase Auth if form email is empty (only on mount)
+	useEffect(() => {
+		if (!form.email) {
+			const firebaseEmail = FIREBASE_AUTH.currentUser?.email || '';
+			if (firebaseEmail) {
+				setForm(prev => ({ ...prev, email: firebaseEmail }));
+			}
+		}
+	}, []); // Run only once on mount
+
 
 	const [errors, setErrors] = useState({
 		firstName: '',
@@ -392,8 +407,8 @@ const PersonalDetails: React.FC = () => {
 								onFocus={() => handleFocus('email')}
 								onBlur={() => handleBlur('email')}
 								keyboardType="email-address"
-								editable={false} // Email is already set from registration
-								style={{ opacity: 0.6 }}
+								autoCapitalize="none"
+								autoCorrect={false}
 							/>
 							{errors.email ? (
 								<Text className="text-red-500 text-xs mt-1">
