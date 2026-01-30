@@ -30,10 +30,9 @@ export const getUserSessionTab = async (userId: string): Promise<EnrichedSession
 export const getNewRequestsTab= async (): Promise<EnrichedSession[]> => {
   try {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/requested-tab`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/requested-tab?isPsw=false`, {
       method: 'GET',
       headers,
-      body: JSON.stringify({ isPsw: false }),
     });
 
     if (!response.ok) {

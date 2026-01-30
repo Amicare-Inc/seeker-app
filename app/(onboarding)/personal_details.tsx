@@ -128,9 +128,15 @@ const PersonalDetails: React.FC = () => {
 		} else {
 			// Check if the person is over 18
 			const today = new Date();
-			
+
 			// Parse the MM/DD/YYYY format from DatePickerField
-			const [month, day, year] = form.dob.split('/').map(num => parseInt(num, 10));
+			const dobString = typeof form.dob === 'string' ? form.dob : '';
+			if (!dobString || !dobString.includes('/')) {
+				newErrors.dob = 'Invalid date format';
+				setErrors(newErrors);
+				return false;
+			}
+			const [month, day, year] = dobString.split('/').map(num => parseInt(num, 10));
 			const birthDate = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
 			
 			let age = today.getFullYear() - birthDate.getFullYear();

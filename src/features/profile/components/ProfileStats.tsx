@@ -28,9 +28,11 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ user }) => {
 	const availabilityStrings: string[] = [];
 	for (const [day, slots] of Object.entries(availabilityObj)) {
 		const dayAbbrev = day.slice(0, 3); // Mon, Tue, etc.
-		slots.forEach(({ start, end }) => {
-			availabilityStrings.push(`${dayAbbrev} ${start}-${end}`);
-		});
+		if (Array.isArray(slots)) {
+			slots.forEach(({ start, end }) => {
+				availabilityStrings.push(`${dayAbbrev} ${start}-${end}`);
+			});
+		}
 	}
 	const availabilityText = availabilityStrings.join(' · ') || 'N/A';
 
