@@ -1,7 +1,8 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { useEnrichedSessions } from '@/features/sessions/api/queries';
+import { useEnrichedSessions, sessionKeys } from '@/features/sessions/api/queries';
 import { markMessagesRead } from '@/features/sessions/api/sessionApi';
+import { useQueryClient } from '@tanstack/react-query';
 
 // No-op setup retained for compatibility
 export function useUnreadSetup() {}
@@ -37,9 +38,14 @@ export function useUnreadBadge(sessionId?: string) {
 }
 
 export function useUnreadActions() {
-  // Only server-side mark read
+  const queryClient = useQueryClient();
+
   const markRead = async (sessionId: string) => {
-    try { await markMessagesRead(sessionId); } catch {}
+    try {
+      await markMessagesRead(sessionId);
+      // Invalidate sessions to update unread badge
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    } catch {}
   };
   return { markRead };
 }

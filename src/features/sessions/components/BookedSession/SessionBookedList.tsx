@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
-import { useUnreadBadge } from '@/features/chat/unread/useUnread';
+import { useUnreadBadge, useUnreadActions } from '@/features/chat/unread/useUnread';
 
 const SmallAvatarWithUnread: React.FC<{ uri?: string; sessionId: string }> = ({ uri, sessionId }) => {
 	console.log('[SmallAvatarWithUnread] sessionId', sessionId);
@@ -52,6 +52,7 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 	title,
 }) => {
 	const currentUser = useSelector((state: RootState) => state.user.userData);
+	const { markRead } = useUnreadActions();
 
 
 	return (
@@ -92,7 +93,10 @@ const SessionBookedList: React.FC<SessionBookedListProps> = ({
 					return (
 						<TouchableOpacity
 							key={item.id}
-							onPress={() => onSessionPress(item)}
+							onPress={() => {
+								if (item.id) markRead(item.id);
+								onSessionPress(item);
+							}}
 							className="mb-[12px]"
 						>
 							<View className="rounded-full w-[360px] h-[84px] flex-row items-center justify-between bg-[#0e7ae2] pl-4 pr-12">
