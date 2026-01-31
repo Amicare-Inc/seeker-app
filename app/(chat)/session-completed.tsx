@@ -236,9 +236,8 @@ const SessionCompleted = () => {
 			<View className="flex-1 justify-center items-center px-4">
 				{/* Profile Photo(s) */}
 				<View className="mb-6 relative">
-					 
-						/* Single profile photo */
-						<Image
+					{/* Single profile photo */}
+					<Image
 							source={
 								displayInfo.primaryPhoto
 									? { uri: displayInfo.primaryPhoto }

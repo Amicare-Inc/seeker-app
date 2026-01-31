@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
@@ -10,6 +10,8 @@ import SessionChecklistBox from './SessionChecklistBox';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { acceptTimeChange, rejectTimeChange } from '@/features/sessions/api/sessionApi';
+import { useStripe } from '@stripe/stripe-react-native';
+import { PaymentService } from '@/services/stripe/payment-service';
 const { width } = Dimensions.get('window');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -20,11 +22,13 @@ type SessionCardSeekerProps = EnrichedSession & { candidateUserId?: string };
 
 const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const [expanded, setExpanded] = React.useState(false);
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const expandedRef = useRef(expanded);
 
     const bookSessionMutation = useBookCandidateSession();
     const rejectSessionMutation = useRejectSession();
     const currentUser = useSelector((state: RootState) => state.user.userData);
+    const stripe = useStripe();
 
     React.useEffect(() => {
         expandedRef.current = expanded;
@@ -48,29 +52,44 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     console.log('enrichedSession.candidateUserId', enrichedSession.candidateUserId);
     const handleBook = async () => {
         if (!currentUser?.id) return;
-        if (enrichedSession.timeChangeRequest?.proposedBy === enrichedSession.candidateUserId) {
-            try {
-                await acceptTimeChange(enrichedSession.id);
-                await bookSessionMutation.mutateAsync({
-                    sessionId: enrichedSession.id,
-                    currentUserId: currentUser.id,
-                    candidateUserId: enrichedSession.candidateUserId ?? ''
-                });
-                router.back();
-            } catch (err) {
-                console.error('Error accepting time change:', err);
-            }
+
+        // Initiate Stripe payment first
+        if (!stripe) {
+            Alert.alert('Error', 'Payment system not available. Please try again.');
             return;
         }
+
+        setIsProcessingPayment(true);
         try {
+            const paymentService = PaymentService.getInstance();
+            const paymentSuccess = await paymentService.initiatePayment(enrichedSession, stripe);
+
+            if (!paymentSuccess) {
+                setIsProcessingPayment(false);
+                return;
+            }
+
+            // Payment successful, proceed with booking
+            if (enrichedSession.timeChangeRequest?.proposedBy === enrichedSession.candidateUserId) {
+                await acceptTimeChange(enrichedSession.id);
+            }
+
             await bookSessionMutation.mutateAsync({
                 sessionId: enrichedSession.id,
                 currentUserId: currentUser.id,
                 candidateUserId: enrichedSession.candidateUserId ?? ''
             });
-            router.back();
+
+            Alert.alert(
+                'Success',
+                'Session booked successfully!',
+                [{ text: 'OK', onPress: () => router.back() }]
+            );
         } catch (err) {
             console.error('Error booking session:', err);
+            Alert.alert('Error', 'Failed to book session. Please try again.');
+        } finally {
+            setIsProcessingPayment(false);
         }
     };
 
@@ -228,16 +247,16 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                             <TouchableOpacity
                                 onPress={handleBook}
                                 className="flex-1 bg-white py-2 rounded-lg items-center"
-                                disabled={bookSessionMutation.isPending}
+                                disabled={isProcessingPayment || bookSessionMutation.isPending}
                             >
                                 <Text className="text-black text-base font-medium">
-                                    {bookSessionMutation.isPending ? 'Booking...' : 'Book'}
+                                    {isProcessingPayment ? 'Processing...' : bookSessionMutation.isPending ? 'Booking...' : 'Book'}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleReject}
                                 className="flex-1 bg-black py-2 rounded-lg items-center"
-                                disabled={rejectSessionMutation.isPending}
+                                disabled={isProcessingPayment || rejectSessionMutation.isPending}
                             >
                                 <Text className="text-white text-base font-medium">
                                     {rejectSessionMutation.isPending ? 'Rejecting...' : 'Reject'}
