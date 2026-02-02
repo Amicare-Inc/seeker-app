@@ -14,9 +14,10 @@ export class PaymentService {
         return PaymentService.instance;
     }
 
-    async initiatePayment(session: EnrichedSession, stripe: any): Promise<boolean> {
+    async initiatePayment(session: EnrichedSession, stripe: any, stripeAccountId?: string): Promise<boolean> {
         try {
-            const pswAccountId = session.otherUser?.stripeAccountId;
+            const pswAccountId = stripeAccountId || session.otherUser?.stripeAccountId;
+            console.log('pswAccountId', pswAccountId);
             if (!pswAccountId) {
                 Alert.alert(
                     'Payments unavailable',

@@ -6,6 +6,7 @@ import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatTimeRange, formatDate } from '@/lib/datetimes/datetimeHelpers';
 import { router } from 'expo-router';
 import { useBookCandidateSession, useRejectSession } from '@/features/sessions/api/queries';
+import { usePricingQuote } from '@/features/pricing/api/usePricingQuote';
 import SessionChecklistBox from './SessionChecklistBox';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -18,7 +19,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-type SessionCardSeekerProps = EnrichedSession & { candidateUserId?: string };
+type SessionCardSeekerProps = EnrichedSession & { candidateUserId?: string; stripeAccountId?: string };
 
 const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const [expanded, setExpanded] = React.useState(false);
@@ -29,6 +30,26 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const rejectSessionMutation = useRejectSession();
     const currentUser = useSelector((state: RootState) => state.user.userData);
     const stripe = useStripe();
+
+    const quoteAddress = enrichedSession.careRecipientData?.address?.fullAddress ?? enrichedSession.careRecipient?.address?.fullAddress;
+    // Use candidateUserId (the PSW who applied) for pricing quote
+    const pswId = enrichedSession.candidateUserId ?? enrichedSession.receiverId;
+    const quoteEnabled = Boolean(
+        pswId &&
+        quoteAddress &&
+        enrichedSession.startTime &&
+        enrichedSession.endTime
+    );
+
+    const { data: quote, isLoading: isQuoteLoading } = usePricingQuote(quoteEnabled, {
+        pswId: pswId ?? '',
+        originAddress: quoteAddress ?? '',
+        startTime: enrichedSession.startTime,
+        endTime: enrichedSession.endTime,
+        useAlgorithmic: true,
+    });
+
+    const billingTotal = quote?.billing?.total ?? enrichedSession.billingDetails?.total;
 
     React.useEffect(() => {
         expandedRef.current = expanded;
@@ -59,10 +80,20 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
             return;
         }
 
+        if (!billingTotal) {
+            Alert.alert('Error', 'Unable to calculate billing. Please try again.');
+            return;
+        }
+
         setIsProcessingPayment(true);
         try {
             const paymentService = PaymentService.getInstance();
-            const paymentSuccess = await paymentService.initiatePayment(enrichedSession, stripe);
+            // Use quote billing details if available, otherwise fall back to session billing details
+            const sessionWithBilling = {
+                ...enrichedSession,
+                billingDetails: quote?.billing ?? enrichedSession.billingDetails,
+            };
+            const paymentSuccess = await paymentService.initiatePayment(sessionWithBilling, stripe, enrichedSession.stripeAccountId);
 
             if (!paymentSuccess) {
                 setIsProcessingPayment(false);
@@ -239,7 +270,9 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                             <Text className="text-white ml-1.5 text-[14px] font-semibold">Book to unlock chat</Text>
                             <View className="flex-1" />
                             <Text className="text-white text-[14px] font-semibold">
-                                Total Cost: <Text className="font-bold">${enrichedSession.billingDetails?.total.toFixed(2)}</Text>
+                                Total Cost: <Text className="font-bold">
+                                    {isQuoteLoading ? 'Loading...' : billingTotal ? `$${billingTotal.toFixed(2)}` : 'N/A'}
+                                </Text>
                             </Text>
                         </View>
 
@@ -247,10 +280,11 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                             <TouchableOpacity
                                 onPress={handleBook}
                                 className="flex-1 bg-white py-2 rounded-lg items-center"
-                                disabled={isProcessingPayment || bookSessionMutation.isPending}
+                                disabled={isProcessingPayment || bookSessionMutation.isPending || isQuoteLoading || !billingTotal}
+                                style={{ opacity: (isProcessingPayment || bookSessionMutation.isPending || isQuoteLoading || !billingTotal) ? 0.6 : 1 }}
                             >
                                 <Text className="text-black text-base font-medium">
-                                    {isProcessingPayment ? 'Processing...' : bookSessionMutation.isPending ? 'Booking...' : 'Book'}
+                                    {isProcessingPayment ? 'Processing...' : bookSessionMutation.isPending ? 'Booking...' : isQuoteLoading ? 'Loading...' : 'Book'}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity

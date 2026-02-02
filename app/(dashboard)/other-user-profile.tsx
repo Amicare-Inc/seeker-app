@@ -168,6 +168,7 @@ const OtherUserProfileScreen = () => {
 					<SessionCardBook
 						{...activeEnrichedProfile}
 						candidateUserId={selectedIdParam ?? ''}
+						stripeAccountId={activeProfile?.stripeAccountId}
 					/>
 				)}
 			
