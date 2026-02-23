@@ -23,6 +23,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
     const uniqueMessages = React.useMemo(() => {
         const seen = new Set<string>();
         return messages.filter(message => {
+            if (!message) return false; // Safety check
             if (seen.has(message.id)) {
                 return false; // Skip duplicate
             }

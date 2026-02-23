@@ -191,6 +191,26 @@ export const leaveChatSession = (sessionId: string) => {
   socketLogger.debug('Left chat session', { sessionId });
 };
 
+export const joinAdminChat = (chatId: string) => {
+  if (!socket?.connected) {
+    socketLogger.warn('Cannot join admin chat - socket not connected', { chatId });
+    return;
+  }
+
+  socket.emit('admin-chat:join', chatId);
+  socketLogger.debug('Joined admin chat', { chatId });
+};
+
+export const leaveAdminChat = (chatId: string) => {
+  if (!socket?.connected) {
+    socketLogger.warn('Cannot leave admin chat - socket not connected', { chatId });
+    return;
+  }
+
+  socket.emit('admin-chat:leave', chatId);
+  socketLogger.debug('Left admin chat', { chatId });
+};
+
 // ✅ Rejoin all active rooms after reconnection
 const rejoinActiveRooms = () => {
   if (!socket?.connected) return;
