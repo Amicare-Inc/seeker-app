@@ -116,3 +116,54 @@ export const getAdminMessages = async (chatId: string): Promise<Message[]> => {
     throw error;
   }
 };
+
+/** Chat document as returned by GET /auth/chat/chats */
+export interface InstitutionChat {
+  id: string;
+  participants: string[];
+  institutionId?: string;
+  title?: string | null;
+  createdBy?: string;
+  createdAt?: string;
+}
+
+export const getUserChatsForInstitution = async (institutionId: string): Promise<InstitutionChat[]> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${BASE}/chats?institutionId=${encodeURIComponent(institutionId)}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    const list = await response.json();
+    return Array.isArray(list) ? list : [];
+  } catch (error: any) {
+    console.error('Error getting user chats for institution:', error);
+    throw error;
+  }
+};
+
+export const createUserChatWithTitle = async (
+  institutionId: string,
+  title?: string
+): Promise<InstitutionChat> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${BASE}/chats`, {
+      method: 'POST',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ institutionId, title: title ?? undefined }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error: any) {
+    console.error('Error creating user chat with title:', error);
+    throw error;
+  }
+};

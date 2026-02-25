@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
-import AmicareCircle from '@/features/sessions/components/AmicareCircle';
+import { useQuery } from '@tanstack/react-query';
+import InstitutionCircle from '@/features/sessions/components/InstitutionCircle';
+import { getUserInstitutions } from '@/features/auth/api/adminChatApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
@@ -46,6 +48,13 @@ interface AppliedSessionsProps {
 const AppliedSessions: React.FC<AppliedSessionsProps> = ({ sessions, onSessionPress, title, isPending, isinProgress }) => {
     const currentUser = useSelector((state: RootState) => state.user.userData);
 
+    const { data: institutions = [] } = useQuery({
+        queryKey: ['userInstitutions'],
+        queryFn: getUserInstitutions,
+        enabled: !!currentUser?.id,
+        staleTime: 1000 * 60 * 10,
+    });
+
     // Decide a border color (fallback similar to SessionList)
     let borderColor = '#797979';
     if (title === 'Pending' || isPending) {
@@ -58,10 +67,15 @@ const AppliedSessions: React.FC<AppliedSessionsProps> = ({ sessions, onSessionPr
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 4, marginTop: 6 }}
         >
-            {/* Always show Amicare as the first avatar */}
-            <View className="items-center mr-6">
-                <AmicareCircle firstName="Amicare" />
-            </View>
+            {institutions.map((inst) => (
+                <View key={inst.institutionId} className="items-center mr-6">
+                    <InstitutionCircle
+                        institutionId={inst.institutionId}
+                        institutionName={inst.institutionName}
+                        chatId={inst.chatId}
+                    />
+                </View>
+            ))}
             {sessions.length > 0
                 ? sessions.map((item) => {
                       if (!item.otherUser || !currentUser) return null;
