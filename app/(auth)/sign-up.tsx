@@ -49,6 +49,7 @@ const SignUp = () => {
                     updateUserFields({
                         id: userId,
                         email: form.email || '',
+                        isPsw: false,
                     }),
                 );
                 
