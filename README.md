@@ -151,44 +151,22 @@ The socket layer tracks active rooms and rejoins them after reconnect.
 
 ## 1) Auth + onboarding
 
-**Sign-up flow:**
-
-```text
-app/(auth)/sign-up-method  →  app/(auth)/sign-up  →  app/(auth)/verify-email  →  app/(onboarding)/...
-```
-
-1. User enters email + password in `sign-up`.
-2. Firebase Auth creates the user client-side and returns a JWT.
-3. `AuthApi.signUp` calls `POST /auth/signup` with `{ uid, email, isPsw: false }` — role is fixed at this point.
-4. Backend writes the user doc to the **Seeker Firestore collection**.
-5. User verifies email, then proceeds through onboarding screens to fill in profile details.
-
-**Sign-in flow:**
-
-```text
-app/(auth)/sign-in  →  (onboardingComplete?)  →  app/(dashboard)/(seeker)/seeker-sessions
-                                               └→  app/(onboarding)/care_needs_1
-```
-
-- On successful sign-in, routing branches on `userData.onboardingComplete`.
-- Sign-out (from settings) redirects back to `app/(auth)/sign-in`.
+- Sign-up and sign-in screens live under `app/(auth)`.
+- Sign-in path uses Firebase auth + backend profile fetch.
+- Onboarding writes critical and optional profile details through auth API routes.
 
 ```mermaid
 sequenceDiagram
-    participant UI as Auth screens
+    participant UI as Auth UI
     participant FB as Firebase Auth
-    participant API as Backend /auth/signup
-    participant FS as Firestore (Seekers)
+    participant API as Backend /auth
     participant Store as Redux
 
-    UI->>FB: createUserWithEmailAndPassword
-    FB-->>UI: userCredential + ID token
-    UI->>API: POST /auth/signup { uid, email, isPsw: false }
-    API->>FS: create doc in Seekers collection
-    FS-->>API: ok
-    API-->>UI: { userId }
-    UI->>Store: updateUserFields({ id, email, isPsw: false })
-    UI->>UI: navigate to verify-email → onboarding
+    UI->>FB: create/sign in credentials
+    FB-->>UI: current user + ID token
+    UI->>API: /auth/signin or signup patch flows
+    API-->>UI: user profile
+    UI->>Store: setUserData/updateUserFields
 ```
 
 ## 2) Family mode
