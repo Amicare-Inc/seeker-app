@@ -24,7 +24,7 @@ const SettingsScreen = () => {
       dispatch(clearUser());
       dispatch(clearActiveProfile());
       queryClient.clear();
-      router.replace('/(onboarding)/role_selection');
+      router.replace('/(auth)/sign-in');
     } catch (error) {
       console.error('Error signing out:', error);
     }

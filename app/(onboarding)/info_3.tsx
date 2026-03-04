@@ -78,7 +78,7 @@ export default function Index() {
 					marginBottom: 16
 				}}>
 					<Text className="text-grey-80 font-light text-[20px] mr-2">Next</Text>
-					<TouchableOpacity onPress={() => router.push('/(onboarding)/role_selection')}>
+					<TouchableOpacity onPress={() => router.push('/(auth)/sign-up-method')}>
 						<Ionicons name="arrow-forward-circle" size={52} color="#0C7AE2" />
 					</TouchableOpacity>
 				</View>

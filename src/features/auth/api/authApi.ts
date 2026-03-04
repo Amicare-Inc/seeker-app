@@ -1,18 +1,29 @@
 import { getAuthHeaders } from '@/lib/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { FIREBASE_AUTH }from '@/firebase.config';
 
 // Auth API service
 export const AuthApi = {
-  async signUp(email: string, password: string, isPsW: boolean): Promise<any> {
+  async signUp(email: string, password: string, isPsw: boolean): Promise<any> {
     try {
+      // create user in Firebase Auth client-side;
+      const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      const user = userCredential.user;
+      const token = await user.getIdToken();
+      
+      console.log('Firebase user created:', user.uid);
+      
+      // Then create user profile in backend with JWT token
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ 
-          email, 
-          password,
-          isPsW,
+          uid: user.uid,
+          email: user.email,
+          isPsw: isPsw
         }),
       });
 
@@ -22,10 +33,6 @@ export const AuthApi = {
           const errorData = await response.json();
           if (response.status === 409 || (errorData.message && errorData.message.includes('already exists'))) {
             userMessage = 'An account with this email already exists.';
-          } else if (errorData.message && errorData.message.toLowerCase().includes('invalid email')) {
-            userMessage = 'Please enter a valid email address.';
-          } else if (errorData.message && errorData.message.toLowerCase().includes('password')) {
-            userMessage = 'Password does not meet requirements.';
           } else {
             userMessage = errorData.message || userMessage;
           }
@@ -36,16 +43,16 @@ export const AuthApi = {
       }
 
       const data = await response.json();
-      return data; // Backend currently returns the userId
+      return user.uid; // Return the Firebase UID
     } catch (error: any) {
       console.error('Sign Up Error:', error);
       let userMessage = 'Sign up failed.';
-      if (error.message && error.message.toLowerCase().includes('valid email')) {
-        userMessage = 'Please enter a valid email address.';
-      } else if (error.message && error.message.toLowerCase().includes('password')) {
-        userMessage = 'Password does not meet requirements.';
-      } else if (error.message && error.message.toLowerCase().includes('already exists')) {
+      if (error.code === 'auth/email-already-in-use') {
         userMessage = 'An account with this email already exists.';
+      } else if (error.code === 'auth/invalid-email') {
+        userMessage = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/weak-password') {
+        userMessage = 'Password is too weak. Please use at least 6 characters.';
       } else if (error.message) {
         userMessage = error.message;
       }
@@ -191,7 +198,75 @@ export const AuthApi = {
     }
   },
 
-  async getUser(uid: string, isPsW: boolean): Promise<any> {
+  async getUserProfile(uid: string, token: string): Promise<any> {
+    try {
+      console.log('AuthApi.getUserProfile: Calling backend to get user profile for:', uid);
+      console.log('Backend URL:', process.env.EXPO_PUBLIC_BACKEND_BASE_URL);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}?isPsw=false`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      console.log('Backend response status:', response.status);
+      
+      if (!response.ok) {
+        let userMessage = 'Failed to load user profile.';
+        try {
+          const errorData = await response.json();
+          if (response.status === 404) {
+            userMessage = 'User profile not found. Please complete your registration.';
+          } else if (response.status === 401) {
+            userMessage = 'Authentication failed. Please sign in again.';
+          } else if (errorData.error) {
+            userMessage = errorData.error;
+          }
+        } catch {
+          if (response.status === 404) {
+            userMessage = 'User profile not found. Please complete your registration.';
+          } else if (response.status === 401) {
+            userMessage = 'Authentication failed. Please sign in again.';
+          } else if (response.status === 500) {
+            userMessage = 'Server error. Please try again later.';
+          }
+        }
+        throw new Error(userMessage);
+      }
+      
+      const data = await response.json();
+      console.log('✅ AuthApi.getUserProfile: User profile loaded successfully:', {
+        id: data.id,
+        email: data.email,
+        onboardingComplete: data.onboardingComplete,
+        isPsw: data.isPsw
+      });
+      return data;
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error('❌ AuthApi.getUserProfile: Request timed out after 15 seconds');
+        throw new Error('Request timed out. Please check your internet connection and try again.');
+      }
+      console.error('❌ AuthApi.getUserProfile error:', error);
+      
+      // Re-throw with a consistent error message
+      if (error.message) {
+        throw error; // Preserve the original error message
+      } else {
+        throw new Error('Network error. Please check your connection and try again.');
+      }
+    }
+  },
+
+  async getUser(uid: string, isPsw: boolean): Promise<any> {
     try {
       const headers = await getAuthHeaders();
       const url = `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}?isPsw=false`;

@@ -111,7 +111,7 @@ const SignIn = () => {
 							Welcome Back
 						</Text>
 						<Text className="text-xs text-gray-500 font-normal text-left mb-4">
-							Let's get started by filling out the form below
+							Sign in to your Care Seeker account.
 						</Text>
 						
 						{/* Error Message Display */}
@@ -148,7 +148,7 @@ const SignIn = () => {
 								Don't have an account?
 							</Text>
 							<TouchableOpacity 
-								onPress={() => router.replace('/(onboarding)/role_selection')}
+								onPress={() => router.replace('/(auth)/sign-up-method')}
 								disabled={loading}
 							>
 								<Text className={`text-xs font-normal ${loading ? 'text-gray-400' : 'text-blue-900'}`}>

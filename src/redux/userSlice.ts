@@ -32,10 +32,13 @@ export const fetchUserFromLoginThunk = createAsyncThunk<
 			const user = userCredential.user;
 			
 			console.log('Firebase authentication successful:', user.uid);
-			console.log('Now calling backend API to get user profile...');
 			
-			// Now get the user profile from our backend using the verified user
-			const userDoc = await AuthApi.signIn(email, password);
+			// get JWT token from Firebase
+			const token = await user.getIdToken();
+			console.log('JWT token obtained, calling backend to get user profile...');
+			
+			// get the user profile from backend using JWT token
+			const userDoc = await AuthApi.getUserProfile(user.uid, token);
 			if (!userDoc) {
 				console.error('Backend returned null/undefined user profile');
 				throw new Error('Failed to load user profile from backend');

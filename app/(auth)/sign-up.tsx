@@ -7,8 +7,6 @@ import { Link, router } from 'expo-router';
 import { useDispatch } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { AppDispatch } from '@/redux/store';
-import { FIREBASE_AUTH } from '@/firebase.config';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { AuthApi } from '@/features/auth/api/authApi';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { TouchableOpacity } from 'react-native';
@@ -34,21 +32,15 @@ const SignUp = () => {
             try {
                 setIsLoading(true);
                 setPasswordError('');
-                // Step 1: Create backend user (which also creates Firebase user)
+                // Create backend user (which also creates Firebase user)
                 const userId = await AuthApi.signUp(form.email, form.password, false);
                 
-                // Step 2: Sign in with Firebase to establish auth state
-                await signInWithEmailAndPassword(
-                    FIREBASE_AUTH,
-                    form.email,
-                    form.password
-                );
-                
-                // Step 3: Update Redux with user ID
+                // Update Redux with user ID and role
                 dispatch(
                     updateUserFields({
                         id: userId,
                         email: form.email || '',
+                        isPsw: false,
                     }),
                 );
                 
