@@ -1,13 +1,12 @@
 import { getAuthHeaders } from '@/lib/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { FIREBASE_AUTH }from '@/firebase.config';
 
 // Auth API service
 export const AuthApi = {
-  async signUp(email: string, password: string, isPsW: boolean): Promise<any> {
+  async signUp(email: string, password: string, isPsw: boolean): Promise<any> {
     try {
-      // create user in Firebase Auth client-side
-      const { createUserWithEmailAndPassword } = await import('firebase/auth');
-      const { FIREBASE_AUTH } = await import('@/firebase.config');
-      
+      // create user in Firebase Auth client-side;
       const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
       const user = userCredential.user;
       const token = await user.getIdToken();
@@ -24,7 +23,7 @@ export const AuthApi = {
         body: JSON.stringify({ 
           uid: user.uid,
           email: user.email,
-          isPsw: isPsW
+          isPsw: isPsw
         }),
       });
 
@@ -267,7 +266,7 @@ export const AuthApi = {
     }
   },
 
-  async getUser(uid: string, isPsW: boolean): Promise<any> {
+  async getUser(uid: string, isPsw: boolean): Promise<any> {
     try {
       const headers = await getAuthHeaders();
       const url = `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/users/${uid}?isPsw=false`;
