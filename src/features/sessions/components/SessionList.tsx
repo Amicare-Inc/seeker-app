@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { getSessionDisplayInfo } from '@/features/sessions/utils/sessionDisplayUtils';
 import { useUnreadBadge } from '@/features/chat/unread/useUnread';
-import AmicareCircle from '@/features/sessions/components/AmicareCircle';
+import InstitutionCircle from '@/features/sessions/components/InstitutionCircle';
+import { getUserInstitutions } from '@/features/auth/api/adminChatApi';
 
 const AvatarWithUnread: React.FC<{ uri?: string; borderColor: string; sessionId: string; enableUnread?: boolean }> = ({ uri, borderColor, sessionId, enableUnread = true }) => {
     const { unread } = useUnreadBadge(sessionId);
@@ -55,6 +57,13 @@ const SessionList: React.FC<SessionListProps> = ({
 }) => {
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 
+	const { data: institutions = [] } = useQuery({
+		queryKey: ['userInstitutions'],
+		queryFn: getUserInstitutions,
+		enabled: !!currentUser?.id,
+		staleTime: 1000 * 60 * 10,
+	});
+
 	// Decide border color based on the title
 	let borderColor = 'transparent';
 	if (!title) {
@@ -103,10 +112,15 @@ const SessionList: React.FC<SessionListProps> = ({
 			showsHorizontalScrollIndicator={false}
 			contentContainerStyle={{ paddingHorizontal: 4, marginTop: 6 }}
 		>
-			{/* Always show Amicare as the first avatar */}
-			<View className="items-center mr-6">
-				<AmicareCircle firstName="Amicare" />
-			</View>
+			{institutions.map((inst) => (
+				<View key={inst.institutionId} className="items-center mr-6">
+					<InstitutionCircle
+						institutionId={inst.institutionId}
+						institutionName={inst.institutionName}
+						chatId={inst.chatId}
+					/>
+				</View>
+			))}
 			{sessions.length > 0
 				? sessions.map((item) => {
 					  if (!item.otherUser || !currentUser) return null;

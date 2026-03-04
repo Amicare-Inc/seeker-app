@@ -43,9 +43,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
             />
             <TouchableOpacity
                 onPress={handleSendMessage}
-                className="bg-neutral-400 rounded-full items-center justify-center ml-2 w-8 h-8"
+                disabled={newMessage.trim().length === 0}
+                className={`rounded-full items-center justify-center ml-2 w-8 h-8 ${newMessage.trim().length > 0 ? 'bg-[#1A8BF8]' : 'bg-neutral-400'}`}
             >
-                <Text style={{ lineHeight: 20 }} className="text-neutral-200 font-bold text-lg text-center">→</Text>
+                <Text style={{ lineHeight: 20 }} className={`${newMessage.trim().length > 0 ? 'text-white' : 'text-neutral-200'} font-bold text-lg text-center`}>→</Text>
             </TouchableOpacity>
         </View>
     );

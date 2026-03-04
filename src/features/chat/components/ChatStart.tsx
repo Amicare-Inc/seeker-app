@@ -14,7 +14,7 @@ const ChatStart: React.FC<ChatStartProps> = ({ user }) => {
             <Text className="text-grey-80 text-xs text-center leading-4 tracking-tight">
                 You are chatting with {userName}.{'\n'}
                 Chats are private, stored with your session,{'\n'}
-                and visible only to you and your caregiver.
+                and visible only to you and {userName}.
             </Text>
         </View>
     );
