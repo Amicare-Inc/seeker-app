@@ -33,6 +33,7 @@ interface SessionData {
 	status: string;
 	createdAt: string;
 	confirmedBy: string[];
+	applicants?: string[];
 	note?: string;
 	startTime?: string;
 	endTime?: string;
@@ -282,14 +283,18 @@ const RequestSession = () => {
 			if (existingSession) {
 				console.log('session id', existingSession.id);
 				
-				// Check if this is a PSW proposing a time change for an applied session
-				// PSW scenario: existingSession exists, status is 'applied', and current user is NOT the sender
+				const hasApplied = Boolean(
+					currentUser?.id &&
+					Array.isArray(existingSession.applicants) &&
+					existingSession.applicants.includes(currentUser.id)
+				);
+
 				const isPSWProposingTimeChange = 
-					existingSession.status === 'applied' && 
-					existingSession.senderId !== currentUser.id;
+					existingSession.senderId !== currentUser.id &&
+					hasApplied;
 
 				if (isPSWProposingTimeChange) {
-					// PSW is proposing an alternate time for a session they applied to
+					// PSW is proposing an alternate time for a session they already applied to
 					await proposeTimeChange(
 						existingSession.id,
 						startDate.toISOString(),

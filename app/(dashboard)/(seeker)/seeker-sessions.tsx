@@ -37,7 +37,6 @@ const SeekerSessionsTab = () => {
 		newRequests,
 		pending,
 		confirmed,
-		applied,
 		loading: sessionsLoading,
 		error: sessionsError,
 		handleExpandSession,
@@ -45,14 +44,10 @@ const SeekerSessionsTab = () => {
 		refetchNewRequests,
 	} = useSessionsTab('seeker');
 
-	const openSessions: EnrichedSession[] = React.useMemo(() => {
-		const byId = new Map<string, EnrichedSession>();
-		[...(applied || []), ...(newRequests || [])].forEach((s) => byId.set(s.id, s));
-		return Array.from(byId.values());
-	}, [applied, newRequests]);
+	const openSessions: EnrichedSession[] = React.useMemo(() => newRequests || [], [newRequests]);
 
 	/**
-	 * Refetch when this screen gains focus to always get latest applied + newRequests
+	 * Refetch when this screen gains focus to always get latest open requests
 	 */
 	useFocusEffect(
 		React.useCallback(() => {
@@ -321,4 +316,3 @@ const SeekerSessionsTab = () => {
 };
 
 export default SeekerSessionsTab;
-

@@ -53,10 +53,6 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		allSessions.filter((session) => session.status === 'pending'), 
 		[allSessions]
 	);
-	const applied = useMemo(() => 
-		allSessions.filter((session) => session.status === 'applied'), 
-		[allSessions]
-	);
 
 	const confirmed = useMemo(() => 
 		allSessions.filter((session) => session.status === 'confirmed'), 
@@ -125,7 +121,6 @@ export function useSessionsTab(role: 'psw' | 'seeker') {
 		completed,
 		failed,
 		confirmed,
-		applied,
 		loading,
 		error: error ? String(error) : null,
 		expandedSession,

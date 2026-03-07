@@ -164,7 +164,7 @@ const OtherUserProfileScreen = () => {
 				/>
 			)}
 			{activeEnrichedProfile &&
-				(activeEnrichedProfile.status === 'newRequest'  || activeEnrichedProfile.status === 'applied') && (
+				activeEnrichedProfile.status === 'newRequest' && (
 					<SessionCardBook
 						{...activeEnrichedProfile}
 						candidateUserId={selectedIdParam ?? ''}

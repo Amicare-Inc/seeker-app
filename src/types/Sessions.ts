@@ -35,8 +35,7 @@ export interface Session {
 		| 'completed'
 		| 'failed'
 		| 'interested' // PSW expressing interest in seeker
-		| 'requested'
-		| 'applied'; // Interested session that was converted to request
+		| 'requested';
 	createdAt?: string;
 	updatedAt?: string;
 	lastMessageAt?: string;
@@ -51,6 +50,7 @@ export interface Session {
 		serviceFee: number;
 		total: number;
 	};
+	applicants?: string[];
 	confirmedBy?: string[]; // Users who have confirmed the session
 	// New fields for live session
 	readyToStart?: {
