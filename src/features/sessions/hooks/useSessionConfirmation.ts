@@ -2,16 +2,13 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { useStripe } from '@stripe/stripe-react-native';
 import { RootState } from '@/redux/store';
 import { useEnrichedSessions, useBookSession, useCancelSession, useDeclineSession } from '../api/queries';
-import { PaymentService } from '@/services/stripe/payment-service';
 import { EnrichedSession } from '@/types/EnrichedSession';
 
 export const useSessionConfirmation = (sessionId: string | string[] | undefined, action: string | string[] | null | undefined) => {
   const currentUser = useSelector((state: RootState) => state.user.userData);
   const [processing, setProcessing] = useState(false);
-  const stripe = useStripe();
 
   // React Query hooks - always called consistently
   const sessionsQuery = useEnrichedSessions(currentUser?.id);
@@ -32,21 +29,6 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
     
     setProcessing(true);
     try {
-
-      if (!stripe) {
-        console.error('Stripe not initialized');
-        Alert.alert('Error', 'Payment system not available. Please try again.');
-        setProcessing(false);
-        return;
-      }
-      
-      const paymentService = PaymentService.getInstance();
-      const paymentSuccess = await paymentService.initiatePayment(activeSession, stripe);
-      if (!paymentSuccess) {
-        setProcessing(false);
-        return;
-      }
-
       await bookSessionMutation.mutateAsync({
         sessionId: activeSession.id,
         currentUserId: currentUser.id!

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, PanResponder, LayoutAnimation, Platform, UIManager, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,8 +11,6 @@ import SessionChecklistBox from './SessionChecklistBox';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { acceptTimeChange, rejectTimeChange } from '@/features/sessions/api/sessionApi';
-import { useStripe } from '@stripe/stripe-react-native';
-import { PaymentService } from '@/services/stripe/payment-service';
 const { width } = Dimensions.get('window');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -23,13 +21,11 @@ type SessionCardSeekerProps = EnrichedSession & { candidateUserId?: string; stri
 
 const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const [expanded, setExpanded] = React.useState(false);
-    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const expandedRef = useRef(expanded);
 
     const bookSessionMutation = useBookCandidateSession();
     const rejectSessionMutation = useRejectSession();
     const currentUser = useSelector((state: RootState) => state.user.userData);
-    const stripe = useStripe();
 
     const quoteAddress = enrichedSession.careRecipientData?.address?.fullAddress ?? enrichedSession.careRecipient?.address?.fullAddress;
     // Use candidateUserId (the PSW who applied) for pricing quote
@@ -74,33 +70,12 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     const handleBook = async () => {
         if (!currentUser?.id) return;
 
-        // Initiate Stripe payment first
-        if (!stripe) {
-            Alert.alert('Error', 'Payment system not available. Please try again.');
-            return;
-        }
-
         if (!billingTotal) {
             Alert.alert('Error', 'Unable to calculate billing. Please try again.');
             return;
         }
 
-        setIsProcessingPayment(true);
         try {
-            const paymentService = PaymentService.getInstance();
-            // Use quote billing details if available, otherwise fall back to session billing details
-            const sessionWithBilling = {
-                ...enrichedSession,
-                billingDetails: quote?.billing ?? enrichedSession.billingDetails,
-            };
-            const paymentSuccess = await paymentService.initiatePayment(sessionWithBilling, stripe, enrichedSession.stripeAccountId);
-
-            if (!paymentSuccess) {
-                setIsProcessingPayment(false);
-                return;
-            }
-
-            // Payment successful, proceed with booking
             if (enrichedSession.timeChangeRequest?.proposedBy === enrichedSession.candidateUserId) {
                 await acceptTimeChange(enrichedSession.id);
             }
@@ -119,8 +94,6 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
         } catch (err) {
             console.error('Error booking session:', err);
             Alert.alert('Error', 'Failed to book session. Please try again.');
-        } finally {
-            setIsProcessingPayment(false);
         }
     };
 
@@ -280,17 +253,17 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                             <TouchableOpacity
                                 onPress={handleBook}
                                 className="flex-1 bg-white py-2 rounded-lg items-center"
-                                disabled={isProcessingPayment || bookSessionMutation.isPending || isQuoteLoading || !billingTotal}
-                                style={{ opacity: (isProcessingPayment || bookSessionMutation.isPending || isQuoteLoading || !billingTotal) ? 0.6 : 1 }}
+                                disabled={bookSessionMutation.isPending || isQuoteLoading || !billingTotal}
+                                style={{ opacity: (bookSessionMutation.isPending || isQuoteLoading || !billingTotal) ? 0.6 : 1 }}
                             >
                                 <Text className="text-black text-base font-medium">
-                                    {isProcessingPayment ? 'Processing...' : bookSessionMutation.isPending ? 'Booking...' : isQuoteLoading ? 'Loading...' : 'Book'}
+                                    {bookSessionMutation.isPending ? 'Booking...' : isQuoteLoading ? 'Loading...' : 'Book'}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleReject}
                                 className="flex-1 bg-black py-2 rounded-lg items-center"
-                                disabled={isProcessingPayment || rejectSessionMutation.isPending}
+                                disabled={rejectSessionMutation.isPending}
                             >
                                 <Text className="text-white text-base font-medium">
                                     {rejectSessionMutation.isPending ? 'Rejecting...' : 'Reject'}
@@ -305,5 +278,3 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
 };
 
 export default SessionCardSeeker;
-
-
