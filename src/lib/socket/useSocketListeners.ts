@@ -184,12 +184,23 @@ export const useSocketListeners = (userId?: string) => {
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
     };
 
+    const handleSessionApplied = (data: SocketPayloads['session:applied']) => {
+      socketLogger.info('Session applied', { sessionId: data.sessionId, applicantId: data.applicantId });
+      // PSW applied to seeker's session - invalidate so applied sessions show immediately
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
+      queryClient.refetchQueries({ queryKey: sessionKeys.lists() });
+      queryClient.refetchQueries({ queryKey: sessionKeys.newRequests() });
+    };
+
     const handleSessionForceRefresh = () => {
       socketLogger.info('Force refresh sessions triggered');
       // Immediately invalidate all session queries to force refetch
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
       // Also refetch any active session data
       queryClient.refetchQueries({ queryKey: sessionKeys.lists() });
+      queryClient.refetchQueries({ queryKey: sessionKeys.newRequests() });
     };
 
     // ✅ CRITICAL: Add handlers for direct socket events (backup for Firebase listener failures)
@@ -251,6 +262,7 @@ export const useSocketListeners = (userId?: string) => {
     socket.on('session:started', handleSessionStarted);
     socket.on('session:completed', handleSessionCompleted);
     socket.on('session:booked', handleSessionBooked);
+    socket.on('session:applied', handleSessionApplied);
     socket.on('session:forceRefresh', handleSessionForceRefresh);
     // ✅ Add direct socket event subscriptions for production reliability
     socket.on('checklist:updated', handleChecklistUpdated);
@@ -273,6 +285,7 @@ export const useSocketListeners = (userId?: string) => {
       socket.off('session:started', handleSessionStarted);
       socket.off('session:completed', handleSessionCompleted);
       socket.off('session:booked', handleSessionBooked);
+      socket.off('session:applied', handleSessionApplied);
       socket.off('session:forceRefresh', handleSessionForceRefresh);
       // ✅ Clean up direct socket event listeners
       socket.off('checklist:updated', handleChecklistUpdated);
