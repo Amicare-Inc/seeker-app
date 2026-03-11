@@ -31,6 +31,10 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
     const isVerified = currentUser?.idManualVerified ?? false;
     const [applications, setApplications] = useState<any[]>([]);
     const [applicationsLoading, setApplicationsLoading] = useState<boolean>(true);
+    // For interested sessions, the PSW (otherUser) is the "interested" party - show them as selectable
+    const displayApplicants = session.status === 'interested' && session.otherUser
+        ? [session.otherUser]
+        : applications;
     const [showTimeChangeModal, setShowTimeChangeModal] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     useEffect(() => {
@@ -68,6 +72,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
     }, [session.id]);
     const displayInfo = getSessionDisplayInfo(session, currentUser!);
     const [isExpanded, setIsExpanded] = useState(false);
+    const isInterestedSession = session.status === 'interested';
 
     const startDate = session.startTime;
     const endDate = session.endTime;
@@ -83,6 +88,16 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
             : weekday && timeRange
                 ? `${weekday}. ${timeRange}`
                 : 'Time TBD';
+
+    // For interested sessions: show PSW who expressed interest. For newRequest (seeker's own): show "Your request" + address.
+    const isOwnRequest = session.senderId === currentUser?.id;
+    const displayName = isInterestedSession && session.otherUser
+        ? `${session.otherUser.firstName} ${session.otherUser.lastName}`
+        : isOwnRequest
+            ? 'Your request'
+            : `${session.careRecipientData?.firstName || session.careRecipient?.firstName} ${session.careRecipientData?.lastName || session.careRecipient?.lastName}`;
+    const displayAddress = (isInterestedSession ? session.otherUser?.address : session.careRecipientData?.address || session.careRecipient?.address)?.street;
+    const subtitle = displayName + (displayAddress ? `, ${displayAddress}` : '');
 
     // Check if there's a time change request
     const hasTimeChangeRequest = !!session.timeChangeRequest;
@@ -145,7 +160,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                        
                         <View className="flex-row items-center mt-1">
                             <Text className="text-sm text-gray-600">
-                              {session.careRecipientData?.firstName} {session.careRecipientData?.lastName}, {session.careRecipientData?.address?.street}
+                              {subtitle}
                             </Text>
                             <Ionicons
                                 name="checkmark-circle"
@@ -157,9 +172,9 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                     </View>
 
                     {/* Profile Pictures Preview - Top Right */}
-                    {applications && applications.length > 0 && (
+                    {displayApplicants && displayApplicants.length > 0 && (
                         <View className="flex-row ml-4">
-                            {applications
+                            {displayApplicants
                                 .slice(0, 3)
                                 .map((applicant: any, index: number) => (
                                     // console.log('applicant', applicant),
@@ -173,17 +188,17 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                                         className="w-8 h-8 rounded-full border-2 border-white"
                                         style={{
                                             marginLeft: index > 0 ? -8 : 0,
-                                            zIndex: (applications.length - index) as any,
+                                            zIndex: (displayApplicants.length - index) as any,
                                         }}
                                     />
                                 ))}
-                            {applications.length > 3 && (
+                            {displayApplicants.length > 3 && (
                                 <View
                                     className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white items-center justify-center"
                                     style={{ marginLeft: -8, zIndex: 0 }}
                                 >
                                     <Text className="text-xs text-gray-600 font-semibold">
-                                        +{applications.length - 3}
+                                        +{displayApplicants.length - 3}
                                     </Text>
                                 </View>
                             )}
@@ -214,15 +229,15 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                     </TouchableOpacity>
                 )}
 
-                {applications && applications.length > 0 && !hasTimeChangeRequest && (
+                {displayApplicants && displayApplicants.length > 0 && !hasTimeChangeRequest && (
                     <View className="border-t border-gray-200 mt-3 pt-3">
                         <View className="flex-row items-center">
                             <Text className="text-sm text-gray-600 mr-2">
-                                New Responses
+                                {isInterestedSession ? 'Caregiver interested' : 'New Responses'}
                             </Text>
                             <View className="bg-red-500 rounded-full w-5 h-5 items-center justify-center">
                                 <Text className="text-white text-xs font-bold">
-                                    {applications.length}
+                                    {displayApplicants.length}
                                 </Text>
                             </View>
                         </View>
@@ -239,7 +254,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                 )}
 
                 {/* No applicants case */}
-                {(!applications || applications.length === 0) && !applicationsLoading && !hasTimeChangeRequest && (
+                {(!displayApplicants || displayApplicants.length === 0) && !applicationsLoading && !hasTimeChangeRequest && (
                     <View className="border-t border-gray-200 mt-3 pt-3">
                         <Text className="text-sm text-gray-500">
                             No applicants yet
@@ -251,13 +266,13 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
             {/* PSW Applicants List - Expanded View */}
             {isExpanded && (
                 <View className="bg-white rounded-xl overflow-hidden">
-                    {applicationsLoading ? (
+                    {applicationsLoading && !isInterestedSession ? (
                         <View className="p-4 items-center">
                             <ActivityIndicator size="small" color="#1A8BF8" />
                         </View>
-                    ) : applications && applications.length > 0 ? (
+                    ) : displayApplicants && displayApplicants.length > 0 ? (
                         <>
-                            {applications.map((applicant: any, index: number) => (
+                            {displayApplicants.map((applicant: any, index: number) => (
                                 // console.log('applicant', applicant),
                                 // console.log('applicant.userId', applicant.id),
                                 <TouchableOpacity
@@ -266,7 +281,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                                         onSelectPSW?.(applicant.id, applicant)
                                     }
                                     className={`flex-row items-center px-4 py-3 ${
-                                        index < applications.length - 1 ? 'border-b border-gray-100' : ''
+                                        index < displayApplicants.length - 1 ? 'border-b border-gray-100' : ''
                                     }`}
                                 >
                                     <Image
