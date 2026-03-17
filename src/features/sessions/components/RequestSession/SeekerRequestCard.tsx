@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, Modal, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ import { getAuthHeaders } from '@/lib/auth';
 import { acceptTimeChange, rejectTimeChange } from '@/features/sessions/api/sessionApi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDistanceToPsw } from '@/features/sessions/hooks/useDistanceToPsw';
+import { useCancelSession } from '@/features/sessions/api/queries';
 interface SeekerRequestCardProps {
     session: EnrichedSession;
     onSelectPSW?: (pswId: string, applicant: any) => void;
@@ -28,6 +29,7 @@ const DistanceText: React.FC<{ origin?: string; destination?: string }> = ({ ori
 const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelectPSW}) => {
     const currentUser = useSelector((state: RootState) => state.user.userData);
     const queryClient = useQueryClient();
+    const cancelSessionMutation = useCancelSession();
     const isVerified = currentUser?.idManualVerified ?? false;
     const [applications, setApplications] = useState<any[]>([]);
     const [applicationsLoading, setApplicationsLoading] = useState<boolean>(true);
@@ -143,6 +145,35 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
             setIsProcessing(false);
         }
     };
+
+    const handleCancelRequest = () => {
+        Alert.alert(
+            'Cancel Session Request',
+            'Are you sure you want to cancel this session request? No caregivers have applied yet.',
+            [
+                { text: 'Keep Request', style: 'cancel' },
+                {
+                    text: 'Cancel Request',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            setIsProcessing(true);
+                            await cancelSessionMutation.mutateAsync(session.id);
+                            setIsExpanded(false);
+                        } catch (error) {
+                            console.error('Error cancelling session request:', error);
+                            Alert.alert('Error', 'Failed to cancel session request. Please try again.');
+                        } finally {
+                            setIsProcessing(false);
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const canCancelRequest = isOwnRequest && (!displayApplicants || displayApplicants.length === 0);
+
     return (
         <View className="mb-6">
             {/* Session Info Card - Always Visible */}
@@ -330,9 +361,52 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                             ))}
                         </>
                     ) : (
-                        <View className="p-6 items-center">
-                            <Ionicons name="people-outline" size={48} color="#D1D5DB" />
-                            <Text className="text-gray-500 mt-3">No applicants yet</Text>
+                        <View className="p-6">
+                            <View className="items-center mb-4">
+                                <Ionicons name="people-outline" size={48} color="#D1D5DB" />
+                                <Text className="text-gray-500 mt-3">No applicants yet</Text>
+                            </View>
+                            {/* Session details - view more info */}
+                            {(session.careRecipientData?.address?.fullAddress || session.careRecipient?.address?.fullAddress) && (
+                                <View className="mb-3">
+                                    <Text className="text-xs font-medium text-gray-500 mb-1">Location</Text>
+                                    <Text className="text-sm text-gray-800">
+                                        {session.careRecipientData?.address?.fullAddress || session.careRecipient?.address?.fullAddress}
+                                    </Text>
+                                </View>
+                            )}
+                            {session.checklist && session.checklist.length > 0 && (
+                                <View className="mb-3">
+                                    <Text className="text-xs font-medium text-gray-500 mb-1">Tasks</Text>
+                                    {session.checklist.map((item, idx) => (
+                                        <Text key={item.id || idx} className="text-sm text-gray-800">
+                                            • {item.task}
+                                        </Text>
+                                    ))}
+                                </View>
+                            )}
+                            {session.note && (
+                                <View className="mb-4">
+                                    <Text className="text-xs font-medium text-gray-500 mb-1">Note</Text>
+                                    <Text className="text-sm text-gray-800">{session.note}</Text>
+                                </View>
+                            )}
+                            {canCancelRequest && (
+                                <TouchableOpacity
+                                    onPress={handleCancelRequest}
+                                    disabled={isProcessing}
+                                    className="mt-2 py-3 rounded-lg border border-red-300 bg-red-50 items-center"
+                                >
+                                    {isProcessing ? (
+                                        <ActivityIndicator size="small" color="#DC2626" />
+                                    ) : (
+                                        <View className="flex-row items-center">
+                                            <Ionicons name="close-circle-outline" size={20} color="#DC2626" style={{ marginRight: 6 }} />
+                                            <Text className="text-red-600 font-semibold">Cancel Request</Text>
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            )}
                         </View>
                     )}
                 </View>
