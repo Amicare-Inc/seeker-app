@@ -1,5 +1,5 @@
 // @/components/Profile/ProfileEditPanel.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
 	View,
 	Text,
@@ -11,7 +11,10 @@ import { useDispatch } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { User } from '@/types/User';
 import OptionsDropdown from './OptionsDropdown';
-import helpOptions from '@/assets/helpOptions';
+import {
+	CARE_TYPE_OPTIONS,
+	getTaskOptionsForCareTypes,
+} from '@/shared/constants/carePreferencesOnboarding';
 import { updateUserProfile } from '@/src/features/currentUser';
 
 interface ProfileEditPanelProps {
@@ -30,9 +33,16 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 		user.carePreferences?.tasks || [],
 	);
 
-	// Options for dropdowns.
-	const careTypeOptions = helpOptions;
-	const tasksOptions = helpOptions;
+	const allowedCareTypes = useMemo(() => new Set(CARE_TYPE_OPTIONS), []);
+	const tasksOptions = useMemo(
+		() => getTaskOptionsForCareTypes(careTypeSelection),
+		[careTypeSelection],
+	);
+
+	useEffect(() => {
+		const allowed = new Set(getTaskOptionsForCareTypes(careTypeSelection));
+		setTasksSelection((prev) => prev.filter((t) => allowed.has(t)));
+	}, [careTypeSelection]);
 
 	// Check if any field is changed.
 	const isBioChanged = bio !== (user.bio || '');
@@ -46,12 +56,19 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 
 	// Handlers for the dropdowns update local state.
 	const handleCareTypeChange = (selected: string) => {
-		const newArray = selected.split(',').map((opt) => opt.trim());
+		const newArray = selected
+			.split(',')
+			.map((opt) => opt.trim())
+			.filter(Boolean)
+			.filter((opt) => allowedCareTypes.has(opt));
 		setCareTypeSelection(newArray);
 	};
 
 	const handleTasksChange = (selected: string) => {
-		const newArray = selected.split(',').map((opt) => opt.trim());
+		const newArray = selected
+			.split(',')
+			.map((opt) => opt.trim())
+			.filter(Boolean);
 		setTasksSelection(newArray);
 	};
 
@@ -105,13 +122,14 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 			{/* Dropdown for Care Type */}
 			<OptionsDropdown
 				label={'Requiring'}
-				options={careTypeOptions}
+				options={CARE_TYPE_OPTIONS}
 				initialValue={careTypeSelection.join(', ')}
 				onChange={handleCareTypeChange}
 			/>
 
 			{/* Dropdown for Tasks */}
 			<OptionsDropdown
+				key={careTypeSelection.slice().sort().join('|')}
 				label={'Need Assistance with'}
 				options={tasksOptions}
 				initialValue={tasksSelection.join(', ')}

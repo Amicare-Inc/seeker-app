@@ -21,6 +21,27 @@ const timeslots = [
 	'8 pm - 10 pm'
 ];
 
+// module-level so initial availability parsing always has mappings
+const timeSlotMap: { [key: string]: { start: string; end: string } } = {
+	'8 am - 10 am': { start: '08:00', end: '10:00' },
+	'10 am - 12 pm': { start: '10:00', end: '12:00' },
+	'12 pm - 2 pm': { start: '12:00', end: '14:00' },
+	'2 pm - 4 pm': { start: '14:00', end: '16:00' },
+	'4 pm - 6 pm': { start: '16:00', end: '18:00' },
+	'6 pm - 8 pm': { start: '18:00', end: '20:00' },
+	'8 pm - 10 pm': { start: '20:00', end: '22:00' },
+};
+
+const dayNameMap: { [key: string]: string } = {
+	Mon: 'Monday',
+	Tues: 'Tuesday',
+	Wed: 'Wednesday',
+	Thurs: 'Thursday',
+	Fri: 'Friday',
+	Sat: 'Saturday',
+	Sun: 'Sunday',
+};
+
 const CareSchedule: React.FC = () => {
 	const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 	const [showTermsModal, setShowTermsModal] = useState(false);
@@ -34,10 +55,7 @@ const CareSchedule: React.FC = () => {
 		clearAll,
 		saveAvailability,
 	} = useAvailability();
-	
-	// Local state to track UI interactions
-	const [activeDay, setActiveDay] = useState<string | null>(null);
-	
+
 	// Initialize local state with existing availability data
 	const initializeLocalSlots = () => {
 		const safeAvailability = (availability && typeof availability === 'object') ? availability : {};
@@ -60,68 +78,49 @@ const CareSchedule: React.FC = () => {
 	};
 	
 	const [localSelectedSlots, setLocalSelectedSlots] = useState<{[day: string]: string[]}>(initializeLocalSlots);
-	
-	// Convert timeslot strings to start/end times
-	const timeSlotMap: { [key: string]: { start: string; end: string } } = {
-		'8 am - 10 am': { start: '08:00', end: '10:00' },
-		'10 am - 12 pm': { start: '10:00', end: '12:00' },
-		'12 pm - 2 pm': { start: '12:00', end: '14:00' },
-		'2 pm - 4 pm': { start: '14:00', end: '16:00' },
-		'4 pm - 6 pm': { start: '16:00', end: '18:00' },
-		'6 pm - 8 pm': { start: '18:00', end: '20:00' },
-	};
-	
-	// Day name mapping for Firebase (convert short to full names)
-	const dayNameMap: { [key: string]: string } = {
-		Mon: 'Monday',
-		Tues: 'Tuesday',
-		Wed: 'Wednesday',
-		Thurs: 'Thursday',
-		Fri: 'Friday',
-		Sat: 'Saturday',
-		Sun: 'Sunday'
-	};
-	
+
 	// Helper function to check if a time slot is selected for a day (using local state)
 	const isTimeSlotSelected = (day: string, timeString: string): boolean => {
 		return (localSelectedSlots[day] || []).includes(timeString);
 	};
-	
-	// Helper function to get all selected time slots for a day
-	const getSelectedTimeSlotsForDay = (day: string): string[] => {
-		return localSelectedSlots[day] || [];
-	};
-	
+
+	// Selected weekdays in Mon→Sun order; each gets its own time block below
+	const selectedDaysOrdered = days.filter((d) =>
+		Object.prototype.hasOwnProperty.call(localSelectedSlots, d),
+	);
+
 	const toggleDay = (day: string) => {
-		setActiveDay(activeDay === day ? null : day);
+		const isSelected = Object.prototype.hasOwnProperty.call(localSelectedSlots, day);
+		if (isSelected) {
+			setLocalSelectedSlots((prev) => {
+				const next = { ...prev };
+				delete next[day];
+				return next;
+			});
+			return;
+		}
+
+		setLocalSelectedSlots((prev) => ({ ...prev, [day]: [] }));
 	};
 	
-	const toggleTime = (timeString: string) => {
-		if (!activeDay) return;
-		
-		setLocalSelectedSlots(prev => {
-			const daySlots = prev[activeDay] || [];
-			const isSelected = daySlots.includes(timeString);
-			
-			if (isSelected) {
-				// Remove the time slot
-				return {
-					...prev,
-					[activeDay]: daySlots.filter(slot => slot !== timeString)
-				};
+	const toggleTime = (day: string, timeString: string) => {
+		setLocalSelectedSlots((prev) => {
+			const daySlots = prev[day] || [];
+			const nextSet = new Set(daySlots);
+			if (nextSet.has(timeString)) {
+				nextSet.delete(timeString);
 			} else {
-				// Add the time slot
-				return {
-					...prev,
-					[activeDay]: [...daySlots, timeString]
-				};
+				nextSet.add(timeString);
 			}
+			return {
+				...prev,
+				[day]: Array.from(nextSet),
+			};
 		});
 	};
 	
 	const resetAvailability = () => {
 		clearAll();
-		setActiveDay(null);
 		setLocalSelectedSlots({});
 	};
 	
@@ -256,33 +255,15 @@ const CareSchedule: React.FC = () => {
 					{/* Day Selection */}
 					<View className="flex-wrap flex-row mb-[10px] justify-between">
 						{days.map((day) => {
-							const hasTimeSlots = getSelectedTimeSlotsForDay(day).length > 0;
-							const isActiveDay = activeDay === day;
-							const isWeekend = day === 'Sat' || day === 'Sun';
-							
-							// Determine button styling based on state
-							let bgColor = 'bg-white';
-							let textColor = 'text-black';
-							
-							if (isWeekend) {
-								// Weekend days - disabled grey
-								bgColor = 'bg-white';
-								textColor = 'text-grey-35';
-							} else if (isActiveDay) {
-								// Currently selected day - full blue
-								bgColor = 'bg-brand-blue';
-								textColor = 'text-white';
-							} else if (hasTimeSlots) {
-								// Days with time slots but not currently active - lighter blue
-								bgColor = 'bg-[#72B2EE]';
-								textColor = 'text-white';
-							}
-							
+							const isSelectedDay = Object.prototype.hasOwnProperty.call(localSelectedSlots, day);
+							const bgColor = isSelectedDay ? 'bg-brand-blue' : 'bg-white';
+							const textColor = isSelectedDay ? 'text-white' : 'text-black';
+
 							return (
 								<CustomButton
 									key={day}
 									title={day}
-									handlePress={isWeekend ? () => {} : () => toggleDay(day)}
+									handlePress={() => toggleDay(day)}
 									containerStyles={`w-[82px] h-[44px] rounded-full mb-[10px] min-h-[44px] ${bgColor}`}
 									textStyles={`text-sm font-medium ${textColor}`}
 								/>
@@ -296,74 +277,65 @@ const CareSchedule: React.FC = () => {
 						/>
 					</View>
 
-					<Text className="mb-[20px] text-grey-49 text-xs px-1">Care on weekends (Sat/Sun) is currently unavailable during our beta phase.</Text>
-
-					{/* Time Slot Selection */}
-					{activeDay && (
-						<View className="">
-							<Text className="text-lg text-grey-80 mb-[20px]">
-								At roughly what times on{' '}
-								<Text className="font-bold">
-									{activeDay ? dayNameMap[activeDay] || activeDay : ''}
-								</Text>{' '}
-								do you need care? Select all that apply:
-							</Text>
-							<View className="flex-wrap flex-row justify-between">
-								{(() => {
-									const leftColumn: string[] = [];
-									const rightColumn: string[] = [];
-									timeslots.forEach((time, idx) => {
-										(idx % 2 === 0 ? leftColumn : rightColumn).push(time);
-									});
-									return (
-										<>
-											<View className="flex-1 mr-[5px]">
-												{leftColumn.map((time) => (
-													<CustomButton
-														key={time}
-														title={time}
-														handlePress={() => toggleTime(time)}
-														containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
-															activeDay && isTimeSlotSelected(activeDay, time)
-																? 'bg-brand-blue'
-																: 'bg-white'
-														}`}
-														textStyles={`text-sm font-medium ${
-															activeDay && isTimeSlotSelected(activeDay, time)
-																? 'text-white'
-																: 'text-black'
-														}`}
-													/>
-												))}
-											</View>
-											<View className="flex-1 ml-[5px]">
-												{rightColumn.map((time) => (
-													<CustomButton
-														key={time}
-														title={time}
-														handlePress={() => toggleTime(time)}
-														containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
-															activeDay && isTimeSlotSelected(activeDay, time)
-																? 'bg-brand-blue'
-																: 'bg-white'
-														}`}
-														textStyles={`text-sm font-medium ${
-															activeDay && isTimeSlotSelected(activeDay, time)
-																? 'text-white'
-																: 'text-black'
-														}`}
-													/>
-												))}
-											</View>
-										</>
-										
-									);
-								})()}
+					{/* One time block per selected day (stacked, Mon→Sun) */}
+					{selectedDaysOrdered.map((scheduleDay) => {
+						const leftColumn: string[] = [];
+						const rightColumn: string[] = [];
+						timeslots.forEach((time, idx) => {
+							(idx % 2 === 0 ? leftColumn : rightColumn).push(time);
+						});
+						return (
+							<View key={scheduleDay} className="mb-6">
+								<Text className="text-lg text-grey-80 mb-[20px]">
+									At roughly what times on{' '}
+									<Text className="font-bold">
+										{dayNameMap[scheduleDay] || scheduleDay}
+									</Text>{' '}
+									do you need care? Select all that apply:
+								</Text>
+								<View className="flex-wrap flex-row justify-between">
+									<View className="flex-1 mr-[5px]">
+										{leftColumn.map((time) => (
+											<CustomButton
+												key={time}
+												title={time}
+												handlePress={() => toggleTime(scheduleDay, time)}
+												containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
+													isTimeSlotSelected(scheduleDay, time)
+														? 'bg-brand-blue'
+														: 'bg-white'
+												}`}
+												textStyles={`text-sm font-medium ${
+													isTimeSlotSelected(scheduleDay, time)
+														? 'text-white'
+														: 'text-black'
+												}`}
+											/>
+										))}
+									</View>
+									<View className="flex-1 ml-[5px]">
+										{rightColumn.map((time) => (
+											<CustomButton
+												key={time}
+												title={time}
+												handlePress={() => toggleTime(scheduleDay, time)}
+												containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
+													isTimeSlotSelected(scheduleDay, time)
+														? 'bg-brand-blue'
+														: 'bg-white'
+												}`}
+												textStyles={`text-sm font-medium ${
+													isTimeSlotSelected(scheduleDay, time)
+														? 'text-white'
+														: 'text-black'
+												}`}
+											/>
+										))}
+									</View>
+								</View>
 							</View>
-							<Text className="mt-[10px] text-grey-49 text-xs px-1">Our time range during beta will be between 10 am to 10 pm.</Text>
-						</View>
-						
-					)}
+						);
+					})}
 
 				</View>
 			</ScrollView>

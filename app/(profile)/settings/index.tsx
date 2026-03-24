@@ -49,7 +49,6 @@ const SettingsScreen = () => {
             icon={<Ionicons name="person" size={28} color="#303031" />}
             label="Personal Details"
             onPress={() => router.push('/(profile)/settings/personal_details')}
-            disabled
           />
           {/* Security & Privacy */}
           <SettingsListItem

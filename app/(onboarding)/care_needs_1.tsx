@@ -8,12 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
-const careTypeOptions = [
-  'Household Tasks',
-  'Personal Care & Mobility',
-  'Social & Cognitive Support',
-  'Transportation',
-];
+import { CARE_TYPE_OPTIONS } from '@/shared/constants/carePreferencesOnboarding';
 import { TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -152,39 +147,24 @@ const toggleCareType = (careType: string) => {
 					 'What types of care are you interested in?'
 					</Text>
 					<View className="flex-col mb-[10px]">
-					{(() => {
-		const unavailableOptions = ['Personal Care & Mobility', 'Transportation'];
-		const available = careTypeOptions.filter(option => !unavailableOptions.includes(option));
-		const unavailable = careTypeOptions.filter(option => unavailableOptions.includes(option));
-		const sortedOptions = [...available, ...unavailable];
-		return sortedOptions.map((option) => {
-		  const isUnavailable = unavailableOptions.includes(option);
-		  return (
-			<CustomButton
-			  key={option}
-			  title={option}
-			  handlePress={isUnavailable ? () => {} : () => toggleCareType(option)}
-			  containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
-				selectedCareTypes.includes(option)
-				  ? 'bg-brand-blue'
-				  : 'bg-white'
-			  }`}
-			  textStyles={`text-sm font-medium ${
-				isUnavailable
-				  ? 'text-grey-35'
-				  : selectedCareTypes.includes(option)
-				  ? 'text-white'
-				  : 'text-black'
-			  }`}
-			/>
-		  );
-		});
-					})()}
+						{CARE_TYPE_OPTIONS.map((option) => (
+							<CustomButton
+								key={option}
+								title={option}
+								handlePress={() => toggleCareType(option)}
+								containerStyles={`mb-[10px] rounded-full w-full h-[44px] min-h-[44px] ${
+									selectedCareTypes.includes(option)
+										? 'bg-brand-blue'
+										: 'bg-white'
+								}`}
+								textStyles={`text-sm font-medium ${
+									selectedCareTypes.includes(option)
+										? 'text-white'
+										: 'text-black'
+								}`}
+							/>
+						))}
 					</View>
-
-		<Text className="mb-[24px] text-grey-49 text-xs px-1">
-		  Personal Care & Mobility and Transportation are currently unavailable during our beta phase.
-		</Text>
 
 				</View>
 			</ScrollView>

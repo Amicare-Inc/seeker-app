@@ -1,6 +1,6 @@
 // @/components/Profile/OptionsDropdown.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface OptionsDropdownProps {
@@ -8,6 +8,8 @@ interface OptionsDropdownProps {
 	options: string[];
 	initialValue?: string; // comma-separated string
 	onChange: (selected: string) => void;
+	// optional class for the trigger row (default: bordered). Use e.g. bg-gray-100 to match auth fields
+	triggerClassName?: string;
 }
 
 const OptionsDropdown: React.FC<OptionsDropdownProps> = ({
@@ -15,6 +17,7 @@ const OptionsDropdown: React.FC<OptionsDropdownProps> = ({
 	options,
 	initialValue = '',
 	onChange,
+	triggerClassName,
 }) => {
 	// Initialize only once from the initialValue.
 	const [selectedOptions, setSelectedOptions] = useState<string[]>(() => {
@@ -46,7 +49,9 @@ const OptionsDropdown: React.FC<OptionsDropdownProps> = ({
 			<Text className="text-sm font-semibold mb-1">{label}</Text>
 			<TouchableOpacity
 				onPress={() => setIsOpen(!isOpen)}
-				className="p-3 border border-gray-300 rounded-lg"
+				className={
+					triggerClassName ?? 'p-3 border border-gray-300 rounded-lg'
+				}
 			>
 				<Text className="text-base text-gray-700">
 					{selectedOptions.length > 0
@@ -55,17 +60,18 @@ const OptionsDropdown: React.FC<OptionsDropdownProps> = ({
 				</Text>
 			</TouchableOpacity>
 			{isOpen && (
-				<View className="mt-2 border border-gray-300 rounded-lg">
-					<FlatList
-						data={options}
-						keyExtractor={(item) => item}
-						scrollEnabled={false}
-						renderItem={({ item }) => (
+				<View className="mt-2 border border-gray-300 rounded-lg overflow-hidden">
+					<ScrollView
+						nestedScrollEnabled
+						keyboardShouldPersistTaps="handled"
+						scrollEnabled={options.length > 8}
+						style={options.length > 8 ? { maxHeight: 280 } : undefined}
+						showsVerticalScrollIndicator={options.length > 8}
+					>
+						{options.map((item) => (
 							<TouchableOpacity
-								onPress={() => {
-									toggleOption(item);
-									setIsOpen(false); // close dropdown immediately after selecting
-								}}
+								key={item}
+								onPress={() => toggleOption(item)}
 								className="p-3 border-b border-gray-200 flex-row items-center justify-between"
 							>
 								<Text className="text-base">{item}</Text>
@@ -77,8 +83,16 @@ const OptionsDropdown: React.FC<OptionsDropdownProps> = ({
 									/>
 								)}
 							</TouchableOpacity>
-						)}
-					/>
+						))}
+					</ScrollView>
+					<TouchableOpacity
+						onPress={() => setIsOpen(false)}
+						className="p-3 bg-gray-100 border-t border-gray-200"
+					>
+						<Text className="text-center text-base font-semibold text-[#0c7ae2]">
+							Done
+						</Text>
+					</TouchableOpacity>
 				</View>
 			)}
 		</View>
