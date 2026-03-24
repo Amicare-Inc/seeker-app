@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, Image, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { router } from 'expo-router';
-import careTypeOptions from '@/assets/careOptions';
 import { TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -18,18 +17,6 @@ const CareNeeds1: React.FC = () => {
 	const [lookingForSelf, setLookingForSelf] = useState<boolean | null>(
 		userData?.lookingForSelf || null,
 	);
-	const [selectedCareTypes, setSelectedCareTypes] = useState<string[]>(
-		userData?.carePreferences?.careType || [],
-	);
-
-	const toggleCareType = (careType: string) => {
-		setSelectedCareTypes((prev) =>
-			prev.includes(careType)
-				? prev.filter((type) => type !== careType)
-				: [...prev, careType],
-		);
-	};
-
 	const handleNext = () => {
 		// Update lookingForSelf at top level and carePreferences separately
 		const updates: any = {};
@@ -37,14 +24,6 @@ const CareNeeds1: React.FC = () => {
 		// Only set lookingForSelf for non-PSW users (seekers)
 
 		updates.lookingForSelf = lookingForSelf;
-	
-		
-		if (selectedCareTypes.length > 0) {
-			updates.carePreferences = {
-				...userData?.carePreferences,
-				careType: selectedCareTypes,
-			};
-		}
 
 		if (Object.keys(updates).length > 0) {
 			dispatch(updateUserFields(updates));
@@ -105,29 +84,6 @@ const CareNeeds1: React.FC = () => {
 							</View>
 						</>
 
-					<Text className="text-lg text-grey-80 mb-[36px]">
-						'What types of care are you interested in?'
-					</Text>
-					<View className="flex-wrap flex-row -mr-[10px] mb-[75px]">
-					{careTypeOptions.map((option) => (
-						<CustomButton
-						key={option}
-						title={option}
-						handlePress={() => toggleCareType(option)}
-						containerStyles={`mb-[10px] mr-[10px] rounded-full w-[174px] h-[44px] min-h-[44px] ${
-							selectedCareTypes.includes(option)
-							? 'bg-brand-blue'
-							: 'bg-white'
-						}`}
-						textStyles={`text-sm font-medium ${
-							selectedCareTypes.includes(option)
-							? 'text-white'
-							: 'text-black'
-						}`}
-						/>
-					))}
-					</View>
-
 				</View>
 			</ScrollView>
 
@@ -144,11 +100,7 @@ const CareNeeds1: React.FC = () => {
 						</Text>
 					</View>
 				<CustomButton
-					title={
-						selectedCareTypes.length > 0 || lookingForSelf !== null
-							? 'Next'
-							: 'Skip'
-					}
+					title={lookingForSelf !== null ? 'Next' : 'Skip'}
 					handlePress={handleNext}
 					containerStyles="bg-black py-4 rounded-lg"
 					textStyles="text-white text-xl font-medium"

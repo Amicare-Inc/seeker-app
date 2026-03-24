@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
 	View,
 	Text,
@@ -19,11 +19,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootState } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
 import { CustomButton } from '@/shared/components';
-import OptionsDropdown from '@/features/profile/components/OptionsDropdown';
-import {
-	CARE_TYPE_OPTIONS,
-	getTaskOptionsForCareTypes,
-} from '@/shared/constants/carePreferencesOnboarding';
+import GroupedCareTasksDropdown from '@/features/profile/components/GroupedCareTasksDropdown';
+import { deriveCareTypesFromTasks } from '@/shared/constants/carePreferencesOnboarding';
 import { updateUserProfile } from '@/src/features/currentUser';
 
 const DROPDOWN_TRIGGER =
@@ -35,7 +32,6 @@ const EditProfileScreen = () => {
 
 	const [formKey, setFormKey] = useState(0);
 	const [bio, setBio] = useState('');
-	const [careTypeSelection, setCareTypeSelection] = useState<string[]>([]);
 	const [tasksSelection, setTasksSelection] = useState<string[]>([]);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
@@ -47,51 +43,24 @@ const EditProfileScreen = () => {
 				return;
 			}
 			setBio(user.bio || '');
-			setCareTypeSelection(user.carePreferences?.careType || []);
 			setTasksSelection(user.carePreferences?.tasks || []);
 			setError('');
 			setFormKey((k) => k + 1);
 		}, [user]),
 	);
 
-	const allowedCareTypes = useMemo(() => new Set(CARE_TYPE_OPTIONS), []);
-
-	const taskDropdownOptions = useMemo(
-		() => getTaskOptionsForCareTypes(careTypeSelection),
-		[careTypeSelection],
+	const derivedCareTypes = useMemo(
+		() => deriveCareTypesFromTasks(tasksSelection),
+		[tasksSelection],
 	);
 
-	// Drop tasks that are no longer valid for the selected care categories (matches signup).
-	useEffect(() => {
-		const allowed = new Set(getTaskOptionsForCareTypes(careTypeSelection));
-		setTasksSelection((prev) => prev.filter((t) => allowed.has(t)));
-	}, [careTypeSelection]);
-
-	const handleCareTypeChange = (selected: string) => {
-		const next = selected
-			.split(',')
-			.map((opt) => opt.trim())
-			.filter(Boolean)
-			.filter((opt) => allowedCareTypes.has(opt));
-		setCareTypeSelection(next);
-	};
-
-	const handleTasksChange = (selected: string) => {
-		const next = selected
-			.split(',')
-			.map((opt) => opt.trim())
-			.filter(Boolean);
-		setTasksSelection(next);
-	};
-
 	const isBioChanged = bio !== (user?.bio || '');
-	const isCareTypeChanged =
-		careTypeSelection.join(',') !==
-		(user?.carePreferences?.careType || []).join(',');
-	const isTasksChanged =
-		tasksSelection.join(',') !==
-		(user?.carePreferences?.tasks || []).join(',');
-	const isDirty = isBioChanged || isCareTypeChanged || isTasksChanged;
+	const storedTasks = user?.carePreferences?.tasks || [];
+	const storedTypes = user?.carePreferences?.careType || [];
+	const isCarePrefsChanged =
+		tasksSelection.join('\u0001') !== storedTasks.join('\u0001') ||
+		derivedCareTypes.join('\u0001') !== storedTypes.join('\u0001');
+	const isDirty = isBioChanged || isCarePrefsChanged;
 
 	const handleSave = async () => {
 		if (!user?.id || !isDirty) return;
@@ -101,17 +70,11 @@ const EditProfileScreen = () => {
 		try {
 			const updatedFields: Record<string, unknown> = {};
 			if (isBioChanged) updatedFields.bio = bio;
-			if (isCareTypeChanged) {
+			if (isCarePrefsChanged) {
 				updatedFields.carePreferences = {
 					...user.carePreferences,
-					careType: careTypeSelection,
-				};
-			}
-			if (isTasksChanged) {
-				updatedFields.carePreferences = {
-					...(updatedFields.carePreferences as object | undefined) ||
-						user.carePreferences,
 					tasks: tasksSelection,
+					careType: derivedCareTypes,
 				};
 			}
 
@@ -201,21 +164,11 @@ const EditProfileScreen = () => {
 							editable={!saving}
 						/>
 
-						<OptionsDropdown
-							key={`care-${formKey}`}
-							label="Requiring help with"
-							options={CARE_TYPE_OPTIONS}
-							initialValue={careTypeSelection.join(', ')}
-							onChange={handleCareTypeChange}
-							triggerClassName={DROPDOWN_TRIGGER}
-						/>
-
-						<OptionsDropdown
-							key={`tasks-${formKey}-${careTypeSelection.slice().sort().join('|')}`}
-							label="Seeking support with"
-							options={taskDropdownOptions}
-							initialValue={tasksSelection.join(', ')}
-							onChange={handleTasksChange}
+						<GroupedCareTasksDropdown
+							key={`seeking-${formKey}`}
+							label="Seeking help with"
+							initialTasks={tasksSelection}
+							onTasksChange={setTasksSelection}
 							triggerClassName={DROPDOWN_TRIGGER}
 						/>
 

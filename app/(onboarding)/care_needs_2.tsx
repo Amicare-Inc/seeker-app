@@ -8,27 +8,21 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
 import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
 import { router } from 'expo-router';
-import { getTaskOptionsForCareTypes } from '@/shared/constants/carePreferencesOnboarding';
+import { deriveCareTypesFromTasks } from '@/shared/constants/carePreferencesOnboarding';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import CarePreferencesCategorySections from '@/features/profile/components/CarePreferencesCategorySections';
 
 const CareNeeds2: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector((state: RootState) => state.user.userData);
     const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
 
-    // Get selected care types from previous page
     const isFamily = userData?.lookingForSelf === false;
-    const selectedCareTypes = isFamily 
-        ? tempFamilyMember?.carePreferences?.careType || []
-        : userData?.carePreferences?.careType || [];
+    const initialTasks = isFamily
+        ? tempFamilyMember?.carePreferences?.tasks || []
+        : userData?.carePreferences?.tasks || [];
 
-    const availableTasks = getTaskOptionsForCareTypes(selectedCareTypes);
-
-    const [selectedTasks, setSelectedTasks] = useState<string[]>(
-        userData?.carePreferences?.tasks || [],
-    );
-    const [isQualificationAccepted, setIsQualificationAccepted] = useState(false);
-    const [showQualificationError, setShowQualificationError] = useState(false);
+    const [selectedTasks, setSelectedTasks] = useState<string[]>(initialTasks);
 
     const toggleTask = (task: string) => {
         setSelectedTasks((prev) =>
@@ -38,54 +32,40 @@ const CareNeeds2: React.FC = () => {
         );
     };
 
-    const handleQualificationToggle = () => {
-        setIsQualificationAccepted(!isQualificationAccepted);
-        // Hide error message when qualification is accepted
-        if (!isQualificationAccepted) {
-            setShowQualificationError(false);
-        }
-    };
-
     const handleNext = () => {
-      
-        
-        if (selectedTasks.length > 0) {
-            // Check if this is family care
-            const isFamily = userData?.lookingForSelf === false;
-            
-            console.log('🔍 CARE_NEEDS_2 DEBUG:', {
-                lookingForSelf: userData?.lookingForSelf,
-                isFamily,
-                selectedTasks,
-                userData,
-                tempFamilyMember
-            });
-            
-            if (isFamily) {
-                // Save tasks to family member
-                const updatedFamilyMember = {
-                    ...tempFamilyMember,
+        const isFamilyNow = userData?.lookingForSelf === false;
+        const derivedTypes = deriveCareTypesFromTasks(selectedTasks);
+
+        console.log('🔍 CARE_NEEDS_2 DEBUG:', {
+            lookingForSelf: userData?.lookingForSelf,
+            isFamily: isFamilyNow,
+            selectedTasks,
+            userData,
+            tempFamilyMember,
+        });
+
+        if (isFamilyNow) {
+            const updatedFamilyMember = {
+                ...tempFamilyMember,
+                carePreferences: {
+                    ...tempFamilyMember?.carePreferences,
+                    tasks: selectedTasks,
+                    careType: derivedTypes,
+                },
+            };
+            dispatch(setTempFamilyMember(updatedFamilyMember));
+        } else {
+            dispatch(
+                updateUserFields({
                     carePreferences: {
-                        ...tempFamilyMember?.carePreferences,
+                        ...userData?.carePreferences,
                         tasks: selectedTasks,
-                    }
-                };
-                console.log('Saving tasks to tempFamilyMember (family care):', updatedFamilyMember);
-                dispatch(setTempFamilyMember(updatedFamilyMember));
-            } else {
-                // Save tasks to core user (self care)
-                dispatch(
-                    updateUserFields({
-                        carePreferences: {
-                            ...userData?.carePreferences,
-                            tasks: selectedTasks,
-                        },
-                    }),
-                );
-                console.log('Tasks updated in Redux:', selectedTasks, userData);
-            }
+                        careType: derivedTypes,
+                    },
+                }),
+            );
         }
-        router.push('/care_schedule'); // Move to the next page regardless
+        router.push('/care_schedule');
     };
 
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -112,30 +92,13 @@ const CareNeeds2: React.FC = () => {
 
                     {/* Question */}
                     <Text className="text-lg text-grey-80 mb-[34px]">
-                        
-                        'What kind of tasks would you need help with?'
+                        What kind of help are you seeking?
                     </Text>
 
-                    {/* Task Options */}
-                    <View className="flex-wrap flex-row mb-[10px]">
-                        {availableTasks.map((task) => (
-                                <CustomButton
-                                    key={task}
-                                    title={task}
-                                    handlePress={() => toggleTask(task)}
-                                    containerStyles={`mb-[10px] mr-[10px] rounded-full w-full min-h-[44px] h-[44px] ${
-                                        selectedTasks.includes(task)
-                                            ? 'bg-brand-blue'
-                                            : 'bg-white'
-                                    }`}
-                                    textStyles={`text-sm font-medium ${
-                                        selectedTasks.includes(task)
-                                            ? 'text-white'
-                                            : 'text-black'
-                                    }`}
-                                />
-                        ))}
-                    </View>
+                    <CarePreferencesCategorySections
+                        selectedTasks={selectedTasks}
+                        onToggleTask={toggleTask}
+                    />
 
                 </View>
             </ScrollView>
