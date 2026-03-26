@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput } from 'react-native';
 import { DatePickerField } from '@/shared/components';
 import { RegionValidatedAddressInput } from '@/shared/components';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { AuthApi } from '@/features/auth/api/authApi';
 import { RootState } from '@/redux/store';
-import { setUserDoc } from '@/services/firebase/firestore';
 
 const PersonalDetailsScreen = () => {
   const dispatch = useDispatch();
@@ -45,6 +44,7 @@ const PersonalDetailsScreen = () => {
       phone,
       email,
       gender,
+      isPsw: false,
     };
     try {
       if (userData?.id) {

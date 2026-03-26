@@ -141,8 +141,9 @@ export function useCancelSession() {
   return useMutation({
     mutationFn: (sessionId: string) => cancelSession(sessionId),
     onSuccess: () => {
-      // Invalidate sessions list to refetch
+      // Invalidate sessions list and new requests to refetch
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
     },
   });
 }

@@ -49,8 +49,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	// Only show dual photos when PSW is viewing a session where seeker booked for family member
 	
 	// Determine which photos and names to show
-	const primaryPhoto = displayInfo?.primaryPhoto || user.profilePhotoUrl;
-	const primaryName = displayInfo?.primaryName || `${user.firstName} ${user.lastName}`;
+	const primaryPhoto = displayInfo?.primaryPhoto || user?.profilePhotoUrl;
+	const primaryName =
+		displayInfo?.primaryName ||
+		(user ? `${user.firstName} ${user.lastName}`.trim() : 'Chat');
 	const secondaryPhoto = undefined;
 
 	return (

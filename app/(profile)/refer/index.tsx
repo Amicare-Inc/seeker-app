@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Share, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { ref } from 'firebase/storage';
+import * as Clipboard from 'expo-clipboard';
+
+/** Main site URL for share/copy until per-user referral links exist */
+const AMICARE_SITE_URL = 'https://amicare.io';
 
 const ReferralsScreen = () => {
-  const [referralLink] = useState('Link Unavailable In Beta'); // Placeholder for referral link
+  const [referralLink] = useState(AMICARE_SITE_URL);
 
   const handleBackPress = () => {
     router.back();
@@ -18,8 +21,8 @@ const ReferralsScreen = () => {
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(referralLink);
-      Alert.alert('Copied!', 'Referral link copied to clipboard');
+      await Clipboard.setStringAsync(referralLink);
+      Alert.alert('Copied!', 'Link copied to clipboard');
     } catch (error) {
       console.error('Failed to copy link:', error);
     }
@@ -28,7 +31,7 @@ const ReferralsScreen = () => {
   const handleShareAmicare = async () => {
     try {
       await Share.share({
-        message: `Share Amicare with friends who need care in Scarborough, Brampton and Mississauga. ${referralLink}`,
+        message: `Share Amicare with friends and family who need care. Learn more at ${referralLink}`,
         title: 'Share Amicare',
       });
     } catch (error) {
@@ -58,9 +61,8 @@ const ReferralsScreen = () => {
           </Text>
           
           <Text className="text-grey-80 text-center text-base font-medium leading-6 mb-12">
-            Share Amicare with friends{'\n'}
-            who need care in Scarborough,{'\n'}
-            Brampton and Mississauga.
+            Share Amicare with friends and family{'\n'}
+            who need care. Visit amicare.io to learn more.
           </Text>
 
           {/* Profile Icon */}
@@ -77,12 +79,10 @@ const ReferralsScreen = () => {
 
           {/* Share Link Section */}
           <View className="mb-6">
-            <Text className="text-grey-80 font-medium text-sm mb-2 ml-3">Share your link:</Text>
+            <Text className="text-grey-80 font-medium text-sm mb-2 ml-3">Share link:</Text>
             <View className="flex-row bg-transparent rounded-full p-2 px-4 pr-2 border border-grey-49 items-center relative">
               <Text className="text-brand-blue text-base font-semibold flex-1">
-              {referralLink.length > 25
-                ? referralLink.slice(0, 25) + '...'
-                : referralLink}
+              {referralLink.length > 28 ? `${referralLink.slice(0, 28)}…` : referralLink}
               </Text>
               <TouchableOpacity
               onPress={handleCopyLink}
@@ -92,27 +92,6 @@ const ReferralsScreen = () => {
               </TouchableOpacity>
             </View>
             </View>
-          </View>
-          <View className="flex mb-[53px] px-4">
-            <View className="flex-row items-center gap-[13px] mb-[31px]">
-              <View className="w-[38px] h-[38px] bg-[#CCE3F9] rounded-full flex items-center justify-center">
-                <Text className="text-[#05549E] font-bold text-xl">1</Text>
-              </View>
-                <Text className="text-base text-grey-58">Share your unique referral link with 3{'\n'}friends</Text>
-            </View>
-            <View className="flex-row items-center gap-[13px] mb-[31px]">
-              <View className="w-[38px] h-[38px] bg-[#CCE3F9] rounded-full flex items-center justify-center">
-                <Text className="text-[#05549E] font-bold text-xl">2</Text>
-              </View>
-                <Text className="text-base text-grey-58">They download Amicare and spend $XX+{'\n'}on Sessions</Text>
-            </View>
-            <View className="flex-row items-center gap-[13px]">
-              <View className="w-[38px] h-[38px] bg-[#CCE3F9] rounded-full flex items-center justify-center">
-                <Text className="text-[#05549E] font-bold text-xl">3</Text>
-              </View>
-                <Text className="text-base text-grey-58">You earn $XX</Text>
-            </View>
-
           </View>
         </ScrollView>
 

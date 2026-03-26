@@ -7,107 +7,22 @@ import { CustomButton } from '@/shared/components';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
 import { updateUserFields, setTempFamilyMember } from '@/redux/userSlice';
-import helpOptions from '@/assets/helpOptions';
 import { router } from 'expo-router';
+import { deriveCareTypesFromTasks } from '@/shared/constants/carePreferencesOnboarding';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import CarePreferencesCategorySections from '@/features/profile/components/CarePreferencesCategorySections';
 
 const CareNeeds2: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userData = useSelector((state: RootState) => state.user.userData);
     const tempFamilyMember = useSelector((state: RootState) => state.user.tempFamilyMember);
 
-    // Get selected care types from previous page
     const isFamily = userData?.lookingForSelf === false;
-    const selectedCareTypes = isFamily 
-        ? tempFamilyMember?.carePreferences?.careType || []
-        : userData?.carePreferences?.careType || [];
+    const initialTasks = isFamily
+        ? tempFamilyMember?.carePreferences?.tasks || []
+        : userData?.carePreferences?.tasks || [];
 
-    // Map care types to relevant tasks (updated for beta)
-    const careTypeToTasksMap: { [key: string]: string[] } = {
-        'Personal Care & Mobility': [
-            'Bathing',
-            'Dressing',
-            'Toileting',
-            'Incontinence care',
-            'Bed chair transfer',
-            'Ambulation support',
-            'Range of support',
-            'Fall prevention',
-        ],
-        'Household Tasks': [
-            'Light housekeeping',
-            'Laundry',
-            'Grocery shopping',
-            'Meal planning',
-            'Meal preparation',
-            'Nutrition tracking',
-        ],
-        'Social & Cognitive Support': [
-            'Conversation',
-            'Recreation hobbies',
-            'Memory games',
-            'Tech help',
-            'Event accompaniment',
-        ],
-    };
-
-    // Define tasks that are not available during beta
-    const unavailableTasks = [
-        // Personal Care & Mobility
-        'Bathing',
-        'Dressing',
-        'Toileting',
-        'Incontinence care',
-        'Bed chair transfer',
-        'Ambulation support',
-        'Range of support',
-        'Fall prevention',
-        // Household Tasks
-        'Meal preparation',
-        // Social & Cognitive Support
-        'Memory games',
-        'Event accompaniment',
-    ];
-
-    // Filter available tasks based on selected care types
-    const getAvailableTasks = () => {
-        if (selectedCareTypes.length === 0) {
-            // If no care types selected, show all tasks from all care types
-            const allTasks: string[] = [];
-            Object.values(careTypeToTasksMap).forEach(tasks => {
-                tasks.forEach(task => {
-                    if (!allTasks.includes(task)) {
-                        allTasks.push(task);
-                    }
-                });
-            });
-            return allTasks.length > 0 ? allTasks : helpOptions;
-        }
-        // Only show tasks for selected care types
-        const availableTasks: string[] = [];
-        selectedCareTypes.forEach((careType: string) => {
-            const tasksForType = careTypeToTasksMap[careType] || [];
-            tasksForType.forEach((task: string) => {
-                if (!availableTasks.includes(task)) {
-                    availableTasks.push(task);
-                }
-            });
-        });
-        return availableTasks.length > 0 ? availableTasks : helpOptions;
-    };
-
-    // Sort so unavailable tasks are always at the bottom
-    const availableTasksRaw = getAvailableTasks();
-    const availableTasks = [
-      ...availableTasksRaw.filter(task => !unavailableTasks.includes(task)),
-      ...availableTasksRaw.filter(task => unavailableTasks.includes(task)),
-    ];
-
-    const [selectedTasks, setSelectedTasks] = useState<string[]>(
-        userData?.carePreferences?.tasks || [],
-    );
-    const [isQualificationAccepted, setIsQualificationAccepted] = useState(false);
-    const [showQualificationError, setShowQualificationError] = useState(false);
+    const [selectedTasks, setSelectedTasks] = useState<string[]>(initialTasks);
 
     const toggleTask = (task: string) => {
         setSelectedTasks((prev) =>
@@ -117,54 +32,40 @@ const CareNeeds2: React.FC = () => {
         );
     };
 
-    const handleQualificationToggle = () => {
-        setIsQualificationAccepted(!isQualificationAccepted);
-        // Hide error message when qualification is accepted
-        if (!isQualificationAccepted) {
-            setShowQualificationError(false);
-        }
-    };
-
     const handleNext = () => {
-      
-        
-        if (selectedTasks.length > 0) {
-            // Check if this is family care
-            const isFamily = userData?.lookingForSelf === false;
-            
-            console.log('🔍 CARE_NEEDS_2 DEBUG:', {
-                lookingForSelf: userData?.lookingForSelf,
-                isFamily,
-                selectedTasks,
-                userData,
-                tempFamilyMember
-            });
-            
-            if (isFamily) {
-                // Save tasks to family member
-                const updatedFamilyMember = {
-                    ...tempFamilyMember,
+        const isFamilyNow = userData?.lookingForSelf === false;
+        const derivedTypes = deriveCareTypesFromTasks(selectedTasks);
+
+        console.log('🔍 CARE_NEEDS_2 DEBUG:', {
+            lookingForSelf: userData?.lookingForSelf,
+            isFamily: isFamilyNow,
+            selectedTasks,
+            userData,
+            tempFamilyMember,
+        });
+
+        if (isFamilyNow) {
+            const updatedFamilyMember = {
+                ...tempFamilyMember,
+                carePreferences: {
+                    ...tempFamilyMember?.carePreferences,
+                    tasks: selectedTasks,
+                    careType: derivedTypes,
+                },
+            };
+            dispatch(setTempFamilyMember(updatedFamilyMember));
+        } else {
+            dispatch(
+                updateUserFields({
                     carePreferences: {
-                        ...tempFamilyMember?.carePreferences,
+                        ...userData?.carePreferences,
                         tasks: selectedTasks,
-                    }
-                };
-                console.log('Saving tasks to tempFamilyMember (family care):', updatedFamilyMember);
-                dispatch(setTempFamilyMember(updatedFamilyMember));
-            } else {
-                // Save tasks to core user (self care)
-                dispatch(
-                    updateUserFields({
-                        carePreferences: {
-                            ...userData?.carePreferences,
-                            tasks: selectedTasks,
-                        },
-                    }),
-                );
-                console.log('Tasks updated in Redux:', selectedTasks, userData);
-            }
+                        careType: derivedTypes,
+                    },
+                }),
+            );
         }
-        router.push('/care_schedule'); // Move to the next page regardless
+        router.push('/care_schedule');
     };
 
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -191,38 +92,13 @@ const CareNeeds2: React.FC = () => {
 
                     {/* Question */}
                     <Text className="text-lg text-grey-80 mb-[34px]">
-                        
-                        'What kind of tasks would you need help with?'
+                        What kind of help are you seeking?
                     </Text>
 
-                    {/* Task Options */}
-                    <View className="flex-wrap flex-row mb-[10px]">
-                        {availableTasks.map((task) => {
-                            const isUnavailable = unavailableTasks.includes(task);
-                            
-                            return (
-                                <CustomButton
-                                    key={task}
-                                    title={task}
-                                    handlePress={isUnavailable ? () => {} : () => toggleTask(task)}
-                                    containerStyles={`mb-[10px] mr-[10px] rounded-full w-full min-h-[44px] h-[44px] ${
-                                        selectedTasks.includes(task)
-                                            ? 'bg-brand-blue'
-                                            : 'bg-white'
-                                    }`}
-                                    textStyles={`text-sm font-medium ${
-                                        isUnavailable
-                                            ? 'text-grey-35'
-                                            : selectedTasks.includes(task)
-                                            ? 'text-white'
-                                            : 'text-black'
-                                    }`}
-                                />
-                            );
-                        })}
-                    </View>
-
-                    <Text className="mb-[65px] text-grey-49 text-xs px-1">Some care tasks are currently unavailable during our beta phase.</Text>
+                    <CarePreferencesCategorySections
+                        selectedTasks={selectedTasks}
+                        onToggleTask={toggleTask}
+                    />
 
                 </View>
             </ScrollView>

@@ -1,5 +1,5 @@
 // @/components/Profile/ProfileEditPanel.tsx
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
 	View,
 	Text,
@@ -10,8 +10,8 @@ import {
 import { useDispatch } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
 import { User } from '@/types/User';
-import OptionsDropdown from './OptionsDropdown';
-import helpOptions from '@/assets/helpOptions';
+import GroupedCareTasksDropdown from './GroupedCareTasksDropdown';
+import { deriveCareTypesFromTasks } from '@/shared/constants/carePreferencesOnboarding';
 import { updateUserProfile } from '@/src/features/currentUser';
 
 interface ProfileEditPanelProps {
@@ -21,57 +21,35 @@ interface ProfileEditPanelProps {
 const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 	const dispatch = useDispatch();
 
-	// Local state for editable fields.
 	const [bio, setBio] = useState<string>(user.bio || '');
-	const [careTypeSelection, setCareTypeSelection] = useState<string[]>(
-		user.carePreferences?.careType || [],
-	);
 	const [tasksSelection, setTasksSelection] = useState<string[]>(
 		user.carePreferences?.tasks || [],
 	);
 
-	// Options for dropdowns.
-	const careTypeOptions = helpOptions;
-	const tasksOptions = helpOptions;
+	const derivedCareTypes = useMemo(
+		() => deriveCareTypesFromTasks(tasksSelection),
+		[tasksSelection],
+	);
 
-	// Check if any field is changed.
 	const isBioChanged = bio !== (user.bio || '');
-	const isCareTypeChanged =
-		careTypeSelection.join(',') !==
-		(user.carePreferences?.careType || []).join(',');
-	const isTasksChanged =
-		tasksSelection.join(',') !==
-		(user.carePreferences?.tasks || []).join(',');
-	const isAnyChanged = isBioChanged || isCareTypeChanged || isTasksChanged;
+	const storedTasks = user.carePreferences?.tasks || [];
+	const storedTypes = user.carePreferences?.careType || [];
+	const isCarePrefsChanged =
+		tasksSelection.join('\u0001') !== storedTasks.join('\u0001') ||
+		derivedCareTypes.join('\u0001') !== storedTypes.join('\u0001');
+	const isAnyChanged = isBioChanged || isCarePrefsChanged;
 
-	// Handlers for the dropdowns update local state.
-	const handleCareTypeChange = (selected: string) => {
-		const newArray = selected.split(',').map((opt) => opt.trim());
-		setCareTypeSelection(newArray);
-	};
-
-	const handleTasksChange = (selected: string) => {
-		const newArray = selected.split(',').map((opt) => opt.trim());
-		setTasksSelection(newArray);
-	};
-
-	// Confirm button handler: updates all changed fields.
 	const handleConfirmChanges = async () => {
 		Keyboard.dismiss();
-		const updatedFields: any = {};
+		const updatedFields: Record<string, unknown> = {};
 		if (isBioChanged) {
 			updatedFields.bio = bio;
 		}
-		if (isCareTypeChanged) {
+		if (isCarePrefsChanged) {
 			updatedFields.carePreferences = {
 				...user.carePreferences,
-				careType: careTypeSelection,
-			};
-		}
-		if (isTasksChanged) {
-			updatedFields.carePreferences = {
-				...(updatedFields.carePreferences || user.carePreferences),
 				tasks: tasksSelection,
+				careType: derivedCareTypes,
 			};
 		}
 
@@ -89,7 +67,6 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 		<View className="p-4">
 			<Text className="text-base font-bold mb-1">Edit Profile</Text>
 
-			{/* Bio Edit Section */}
 			<View className="mb-4">
 				<Text className="text-sm font-semibold mb-1">Bio</Text>
 				<TextInput
@@ -102,31 +79,21 @@ const ProfileEditPanel: React.FC<ProfileEditPanelProps> = ({ user }) => {
 				/>
 			</View>
 
-			{/* Dropdown for Care Type */}
-			<OptionsDropdown
-				label={'Requiring'}
-				options={careTypeOptions}
-				initialValue={careTypeSelection.join(', ')}
-				onChange={handleCareTypeChange}
+			<GroupedCareTasksDropdown
+				label="Seeking help with"
+				initialTasks={tasksSelection}
+				onTasksChange={setTasksSelection}
 			/>
 
-			{/* Dropdown for Tasks */}
-			<OptionsDropdown
-				label={'Need Assistance with'}
-				options={tasksOptions}
-				initialValue={tasksSelection.join(', ')}
-				onChange={handleTasksChange}
-			/>
-
-			{/* Confirm Changes Button */}
 			{isAnyChanged && (
 				<View className="mt-2">
-					<Text className="text-xs mb-2">Any information provided here may be visible to other users.</Text>
+					<Text className="text-xs mb-2">
+						Any information provided here may be visible to other users.
+					</Text>
 					<TouchableOpacity
 						onPress={handleConfirmChanges}
 						className=" bg-brand-blue rounded-lg py-2 px-4 self-start mt-2"
 					>
-									
 						<Text className="text-sm font-semibold text-white">
 							Confirm Changes
 						</Text>

@@ -11,7 +11,7 @@ import { useEnrichedSessions } from '@/features/sessions/api/queries';
 
 interface UseChatHeaderProps {
   session: EnrichedSession;
-  user: User;
+  user?: User | null;
 }
 
 export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
@@ -37,7 +37,7 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
 
   // Navigation helpers -------------------------------------------------
   const navigateToSessionConfirmation = (action: 'book' | 'cancel' | 'change') => {
-    if (!user.id) return;
+    if (!user?.id) return;
     router.replace({
       pathname: '/session-confirmation',
       params: {
@@ -56,7 +56,7 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
     if (currentSession.status === 'confirmed') {
       handleChangeSession();
     } else {
-      if (!user.id) return;
+      if (!user?.id) return;
       console.log('🔍 useChatHeader - Navigating to request-sessions with currentSession:', currentSession);
       console.log('🔍 useChatHeader - currentSession.checklist:', currentSession.checklist);
       dispatch(setActiveProfile(user));
@@ -71,6 +71,7 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
   };
 
   const handleNavigateToUserProfile = () => {
+    if (!user) return;
     dispatch(setActiveProfile(user));
     router.push('/other-user-profile');
   };

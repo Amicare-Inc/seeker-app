@@ -7,6 +7,7 @@ export type SocketPayloads = {
   'session:started': { sessionId: string; actualStartTime: string };
   'session:completed': { sessionId: string; actualEndTime: string };
   'session:booked': { sessionId: string; status: string; bookedBy: string; updatedAt: string };
+  'session:applied': { sessionId: string; applicantId: string };
   'chat:newMessage': Message[];
   'chat:notify': { sessionId: string; lastMessageAt: string; lastMessageBy: string };
   'chat:readReceipt': { sessionId: string; userId: string; lastReadAt: string };

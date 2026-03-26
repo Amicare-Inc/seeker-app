@@ -5,9 +5,10 @@ import { CustomButton } from '@/shared/components';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
 import { updateUserFields } from '@/redux/userSlice';
-import helpOptions from '@/assets/helpOptions';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { deriveCareTypesFromTasks } from '@/shared/constants/carePreferencesOnboarding';
+import CarePreferencesCategorySections from '@/features/profile/components/CarePreferencesCategorySections';
 
 const CareNeeds2: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -27,17 +28,16 @@ const CareNeeds2: React.FC = () => {
     };
 
     const handleNext = () => {
-        if (selectedTasks.length > 0) {
-            dispatch(
-                updateUserFields({
-                    carePreferences: {
-                        ...userData?.carePreferences,
-                        tasks: selectedTasks,
-                    },
-                }),
-            );
-            console.log('Tasks updated in Redux:', selectedTasks, userData);
-        }
+        const derivedTypes = deriveCareTypesFromTasks(selectedTasks);
+        dispatch(
+            updateUserFields({
+                carePreferences: {
+                    ...userData?.carePreferences,
+                    tasks: selectedTasks,
+                    careType: derivedTypes,
+                },
+            }),
+        );
         router.back();
     };
 
@@ -59,29 +59,13 @@ const CareNeeds2: React.FC = () => {
 
                     {/* Question */}
                     <Text className="text-lg text-grey-80 mb-[34px]">
-                        'What kind of tasks would you need help with?'
+                        What kind of help are you seeking? Select all that apply under each category.
                     </Text>
 
-                    {/* Task Options */}
-                    <View className="flex-wrap flex-row -mr-[10px] mb-[75px]">
-                        {helpOptions.map((task) => (
-                            <CustomButton
-                                key={task}
-                                title={task}
-                                handlePress={() => toggleTask(task)}
-                                containerStyles={`mb-[10px] mr-[10px] rounded-full w-full h-[44px] ${
-                                    selectedTasks.includes(task)
-                                        ? 'bg-brand-blue'
-                                        : 'bg-white'
-                                }`}
-                                textStyles={`text-sm font-medium ${
-                                    selectedTasks.includes(task)
-                                        ? 'text-white'
-                                        : 'text-black'
-                                }`}
-                            />
-                        ))}
-                    </View>
+                    <CarePreferencesCategorySections
+                        selectedTasks={selectedTasks}
+                        onToggleTask={toggleTask}
+                    />
 
                 </View>
             </ScrollView>

@@ -6,6 +6,7 @@ import { RootState } from '@/redux/store';
 import { useRouter } from 'expo-router';
 import { User } from '@/types/User';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
+import { groupSelectedTasksByCategory } from '@/shared/constants/carePreferencesOnboarding';
 
 interface UserCardExpandedProps {
 	user: User;
@@ -20,13 +21,9 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 	const dispatch = useDispatch();
 	const { setActiveEnrichedSession } = useActiveSession();
 
-	// Build strings for tasks and care type; if none, show an empty string.
-	const tasks = user.carePreferences?.tasks?.length
-		? user.carePreferences.tasks.join(', ')
-		: '';
-	const diagnosed = user.carePreferences?.careType?.length
-		? user.carePreferences.careType.join(', ')
-		: '';
+	const taskGroups = groupSelectedTasksByCategory(
+		user.carePreferences?.tasks || [],
+	);
 
 	const bioText = user.bio;
 	const rating = '4.6 out of 5';
@@ -108,21 +105,25 @@ const UserCardExpanded: React.FC<UserCardExpandedProps> = ({
 					{bioText}
 					</Text>
 
-					{/* Skill Sets */}
-				<Text className="font-bold text-gray-800 mb-1">
-						{'Requiring Help With'}
+					<Text className="font-bold text-gray-800 mb-1">
+						Seeking help with
 					</Text>
-				<Text className="text-gray-700 mb-3">
-					{tasks}
-					</Text>
-
-					{/* Diagnosed Conditions */}
-				<Text className="font-bold text-gray-800 mb-1">
-						{'Services Needed'}
-					</Text>
-				<Text className="text-gray-700 mb-3">
-					{diagnosed}
-					</Text>
+					{taskGroups.length === 0 ? (
+						<Text className="text-gray-700 mb-3">—</Text>
+					) : (
+						<View className="mb-3">
+							{taskGroups.map(({ category, tasks }) => (
+								<View key={category} className="mb-2">
+									<Text className="text-xs font-semibold text-gray-800">
+										{category}
+									</Text>
+									<Text className="text-gray-700 text-sm">
+										{tasks.join(', ')}
+									</Text>
+								</View>
+							))}
+						</View>
+					)}
 
 					{/* Bottom buttons row */}
 					<View className="flex-row mt-4">
