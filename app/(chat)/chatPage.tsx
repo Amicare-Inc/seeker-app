@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { KeyboardAvoidingView, Keyboard, Platform, View, StatusBar } from 'react-native';
+import { KeyboardAvoidingView, Keyboard, Platform, View, StatusBar, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { useSelector } from 'react-redux';
@@ -12,6 +12,8 @@ import { useActiveSession } from '@/lib/context/ActiveSessionContext';
 import { joinChatSession, leaveChatSession } from '@/src/features/socket';
 import { markMessagesRead } from '@/features/sessions/api/sessionApi';
 import { useUnreadActions } from '@/features/chat/unread/useUnread';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 const ChatPage = () => {
     const { sessionId } = useLocalSearchParams();
@@ -85,6 +87,31 @@ const ChatPage = () => {
         }
     };
 
+    if (!otherUser) {
+        return (
+            <SafeAreaView className="flex-1 bg-white" edges={['top', 'left', 'right', 'bottom']}>
+                <View className="flex-row items-center px-4 py-3">
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        className="mr-2 p-2 -ml-2"
+                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    >
+                        <Ionicons name="chevron-back" size={26} color="#000" />
+                    </TouchableOpacity>
+                    <Text className="text-xl font-medium">Chat</Text>
+                </View>
+                <View className="flex-1 items-center justify-center px-6">
+                    <Text className="text-gray-700 text-center mb-3">
+                        Failed to load chat.
+                    </Text>
+                    <Text className="text-gray-500 text-center">
+                        Please go back and reopen this session.
+                    </Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView className="flex-1" edges={['left', 'right', 'bottom']}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
@@ -106,7 +133,7 @@ const ChatPage = () => {
                 <View style={{ backgroundColor: '#FFFFFF' }}>
                     <ChatHeader
                         session={activeSession}
-                        user={otherUser!}
+                        user={otherUser}
                         isExpanded={isHeaderExpanded}
                         toggleExpanded={toggleHeaderExpanded}
                     />
@@ -120,7 +147,7 @@ const ChatPage = () => {
                 >
                     <ChatMessageList
                         messages={messages}
-                        otherUser={otherUser!}
+                        otherUser={otherUser}
                         currentUserId={currentUser.id!}
                         isKeyboardVisible={isKeyboardVisible}
                     />
