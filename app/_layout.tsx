@@ -18,7 +18,7 @@ import { FIREBASE_AUTH } from '@/firebase.config';
 import { AuthApi } from '@/features/auth/api/authApi';
 import { fetchExploreUsersWithDistance } from '@/features/userDirectory/api/userDirectoryApi';
 import { getUserSessionTab } from '@/features/sessions/api/sessionApi'
-import { updateUserFields } from '@/redux/userSlice';
+import { setUserData, updateUserFields } from '@/redux/userSlice';
 import { useUnreadSetup } from '@/features/chat/unread/useUnread';
 
 const GlobalDataLoader = () => {
@@ -28,6 +28,7 @@ const GlobalDataLoader = () => {
 	const queryClient = useQueryClient();
 	const [isAuthReady, setIsAuthReady] = useState(false);
 	const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+	const [isRestoringUser, setIsRestoringUser] = useState(false);
 
 	// Listen to Firebase auth state changes
 	useEffect(() => {
@@ -40,8 +41,37 @@ const GlobalDataLoader = () => {
 		return unsubscribe;
 	}, []);
 
+	// Rehydrate Redux user state from persisted Firebase session after app refresh.
+	useEffect(() => {
+		let isCancelled = false;
+
+		const restoreUser = async () => {
+			if (!isAuthReady || !firebaseUser?.uid || currentUser?.id) return;
+
+			try {
+				setIsRestoringUser(true);
+				const userProfile = await AuthApi.getUser(firebaseUser.uid, false);
+				if (!isCancelled && userProfile?.id) {
+					dispatch(setUserData(userProfile));
+				}
+			} catch (error) {
+				console.error('Failed to restore persisted session user:', error);
+			} finally {
+				if (!isCancelled) {
+					setIsRestoringUser(false);
+				}
+			}
+		};
+
+		restoreUser();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [isAuthReady, firebaseUser?.uid, currentUser?.id, dispatch]);
+
 	// Only proceed with API calls when both Redux user data and Firebase auth are ready
-	const shouldMakeApiCalls = isAuthReady && currentUser?.id && firebaseUser;
+	const shouldMakeApiCalls = isAuthReady && !isRestoringUser && currentUser?.id && firebaseUser;
 
 	// Global socket listeners (will lazily connect when userId available and auth is ready)
 	useSocketListeners(shouldMakeApiCalls ? currentUser?.id : undefined);

@@ -14,6 +14,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 
 import { useRouter, useSegments } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { FIREBASE_AUTH } from '@/firebase.config';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 
   
@@ -25,8 +29,34 @@ export default function Index() {
 	const router = useRouter();
 	const segments = useSegments() as string[];
 	const [redirecting, setRedirecting] = useState(true);
+	const [authReady, setAuthReady] = useState(false);
+	const [isFirebaseAuthenticated, setIsFirebaseAuthenticated] = useState(false);
+	const userData = useSelector((state: RootState) => state.user.userData);
 
 	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
+			setIsFirebaseAuthenticated(!!user);
+			setAuthReady(true);
+		});
+
+		return unsubscribe;
+	}, []);
+
+	useEffect(() => {
+		// Restore users to the correct route after refresh.
+		if (authReady && isFirebaseAuthenticated) {
+			if (!userData?.id) {
+				return;
+			}
+
+			if (userData.onboardingComplete) {
+				router.replace('/(dashboard)/(seeker)/seeker-sessions');
+			} else {
+				router.replace('/(onboarding)/care_needs_1');
+			}
+			return;
+		}
+
 		// Only redirect if the skip flag is set
 		if (process.env.EXPO_PUBLIC_SKIP_ONBOARDING === 'true') {
 		// Make sure segments are initialized
@@ -36,10 +66,13 @@ export default function Index() {
 		} else {
 		setRedirecting(false);
 		}
-	}, [segments]);
+	}, [segments, authReady, isFirebaseAuthenticated, userData?.id, userData?.onboardingComplete]);
 
 	// While redirecting, render nothing
-	if (process.env.EXPO_PUBLIC_SKIP_ONBOARDING === 'true' && redirecting) {
+	if (
+		(process.env.EXPO_PUBLIC_SKIP_ONBOARDING === 'true' && redirecting) ||
+		(authReady && isFirebaseAuthenticated && !userData?.id)
+	) {
 		return null;
 	}
 
