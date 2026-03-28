@@ -21,14 +21,6 @@ const OnboardingLayout = () => {
 				}} 
 			/>
 			<Stack.Screen 
-				name="role_selection" 
-				options={{ 
-					headerShown: false,
-					gestureEnabled: false,
-					headerLeft: () => null
-				}} 
-			/>
-			<Stack.Screen 
 				name="role" 
 				options={{ 
 					headerShown: false,
