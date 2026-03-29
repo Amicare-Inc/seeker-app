@@ -33,6 +33,13 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
     const isVerified = currentUser?.idManualVerified ?? false;
     const [applications, setApplications] = useState<any[]>([]);
     const [applicationsLoading, setApplicationsLoading] = useState<boolean>(true);
+    // When PSW applies, session status / applicants / updatedAt change on the server but session.id does not.
+    // Re-fetch candidates whenever those change so the list is not stuck on the initial empty load.
+    const applicantsSignal = [
+        session.updatedAt,
+        session.status,
+        Array.isArray((session as any).applicants) ? (session as any).applicants.join(',') : '',
+    ].join('|');
     // For interested sessions, the PSW (otherUser) is the "interested" party - show them as selectable
     const displayApplicants = session.status === 'interested' && session.otherUser
         ? [session.otherUser]
@@ -71,7 +78,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
         };
         fetchApplicants();
         return () => { isMounted = false; };
-    }, [session.id]);
+    }, [session.id, applicantsSignal]);
     const displayInfo = getSessionDisplayInfo(session, currentUser!);
     const [isExpanded, setIsExpanded] = useState(false);
     const isInterestedSession = session.status === 'interested';

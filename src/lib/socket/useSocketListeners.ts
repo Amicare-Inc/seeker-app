@@ -8,25 +8,14 @@ import { logger } from '@/lib/logger';
 import { sessionKeys } from '@/features/sessions/api/queries';
 import { router } from 'expo-router';
 import { useActiveSession } from '@/lib/context/ActiveSessionContext';
-// Removed SessionCompletionContext import
+import type { Socket } from 'socket.io-client';
 
 const socketLogger = logger.child('[Socket]');
 
 export const useSocketListeners = (userId?: string) => {
   const queryClient = useQueryClient();
   const { setActiveEnrichedSession } = useActiveSession();
-  // Removed SessionCompletionContext usage
 
-  // lazily ensure connection with enhanced reliability
-  const socket = getSocket();
-  useEffect(() => {
-    if (!socket && userId) {
-      socketLogger.info('Initializing socket connection', { userId });
-      connectSocket(userId);
-    }
-  }, [socket, userId]);
-
-  // Monitor connection health and attempt reconnection if needed - enhanced for iOS
   useEffect(() => {
     if (!userId) return;
 
@@ -34,264 +23,247 @@ export const useSocketListeners = (userId?: string) => {
       const connected = isSocketConnected();
       if (!connected) {
         socketLogger.warn('Socket health check failed - attempting reconnection', { userId });
-        connectSocket(userId);
+        void connectSocket(userId);
       }
-    }, 10000); // Reduced from 15000 to 10000 for better iOS reliability
+    }, 10000);
 
     return () => clearInterval(healthCheck);
   }, [userId]);
 
   useEffect(() => {
-    if (!socket) return; // wait until connected
+    if (!userId) return;
 
-    /* ---------------------------- HANDLERS -------------------------------- */
-    const handleSessionUpdate = (payload: SocketPayloads['session:update']) => {
-      socketLogger.debug('session:update', { count: payload.length });
-      // Seed unread last-message meta from session payload if present
+    let cancelled = false;
+    let detach: (() => void) | undefined;
+
+    const run = async () => {
       try {
-        payload.forEach((s: any) => {
-          if (s?.id && s?.lastMessageAt && s?.lastMessageBy) {
-            upsertLastMessageMeta(s.id, s.lastMessageAt, s.lastMessageBy);
-          }
-        });
-      } catch {}
-      // Invalidate session lists to refetch latest data
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-    };
-
-    const handleChatNewMessage = (messages: SocketPayloads['chat:newMessage']) => {
-      // Update React Query cache for messages with deduplication
-      if (messages.length) {
-        const sessionId = messages[0].sessionId;
-        queryClient.setQueryData<Message[]>(
-          sessionKeys.messagesBySession(sessionId),
-          (oldMessages) => {
-            if (!oldMessages) return messages;
-            
-            // Create a map of existing messages by ID for fast lookup
-            const existingMessagesMap = new Map(oldMessages.map(msg => [msg.id, msg]));
-            
-            // Add new messages, avoiding duplicates
-            const updatedMessages = [...oldMessages];
-            messages.forEach(newMessage => {
-              if (!existingMessagesMap.has(newMessage.id)) {
-                updatedMessages.push(newMessage);
-              }
-            });
-            
-            // Sort by timestamp to maintain order
-            return updatedMessages.sort((a, b) => 
-              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-            );
-          }
-        );
-        // Invalidate sessions to refresh lastMessageAt/By via server
-        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+        await connectSocket(userId);
+      } catch (e) {
+        socketLogger.error('connectSocket failed', { userId, e });
+        return;
       }
-    };
+      if (cancelled) return;
 
-    const handleChatNotify = (payload: SocketPayloads['chat:notify']) => {
-      // Conservative: refetch sessions; server listener will push updates too
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-    };
+      const sock = getSocket();
+      if (!sock || cancelled) {
+        socketLogger.warn('No socket instance after connectSocket');
+        return;
+      }
 
-    const handleChatReadReceipt = (payload: SocketPayloads['chat:readReceipt']) => {
-      try {
-        if (!payload?.sessionId || !payload?.userId || !payload?.lastReadAt) return;
-        // If receipt is for me, align local lastReadAt to server
-        const me = userId;
-        if (payload.userId === me) {
-          // Write to lastReadAt map cache via queryClient directly (same key used by useUnread)
-          // Let session refetch update readReceipts; optionally, force refetch here
+      const handleSessionUpdate = (payload: SocketPayloads['session:update']) => {
+        socketLogger.debug('session:update', { count: payload.length });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      };
+
+      const handleChatNewMessage = (messages: SocketPayloads['chat:newMessage']) => {
+        if (messages.length) {
+          const sessionId = messages[0].sessionId;
+          queryClient.setQueryData<Message[]>(
+            sessionKeys.messagesBySession(sessionId),
+            (oldMessages) => {
+              if (!oldMessages) return messages;
+
+              const existingMessagesMap = new Map(oldMessages.map((msg) => [msg.id, msg]));
+              const updatedMessages = [...oldMessages];
+              messages.forEach((newMessage) => {
+                if (!existingMessagesMap.has(newMessage.id)) {
+                  updatedMessages.push(newMessage);
+                }
+              });
+
+              return updatedMessages.sort(
+                (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+              );
+            }
+          );
           queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
         }
-      } catch {}
-    };
+      };
 
-    const handleSessionStarted = (data: SocketPayloads['session:started']) => {
-      socketLogger.info('Session started', { sessionId: data.sessionId });
-      // Invalidate session lists to refetch updated session data
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-    };
+      const handleChatNotify = (_payload: SocketPayloads['chat:notify']) => {
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      };
 
-    const handleSessionCompleted = (data: SocketPayloads['session:completed']) => {
-      socketLogger.info('🎉 Session completed event received!', { sessionId: data.sessionId });
+      const handleChatReadReceipt = (payload: SocketPayloads['chat:readReceipt']) => {
+        try {
+          if (!payload?.sessionId || !payload?.userId || !payload?.lastReadAt) return;
+          const me = userId;
+          if (payload.userId === me) {
+            queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+          }
+        } catch {}
+      };
 
-      
-      // Optimistically update the session status in React Query cache
-      const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
-      allSessionsQueries.forEach(query => {
-        if (query.state.data) {
-          const sessions = query.state.data as EnrichedSession[];
-          const updatedSessions = sessions.map(session => {
-            if (session.id === data.sessionId) {
+      const handleSessionStarted = (data: SocketPayloads['session:started']) => {
+        socketLogger.info('Session started', { sessionId: data.sessionId });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      };
 
-              return {
-                ...session,
-                status: 'completed' as const,
-                actualEndTime: data.actualEndTime,
-                liveStatus: 'completed'
-              };
-            }
-            return session;
-          });
-          
-          // Update the cache immediately
-          queryClient.setQueryData(query.queryKey, updatedSessions);
-        }
-      });
-      
-      // Invalidate session lists to refetch updated session data (backup)
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-      
-      // Also update specific user list query to ensure availability
-      if (userId) {
-        const listKey = sessionKeys.list(userId);
-        const existingList = queryClient.getQueryData<EnrichedSession[]>(listKey) || [];
-        const updatedList = existingList.map(s =>
-          s.id === data.sessionId ? { ...s, status: 'completed' as const, actualEndTime: data.actualEndTime, liveStatus: 'completed' } : s
-        );
-        queryClient.setQueryData(listKey, updatedList);
-      }
+      const handleSessionCompleted = (data: SocketPayloads['session:completed']) => {
+        socketLogger.info('Session completed event received', { sessionId: data.sessionId });
 
-      // After optimistic cache update block
-      let completedSession: EnrichedSession | undefined;
-      const listKeyCheck = userId ? sessionKeys.list(userId) : undefined;
-      if (listKeyCheck) {
-        completedSession = (queryClient.getQueryData<EnrichedSession[]>(listKeyCheck) || []).find(s => s.id === data.sessionId);
-      }
-      if (completedSession) {
-        setActiveEnrichedSession(completedSession);
-        // Removed setCompletedSession call
-      }
-
-      // Navigate directly to session completed page
-
-      try {
-        router.push({ 
-          pathname: '/(chat)/session-completed', 
-          params: { sessionId: data.sessionId } 
+        const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
+        allSessionsQueries.forEach((query) => {
+          if (query.state.data) {
+            const sessions = query.state.data as EnrichedSession[];
+            const updatedSessions = sessions.map((session) => {
+              if (session.id === data.sessionId) {
+                return {
+                  ...session,
+                  status: 'completed' as const,
+                  actualEndTime: data.actualEndTime,
+                  liveStatus: 'completed',
+                };
+              }
+              return session;
+            });
+            queryClient.setQueryData(query.queryKey, updatedSessions);
+          }
         });
 
-      } catch (error) {
-        console.error(`❌ Navigation failed for session ${data.sessionId}:`, error);
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+
+        if (userId) {
+          const listKey = sessionKeys.list(userId);
+          const existingList = queryClient.getQueryData<EnrichedSession[]>(listKey) || [];
+          const updatedList = existingList.map((s) =>
+            s.id === data.sessionId
+              ? { ...s, status: 'completed' as const, actualEndTime: data.actualEndTime, liveStatus: 'completed' }
+              : s
+          );
+          queryClient.setQueryData(listKey, updatedList);
+        }
+
+        let completedSession: EnrichedSession | undefined;
+        const listKeyCheck = userId ? sessionKeys.list(userId) : undefined;
+        if (listKeyCheck) {
+          completedSession = (queryClient.getQueryData<EnrichedSession[]>(listKeyCheck) || []).find(
+            (s) => s.id === data.sessionId
+          );
+        }
+        if (completedSession) {
+          setActiveEnrichedSession(completedSession);
+        }
+
+        try {
+          router.push({
+            pathname: '/(chat)/session-completed',
+            params: { sessionId: data.sessionId },
+          });
+        } catch (error) {
+          console.error(`Navigation failed for session ${data.sessionId}:`, error);
+        }
+      };
+
+      const handleSessionBooked = (data: SocketPayloads['session:booked']) => {
+        socketLogger.info('Session booked', { sessionId: data.sessionId, status: data.status, bookedBy: data.bookedBy });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      };
+
+      const handleSessionApplied = (data: SocketPayloads['session:applied']) => {
+        socketLogger.info('Session applied', { sessionId: data.sessionId, applicantId: data.applicantId });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
+        queryClient.refetchQueries({ queryKey: sessionKeys.lists() });
+        queryClient.refetchQueries({ queryKey: sessionKeys.newRequests() });
+      };
+
+      const handleSessionForceRefresh = () => {
+        socketLogger.info('Force refresh sessions triggered');
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
+        queryClient.refetchQueries({ queryKey: sessionKeys.lists() });
+        queryClient.refetchQueries({ queryKey: sessionKeys.newRequests() });
+      };
+
+      const handleChecklistUpdated = (data: SocketPayloads['checklist:updated']) => {
+        socketLogger.info('Direct checklist update received', { sessionId: data.sessionId, updatedBy: data.updatedBy });
+        const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
+        allSessionsQueries.forEach((query) => {
+          if (query.state.data) {
+            const sessions = query.state.data as EnrichedSession[];
+            const updatedSessions = sessions.map((session) => {
+              if (session.id === data.sessionId) {
+                return { ...session, checklist: data.checklist };
+              }
+              return session;
+            });
+            queryClient.setQueryData(query.queryKey, updatedSessions);
+          }
+        });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      };
+
+      const handleCommentAdded = (data: SocketPayloads['comment:added']) => {
+        socketLogger.info('Direct comment addition received', { sessionId: data.sessionId, addedBy: data.addedBy });
+        const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
+        allSessionsQueries.forEach((query) => {
+          if (query.state.data) {
+            const sessions = query.state.data as EnrichedSession[];
+            const updatedSessions = sessions.map((session) => {
+              if (session.id === data.sessionId) {
+                return { ...session, comments: [...(session.comments || []), data.comment] };
+              }
+              return session;
+            });
+            queryClient.setQueryData(query.queryKey, updatedSessions);
+          }
+        });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      };
+
+      const handleConnect = () => {
+        socketLogger.info('Socket connected — refreshing sessions');
+        queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
+      };
+
+      const handleDisconnect = (reason: string) => {
+        socketLogger.warn('Socket disconnected', { reason });
+      };
+
+      sock.on('session:update', handleSessionUpdate);
+      sock.on('chat:newMessage', handleChatNewMessage);
+      sock.on('chat:notify', handleChatNotify);
+      sock.on('chat:readReceipt', handleChatReadReceipt);
+      sock.on('session:started', handleSessionStarted);
+      sock.on('session:completed', handleSessionCompleted);
+      sock.on('session:booked', handleSessionBooked);
+      sock.on('session:applied', handleSessionApplied);
+      sock.on('session:forceRefresh', handleSessionForceRefresh);
+      sock.on('checklist:updated', handleChecklistUpdated);
+      sock.on('comment:added', handleCommentAdded);
+      sock.on('connect', handleConnect);
+      sock.on('disconnect', handleDisconnect);
+
+      if (sock.connected) {
+        handleConnect();
       }
+
+      const s: Socket = sock;
+      detach = () => {
+        s.off('session:update', handleSessionUpdate);
+        s.off('chat:newMessage', handleChatNewMessage);
+        s.off('chat:notify', handleChatNotify);
+        s.off('chat:readReceipt', handleChatReadReceipt);
+        s.off('session:started', handleSessionStarted);
+        s.off('session:completed', handleSessionCompleted);
+        s.off('session:booked', handleSessionBooked);
+        s.off('session:applied', handleSessionApplied);
+        s.off('session:forceRefresh', handleSessionForceRefresh);
+        s.off('checklist:updated', handleChecklistUpdated);
+        s.off('comment:added', handleCommentAdded);
+        s.off('connect', handleConnect);
+        s.off('disconnect', handleDisconnect);
+      };
     };
 
-    const handleSessionBooked = (data: SocketPayloads['session:booked']) => {
-      socketLogger.info('Session booked', { sessionId: data.sessionId, status: data.status, bookedBy: data.bookedBy });
-      // Invalidate session lists to refetch updated session data
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-    };
-
-    const handleSessionApplied = (data: SocketPayloads['session:applied']) => {
-      socketLogger.info('Session applied', { sessionId: data.sessionId, applicantId: data.applicantId });
-      // PSW applied to seeker's session - invalidate so applied sessions show immediately
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
-      queryClient.refetchQueries({ queryKey: sessionKeys.lists() });
-      queryClient.refetchQueries({ queryKey: sessionKeys.newRequests() });
-    };
-
-    const handleSessionForceRefresh = () => {
-      socketLogger.info('Force refresh sessions triggered');
-      // Immediately invalidate all session queries to force refetch
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
-      // Also refetch any active session data
-      queryClient.refetchQueries({ queryKey: sessionKeys.lists() });
-      queryClient.refetchQueries({ queryKey: sessionKeys.newRequests() });
-    };
-
-    // ✅ CRITICAL: Add handlers for direct socket events (backup for Firebase listener failures)
-    const handleChecklistUpdated = (data: SocketPayloads['checklist:updated']) => {
-      socketLogger.info('Direct checklist update received', { sessionId: data.sessionId, updatedBy: data.updatedBy });
-      
-      // Update React Query cache immediately for all session lists
-      const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
-      allSessionsQueries.forEach(query => {
-        if (query.state.data) {
-          const sessions = query.state.data as EnrichedSession[];
-          const updatedSessions = sessions.map(session => {
-            if (session.id === data.sessionId) {
-              return {
-                ...session,
-                checklist: data.checklist
-              };
-            }
-            return session;
-          });
-          queryClient.setQueryData(query.queryKey, updatedSessions);
-        }
-      });
-      
-      // Also invalidate to trigger refetch as backup
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-    };
-
-    const handleCommentAdded = (data: SocketPayloads['comment:added']) => {
-      socketLogger.info('Direct comment addition received', { sessionId: data.sessionId, addedBy: data.addedBy });
-      
-      // Update React Query cache immediately for all session lists
-      const allSessionsQueries = queryClient.getQueryCache().findAll({ queryKey: sessionKeys.lists() });
-      allSessionsQueries.forEach(query => {
-        if (query.state.data) {
-          const sessions = query.state.data as EnrichedSession[];
-          const updatedSessions = sessions.map(session => {
-            if (session.id === data.sessionId) {
-              return {
-                ...session,
-                comments: [...(session.comments || []), data.comment]
-              };
-            }
-            return session;
-          });
-          queryClient.setQueryData(query.queryKey, updatedSessions);
-        }
-      });
-      
-      // Also invalidate to trigger refetch as backup
-      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
-    };
-
-    /* --------------------------- SUBSCRIPTIONS ----------------------------- */
-    socket.on('session:update', handleSessionUpdate);
-    socket.on('chat:newMessage', handleChatNewMessage);
-    socket.on('chat:notify', handleChatNotify);
-    socket.on('chat:readReceipt', handleChatReadReceipt);
-    socket.on('session:started', handleSessionStarted);
-    socket.on('session:completed', handleSessionCompleted);
-    socket.on('session:booked', handleSessionBooked);
-    socket.on('session:applied', handleSessionApplied);
-    socket.on('session:forceRefresh', handleSessionForceRefresh);
-    // ✅ Add direct socket event subscriptions for production reliability
-    socket.on('checklist:updated', handleChecklistUpdated);
-    socket.on('comment:added', handleCommentAdded);
-
-    // ✅ Enhanced connection event logging
-    socket.on('connect', () => {
-      socketLogger.info('Socket reconnected in listeners');
-    });
-
-    socket.on('disconnect', (reason) => {
-      socketLogger.warn('Socket disconnected in listeners', { reason });
-    });
+    void run();
 
     return () => {
-      socket.off('session:update', handleSessionUpdate);
-      socket.off('chat:newMessage', handleChatNewMessage);
-      socket.off('chat:notify', handleChatNotify);
-      socket.off('chat:readReceipt', handleChatReadReceipt);
-      socket.off('session:started', handleSessionStarted);
-      socket.off('session:completed', handleSessionCompleted);
-      socket.off('session:booked', handleSessionBooked);
-      socket.off('session:applied', handleSessionApplied);
-      socket.off('session:forceRefresh', handleSessionForceRefresh);
-      // ✅ Clean up direct socket event listeners
-      socket.off('checklist:updated', handleChecklistUpdated);
-      socket.off('comment:added', handleCommentAdded);
-      socket.off('connect');
-      socket.off('disconnect');
+      cancelled = true;
+      detach?.();
     };
-  }, [socket, queryClient, userId, setActiveEnrichedSession]);
-}; 
+  }, [userId, queryClient, setActiveEnrichedSession]);
+};

@@ -3,6 +3,7 @@ import {
   getUserSessionTab, 
   acceptSession, 
   rejectSession,
+  rejectSessionApplicant,
   updateSession,
   requestSession,
   applyToSession,
@@ -91,6 +92,17 @@ export function useRejectSession() {
     mutationFn: (sessionId: string) => rejectSession(sessionId),
     onSuccess: () => {
       // Invalidate sessions list to refetch
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    },
+  });
+}
+
+export function useRejectSessionApplicant() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sessionId, candidateUserId }: { sessionId: string; candidateUserId: string }) =>
+      rejectSessionApplicant(sessionId, candidateUserId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
     },
   });

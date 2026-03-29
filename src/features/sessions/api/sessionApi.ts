@@ -146,6 +146,32 @@ export const rejectSession = async (sessionId: string): Promise<Session> => {
   }
 };
 
+// seeker declines one PSW, but the open request stays listed for other applicants
+export const rejectSessionApplicant = async (
+  sessionId: string,
+  candidateUserId: string
+): Promise<Session> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}/reject-applicant`,
+      {
+        method: 'PATCH',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidateUserId }),
+      }
+    );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  } catch (error: any) {
+    console.error(`Error rejecting applicant on session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
 export const bookSession = async (sessionId: string, currentUserId: string): Promise<Session> => {
   try {
     const headers = await getAuthHeaders();

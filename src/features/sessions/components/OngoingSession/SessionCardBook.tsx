@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { EnrichedSession } from '@/types/EnrichedSession';
 import { formatTimeRange, formatDate } from '@/lib/datetimes/datetimeHelpers';
 import { router } from 'expo-router';
-import { useBookCandidateSession, useRejectSession } from '@/features/sessions/api/queries';
+import { useBookCandidateSession, useRejectSession, useRejectSessionApplicant } from '@/features/sessions/api/queries';
 import { usePricingQuote } from '@/features/pricing/api/usePricingQuote';
 import SessionChecklistBox from './SessionChecklistBox';
 import { useSelector } from 'react-redux';
@@ -28,6 +28,7 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
 
     const bookSessionMutation = useBookCandidateSession();
     const rejectSessionMutation = useRejectSession();
+    const rejectApplicantMutation = useRejectSessionApplicant();
     const currentUser = useSelector((state: RootState) => state.user.userData);
     const stripe = useStripe();
 
@@ -125,8 +126,16 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
     };
 
     const handleReject = async () => {
+        const candidateId = enrichedSession.candidateUserId?.trim();
         try {
-            await rejectSessionMutation.mutateAsync(enrichedSession.id);
+            if (enrichedSession.status === 'applied' && candidateId) {
+                await rejectApplicantMutation.mutateAsync({
+                    sessionId: enrichedSession.id!,
+                    candidateUserId: candidateId,
+                });
+            } else {
+                await rejectSessionMutation.mutateAsync(enrichedSession.id!);
+            }
             router.back();
         } catch (err) {
             console.error('Error rejecting session:', err);
@@ -290,10 +299,16 @@ const SessionCardSeeker = (enrichedSession: SessionCardSeekerProps) => {
                             <TouchableOpacity
                                 onPress={handleReject}
                                 className="flex-1 bg-black py-2 rounded-lg items-center"
-                                disabled={isProcessingPayment || rejectSessionMutation.isPending}
+                                disabled={
+                                    isProcessingPayment ||
+                                    rejectSessionMutation.isPending ||
+                                    rejectApplicantMutation.isPending
+                                }
                             >
                                 <Text className="text-white text-base font-medium">
-                                    {rejectSessionMutation.isPending ? 'Rejecting...' : 'Reject'}
+                                    {rejectSessionMutation.isPending || rejectApplicantMutation.isPending
+                                        ? 'Rejecting...'
+                                        : 'Reject'}
                                 </Text>
                             </TouchableOpacity>
                         </View>
