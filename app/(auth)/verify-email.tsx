@@ -1,10 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Button, SafeAreaView, ScrollView } from 'react-native';
-import {
-	getAuth,
-	onAuthStateChanged,
-	sendEmailVerification,
-} from 'firebase/auth';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { sendEmailVerification } from 'firebase/auth';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { CustomButton } from '@/shared/components';
 import { StatusBar } from 'expo-status-bar';
@@ -13,7 +9,6 @@ import { FIREBASE_AUTH } from '@/firebase.config';
 
 const VerifyEmail = () => {
 	const router = useRouter();
-	// Prefer the configured auth instance
 	const [user, setUser] = useState(FIREBASE_AUTH.currentUser);
 	const [resendDisabled, setResendDisabled] = useState(false);
 	const [countdown, setCountdown] = useState(0);
@@ -34,7 +29,6 @@ const VerifyEmail = () => {
 		}
 	}, [user]);
 
-	// Poll using a fresh auth.currentUser reference each tick to avoid stale closures
 	useEffect(() => {
 		const current = FIREBASE_AUTH.currentUser;
 		if (current && !current.emailVerified) {
@@ -50,7 +44,6 @@ const VerifyEmail = () => {
 		}
 	}, [router]);
 
-	// Also re-check on screen focus
 	useFocusEffect(
 		useCallback(() => {
 			let isActive = true;
@@ -65,8 +58,10 @@ const VerifyEmail = () => {
 					}
 				} catch {}
 			})();
-			return () => { isActive = false; };
-		}, [router])
+			return () => {
+				isActive = false;
+			};
+		}, [router]),
 	);
 
 	useEffect(() => {
@@ -81,7 +76,7 @@ const VerifyEmail = () => {
 	const handleButton = () => {
 		if (user && !resendDisabled) {
 			setResendDisabled(true);
-			setCountdown(5); // 5 second cooldown
+			setCountdown(5);
 			sendEmailVerification(user)
 				.then(() => {
 					console.log(
@@ -116,23 +111,23 @@ const VerifyEmail = () => {
 		<SafeAreaView className="h-full bg-white">
 			<ScrollView contentContainerStyle={{ height: '100%' }}>
 				<View className="flex w-full h-full justify-center items-center p-4">
-					{/* Icon */}
 					<View className="bg-blue-50 p-4 rounded-full mb-6">
 						<Ionicons name="mail-outline" size={48} color="#2563eb" />
 					</View>
 
-					{/* Main Title */}
 					<Text className="text-3xl text-black font-semibold text-center mb-3">
 						Verify Your Email Address
 					</Text>
 
-					{/* Subtitle */}
 					<Text className="text-xs text-gray-500 font-normal text-center mb-8 px-4">
 						We've sent a verification email to{'\n'}
 						<Text className="font-semibold text-black">{user?.email}</Text>
 					</Text>
 
-					{/* Instructions */}
+					<TouchableOpacity onPress={() => router.back()} className="mb-6">
+						<Text className="text-sm text-blue-700 text-center">Wrong email? Go back</Text>
+					</TouchableOpacity>
+
 					<View className="bg-gray-50 rounded-lg p-4 mb-6 w-full">
 						<Text className="text-sm text-gray-700 font-normal text-center mb-3">
 							Please check your email and click the verification link to continue.
@@ -142,14 +137,12 @@ const VerifyEmail = () => {
 						</Text>
 					</View>
 
-					{/* Resend Button */}
 					<CustomButton
-						title={resendDisabled ? `Resend in ${countdown}s` : "Resend verification email"}
+						title={resendDisabled ? `Resend in ${countdown}s` : 'Resend verification email'}
 						handlePress={handleButton}
 						containerStyles={`w-full mb-3 ${resendDisabled ? 'bg-gray-300' : ''}`}
 					/>
 
-					{/* Manual Continue */}
 					<CustomButton
 						title={isChecking ? 'Checking...' : "I've verified, Continue"}
 						handlePress={handleContinue}
@@ -157,7 +150,6 @@ const VerifyEmail = () => {
 						isLoading={isChecking}
 					/>
 
-					{/* Security Notice */}
 					<Text className="text-xs text-gray-400 font-normal text-center px-6">
 						This verification helps us maintain a secure and trusted community. 
 						By verifying your email, you agree to our Terms of Service and Privacy Policy.

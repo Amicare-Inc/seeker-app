@@ -56,15 +56,22 @@ const SignUp = () => {
                 router.push('/(auth)/verify-email');
                 // router.push('/(onboarding)/care_needs_1');
             } catch (error: any) {
-                // Handle both backend and Firebase errors
-                if (error.message?.includes('already exists')) {
-                    setPasswordError('An account with this email already exists. Please sign in instead.');
-                } else if (error.code === 'auth/weak-password') {
+                const msg = error?.message || '';
+                if (error.code === 'auth/weak-password') {
                     setPasswordError('Password should be at least 6 characters.');
                 } else if (error.code === 'auth/invalid-email') {
                     setPasswordError('Please enter a valid email address.');
+                } else if (
+                    error.code === 'auth/email-already-in-use' ||
+                    msg.includes('already exists') ||
+                    msg.includes('Sign in instead')
+                ) {
+                    setPasswordError(
+                        msg ||
+                            'An account with this email already exists. Sign in instead, or use a different email address.',
+                    );
                 } else {
-                    setPasswordError(error.message || 'Sign-up failed');
+                    setPasswordError(msg || 'Sign-up failed');
                 }
                 console.log((error as any).message);
             } finally {

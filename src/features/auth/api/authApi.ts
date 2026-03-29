@@ -2,7 +2,7 @@ import { getAuthHeaders } from '@/lib/auth';
 
 // Auth API service
 export const AuthApi = {
-  async signUp(email: string, password: string, isPsW: boolean): Promise<any> {
+  async signUp(email: string, password: string, isPsw: boolean): Promise<any> {
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/auth/signup`, {
         method: 'POST',
@@ -12,7 +12,7 @@ export const AuthApi = {
         body: JSON.stringify({ 
           email, 
           password,
-          isPsW,
+          isPsw,
         }),
       });
 
@@ -20,8 +20,10 @@ export const AuthApi = {
         let userMessage = 'Sign up failed.';
         try {
           const errorData = await response.json();
-          if (response.status === 409 || (errorData.message && errorData.message.includes('already exists'))) {
-            userMessage = 'An account with this email already exists.';
+          if (response.status === 409 || errorData.code === 'EMAIL_ALREADY_EXISTS') {
+            userMessage =
+              errorData.message ||
+              'An account with this email already exists. Sign in instead, or use a different email address.';
           } else if (errorData.message && errorData.message.toLowerCase().includes('invalid email')) {
             userMessage = 'Please enter a valid email address.';
           } else if (errorData.message && errorData.message.toLowerCase().includes('password')) {
@@ -44,8 +46,6 @@ export const AuthApi = {
         userMessage = 'Please enter a valid email address.';
       } else if (error.message && error.message.toLowerCase().includes('password')) {
         userMessage = 'Password does not meet requirements.';
-      } else if (error.message && error.message.toLowerCase().includes('already exists')) {
-        userMessage = 'An account with this email already exists.';
       } else if (error.message) {
         userMessage = error.message;
       }
