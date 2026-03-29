@@ -36,7 +36,7 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
   const subTitle = cityProvince;
 
   // Navigation helpers -------------------------------------------------
-  const navigateToSessionConfirmation = (action: 'book' | 'cancel' | 'change') => {
+  const navigateToSessionConfirmation = (action: 'book' | 'cancel') => {
     if (!user?.id) return;
     router.replace({
       pathname: '/session-confirmation',
@@ -50,24 +50,17 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
 
   const handleBookSession = () => navigateToSessionConfirmation('book');
   const handleCancelSession = () => navigateToSessionConfirmation('cancel');
-  const handleChangeSession = () => navigateToSessionConfirmation('change');
 
   const handleNavigateToRequestSession = () => {
-    if (currentSession.status === 'confirmed') {
-      handleChangeSession();
-    } else {
-      if (!user?.id) return;
-      console.log('🔍 useChatHeader - Navigating to request-sessions with currentSession:', currentSession);
-      console.log('🔍 useChatHeader - currentSession.checklist:', currentSession.checklist);
-      dispatch(setActiveProfile(user));
-      router.push({
-        pathname: '/request-sessions',
-        params: {
-          otherUserId: user.id,
-          sessionObj: JSON.stringify(currentSession),
-        },
-      });
-    }
+    if (!user?.id) return;
+    dispatch(setActiveProfile(user));
+    router.push({
+      pathname: '/request-sessions',
+      params: {
+        otherUserId: user.id,
+        sessionObj: JSON.stringify(currentSession),
+      },
+    });
   };
 
   const handleNavigateToUserProfile = () => {
@@ -78,7 +71,7 @@ export const useChatHeader = ({ session, user }: UseChatHeaderProps) => {
 
   // Misc labels ---------------------------------------------------------
   const isDisabled = !isConfirmed && isUserConfirmed;
-  const bookText = isConfirmed ? 'Change' : isUserConfirmed ? 'Waiting...' : 'Book';
+  const bookText = isConfirmed ? 'Update' : isUserConfirmed ? 'Waiting...' : 'Book';
 
   const formattedDate = formatDate(currentSession.startTime || '');
   const formattedTimeRange = formatTimeRange(

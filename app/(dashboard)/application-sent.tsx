@@ -133,6 +133,19 @@ const ApplicationSent = () => {
 		router.back();
 	};
 
+	const handleCancelSession = () => {
+		if (!session?.id) return;
+		const otherUserId = otherUser?.id ?? session.receiverId;
+		router.push({
+			pathname: '/session-confirmation',
+			params: {
+				sessionId: session.id,
+				action: 'cancel',
+				...(otherUserId ? { otherUserId } : {}),
+			},
+		});
+	};
+
 	const getImageSource = () => {
 		const photoUrl = displayInfo?.primaryPhoto;
 		if (photoUrl && photoUrl.trim() !== '') {
@@ -434,9 +447,9 @@ const ApplicationSent = () => {
 									</Text>
 								</View>
 							</TouchableOpacity>
-							<TouchableOpacity>
+							<TouchableOpacity onPress={handleCancelSession}>
 								<Text style={{ color: 'white', fontSize: 14 }}>
-									Change/Cancel
+									Cancel
 								</Text>
 							</TouchableOpacity>
 						</View>

@@ -10,6 +10,7 @@ import {
   bookSession,
   declineSession,
   cancelSession,
+  deleteSessionAsSeeker,
   getMessages,
   sendMessage,
   getNewRequestsTab,
@@ -154,6 +155,18 @@ export function useCancelSession() {
     mutationFn: (sessionId: string) => cancelSession(sessionId),
     onSuccess: () => {
       // Invalidate sessions list and new requests to refetch
+      queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
+    },
+  });
+}
+
+export function useDeleteSeekerSession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (sessionId: string) => deleteSessionAsSeeker(sessionId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: sessionKeys.newRequests() });
     },

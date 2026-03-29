@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useStripe } from '@stripe/stripe-react-native';
 import { RootState } from '@/redux/store';
-import { useEnrichedSessions, useBookSession, useCancelSession, useDeclineSession } from '../api/queries';
+import { useEnrichedSessions, useBookSession, useCancelSession, useDeclineSession, useDeleteSeekerSession } from '../api/queries';
 import { PaymentService } from '@/services/stripe/payment-service';
 import { EnrichedSession } from '@/types/EnrichedSession';
 
@@ -18,6 +18,7 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
   const bookSessionMutation = useBookSession();
   const cancelSessionMutation = useCancelSession();
   const declineSessionMutation = useDeclineSession();
+  const deleteSeekerSessionMutation = useDeleteSeekerSession();
 
   // Derived state - computed after hooks
   const sessionIdStr = Array.isArray(sessionId) ? sessionId[0] : sessionId;
@@ -66,34 +67,33 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
   };
 
   const handleCancelSession = async () => {
-    if (!activeSession) return;
-    
+    if (!activeSession || !currentUser?.id) return;
+
+    const isSeeker = activeSession.senderId === currentUser.id;
+    const preBookingSeekerDelete: EnrichedSession['status'][] = [
+      'pending',
+      'newRequest',
+      'applied',
+      'interested',
+      'requested',
+    ];
+
     setProcessing(true);
     try {
-      if (activeSession.status === 'pending') {
+      if (isSeeker && preBookingSeekerDelete.includes(activeSession.status)) {
+        await deleteSeekerSessionMutation.mutateAsync(activeSession.id);
+      } else if (activeSession.status === 'pending' && !isSeeker) {
         await declineSessionMutation.mutateAsync(activeSession.id);
       } else if (activeSession.status === 'confirmed') {
         await cancelSessionMutation.mutateAsync(activeSession.id);
       }
-      router.back();
+      router.replace('/(dashboard)/(seeker)/seeker-sessions');
     } catch (error) {
       console.error('Error cancelling session:', error);
       Alert.alert('Error', 'Failed to cancel session');
     } finally {
       setProcessing(false);
     }
-  };
-
-  const handleChangeSession = () => {
-    if (!activeSession?.otherUser) return;
-    
-    router.push({
-      pathname: '/request-sessions',
-      params: {
-        otherUserId: activeSession.otherUser.id,
-        sessionObj: JSON.stringify(activeSession),
-      },
-    });
   };
 
   // UI content calculation
@@ -119,7 +119,14 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
       onPrimaryPress = handleBookSession;
     } else if (actionStr === 'cancel') {
       headerText = 'Confirm Cancellation';
-      if (activeSession.status === 'pending') {
+      const isSeeker = activeSession.senderId === currentUser?.id;
+      const preBooking = ['pending', 'newRequest', 'applied', 'interested', 'requested'].includes(
+        activeSession.status
+      );
+      if (isSeeker && preBooking) {
+        messageText =
+          "This will remove the session for everyone. You'll need a new request if you still want care.";
+      } else if (activeSession.status === 'pending') {
         messageText = "Cancelling now will end your chat and you'll need to send a new session request.";
       } else if (activeSession.status === 'confirmed') {
         if (timeDiff !== null && timeDiff >= 2) {
@@ -131,22 +138,6 @@ export const useSessionConfirmation = (sessionId: string | string[] | undefined,
       primaryButtonText = 'Cancel Session';
       primaryButtonColor = '#DC2626';
       onPrimaryPress = handleCancelSession;
-    } else if (actionStr === 'change') {
-      headerText = 'Confirm Change';
-      if (activeSession.status === 'pending') {
-        messageText = 'Changing the time will send you to the session request page to update your request.';
-        primaryButtonText = 'Change Time';
-        primaryButtonColor = '#008DF4';
-      } else if (activeSession.status === 'confirmed') {
-        if (timeDiff !== null && timeDiff >= 2) {
-          messageText = 'Your session needs to be rebooked. Please update your session details. (This may affect your rating.)';
-        } else {
-          messageText = 'Session change is non-refundable.';
-        }
-        primaryButtonText = 'Change Session';
-        primaryButtonColor = '#DC2626';
-      }
-      onPrimaryPress = handleChangeSession;
     }
 
     return {

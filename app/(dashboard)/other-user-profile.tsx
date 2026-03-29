@@ -144,13 +144,16 @@ const OtherUserProfileScreen = () => {
 	
 	console.log('displayUser id', activeProfile?.id);
 	console.log('isPsw', currentUser?.isPsw);
-	const handleRequestChange = () => {
-		if (!activeEnrichedProfile?.otherUser) return;
+	const handlePendingCancel = () => {
+		const session = activeEnrichedProfile;
+		if (!session?.id) return;
+		const otherUserId = session.otherUser?.id ?? session.receiverId;
 		router.push({
-			pathname: '/request-sessions',
+			pathname: '/session-confirmation',
 			params: {
-				otherUserId: activeEnrichedProfile.otherUser.id,
-				sessionObj: JSON.stringify(activeEnrichedProfile),
+				sessionId: session.id,
+				action: 'cancel',
+				...(otherUserId ? { otherUserId } : {}),
 			},
 		});
 	};
@@ -177,6 +180,7 @@ const OtherUserProfileScreen = () => {
 			{(activeEnrichedProfile && activeEnrichedProfile.status === 'pending' ) && (
 				<PendingSessionSlider
 					session={activeEnrichedProfile}
+					onCancel={handlePendingCancel}
 				/>
 			)}
 		</>

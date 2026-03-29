@@ -271,6 +271,23 @@ export const cancelSession = async (sessionId: string): Promise<Session> => {
   }
 };
 
+export const deleteSessionAsSeeker = async (sessionId: string): Promise<void> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/sessions/${sessionId}`, {
+      method: 'DELETE',
+      headers,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error((errorData as { message?: string }).message || `HTTP error! status: ${response.status}`);
+    }
+  } catch (error: any) {
+    console.error(`Error deleting session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
 export const sendMessage = async (sessionId: string, userId: string, message: string): Promise<Message> => {
   try {
     const headers = await getAuthHeaders();

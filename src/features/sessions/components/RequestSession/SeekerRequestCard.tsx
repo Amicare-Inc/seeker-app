@@ -10,7 +10,7 @@ import { getAuthHeaders } from '@/lib/auth';
 import { acceptTimeChange, rejectTimeChange } from '@/features/sessions/api/sessionApi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDistanceToPsw } from '@/features/sessions/hooks/useDistanceToPsw';
-import { useCancelSession } from '@/features/sessions/api/queries';
+import { useDeleteSeekerSession } from '@/features/sessions/api/queries';
 interface SeekerRequestCardProps {
     session: EnrichedSession;
     onSelectPSW?: (pswId: string, applicant: any) => void;
@@ -29,7 +29,7 @@ const DistanceText: React.FC<{ origin?: string; destination?: string }> = ({ ori
 const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelectPSW}) => {
     const currentUser = useSelector((state: RootState) => state.user.userData);
     const queryClient = useQueryClient();
-    const cancelSessionMutation = useCancelSession();
+    const deleteSeekerSessionMutation = useDeleteSeekerSession();
     const isVerified = currentUser?.idManualVerified ?? false;
     const [applications, setApplications] = useState<any[]>([]);
     const [applicationsLoading, setApplicationsLoading] = useState<boolean>(true);
@@ -165,7 +165,7 @@ const SeekerRequestCard: React.FC<SeekerRequestCardProps> = ({ session, onSelect
                     onPress: async () => {
                         try {
                             setIsProcessing(true);
-                            await cancelSessionMutation.mutateAsync(session.id);
+                            await deleteSeekerSessionMutation.mutateAsync(session.id);
                             setIsExpanded(false);
                         } catch (error) {
                             console.error('Error cancelling session request:', error);

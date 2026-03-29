@@ -11,12 +11,12 @@ import { router } from 'expo-router';
 
 interface PendingSessionSliderProps {
 	session: EnrichedSession;
-	onRequestChange?: () => void;
+	onCancel?: () => void;
 }
 
 const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 	session,
-	onRequestChange,
+	onCancel,
 }) => {
 	const currentUser = useSelector((state: RootState) => state.user.userData);
 	const acceptSessionMutation = useAcceptSession();
@@ -169,13 +169,13 @@ const PendingSessionSlider: React.FC<PendingSessionSliderProps> = ({
 						</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
-						onPress={onRequestChange}
+						onPress={() => onCancel?.()}
 						activeOpacity={0.8}
 						className="bg-black px-6 py-3 rounded-lg"
 						style={{ width: '48%' }}
 					>
 						<Text className="text-white text-sm text-center font-medium">
-							Change/Cancel
+							Cancel
 						</Text>
 					</TouchableOpacity>
 				</View>
