@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
 	View,
 	Text,
@@ -7,32 +7,23 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 	TouchableOpacity,
-	TextInput,
 	ActivityIndicator,
 	Alert,
-	Keyboard,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useFocusEffect } from 'expo-router';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { RootState } from '@/redux/store';
-import { updateUserFields } from '@/redux/userSlice';
-import { CustomButton } from '@/shared/components';
-import GroupedCareTasksDropdown from '@/features/profile/components/GroupedCareTasksDropdown';
-import { deriveCareTypesFromTasks } from '@/shared/constants/carePreferencesOnboarding';
-import { updateUserProfile } from '@/src/features/currentUser';
+import ProfileEditPanel from '@/features/profile/components/ProfileEditPanel';
 
 const DROPDOWN_TRIGGER =
 	'p-4 bg-gray-100 rounded-lg min-h-[48px] justify-center';
 
 const EditProfileScreen = () => {
-	const dispatch = useDispatch();
 	const user = useSelector((state: RootState) => state.user.userData);
 
 	const [formKey, setFormKey] = useState(0);
-	const [bio, setBio] = useState('');
-	const [tasksSelection, setTasksSelection] = useState<string[]>([]);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
 
@@ -42,57 +33,10 @@ const EditProfileScreen = () => {
 				router.back();
 				return;
 			}
-			setBio(user.bio || '');
-			setTasksSelection(user.carePreferences?.tasks || []);
 			setError('');
 			setFormKey((k) => k + 1);
 		}, [user]),
 	);
-
-	const derivedCareTypes = useMemo(
-		() => deriveCareTypesFromTasks(tasksSelection),
-		[tasksSelection],
-	);
-
-	const isBioChanged = bio !== (user?.bio || '');
-	const storedTasks = user?.carePreferences?.tasks || [];
-	const storedTypes = user?.carePreferences?.careType || [];
-	const isCarePrefsChanged =
-		tasksSelection.join('\u0001') !== storedTasks.join('\u0001') ||
-		derivedCareTypes.join('\u0001') !== storedTypes.join('\u0001');
-	const isDirty = isBioChanged || isCarePrefsChanged;
-
-	const handleSave = async () => {
-		if (!user?.id || !isDirty) return;
-		Keyboard.dismiss();
-		setError('');
-		setSaving(true);
-		try {
-			const updatedFields: Record<string, unknown> = {};
-			if (isBioChanged) updatedFields.bio = bio;
-			if (isCarePrefsChanged) {
-				updatedFields.carePreferences = {
-					...user.carePreferences,
-					tasks: tasksSelection,
-					careType: derivedCareTypes,
-				};
-			}
-
-			const data = await updateUserProfile(user.id, updatedFields);
-			if (data.user) {
-				dispatch(updateUserFields(data.user));
-			}
-			Alert.alert('Saved', 'Your profile was updated.', [
-				{ text: 'OK', onPress: () => router.back() },
-			]);
-		} catch (e: unknown) {
-			const message =
-				e instanceof Error ? e.message : 'Could not save. Try again.';
-			setError(message);
-		} finally {
-			setSaving(false);
-		}
-	};
 
 	if (!user?.id) {
 		return null;
@@ -144,43 +88,24 @@ const EditProfileScreen = () => {
 							preferences, then save. Some details may be visible to other users.
 						</Text>
 
-						{error ? (
-							<View className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-								<Text className="text-red-700 text-sm text-center">
-									{error}
-								</Text>
-							</View>
-						) : null}
-
-						<Text className="text-xs text-gray-500 font-normal mb-2">Bio</Text>
-						<TextInput
-							className="bg-gray-100 rounded-lg px-4 py-3 text-base text-black font-medium min-h-[120px] mb-6"
-							value={bio}
-							onChangeText={setBio}
-							multiline
-							placeholder="Introduce yourself to caregivers…"
-							placeholderTextColor="#9D9DA1"
-							textAlignVertical="top"
-							editable={!saving}
-						/>
-
-						<GroupedCareTasksDropdown
-							key={`seeking-${formKey}`}
-							label="Seeking help with"
-							initialTasks={tasksSelection}
-							onTasksChange={setTasksSelection}
-							triggerClassName={DROPDOWN_TRIGGER}
-						/>
-
-						<Text className="text-xs text-gray-400 font-normal mb-4">
-							Personal name and address are edited from Settings → Personal
-							Details.
-						</Text>
-
-						<CustomButton
-							title="Save changes"
-							handlePress={handleSave}
-							containerStyles={`mb-4 ${!isDirty || saving ? 'opacity-40' : ''}`}
+						<ProfileEditPanel
+							user={user}
+							variant="screen"
+							formResetKey={formKey}
+							careTasksLabel="Seeking help with"
+							bioPlaceholder="Introduce yourself to caregivers…"
+							footerNote="Personal name and address are edited from Settings → Personal Details."
+							dropdownTriggerClassName={DROPDOWN_TRIGGER}
+							error={error}
+							saving={saving}
+							onSaveStart={() => setError('')}
+							onSavingChange={setSaving}
+							onSaveError={setError}
+							onSaveSuccess={() =>
+								Alert.alert('Saved', 'Your profile was updated.', [
+									{ text: 'OK', onPress: () => router.back() },
+								])
+							}
 						/>
 					</View>
 				</ScrollView>
