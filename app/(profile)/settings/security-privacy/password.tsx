@@ -28,7 +28,8 @@ const PasswordScreen = () => {
     if (!form.newPassword) {
       newErrors.newPassword = 'New password is required';
     } else if (form.newPassword.length < 6) {
-      newErrors.newPassword = 'Password must be at least 6 characters long';
+      newErrors.newPassword =
+        'Password must be at least 6 characters.';
     }
 
     if (!form.confirmPassword) {
@@ -66,7 +67,7 @@ const PasswordScreen = () => {
         ]
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update password');
+      Alert.alert('Could not update password', error.message || 'Failed to update password');
     } finally {
       setIsLoading(false);
     }
@@ -87,10 +88,10 @@ const PasswordScreen = () => {
       <ScrollView className="flex-1">
         <View className="mx-4 mt-10">
           <Text className="text-xl font-semibold">Update Password</Text>
-          <Text className="text-base mt-4 text-gray-600">
-            Your password must be at least 6 characters long and contain at least one digit and one letter.
+          <Text className="text-base mt-3 text-gray-600">
+            Enter your current password, then choose a new one. If the new password is rejected, the error message will explain what to fix.
           </Text>
-          
+
           {/* Current Password */}
           <Text className="mt-6 mb-2 text-base font-semibold">Current Password</Text>
           <TextInput

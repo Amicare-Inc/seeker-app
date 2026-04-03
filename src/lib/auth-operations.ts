@@ -52,7 +52,9 @@ export const changeUserPassword = async (currentPassword: string, newPassword: s
     if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
       throw new Error('Current password is incorrect. Please try again.');
     } else if (error.code === 'auth/weak-password') {
-      throw new Error('New password is too weak. Please choose a stronger password.');
+      throw new Error(
+        'That password is too weak or too common. Use at least 6 characters (8+ recommended) with a mix of letters, numbers, and symbols. Avoid obvious words like "password" or simple sequences like "123456".',
+      );
     } else if (error.code === 'auth/requires-recent-login') {
       throw new Error('For security reasons, please sign out and sign back in before changing your password');
     } else if (error.code === 'auth/user-mismatch') {

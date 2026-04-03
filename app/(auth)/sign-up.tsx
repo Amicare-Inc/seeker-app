@@ -1,8 +1,7 @@
 import { View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { ForumField } from '@/shared/components';
-import { CustomButton } from '@/shared/components';
+import { ForumField, CustomButton } from '@/shared/components';
 import { Link, router } from 'expo-router';
 import { useDispatch } from 'react-redux';
 import { updateUserFields } from '@/redux/userSlice';
@@ -11,7 +10,6 @@ import { FIREBASE_AUTH } from '@/firebase.config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { AuthApi } from '@/features/auth/api/authApi';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { TouchableOpacity } from 'react-native';
 
 const SignUp = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -29,7 +27,11 @@ const SignUp = () => {
 
     const handleSignUp = async () => {
         if (form.password != form.confirm_password) {
-            setPasswordError('Passwords do not match');
+            setPasswordError('Passwords do not match. Enter the same password in both fields.');
+        } else if (form.password.length < 6) {
+            setPasswordError(
+                'Password must be at least 6 characters.',
+            );
         } else {
             try {
                 setIsLoading(true);
@@ -57,8 +59,24 @@ const SignUp = () => {
                 // router.push('/(onboarding)/care_needs_1');
             } catch (error: any) {
                 const msg = error?.message || '';
-                if (error.code === 'auth/weak-password') {
-                    setPasswordError('Password should be at least 6 characters.');
+                const msgLower = msg.toLowerCase();
+                const tooShort =
+                    error.code === 'auth/invalid-password' ||
+                    msgLower.includes('at least 6 characters') ||
+                    msgLower.includes('at least 6 char');
+                const tooWeakOrCommon =
+                    error.code === 'auth/weak-password' ||
+                    msgLower.includes('too weak') ||
+                    msgLower.includes('password is too weak') ||
+                    msgLower.includes('does not meet requirements');
+                if (tooShort) {
+                    setPasswordError(
+                        'Password must be at least 6 characters.',
+                    );
+                } else if (tooWeakOrCommon) {
+                    setPasswordError(
+                        'That password is too weak or too common. Use a longer password that mixes uppercase and lowercase letters, numbers, and symbols. Avoid obvious words like "password" or simple sequences like "123456".',
+                    );
                 } else if (error.code === 'auth/invalid-email') {
                     setPasswordError('Please enter a valid email address.');
                 } else if (
@@ -83,8 +101,12 @@ const SignUp = () => {
     return (
         <SafeAreaView className="h-full bg-white">
             <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-                <View>
-                    <View className="flex w-full h-full justify-center px-9">
+                <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={{ flexGrow: 1, paddingVertical: 24 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View className="flex w-full min-h-full justify-center px-9">
                         <Text className="text-3xl text-black font-normal text-left mb-3">
                             Create an account
                         </Text>
@@ -92,9 +114,9 @@ const SignUp = () => {
                             Let's get started by filling out the form below
                         </Text>
                         {passwordError ? (
-                            <Text className="text-normal text-red-500 font-normal text-left mb-4">
-                                {passwordError}
-                            </Text>
+                            <View className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                                <Text className="text-red-700 text-sm text-left">{passwordError}</Text>
+                            </View>
                         ) : null}
                         <ForumField
                             title="Email"
@@ -104,6 +126,7 @@ const SignUp = () => {
                             }
                             otherStyles="mb-4"
                             keyboardType="email-address"
+                            autoCapitalize="none"
                         />
                         <ForumField
                             title="Password"
@@ -138,7 +161,7 @@ const SignUp = () => {
                             </Link>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
                 {isLoading && (
                     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} className="bg-black/10 items-center justify-center">
                         <Ionicons name="hourglass" size={40} color="#0c7ae2" />
