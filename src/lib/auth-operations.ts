@@ -1,5 +1,37 @@
-import { updatePassword, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import {
+  updatePassword,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  sendPasswordResetEmail,
+} from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/firebase.config';
+
+export const requestPasswordReset = async (email: string): Promise<void> => {
+  const trimmed = email.trim();
+  if (!trimmed) {
+    throw new Error('Please enter your email address.');
+  }
+
+  try {
+    await sendPasswordResetEmail(FIREBASE_AUTH, trimmed);
+  } catch (error: any) {
+    console.error('Password reset request failed:', error);
+    if (error.code === 'auth/invalid-email') {
+      throw new Error('Please enter a valid email address.');
+    }
+    if (error.code === 'auth/user-not-found') {
+      return;
+    }
+    if (error.code === 'auth/too-many-requests') {
+      throw new Error('Too many attempts. Please try again later.');
+    }
+    if (error.code === 'auth/network-request-failed') {
+      throw new Error('Network error. Check your connection and try again.');
+    }
+    throw new Error(error.message || 'Could not send reset email. Please try again.');
+  }
+};
 
 export const changeUserPassword = async (currentPassword: string, newPassword: string): Promise<void> => {
   const user = FIREBASE_AUTH.currentUser;
